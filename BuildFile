@@ -1,0 +1,42 @@
+<use name=root>
+<use name=FWCore/Framework>
+
+<use name=DataFormats/L1Trigger>
+<use name=DataFormats/CSCDigi>
+<use name=DataFormats/L1CSCTrackFinder>
+<use name=CondFormats/L1TObjects>
+<use name=L1Trigger/CSCTrackFinder>
+<use name=DataFormats/L1GlobalMuonTrigger>
+<use name=DataFormats/L1GlobalTrigger>
+
+<use name=DQMServices/Core>
+<use name=DQMServices/ClientConfig>
+
+<use name=Geometry/RPCGeometry>
+<use name=Geometry/CommonDetUnit>
+<use name=Geometry/Records>
+<use name=EventFilter/RPCRawToDigi>
+<use name=DataFormats/RPCDigi>
+<use name=DataFormats/FEDRawData>
+
+<use name=RecoTracker/TkHitPairs>
+<use name=RecoTracker/TkTrackingRegions>
+<use name=SimTracker/TrackerHitAssociation>
+<use name=SimDataFormats/TrackerDigiSimLink>
+
+
+<export>
+  <lib name=UserCodeL1RpcTriggerAnalysis>
+  <use name=root>
+  <use name=FWCore/Framework>
+  <use name=SimDataFormats/TrackerDigiSimLink>
+  <use name=SimTracker/TrackerHitAssociation>
+<use name=DataFormats/L1Trigger>
+<use name=DataFormats/CSCDigi>
+<use name=DataFormats/L1CSCTrackFinder>
+<use name=CondFormats/L1TObjects>
+<use name=L1Trigger/CSCTrackFinder>
+<use name=DataFormats/L1GlobalMuonTrigger>
+<use name=DataFormats/L1GlobalTrigger>
+
+</export>

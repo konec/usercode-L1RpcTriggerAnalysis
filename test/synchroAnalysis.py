@@ -96,7 +96,7 @@ process.linkSynchroAnalysis =  cms.EDAnalyzer("LinkSynchroAnalysis",
   histoFileName = cms.untracked.string("analysis.root"),
   linkMonitorPSet = cms.PSet(
     useFirstHitOnly = cms.untracked.bool(True),
-    dumpDelays = cms.untracked.bool(False)
+    dumpDelays = cms.untracked.bool(True)
   ),
   ORedSynchroFilters = cms.VPSet(
     cms.PSet( collection = cms.string("globalMuons"),
