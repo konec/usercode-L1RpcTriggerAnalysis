@@ -118,7 +118,7 @@ process.linkSynchroAnalysis =  cms.EDAnalyzer("LinkSynchroAnalysis",
 )
 
 process.p = cms.Path( 
-  process.filterBX*
+#  process.filterBX*
   process.primaryVertexFilter*
   process.gtDigis*
   process.filterL1_GM* 
