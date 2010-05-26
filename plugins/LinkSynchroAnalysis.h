@@ -5,8 +5,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/ESWatcher.h"
 #include "CondFormats/DataRecord/interface/RPCEMapRcd.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroSelector.h"
 #include "TObjArray.h"
-#include "SynchroSelector.h"
 
 namespace edm { class Event; class EventSetup; }
 class RPCReadOutMapping;

@@ -1,5 +1,4 @@
-
-#include "SynchroSelector.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroSelector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -130,6 +129,7 @@ bool SynchroSelector::takeIt(const RPCDetId & det, const edm::Event&ev, const ed
   mindphi = 100.;
 
   typedef reco::TrackCollection::const_iterator IT;
+  GlobalPoint detPos, trackPos;
   for (IT it = tracks.begin(); it !=tracks.end(); ++it) {
     const reco::Track & track = *it;
     if (track.pt() < theMinPt ) continue;
@@ -144,6 +144,8 @@ bool SynchroSelector::takeIt(const RPCDetId & det, const edm::Event&ev, const ed
     TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(aTSOS, globalGeometry->idToDet(det)->surface());
     if (!trackAtRPC.isValid()) continue;
     globalGeometry->idToDet(det)->specificSurface();
+    detPos = globalGeometry->idToDet(det)->position();
+    trackPos = trackAtRPC.globalPosition();
     std::cout <<" **** "<<theOption<<" position at RPC det:"<<det.rawId()
                         //<< is :"<globalGeometry->idToDet(det)->position()
                         <<", r= "<<trackAtRPC.globalPosition().perp()
@@ -168,6 +170,11 @@ bool SynchroSelector::takeIt(const RPCDetId & det, const edm::Event&ev, const ed
   }
   if (mindphi < 99.) hDeltaPhi->Fill(mindphi);
   if (mindeta < 99.) hDeltaEta->Fill(mindeta);
+
+  if (inside) { 
+    std::cout <<" detector: " << detPos <<" track: "<< trackPos << std::endl;
+    thePos.push_back(trackPos);
+  }
 
   return inside;
 } 

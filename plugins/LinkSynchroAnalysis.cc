@@ -18,6 +18,11 @@
 #include "TH1F.h"
 #include <map> 
 
+#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+#include "DataFormats/GeometryVector/interface/GlobalVector.h"
+
+struct LessGP { bool operator () (const GlobalPoint & p1, const GlobalPoint & p2) const { return p1.perp() < p2.perp(); } };
+
 LinkSynchroAnalysis::LinkSynchroAnalysis(const edm::ParameterSet& cfg) 
     : RPCMonitorLinkSynchro(cfg.getParameter<edm::ParameterSet>("linkMonitorPSet")), theAnaConfig(cfg),theCabling(0), theEventCounter(0) { }
 
@@ -32,6 +37,10 @@ void LinkSynchroAnalysis::beginJob()
   theHistos.Add(new TH1F("hDeltaEta","hDeltaEta",100, 0., 1.));
   theHistos.Add(new TH1F("hDxy","hDxy",100.,0.,1.));
   theHistos.Add(new TH1F("hNumTracks","hNumTracks",50,0.,250.)); 
+  theHistos.Add(new TH1F("hDistB","hDistB",50,0.,200.)); 
+  theHistos.Add(new TH1F("hDistE","hDistE",50,0.,500.)); 
+  theHistos.Add(new TH1F("hPenetrationB","hPenetrationB",10,0.,10.)); 
+  theHistos.Add(new TH1F("hPenetrationE","hPenetrationE",10,0.,10.)); 
 
   typedef std::vector<edm::ParameterSet> VPSet;
   VPSet selectorConfigs = theAnaConfig.getParameter<VPSet>("ORedSynchroFilters");
@@ -77,6 +86,7 @@ const RPCRawSynchro::ProdItem& LinkSynchroAnalysis::select(const RPCRawSynchro::
     LogTrace("") << "LinkSynchroAnalysis - record has CHANGED!!, read map, VERSION: " << theCabling->version();
   }
 
+  theSynchroFilters[0].resetPos();
   for(RPCRawSynchro::ProdItem::const_iterator it = vItem.begin(); it != vItem.end(); ++it) {
     const LinkBoardElectronicIndex & path = it->first;
     const  std::vector<FebConnectorSpec> & febs = theCabling->location(path)->febs();
@@ -91,6 +101,29 @@ const RPCRawSynchro::ProdItem& LinkSynchroAnalysis::select(const RPCRawSynchro::
     if (takeIt) selected.push_back(*it);
     if (takeIt) wasTakeIt = true;
   }
+  std::vector<GlobalPoint> pos = theSynchroFilters[0].positions();
+std::sort(pos.begin(), pos.end(), LessGP());
+  GlobalPoint last(0.,0.,0.);
+  unsigned int points = 0;
+  bool barrel = false;
+  bool endcap = false;
+  for (std::vector<GlobalPoint>::const_iterator ip= pos.begin(); ip != pos.end(); ++ip) {
+    double dist = 0.;
+    if (fabs(ip->eta()) > 1.24 && fabs(ip->eta()) < 1.6 ) endcap = true; 
+    if (fabs(ip->eta()) < 0.93)  barrel= true; 
+    if (barrel) dist = ((*ip)-last).perp();
+    if (endcap) dist = fabs(((*ip)-last).z());
+    if (barrel) static_cast<TH1F* >(theHistos.FindObject("hDistB"))->Fill(dist);
+    if (endcap) static_cast<TH1F* >(theHistos.FindObject("hDistE"))->Fill(dist);
+    if (endcap&& dist > 50.) points++;
+    if (barrel&& dist > 30.) points++;
+    last = *ip;
+    std::cout <<"HERE,  barrel: " <<barrel<<" endcap:"<< endcap<<" dist: " << dist <<" points: "<<points<< *ip<<std::endl; 
+  }
+  std::cout <<"POINTS: " << points << std::endl;
+  if (barrel && endcap) std::cout << "PROBLEM" << std::endl;
+  if (wasTakeIt && barrel ) static_cast<TH1F* >(theHistos.FindObject("hPenetrationB"))->Fill(points);
+  if (wasTakeIt && endcap) static_cast<TH1F* >(theHistos.FindObject("hPenetrationE"))->Fill(points);
   if (wasTakeIt) static_cast<TH1*>(theHistos.FindObject("hBX"))->Fill( ev.bunchCrossing());
   if (wasTakeIt) theEventCounter++;
   return selected;

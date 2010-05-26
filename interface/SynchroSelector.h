@@ -2,6 +2,8 @@
 #define SynchroSelector_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+
 class TH1;
 class RPCDetId;
 class TrajectoryStateOnSurface;
@@ -21,14 +23,18 @@ public:
 
   bool takeIt(const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es);
 
+  void resetPos() { thePos.clear(); }
+  std::vector<GlobalPoint> positions() { return thePos;}
+
+  bool checkMatching(const TrajectoryStateOnSurface&, float eta, float phi, const edm::Event&, const edm::EventSetup&);
+  bool checkTriggerMatching( const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es);
   
 private:
+  std::vector<GlobalPoint> thePos;
   edm::ParameterSet theConfig;
   TH1 *hDxy, *hNum, *hDeltaEta, *hDeltaPhi;
   float mindeta, mindphi;
 
-  bool checkMatching(const TrajectoryStateOnSurface&, float eta, float phi, const edm::Event&, const edm::EventSetup&);
-  bool checkTriggerMatching( const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es);
 };
 
 #endif
