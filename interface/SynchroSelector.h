@@ -20,19 +20,24 @@ public:
   void setHistoNum(TH1* h) { hNum=h; }
   void setHistoEta(TH1* h) { hDeltaEta=h; }
   void setHistoPhi(TH1* h) { hDeltaPhi=h; } 
+  void setHistoPullX(TH1* h) { hPullX=h;}
+  void setHistoDistX(TH1* h) { hDistX=h;}
 
   bool takeIt(const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es);
 
   void resetPos() { thePos.clear(); }
   std::vector<GlobalPoint> positions() { return thePos;}
 
-  bool checkMatching(const TrajectoryStateOnSurface&, float eta, float phi, const edm::Event&, const edm::EventSetup&);
-  bool checkTriggerMatching( const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es);
+private:
+  bool checkL1RpcMatching( const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es);
+  bool checkRpcDetMatching( const TrajectoryStateOnSurface & tsos,  const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es);
+  bool checkUniqueRecHitMatching( const TrajectoryStateOnSurface & tsos,  const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es);
+  
   
 private:
   std::vector<GlobalPoint> thePos;
   edm::ParameterSet theConfig;
-  TH1 *hDxy, *hNum, *hDeltaEta, *hDeltaPhi;
+  TH1 *hDxy, *hNum, *hDeltaEta, *hDeltaPhi, *hPullX, *hDistX;
   float mindeta, mindphi;
 
 };

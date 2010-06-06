@@ -41,6 +41,8 @@ void LinkSynchroAnalysis::beginJob()
   theHistos.Add(new TH1F("hDistE","hDistE",50,0.,500.)); 
   theHistos.Add(new TH1F("hPenetrationB","hPenetrationB",10,0.,10.)); 
   theHistos.Add(new TH1F("hPenetrationE","hPenetrationE",10,0.,10.)); 
+  theHistos.Add(new TH1F("hPullX","hPullX",100,-10.,10.));
+  theHistos.Add(new TH1F("hDistX","hDistX",100,-100.,100.));
 
   typedef std::vector<edm::ParameterSet> VPSet;
   VPSet selectorConfigs = theAnaConfig.getParameter<VPSet>("ORedSynchroFilters");
@@ -51,6 +53,10 @@ void LinkSynchroAnalysis::beginJob()
       f.setHistoPhi(static_cast<TH1F* >(theHistos.FindObject("hDeltaPhi")));
       f.setHistoEta(static_cast<TH1F* >(theHistos.FindObject("hDeltaEta")));
       f.setHistoDxy(static_cast<TH1F* >(theHistos.FindObject("hDxy")));
+      f.setHistoPullX(static_cast<TH1F* >(theHistos.FindObject("hPullX")));
+      f.setHistoDistX(static_cast<TH1F* >(theHistos.FindObject("hDistX")));
+    }
+    if (it->getParameter<std::string>("collection") == "globalMuons") {
     }
     theSynchroFilters.push_back(f); 
   }
@@ -101,6 +107,8 @@ const RPCRawSynchro::ProdItem& LinkSynchroAnalysis::select(const RPCRawSynchro::
     if (takeIt) selected.push_back(*it);
     if (takeIt) wasTakeIt = true;
   }
+
+/*
   std::vector<GlobalPoint> pos = theSynchroFilters[0].positions();
 std::sort(pos.begin(), pos.end(), LessGP());
   GlobalPoint last(0.,0.,0.);
@@ -124,6 +132,8 @@ std::sort(pos.begin(), pos.end(), LessGP());
   if (barrel && endcap) std::cout << "PROBLEM" << std::endl;
   if (wasTakeIt && barrel ) static_cast<TH1F* >(theHistos.FindObject("hPenetrationB"))->Fill(points);
   if (wasTakeIt && endcap) static_cast<TH1F* >(theHistos.FindObject("hPenetrationE"))->Fill(points);
+
+*/
   if (wasTakeIt) static_cast<TH1*>(theHistos.FindObject("hBX"))->Fill( ev.bunchCrossing());
   if (wasTakeIt) theEventCounter++;
   return selected;

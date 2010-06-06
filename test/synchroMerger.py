@@ -6,9 +6,7 @@ process.source = cms.Source("EmptySource")
 
 process.load("DQMServices.Core.DQM_cfg")
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'MC_36Y_V4::All'
-
-#process.GlobalTag.globaltag = 'START36_V3::All'
+process.GlobalTag.globaltag = 'MC_37Y_V5::All'
 
 process.merger =  cms.EDAnalyzer("LinkSynchroMerger",
   writeHistograms = cms.untracked.bool(True),
@@ -18,7 +16,7 @@ process.merger =  cms.EDAnalyzer("LinkSynchroMerger",
     dumpDelays = cms.untracked.bool(True)
   ),
   preFillLinkSynchroFileNames=cms.untracked.vstring(
- '/disk00/work/CMSSW_3_6_0.R2D/jobs/crab_0_100505_190111/res/out.txt'
+  '/disk00/work/CMSSW_3_7_0.R2D/jobs/out' 
   )
 )
 
