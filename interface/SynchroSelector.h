@@ -28,8 +28,8 @@ public:
   void resetPos() { thePos.clear(); }
   std::vector<GlobalPoint> positions() { return thePos;}
 
-private:
   bool checkL1RpcMatching( const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es);
+private:
   bool checkRpcDetMatching( const TrajectoryStateOnSurface & tsos,  const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es);
   bool checkUniqueRecHitMatching( const TrajectoryStateOnSurface & tsos,  const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es);
   

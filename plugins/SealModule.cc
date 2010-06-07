@@ -16,4 +16,8 @@ DEFINE_FWK_MODULE(LinkSynchroAnalysis);
 #include "LinkSynchroMerger.h"
 DEFINE_FWK_MODULE(LinkSynchroMerger);
 
+#include "EfficiencyTree.h"
+DEFINE_FWK_MODULE(EfficiencyTree);
 
+#include "EfficiencyAnalysis.h"
+DEFINE_FWK_MODULE(EfficiencyAnalysis);

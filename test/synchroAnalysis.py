@@ -79,7 +79,7 @@ process.linkSynchroAnalysis =  cms.EDAnalyzer("LinkSynchroAnalysis",
   histoFileName = cms.untracked.string("analysis.root"),
   linkMonitorPSet = cms.PSet(
     useFirstHitOnly = cms.untracked.bool(True),
-    dumpDelays = cms.untracked.bool(True)
+    dumpDelays = cms.untracked.bool(False)
   ),
   ORedSynchroFilters = cms.VPSet(
     cms.PSet( collection = cms.string("globalMuons"),
@@ -88,8 +88,7 @@ process.linkSynchroAnalysis =  cms.EDAnalyzer("LinkSynchroAnalysis",
       maxTIP = cms.double(0.5),
       matchL1RPC = cms.bool(False),
       checkUniqueRecHitMatching = cms.bool(True)
-    )
-,
+    ) ,
     cms.PSet( collection = cms.string("generalTracks"),
       minPt = cms.double(2.),    
       beamSpot = cms.InputTag("offlineBeamSpot"),
@@ -102,6 +101,18 @@ process.linkSynchroAnalysis =  cms.EDAnalyzer("LinkSynchroAnalysis",
     )
   )
 )
+process.efficiencyTree = cms.EDAnalyzer("EfficiencyTree",
+    treeFileName = cms.string("efficiencyTree.root"),
+    muonColl = cms.string("muons"),
+    trackColl = cms.string("generalTracks"),
+    beamSpot = cms.InputTag("offlineBeamSpot"),
+    minPt = cms.double(2.),
+    maxTIP = cms.double(0.5),
+    maxEta = cms.double(1.6),
+    l1MuReadout = cms.InputTag("gtDigis"),
+    rpcMatcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.8), maxDeltaPhi = cms.double(0.8)), 
+    dtcscMatcherPSet = cms.PSet( maxDeltaEta = cms.double(0.1), maxDeltaPhi = cms.double(0.1)), 
+)
 
 process.p = cms.Path( 
 #  process.filterBX*
@@ -111,5 +122,4 @@ process.p = cms.Path(
   process.muonRPCDigis*
   process.rpcFEDIntegrity*process.rpcMonitorRaw*
   process.linkSynchroAnalysis*
-  process.l1trpctf*
-  process.dqmEnv*process.dqmSaver)
+  process.efficiencyTree)

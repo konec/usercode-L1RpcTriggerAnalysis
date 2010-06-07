@@ -8,6 +8,7 @@
 <use name=L1Trigger/CSCTrackFinder>
 <use name=DataFormats/L1GlobalMuonTrigger>
 <use name=DataFormats/L1GlobalTrigger>
+<use name=DataFormats/MuonReco>
 
 <use name=DQMServices/Core>
 <use name=DQMServices/ClientConfig>

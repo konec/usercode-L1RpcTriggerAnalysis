@@ -62,7 +62,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
     Cands = RRItr->getCSCCands();
     for(ITC it = Cands.begin() ; it != Cands.end() ; ++it ) {
       if (it->empty()) continue;
-      CSC = true;
+      if (fabs(it->etaValue()) < 1.6) CSC = true;
       str <<"HAS  CSC cand "
           <<" pt: "<<it->ptValue()
           <<" eta: "<<it->etaValue()
@@ -109,8 +109,8 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
     }
   }
   if ( brlRPC || fwdRPC)  std::cout << str.str() << std::endl;
-//  if (brlRPC || fwdRPC || CSC || DT) goodEvent = true;
-  if (brlRPC || fwdRPC) goodEvent = true;
+  if (brlRPC || fwdRPC || CSC || DT) goodEvent = true;
+//  if (brlRPC || fwdRPC) goodEvent = true;
   if (goodEvent) theCounter++;
   return goodEvent;
 //  return true;
