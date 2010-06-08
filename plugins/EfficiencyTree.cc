@@ -200,8 +200,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     }
   }
 
-  // if no track at all - no efficiency
-  if (!tsos.isValid()) return;
+  if (tsos.isValid()) { 
 
   // get rpc candidates, check comp. with muon or track matching DT/CSSC 
   std::vector<L1Obj> l1Rpcs = l1(L1ObjMaker::RPCB,L1ObjMaker::RPCF);
@@ -214,7 +213,29 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
       minBx = l1Rpc.bx;
     }
   } 
+  }
 
+  //finally take RPC or other
+
+  std::vector<L1Obj> l1Rpcs =  l1(L1ObjMaker::RPCB,L1ObjMaker::RPCF);
+  int maxQ = -1;
+  for (std::vector<L1Obj>::const_iterator it = l1Rpcs.begin(); it != l1Rpcs.end(); ++it) {
+    if (it->q > maxQ) {
+      l1Rpc = *it;
+      maxQ = l1Rpc.q;
+    }
+  }
+
+  std::vector<L1Obj> l1Others = l1(L1ObjMaker::DT,L1ObjMaker::CSC);
+  maxQ=-1;
+  for (std::vector<L1Obj>::const_iterator it = l1Others.begin(); it != l1Others.end(); ++it) {
+    if (it->q > maxQ) {
+      l1Other = *it;
+      maxQ = l1Other.q;
+    }
+  }
+
+  if (!tsos.isValid() && l1Rpcs.size()==0 && l1Others.size()==0) return;
   theTree->Fill();
    
 }
