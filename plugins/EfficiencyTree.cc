@@ -175,7 +175,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
       const GeomDet * det = rpcGeometry->idToDet(*it);
       GlobalPoint detPosition = det->position();
       //if (fabs(muon.eta- detPosition.eta()) > 1.) continue;
-      if (deltaR(muon.eta, muon.phi, detPosition.eta(), detPosition.phi()) > 3.) continue;
+      if (deltaR(muon.eta, muon.phi, detPosition.eta(), detPosition.phi()) > 2.) continue;
       TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(muTSOS, det->surface());
       if (!trackAtRPC.isValid()) continue;
       if (! (det->surface().bounds().inside(trackAtRPC.localPosition()))) continue;
