@@ -8,6 +8,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 
 
 namespace edm { class Event; class EventSetup; }
@@ -23,18 +24,17 @@ public:
   virtual void endJob();
 private:
   edm::ParameterSet theConfig;
-
-  // std::vector<float> 
-  // std::vector<float> 
-  L1Obj l1Rpc;
-  L1Obj l1Other;
-  EventObj event;
-  TrackObj track;
-  TrackObj muon;
-
-  std::vector<bool> hitBarrel, hitEndcap;
                     
   TFile *theFile;
   TTree *theTree;
+  
+  EventObj* event;
+  TrackObj track;
+  TrackObj muon;
+  std::vector<bool> hitBarrel, hitEndcap;
+  std::vector<unsigned int> detBarrel, detEndcap;
+  L1ObjColl * l1RpcColl; 
+  L1ObjColl * l1OtherColl; 
+
 }; 
 #endif

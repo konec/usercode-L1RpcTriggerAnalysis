@@ -37,10 +37,11 @@
 #include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/RPCRecHit/interface/RPCRecHitCollection.h"
+#include "DataFormats/DetId/interface/DetIdCollection.h"
 
 
 EfficiencyTree::EfficiencyTree(const edm::ParameterSet& cfg)
-  : theConfig(cfg), theTree(0)
+  : theConfig(cfg), theTree(0), event(0), l1RpcColl(0) , l1OtherColl(0)
 {
 }
 
@@ -49,10 +50,7 @@ void EfficiencyTree::beginJob()
   theFile = new TFile(theConfig.getParameter<std::string>("treeFileName").c_str(),"RECREATE");
   theTree = new TTree("tL1Rpc","L1RpcEfficciency");
 
-  theTree->Branch("evBx",&event.bx);
-  theTree->Branch("evId",&event.id);
-  theTree->Branch("evLumi",&event.lumi);
-  theTree->Branch("evRun",&event.run);
+  theTree->Branch("event","EventObj",&event,32000,99);
 
   theTree->Branch("muPt", &muon.pt);
   theTree->Branch("muEta",&muon.eta);
@@ -62,20 +60,13 @@ void EfficiencyTree::beginJob()
   theTree->Branch("tkEta",&track.eta);
   theTree->Branch("tkPhi",&track.phi);
 
-  theTree->Branch("rpcPt", &l1Rpc.pt);
-  theTree->Branch("rpcEta",&l1Rpc.eta);
-  theTree->Branch("rpcPhi",&l1Rpc.phi);
-  theTree->Branch("rpcBx",&l1Rpc.bx);
-  theTree->Branch("rpcQ",&l1Rpc.q);
-
-  theTree->Branch("otherPt", &l1Other.pt);
-  theTree->Branch("otherEta",&l1Other.eta);
-  theTree->Branch("otherPhi",&l1Other.phi);
-  theTree->Branch("otherBx",&l1Other.bx);
-  theTree->Branch("otherQ",&l1Other.q);
-
   theTree->Branch("hitBarrel",&hitBarrel);
   theTree->Branch("hitEndcap",&hitEndcap);
+  theTree->Branch("detBarrel",&detBarrel);
+  theTree->Branch("detEndcap",&detEndcap);
+
+  theTree->Branch("l1RpcColl","L1ObjColl",&l1RpcColl,32000,99);
+  theTree->Branch("l1OtherColl","L1ObjColl",&l1OtherColl,32000,99);
 
 }
 
@@ -88,16 +79,24 @@ void EfficiencyTree::endJob()
 void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
 {
   //clean event
-  event.bx = ev.bunchCrossing();
-  event.id = ev.id().event();
-  event.run = ev.run();
-  event.lumi = ev.luminosityBlock();
+  event = new EventObj;
+  event->bx = ev.bunchCrossing();
+  event->orbit = ev.orbitNumber();
+  event->time = ev.time().value();
+  event->id = ev.id().event();
+  event->run = ev.run();
+  event->lumi = ev.luminosityBlock();
+
   muon = TrackObj();
   track = TrackObj();
-  l1Rpc = L1Obj();
-  l1Other = L1Obj();
+
   hitBarrel = std::vector<bool>(6,false);
   hitEndcap = std::vector<bool>(3,false);
+  detBarrel = std::vector<unsigned int>(6,0);
+  detEndcap = std::vector<unsigned int>(3,0);
+
+  l1RpcColl = new L1ObjColl;
+  l1OtherColl = new L1ObjColl;
 
   //getBeamSpot, 
   math::XYZPoint reference(0.,0.,0.);
@@ -168,13 +167,41 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
         }
       }
     }
+
+    //rpc dets compatible with muon
+    const TrackingGeometry::DetIdContainer & detIds = rpcGeometry->detIds();
+    if ( (fabs(muon.eta) > 1.24 && muon.pt > 4) || (muon.pt >7.) ) {
+    for (TrackingGeometry::DetIdContainer::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
+      const GeomDet * det = rpcGeometry->idToDet(*it);
+      GlobalPoint detPosition = det->position();
+      //if (fabs(muon.eta- detPosition.eta()) > 1.) continue;
+      //if (deltaR(muon.eta, muon.phi, detPosition.eta(), detPosition.phi()) > 2.) continue;
+      TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(muTSOS, det->surface());
+      if (!trackAtRPC.isValid()) continue;
+      if (! det->surface().bounds().inside(trackAtRPC.localPosition()) ) continue;
+      RPCDetId rpcDet(*it);
+      int region = rpcDet.region();
+      if (region==0) {
+        int sM = rpcDet.station();
+        int sI = rpcDet.layer();
+        int layer = (sM <=2)? 2*(sM-1)+sI : sM+2;
+        detBarrel[layer-1]++;
+      } else {
+        detEndcap[rpcDet.station()-1]++;
+      }
+    } 
+    }
+    
   }
 
   //create L1muon helper 
   edm::InputTag l1Tag(theConfig.getParameter<edm::InputTag>("l1MuReadout"));
   L1ObjMaker l1(l1Tag,ev);
 
-  //get all tracks, check compatibility with DT and CSC
+  // set L1Others
+  std::vector<L1Obj> l1Others=  l1(L1ObjMaker::DT,L1ObjMaker::CSC);
+  std::vector<bool> l1OthersMatching(l1Others.size(),false);
+
   edm::Handle<reco::TrackCollection> tracks;
   ev.getByLabel( theConfig.getParameter<std::string>("trackColl"), tracks);
   typedef reco::TrackCollection::const_iterator IT;
@@ -183,59 +210,44 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     if (muTrack.pt() < theConfig.getParameter<double>("minPt")) continue;
     if (muTrack.dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
     if (fabs(muTrack.eta()) >  theConfig.getParameter<double>("maxEta")) continue;
-    std::vector<L1Obj> l1Others=  l1(L1ObjMaker::DT,L1ObjMaker::CSC);
+    if (muTrack.pt() < track.pt) continue;
     TrajectoryStateOnSurface tTSOS = TrajectoryStateTransform().outerStateOnSurface(muTrack, *globalGeometry, magField.product());
-    int minBx = 100;
     TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("dtcscMatcherPSet"));
-    for (std::vector<L1Obj>::const_iterator it = l1Others.begin(); it != l1Others.end(); ++it) {
-      bool isCompatible = matcher(*it, tTSOS, ev,es);
-      if (isCompatible && it->bx < minBx) {
-        if (!theMuon) tsos = tTSOS;
-        l1Other = *it;
-        minBx = l1Other.bx;
-        track.pt = muTrack.pt();
-        track.eta = muTrack.eta();
-        track.phi = muTrack.phi(); 
-      } 
+
+    bool isTrackCompatible = false;
+    std::vector<bool> l1OthersThisTrackMatching(l1Others.size(),false);
+
+    for (unsigned int i=0; i< l1Others.size(); ++i) {
+      if ( matcher(l1Others[i], tTSOS, ev,es) ) {
+        isTrackCompatible = true; 
+        l1OthersThisTrackMatching[i]=true;
+      }
+    }
+    if (isTrackCompatible) {
+      if (!theMuon) tsos = tTSOS;
+      track.pt = muTrack.pt();
+      track.eta = muTrack.eta();
+      track.phi = muTrack.phi();
+      l1OthersMatching = l1OthersThisTrackMatching;
     }
   }
+  l1OtherColl->set(l1Others);
+  l1OtherColl->set(l1OthersMatching);
 
-  if (tsos.isValid()) { 
 
-  // get rpc candidates, check comp. with muon or track matching DT/CSSC 
+  // set L1 RPC 
   std::vector<L1Obj> l1Rpcs = l1(L1ObjMaker::RPCB,L1ObjMaker::RPCF);
-  int minBx = 100;
+  std::vector<bool> l1RpcsMatching(l1Rpcs.size(), false);
   TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("rpcMatcherPSet"));
-  for (std::vector<L1Obj>::const_iterator it = l1Rpcs.begin(); it != l1Rpcs.end(); ++it) {
-    bool isCompatible = matcher(*it, tsos, ev,es);
-    if (isCompatible && it->bx < minBx) {
-      l1Rpc = *it;
-      minBx = l1Rpc.bx;
-    }
-  } 
-  }
+  if (tsos.isValid()) for (unsigned int i=0; i< l1Rpcs.size(); ++i)  if (matcher(l1Rpcs[i], tsos, ev,es)) l1RpcsMatching[i]=true;
+  l1RpcColl->set(l1Rpcs);
+  l1RpcColl->set(l1RpcsMatching);
 
-  //finally take RPC or other
 
-  std::vector<L1Obj> l1Rpcs =  l1(L1ObjMaker::RPCB,L1ObjMaker::RPCF);
-  int maxQ = -1;
-  for (std::vector<L1Obj>::const_iterator it = l1Rpcs.begin(); it != l1Rpcs.end(); ++it) {
-    if (it->q > maxQ) {
-      l1Rpc = *it;
-      maxQ = l1Rpc.q;
-    }
-  }
+  // fill ntuple and cleanup
+  if (tsos.isValid() || l1Rpcs.size() != 0 ||  l1Others.size() !=0) theTree->Fill();
+  delete event;
+  delete l1RpcColl;
+  delete l1OtherColl;
 
-  std::vector<L1Obj> l1Others = l1(L1ObjMaker::DT,L1ObjMaker::CSC);
-  maxQ=-1;
-  for (std::vector<L1Obj>::const_iterator it = l1Others.begin(); it != l1Others.end(); ++it) {
-    if (it->q > maxQ) {
-      l1Other = *it;
-      maxQ = l1Other.q;
-    }
-  }
-
-  if (!tsos.isValid() && l1Rpcs.size()==0 && l1Others.size()==0) return;
-  theTree->Fill();
-   
 }

@@ -1,6 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 process = cms.Process("Analysis")
 
+data0ChainFileNames = cms.PSet( treeFileNames = cms.vstring( "efficiencyTree.root") )
+
 data2ChainFileNames = cms.PSet(
   treeFileNames = cms.vstring(
 "data2/efficiencyTree_10_1.root",
@@ -94,10 +96,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(0))
 process.source = cms.Source("EmptySource")
 
 process.efficiency = cms.EDAnalyzer("EfficiencyAnalysis",
-  data4ChainFileNames,
+  data0ChainFileNames,
   histoFileName = cms.string("efficiencyHistos.root"),
 #  l1Cut = cms.double(0.),
-  ptMin = cms.double(2.0)
+  ptMin = cms.double(0.0)
 )
 
 process.p = cms.Path(process.efficiency)
