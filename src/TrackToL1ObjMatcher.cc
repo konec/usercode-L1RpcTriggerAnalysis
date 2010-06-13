@@ -37,7 +37,7 @@ bool TrackToL1ObjMatcher::operator()(const L1Obj& l1, const TrajectoryStateOnSur
   else if (rpcEta < 1.04)  rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 500, 520, -700, 700 ) ) );
   else                     rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,800.), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
   edm::ESHandle<Propagator> propagator;
-  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
   TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(tsos, *rpc);
   if (!trackAtRPC.isValid()) return false;
   float phi = trackAtRPC.globalPosition().phi();

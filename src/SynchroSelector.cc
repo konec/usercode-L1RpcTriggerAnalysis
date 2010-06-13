@@ -73,7 +73,7 @@ bool SynchroSelector::checkL1RpcMatching( const TrajectoryStateOnSurface & tsos,
         else if (rpcEta < 1.04)  rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 500, 520, -700, 700 ) ) );
         else                     rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,800.), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
         edm::ESHandle<Propagator> propagator;
-        es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
+        es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
         TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(tsos, *rpc);
         if (!trackAtRPC.isValid()) return false;
         float phi = trackAtRPC.globalPosition().phi();
@@ -150,7 +150,7 @@ bool SynchroSelector::takeIt(const RPCDetId & det, const edm::Event&ev, const ed
 bool SynchroSelector::checkRpcDetMatching( const TrajectoryStateOnSurface & tsos,  const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es)
 {
   edm::ESHandle<Propagator> propagator;
-  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
 
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
   es.get<GlobalTrackingGeometryRecord>().get(globalGeometry);
@@ -191,7 +191,7 @@ bool SynchroSelector::checkUniqueRecHitMatching( const TrajectoryStateOnSurface 
 {
   //propagate to det
   edm::ESHandle<Propagator> propagator;
-  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
   es.get<GlobalTrackingGeometryRecord>().get(globalGeometry);
   TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(tsos, globalGeometry->idToDet(det)->surface());

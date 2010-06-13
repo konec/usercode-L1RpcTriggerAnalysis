@@ -129,6 +129,13 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     muon.eta = theMuon->track()->eta();
     muon.phi = theMuon->track()->phi();
 
+/*
+    std::cout <<"Is mached valid: "<< theMuon->isMatchesValid();
+    std::cout <<" inner (pt,eta,phi) "<<  muon.pt<<" "<<muon.eta<<" "<< muon.phi<< std::endl;
+    std::cout <<" outer (pt,eta,phi) "<<theMuon->outerTrack()->pt()<<" "<<theMuon->outerTrack()->eta()<<" "<<theMuon->outerTrack()->phi()<<std::endl;
+    std::cout <<" combi (pt,eta,phi) "<<theMuon->globalTrack()->pt()<<" "<<theMuon->globalTrack()->eta()<<" "<<theMuon->globalTrack()->phi()<<std::endl;
+*/
+
     // get muon tsos for muon matching to RPC
     TrajectoryStateOnSurface muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(theMuon->track()), *globalGeometry, magField.product());
     tsos = muTSOS;
@@ -140,7 +147,8 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     edm::ESHandle<RPCGeometry> rpcGeometry;
     es.get<MuonGeometryRecord>().get(rpcGeometry);
     edm::ESHandle<Propagator> propagator;
-    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
+    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
+    
     typedef RPCRecHitCollection::const_iterator IH;
     for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
       RPCDetId rpcDet = ih->rpcId();
@@ -170,15 +178,25 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
 
     //rpc dets compatible with muon
     const TrackingGeometry::DetIdContainer & detIds = rpcGeometry->detIds();
-    if ( (fabs(muon.eta) > 1.24 && muon.pt > 4) || (muon.pt >7.) ) {
+    if ( (fabs(muon.eta) > 1.24 && muon.pt > 3.5) || (muon.pt >6.) ) {
     for (TrackingGeometry::DetIdContainer::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
       const GeomDet * det = rpcGeometry->idToDet(*it);
       GlobalPoint detPosition = det->position();
-      //if (fabs(muon.eta- detPosition.eta()) > 1.) continue;
-      if (deltaR(muon.eta, muon.phi, detPosition.eta(), detPosition.phi()) > 2.) continue;
+      if (deltaR(muon.eta, muon.phi, detPosition.eta(), detPosition.phi()) > 1.) continue;
       TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(muTSOS, det->surface());
       if (!trackAtRPC.isValid()) continue;
       if (! (det->surface().bounds().inside(trackAtRPC.localPosition()))) continue;
+/*
+         std::cout << " **** HERE PROBLEM  "<< std::endl;  else   std::cout << " **** HERE OK "<< std:: endl; 
+
+         std::cout <<" is valid: "<< trackAtRPC.isValid() <<" is inside: "<< det->surface().bounds().inside(trackAtRPC.localPosition()) << std::endl;
+         std::cout <<" dR= "<<deltaR(muon.eta, muon.phi, detPosition.eta(), detPosition.phi())<<std::endl; 
+         std::cout <<" DetPosition: (eta: "<<detPosition.eta()<<",phi: "<< detPosition.phi()<<",r: "<< detPosition.perp()<<",z :"<< detPosition.z()<<")"<<std::endl; 
+         std::cout <<" Tk Position  (eta:"<<trackAtRPC.globalPosition().eta()<<", phi; "<<trackAtRPC.globalPosition().phi()<<", r: "<<trackAtRPC.globalPosition().perp()<<", z"<<trackAtRPC.globalPosition().z()<<")"<<std::endl;
+         std::cout <<" local Tk Position:"<< trackAtRPC.localPosition();
+         std::cout << std::endl;
+*/
+      
       RPCDetId rpcDet(*it);
       int region = rpcDet.region();
       if (region==0) {
@@ -191,7 +209,6 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
       }
     } 
     }
-    
   }
 
   //create L1muon helper 
