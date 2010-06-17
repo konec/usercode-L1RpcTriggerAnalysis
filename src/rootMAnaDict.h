@@ -31,6 +31,8 @@ extern void G__set_cpp_environmentrootMAnaDict();
 #include "TObject.h"
 #include "TMemberInspector.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include <algorithm>
@@ -48,6 +50,8 @@ extern G__linked_taginfo G__rootMAnaDictLN_vectorlEboolcOallocatorlEboolgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlEROOTcLcLTSchemaHelpercOallocatorlEROOTcLcLTSchemaHelpergRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEROOTcLcLTSchemaHelpercOallocatorlEROOTcLcLTSchemaHelpergRsPgRcLcLiteratorgR;
 extern G__linked_taginfo G__rootMAnaDictLN_EventObj;
+extern G__linked_taginfo G__rootMAnaDictLN_TrackObj;
+extern G__linked_taginfo G__rootMAnaDictLN_MuonObj;
 extern G__linked_taginfo G__rootMAnaDictLN_L1Obj;
 extern G__linked_taginfo G__rootMAnaDictLN_L1ObjColl;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlEL1ObjcOallocatorlEL1ObjgRsPgR;

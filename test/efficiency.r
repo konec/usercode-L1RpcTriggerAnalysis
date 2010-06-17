@@ -146,6 +146,14 @@
   hDistL1Other->DrawCopy("box");
   c7.Print(0,".eps");
 
-  
+  c8= new TCanvas("c8","c8",-2);
+  hL1RpcBX->SetXTitle("L1Rpc wrt L1 [BX]");
+  Int_t integral = hL1RpcBX->Integral(); 
+  hL1RpcBX->Scale(1./integral);
+  gPad->SetLogy();
+  hL1RpcBX->SetNdivisions(605,"X");
+  hL1RpcBX->DrawCopy();
+  c8.Print(0,".eps");
+  c8.Print(0,".png");
 }
 

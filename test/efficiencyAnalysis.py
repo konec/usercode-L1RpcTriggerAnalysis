@@ -96,7 +96,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(0))
 process.source = cms.Source("EmptySource")
 
 process.efficiency = cms.EDAnalyzer("EfficiencyAnalysis",
-  data0ChainFileNames,
+  data4ChainFileNames,
   histoFileName = cms.string("efficiencyHistos.root"),
 #  l1Cut = cms.double(0.),
   ptMin = cms.double(0.0)

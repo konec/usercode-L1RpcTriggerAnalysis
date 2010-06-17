@@ -22,8 +22,13 @@
 using namespace edm;
 using namespace std;
 
-bool TrackToL1ObjMatcher::operator()(const L1Obj& l1, const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es) const
+static const TrackToL1ObjMatcher::LastResult dummy = {false, 100., 100.};
+
+TrackToL1ObjMatcher::TrackToL1ObjMatcher(const edm::ParameterSet & cfg) : theConfig(cfg), theLastResult(dummy) { }
+
+bool TrackToL1ObjMatcher::operator()(float l1ObjEta, float l1ObjPhi, const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es) const
 {
+  theLastResult = dummy;
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
   es.get<GlobalTrackingGeometryRecord>().get(globalGeometry);
   edm::ESHandle<MagneticField> magField;
@@ -31,11 +36,13 @@ bool TrackToL1ObjMatcher::operator()(const L1Obj& l1, const TrajectoryStateOnSur
   ReferenceCountingPointer<Surface> rpc;
 
   //propagate and check matching for candidate
-  float rpcEta = l1.eta;
-  float rpcPhi = l1.phi;
-  if (rpcEta < -1.04)      rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,-800.), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
-  else if (rpcEta < 1.04)  rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 500, 520, -700, 700 ) ) );
-  else                     rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,800.), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
+  float rpcEta = l1ObjEta;
+  float rpcPhi = l1ObjPhi;
+  if (rpcEta < -1.04)       rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,-790.), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
+  else if (rpcEta < -0.72)  rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 520, 520, -700, 700 ) ) );
+  else if (rpcEta < 0.72)   rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 500, 500, -700, 700 ) ) );
+  else if (rpcEta < 1.04)   rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 520, 520, -700, 700 ) ) );
+  else                      rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,790.), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
   edm::ESHandle<Propagator> propagator;
   es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
   TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(tsos, *rpc);
@@ -50,6 +57,10 @@ bool TrackToL1ObjMatcher::operator()(const L1Obj& l1, const TrajectoryStateOnSur
   double maxDeltaEta = theConfig.getParameter<double>("maxDeltaEta");
   double maxDeltaPhi = theConfig.getParameter<double>("maxDeltaPhi");
   bool matching = ( fabs(dphi) < maxDeltaPhi && fabs(deta) < maxDeltaEta) ? true : false;
+
+  theLastResult.isValid = true;
+  theLastResult.deltaEta = deta;
+  theLastResult.deltaPhi = dphi;
 
   if (matching) return true; 
   else return false;

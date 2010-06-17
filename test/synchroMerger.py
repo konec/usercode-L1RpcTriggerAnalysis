@@ -16,8 +16,7 @@ process.merger =  cms.EDAnalyzer("LinkSynchroMerger",
     dumpDelays = cms.untracked.bool(True)
   ),
   preFillLinkSynchroFileNames=cms.untracked.vstring(
-   'tmp.txt'
-#  '/disk00/work/CMSSW_3_7_0.R2D/jobs/tmp.txt' 
+   'out.txt'
   )
 )
 

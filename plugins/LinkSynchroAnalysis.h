@@ -5,11 +5,11 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/ESWatcher.h"
 #include "CondFormats/DataRecord/interface/RPCEMapRcd.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroSelector.h"
 #include "TObjArray.h"
 
 namespace edm { class Event; class EventSetup; }
 class RPCReadOutMapping;
+class SynchroSelector;
 
 
 class LinkSynchroAnalysis : public RPCMonitorLinkSynchro {
@@ -26,7 +26,7 @@ private:
   TObjArray theHistos; 
   unsigned int theEventCounter;
   unsigned int theRPCCounter;
-  std::vector<SynchroSelector> theSynchroFilters;
+  std::vector<SynchroSelector *> theSynchroFilters;
 };
 #endif
 

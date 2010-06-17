@@ -8,14 +8,16 @@
 //  TCanvas cRMSB("cRMSB","cRMSB",-2);
 
   TCanvas cep("cep","cep",-2);
+//  TFile f("histos_ep_471.root");
 //  TFile f("merge.root");
   TFile f("analysis.root");
+//  TFile f("links_hadd.root");
   cep.cd();
   delaySummary.SetLineColor(2);
   delaySummary.SetLineWidth(3);
   delaySummary.SetXTitle("LB data delay [BX]");
   delaySummary.SetYTitle("entries");
-//  gPad->SetLogy();
+  gPad->SetLogy();
   delaySummary.GetXaxis()->SetNdivisions(8);
   delaySummary.SetTitleOffset(2.0,"Y");
   delaySummary.DrawCopy();

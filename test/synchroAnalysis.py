@@ -4,13 +4,8 @@ process = cms.Process("Analysis")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
-'file:/disk00/work/data/MuonDPG_skim-May27thSkim_v3/863EAB8A-8D6E-DF11-9EFA-00304867402A.root'),
-#'file:/disk00/work/data/run132440.muon/208A5482-4D3C-DF11-97EA-00E08178C0FB.root',
-#'file:/disk00/work/data/run132440.muon/BC463F24-4A3C-DF11-998A-00E08178C085.root',
-#'file:/disk00/work/data/run132440.muon/963F1CB1-443C-DF11-B5F1-003048673F1C.root',
-#'file:/disk00/work/data/run132440.muon/86912F13-4C3C-DF11-9CEB-00E0817918BF.root'),
-#'file:/disk00/work/data/run133321/E2758439-9749-DF11-B4E1-003048673F2C.root',
-#'file:/disk00/work/data/run133321/EC5E5E70-9D49-DF11-A32C-00E081791809.root'),
+#'file:/disk00/work/data/MinimimBias-MuonDPG_skim-May27thSkim_v3/863EAB8A-8D6E-DF11-9EFA-00304867402A.root'),
+'file:/disk00/work/data/Commissioning-MuonDPG_skim-May27thSkim_v2/1E1A93A9-B96D-DF11-848B-003048D47A2E.root'),
 inputCommands=cms.untracked.vstring( 'keep *', 'drop *_hltL1GtObjectMap_*_*')
 )
 
@@ -60,10 +55,10 @@ process.l1trpctf.rpctfSource =  cms.InputTag("gtDigis")
 process.load("DQM.RPCMonitorClient.RPCFEDIntegrity_cfi")
 process.load("DQM.RPCMonitorClient.RPCMonitorRaw_cfi")
 process.rpcMonitorRaw.writeHistograms = cms.untracked.bool(True)
-process.rpcMonitorRaw.histoFileName = cms.untracked.string("histos1.root")
+process.rpcMonitorRaw.histoFileName = cms.untracked.string("rawMonitor.root")
 
 
-process.filterBX = cms.EDFilter("FilterBX", beamBX = cms.vuint32(1) )
+process.filterBX = cms.EDFilter("FilterBX", beamBX = cms.vuint32(1,100) )
 
 process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
   vertexCollection = cms.InputTag('offlinePrimaryVertices'),
@@ -76,42 +71,44 @@ process.filterL1_GM = cms.EDFilter("Filter_L1_GM", l1MuReadout = cms.InputTag("g
 
 process.linkSynchroAnalysis =  cms.EDAnalyzer("LinkSynchroAnalysis",
   writeHistograms = cms.untracked.bool(True),
-  histoFileName = cms.untracked.string("analysis.root"),
+  histoFileName = cms.untracked.string("synchroAnalysis.root"),
   linkMonitorPSet = cms.PSet(
     useFirstHitOnly = cms.untracked.bool(True),
-    dumpDelays = cms.untracked.bool(False)
+    dumpDelays = cms.untracked.bool(True)
   ),
-  ORedSynchroFilters = cms.VPSet(
-    cms.PSet( collection = cms.string("globalMuons"),
-      minPt = cms.double(2.),  
-      beamSpot = cms.InputTag("offlineBeamSpot"),
-      maxTIP = cms.double(0.5),
-      matchL1RPC = cms.bool(False),
-      checkUniqueRecHitMatching = cms.bool(True)
-    ) ,
-    cms.PSet( collection = cms.string("generalTracks"),
-      minPt = cms.double(2.),    
-      beamSpot = cms.InputTag("offlineBeamSpot"),
-      maxTIP = cms.double(0.5),
-      matchL1RPC = cms.bool(True),
-      checkUniqueRecHitMatching = cms.bool(True),
-      l1MuReadout = cms.InputTag("gtDigis"),    
-      maxDeltaEta = cms.double(0.2),
-      maxDeltaPhi = cms.double(0.25)
-    )
-  )
-)
-process.efficiencyTree = cms.EDAnalyzer("EfficiencyTree",
-    treeFileName = cms.string("efficiencyTree.root"),
-    muonColl = cms.string("muons"),
-    trackColl = cms.string("generalTracks"),
-    beamSpot = cms.InputTag("offlineBeamSpot"),
-    minPt = cms.double(2.),
+  synchroSelectorMuon = cms.PSet( 
+    muonColl= cms.string("muons"),
+    minPt = cms.double(2.),  
     maxTIP = cms.double(0.5),
-    maxEta = cms.double(1.6),
-    l1MuReadout = cms.InputTag("gtDigis"),
-    rpcMatcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.8), maxDeltaPhi = cms.double(0.8)), 
-    dtcscMatcherPSet = cms.PSet( maxDeltaEta = cms.double(0.1), maxDeltaPhi = cms.double(0.1)), 
+    maxEta = cms.double(1.55),
+    beamSpot = cms.InputTag("offlineBeamSpot"),
+    checkUniqueRecHitMatching = cms.bool(True)
+  ),
+#  synchroSelectorTrack =  cms.PSet( 
+#    collection = cms.string("generalTracks"),
+#    minPt = cms.double(2.),
+#    maxTIP = cms.double(0.5),
+#    beamSpot = cms.InputTag("offlineBeamSpot"),
+#    checkUniqueRecHitMatching = cms.bool(True),
+#    l1MuReadout = cms.InputTag("gtDigis"),
+#    maxDeltaEta = cms.double(0.2),
+#    maxDeltaPhi = cms.double(0.25),
+#    rpcMatcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.2), maxDeltaPhi = cms.double(0.25))
+#  )
+)
+
+process.efficiencyTree = cms.EDAnalyzer("EfficiencyTree",
+  histoFileName = cms.string("efficiencyHelper.root"),
+  treeFileName = cms.string("efficiencyTree.root"),
+  muonColl = cms.string("muons"),
+  trackColl = cms.string("generalTracks"),
+  beamSpot = cms.InputTag("offlineBeamSpot"),
+  minPt = cms.double(2.),
+  maxTIP = cms.double(0.5),
+  maxEta = cms.double(1.55),
+  l1MuReadout = cms.InputTag("gtDigis"),
+  rpcMatcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.5), maxDeltaPhi = cms.double(0.5)), 
+  dtcscMatcherPSet = cms.PSet( maxDeltaEta = cms.double(0.1), maxDeltaPhi = cms.double(0.1))
 )
 
 process.p = cms.Path( 

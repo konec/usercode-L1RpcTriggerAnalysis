@@ -2,6 +2,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 
 
@@ -69,6 +70,7 @@ void EfficiencyAnalysis::beginJob()
   histos.Add(new TH2D("hDistL1Other","hDistL1Other",144,0,2*M_PI,33,-1.6,1.6));
 
   // simple efficiency variable to be 
+  histos.Add(new TH1D("hL1RpcBX","hL1RpcBX",5,-2.5,2.5));
 
   // define chain
   TChain chain("tL1Rpc");
@@ -81,8 +83,8 @@ void EfficiencyAnalysis::beginJob()
   std::vector<unsigned int> *detEndcap = 0;
 
   EventObj * event = 0;
-  TrackObj track;
-  TrackObj muon;
+  TrackObj * track = 0;
+  MuonObj * muon = 0;
 
   TBranch *bhitBarrel=0;
   TBranch *bhitEndcap=0;
@@ -94,13 +96,8 @@ void EfficiencyAnalysis::beginJob()
   
   chain.SetBranchAddress("event",&event);
 
-  chain.SetBranchAddress("muPt",&muon.pt);
-  chain.SetBranchAddress("muEta",&muon.eta);
-  chain.SetBranchAddress("muPhi",&muon.phi);
-
-  chain.SetBranchAddress("tkPt",&track.pt);
-  chain.SetBranchAddress("tkEta",&track.eta);
-  chain.SetBranchAddress("tkPhi",&track.phi);
+  chain.SetBranchAddress("muon",&muon);
+  chain.SetBranchAddress("track",&track);
 
   chain.SetBranchAddress("hitBarrel",&hitBarrel, &bhitBarrel);
   chain.SetBranchAddress("hitEndcap",&hitEndcap, &bhitEndcap);
@@ -118,18 +115,24 @@ void EfficiencyAnalysis::beginJob()
   for (int ev=0; ev<nentries; ev++) {
     chain.GetEntry(ev);
     std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsMatched(); 
+    if (l1Rpcs.size() > 0) {
+      int firstBX = 100;
+      for (std::vector<L1Obj>::const_iterator it=l1Rpcs.begin(); it!= l1Rpcs.end(); ++it) if ( (it->bx) < firstBX) firstBX = it->bx;
+      static_cast<TH1D* >(histos.FindObject("hL1RpcBX"))->Fill(firstBX);
+     }
+      
 
     std::cout<< "EV: "<<event->id<<" run: "<< event->run<< " RPC: "<< l1Rpcs.size()<<" rand: "<<(float) rand()/RAND_MAX;
     std::cout << std::endl;
 
-    bool isMuon = (muon.pt > theConfig.getParameter<double>("ptMin") );
+    bool isMuon = (muon->pt() > theConfig.getParameter<double>("ptMin") );
     if(isMuon) {
       //if (fabs(muon.eta) > 0.8) continue;
       //if (fabs(muon.eta) < 1.24) continue;
 
-      static_cast<TH1D* >(histos.FindObject("hMuonPt"))->Fill(muon.pt);
-      static_cast<TH1D* >(histos.FindObject("hMuonEta"))->Fill(muon.eta);
-      static_cast<TH1D* >(histos.FindObject("hMuonPhi"))->Fill(muon.phi);
+      static_cast<TH1D* >(histos.FindObject("hMuonPt"))->Fill(muon->pt());
+      static_cast<TH1D* >(histos.FindObject("hMuonEta"))->Fill(muon->eta());
+      static_cast<TH1D* >(histos.FindObject("hMuonPhi"))->Fill(muon->phi());
 
       int nHitsB = 0; for (int i=0; i<6; i++) if( hitBarrel->at(i) ) nHitsB++;
       int nHitsBL= 0; for (int i=0; i<4; i++) if( hitBarrel->at(i) ) nHitsBL++;
@@ -138,47 +141,47 @@ void EfficiencyAnalysis::beginJob()
       int nDetsB = 0;  for (int i=0; i<6; i++) if( detBarrel->at(i) ) nDetsB++;
       int nDetsE = 0;  for (int i=0; i<3; i++) if( detEndcap->at(i) ) nDetsE++;
 
-      if (fabs(muon.eta) < 0.8) {
+      if (fabs(muon->eta()) < 0.8) {
         static_cast<TH1D* >(histos.FindObject("hHitsB"))->Fill(nHitsB);
         static_cast<TH1D* >(histos.FindObject("hDetsB_100"))->Fill(nDetsB);
-        static_cast<TH1D* >(histos.FindObject("hEfficHits_D"))->Fill(muon.eta);      
+        static_cast<TH1D* >(histos.FindObject("hEfficHits_D"))->Fill(muon->eta());      
         if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5)) ) ) {
-          static_cast<TH1D* >(histos.FindObject("hEfficHits_N"))->Fill(muon.eta);
-          if (l1Rpcs.size()>0) static_cast<TH1D* >(histos.FindObject("hEfficHits_H"))->Fill(muon.eta);
+          static_cast<TH1D* >(histos.FindObject("hEfficHits_N"))->Fill(muon->eta());
+          if (l1Rpcs.size()>0) static_cast<TH1D* >(histos.FindObject("hEfficHits_H"))->Fill(muon->eta());
         }
       }
-      if (fabs(muon.eta) > 1.25 && fabs(muon.eta) < 1.55) { 
+      if (fabs(muon->eta()) > 1.25 && fabs(muon->eta()) < 1.55) { 
         static_cast<TH1D* >(histos.FindObject("hHitsE"))->Fill(nHitsE);
         static_cast<TH1D* >(histos.FindObject("hDetsE_100"))->Fill(nDetsE);
-        static_cast<TH1D* >(histos.FindObject("hEfficHits_D"))->Fill(muon.eta);      
+        static_cast<TH1D* >(histos.FindObject("hEfficHits_D"))->Fill(muon->eta());      
         if (nHitsE==3) {
-          static_cast<TH1D* >(histos.FindObject("hEfficHits_N"))->Fill(muon.eta);
-          if (l1Rpcs.size()) static_cast<TH1D* >(histos.FindObject("hEfficHits_H"))->Fill(muon.eta);
+          static_cast<TH1D* >(histos.FindObject("hEfficHits_N"))->Fill(muon->eta());
+          if (l1Rpcs.size()) static_cast<TH1D* >(histos.FindObject("hEfficHits_H"))->Fill(muon->eta());
         }
       }
 
-      static_cast<TH1D* >(histos.FindObject("hEfficMu_D"))->Fill(muon.eta);
-      if (l1Rpcs.size()) static_cast<TH1D* >(histos.FindObject("hEfficMu_N"))->Fill(muon.eta); 
+      static_cast<TH1D* >(histos.FindObject("hEfficMu_D"))->Fill(muon->eta());
+      if (l1Rpcs.size()) static_cast<TH1D* >(histos.FindObject("hEfficMu_N"))->Fill(muon->eta()); 
 
-      static_cast<TH1D* >(histos.FindObject("hEfficMuPt_D"))->Fill(muon.pt);
-      if (l1Rpcs.size())      static_cast<TH1D* >(histos.FindObject("hEfficMuPt_N"))->Fill(muon.pt);
-      if (l1RpcColl->getL1ObjsMatched(7.).size()) static_cast<TH1D* >(histos.FindObject("hEfficMuPt7_N"))->Fill(muon.pt); 
+      static_cast<TH1D* >(histos.FindObject("hEfficMuPt_D"))->Fill(muon->pt());
+      if (l1Rpcs.size())      static_cast<TH1D* >(histos.FindObject("hEfficMuPt_N"))->Fill(muon->pt());
+      if (l1RpcColl->getL1ObjsMatched(7.).size()) static_cast<TH1D* >(histos.FindObject("hEfficMuPt7_N"))->Fill(muon->pt()); 
     }
 
-    bool isTrack = (track.pt > theConfig.getParameter<double>("ptMin") );
+    bool isTrack = (track->pt() > theConfig.getParameter<double>("ptMin") );
     if (isTrack) {
       //if (fabs(track.eta) > 0.8) continue;
       //if (fabs(track.eta) < 1.24) continue;
-      static_cast<TH1D* >(histos.FindObject("hTrackPt"))->Fill(track.pt);
-      static_cast<TH1D* >(histos.FindObject("hTrackEta"))->Fill(track.eta);
-      static_cast<TH1D* >(histos.FindObject("hTrackPhi"))->Fill(track.phi);
+      static_cast<TH1D* >(histos.FindObject("hTrackPt"))->Fill(track->pt());
+      static_cast<TH1D* >(histos.FindObject("hTrackEta"))->Fill(track->eta());
+      static_cast<TH1D* >(histos.FindObject("hTrackPhi"))->Fill(track->phi());
 
-      static_cast<TH1D* >(histos.FindObject("hEfficTk_D"))->Fill(track.eta);
-      if (l1Rpcs.size()) static_cast<TH1D* >(histos.FindObject("hEfficTk_N"))->Fill(track.eta); 
+      static_cast<TH1D* >(histos.FindObject("hEfficTk_D"))->Fill(track->eta());
+      if (l1Rpcs.size()) static_cast<TH1D* >(histos.FindObject("hEfficTk_N"))->Fill(track->eta()); 
 
-      static_cast<TH1D* >(histos.FindObject("hEfficTkPt_D"))->Fill(track.pt);
-      if (l1Rpcs.size())     static_cast<TH1D* >(histos.FindObject("hEfficTkPt_N"))->Fill(track.pt);
-      if (l1RpcColl->getL1ObjsMatched(7.).size()) static_cast<TH1D* >(histos.FindObject("hEfficTkPt7_N"))->Fill(track.pt); 
+      static_cast<TH1D* >(histos.FindObject("hEfficTkPt_D"))->Fill(track->pt());
+      if (l1Rpcs.size())     static_cast<TH1D* >(histos.FindObject("hEfficTkPt_N"))->Fill(track->pt());
+      if (l1RpcColl->getL1ObjsMatched(7.).size()) static_cast<TH1D* >(histos.FindObject("hEfficTkPt7_N"))->Fill(track->pt()); 
     }
 
   

@@ -7,13 +7,17 @@
 #include <vector>
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
+#include "TObjArray.h"
+
 
 
 namespace edm { class Event; class EventSetup; }
 class TTree; 
 class TFile;
+class TH1F;
 
 class EfficiencyTree : public edm::EDAnalyzer {
 public:
@@ -29,12 +33,17 @@ private:
   TTree *theTree;
   
   EventObj* event;
-  TrackObj track;
-  TrackObj muon;
+  MuonObj* muon;
+  TrackObj* track;
   std::vector<bool> hitBarrel, hitEndcap;
   std::vector<unsigned int> detBarrel, detEndcap;
   L1ObjColl * l1RpcColl; 
   L1ObjColl * l1OtherColl; 
+
+  TObjArray histos;
+  TH1F *hPullX_Sta, *hPullY_Sta, *hPullX_Tk, *hPullY_Tk;
+  TH1F *hDeltaR_Sta, *hDeltaR_TkMu, *hDeltaR_TkTk;
+  TH1F *hPropToDetDeltaR;
 
 }; 
 #endif
