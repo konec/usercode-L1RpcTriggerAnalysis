@@ -14,6 +14,7 @@
   MyDefaultStyle->cd();
   gStyle->SetOptStat();
 
+
   //----muon distribution
   c0Mu = new TCanvas("c0Mu","muon distribution",1200,400);
   c0Mu.Divide(3,1);
@@ -59,6 +60,8 @@
   hDetsE_100.SetMinimum(0.);
   hDetsE_100.DrawCopy();
   c1D.Print(0,".eps");
+
+// goto end:
 
   //----hits efficiency
   c2 =  new TCanvas("c2","c2",-2);
@@ -155,5 +158,36 @@
   hL1RpcBX->DrawCopy();
   c8.Print(0,".eps");
   c8.Print(0,".png");
+
+//:end
+  //----chamber  efficiency
+  c9 =  new TCanvas("c9","c9",-1);
+  c9->Divide(2,1);
+  c9->cd(1);
+  TH1D * heffChambBar = DivideErr(hEfficChambBar_N,hEfficChambBar_D,"hEfficChambBar","B");
+  heffChambBar->SetMinimum(0.);
+  heffChambBar->SetMaximum(1.002);
+  heffChambBar->SetXTitle("layer");
+  heffChambBar->SetYTitle("efficiency");
+  heffChambBar->DrawCopy("E");
+  c9->cd(2);
+  TH1D * heffChambEnd = DivideErr(hEfficChambEnd_N,hEfficChambEnd_D,"hEfficChambEnd","B");
+  heffChambEnd->SetMinimum(0.);
+  heffChambEnd->SetMaximum(1.002);
+  heffChambEnd->SetXTitle("layer");
+  heffChambEnd->SetYTitle("efficiency");
+  heffChambEnd->DrawCopy("E");
+  c9.Print(0,".eps");
+
+  //----chamber  efficiency
+  c10 =  new TCanvas("c10","c10",-1);
+  c10->Divide(2,1);
+  c10->cd(1);
+  hEffLumi->Draw();
+  c10->cd(2);
+  hGraph->SetMarkerStyle(25);
+  hGraph->SetMarkerColor(2);
+  hGraph->Draw("Paint E");
+  c10.Print(0,".eps");
 }
 

@@ -2,10 +2,11 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("Analysis")
 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000))
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
 #'file:/disk00/work/data/MinimimBias-MuonDPG_skim-May27thSkim_v3/863EAB8A-8D6E-DF11-9EFA-00304867402A.root'),
-'file:/disk00/work/data/Commissioning-MuonDPG_skim-May27thSkim_v2/1E1A93A9-B96D-DF11-848B-003048D47A2E.root'),
+#'file:/disk00/work/data/Commissioning-MuonDPG_skim-May27thSkim_v2/1E1A93A9-B96D-DF11-848B-003048D47A2E.root'),
+'file:/disk00/work/data/Commissioning-MuonDPG_skim-May27thSkim_v2/96984B02-996D-DF11-BB4F-003048D460AE.root'),
 inputCommands=cms.untracked.vstring( 'keep *', 'drop *_hltL1GtObjectMap_*_*')
 )
 
@@ -44,7 +45,8 @@ process.dqmEnv.subSystemFolder = 'R2DTEST'
 
 process.MessageLogger = cms.Service("MessageLogger",
     #debugModules = cms.untracked.vstring('rpcunpacker','rpcMonitorLinkSynchro'),
-    debugModules = cms.untracked.vstring(''),
+    #debugModules = cms.untracked.vstring('muonRPCDigis','rpc*','rpcMonitorRaw'),
+    debugModules = cms.untracked.vstring(' '),
     destinations = cms.untracked.vstring('cout'),
     cout = cms.untracked.PSet( threshold = cms.untracked.string('DEBUG'))
 )
