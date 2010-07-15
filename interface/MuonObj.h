@@ -5,7 +5,7 @@
 class MuonObj : public TrackObj {
 public:
   MuonObj():TrackObj(),theMuonBits(0) {}
-  MuonObj(float pt, float eta, float phi) : TrackObj(pt,eta,phi), theMuonBits(0) {}
+    MuonObj(float pt, float eta, float phi, float charge) : TrackObj(pt,eta,phi,charge), theMuonBits(0) {}
   virtual ~MuonObj(){}
   void setBits(bool isGlobal, bool isTracker, bool isOuter, bool isCalo, bool isMatched) {
      if (isGlobal)  theMuonBits = 1 << 4;

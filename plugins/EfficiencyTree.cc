@@ -12,6 +12,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
@@ -60,6 +61,15 @@ void EfficiencyTree::beginJob()
   theTree->Branch("hitEndcap",&hitEndcap);
   theTree->Branch("detBarrel",&detBarrel);
   theTree->Branch("detEndcap",&detEndcap);
+
+//   theTree->Branch("validRPCHitsBarrel",&validRPCHitsBarrel);
+//   theTree->Branch("validRPCHitsEndcap",&validRPCHitsEndcap);
+//   theTree->Branch("validDTHitsBarrel",&validDTHitsBarrel);
+//   theTree->Branch("validDTHitsEndcap",&validDTHitsEndcap);
+//   theTree->Branch("validCSCHitsBarrel",&validCSCHitsBarrel);
+//   theTree->Branch("validCSCHitsEndcap",&validCSCHitsEndcap);
+
+
 
   theTree->Branch("l1RpcColl","L1ObjColl",&l1RpcColl,32000,99);
   theTree->Branch("l1OtherColl","L1ObjColl",&l1OtherColl,32000,99);
@@ -133,12 +143,88 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
    if (im->track()->pt() < theConfig.getParameter<double>("minPt")) continue;
    if (fabs(im->track()->eta()) >  theConfig.getParameter<double>("maxEta")) continue;
    if (im->track()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
+
+   //remove muons without valid hits in tk and mu system
+   int nTrackerHits =-99;
+   int nRPCHits =-99;
+   int nDTHits =-99;
+   int nCSCHits =-99;
+   if(im->isGlobalMuon()){
+     const reco::HitPattern& hp = (im->globalTrack())->hitPattern();
+     nTrackerHits = hp.numberOfValidTrackerHits();
+   } 
+   if(im->isStandAloneMuon()){
+     const reco::HitPattern& hp = (im->standAloneMuon())->hitPattern();
+     nRPCHits = hp.numberOfValidMuonRPCHits();
+     nDTHits = hp.numberOfValidMuonDTHits();
+     nCSCHits = hp.numberOfValidMuonCSCHits();
+   }
+   std::cout<<" PRZED spr"
+	    <<" Hits:Tk "<< nTrackerHits
+	    <<" RPC "<< nRPCHits
+	    <<" DT "<< nDTHits
+	    <<" CSC "<< nCSCHits
+	    <<" pt,eta,phi "<< im->track()->pt()<<","<<im->track()->eta()<<","<<im->track()->phi()
+	    <<" charge "<< im->track()->charge()
+	    <<std::endl;
+
+   std::cout <<"i-mu muon  (pt,eta,phi) "<<im->track()->pt()<<" "<< im->track()->eta() <<" "<< im->track()->phi() << std::endl;
+
+   if(im->innerTrack().isNonnull())
+     std::cout <<"i-mu inner (pt,p,eta,phi) "<<im->innerTrack()->pt()<<" "<<im->innerTrack()->p()
+	       <<" "<<im->innerTrack()->eta()<<" "<<im->innerTrack()->phi()<<std::endl;
+   else
+     std::cout <<"i-mu inner brak "
+	    <<" Hits:Tk "<< nTrackerHits
+	    <<" RPC "<< nRPCHits
+	    <<" DT "<< nDTHits
+	    <<" CSC "<< nCSCHits
+	    <<std::endl;
+
+
+   if(im->outerTrack().isNonnull())
+     std::cout <<"i-mu outer (pt,p,eta,phi) "<<im->outerTrack()->pt()<<" "<<im->outerTrack()->p()
+	       <<" "<<im->outerTrack()->eta()<<" "<<im->outerTrack()->phi()<<std::endl;
+   else
+     std::cout <<"i-mu outer brak "
+	       <<" Hits:Tk "<< nTrackerHits
+	       <<" RPC "<< nRPCHits
+	       <<" DT "<< nDTHits
+	       <<" CSC "<< nCSCHits
+	       <<std::endl;
+   
+
+   if(im->globalTrack().isNonnull())
+     std::cout <<"i-mu globa (pt,p,eta,phi) "<<im->globalTrack()->pt()<<" "<<im->globalTrack()->p()
+	       <<" "<<im->globalTrack()->eta()<<" "<<im->globalTrack()->phi()<<std::endl;
+   else
+     std::cout <<"i-mu globa brak "
+	       <<" Hits:Tk "<< nTrackerHits
+	       <<" RPC "<< nRPCHits
+	       <<" DT "<< nDTHits
+	       <<" CSC "<< nCSCHits
+	       <<std::endl;
+   
+   
+   if (nTrackerHits<=0) continue;
+   if ( nRPCHits==0 &&nDTHits==0 &&nCSCHits==0  ) continue;
+
+//    std::cout<<" Po    spr"
+// 	    <<" Hits:Tk "<< nTrackerHits
+// 	    <<" RPC "<< nRPCHits
+// 	    <<" DT "<< nDTHits
+// 	    <<" CSC "<< nCSCHits
+// 	    <<" pt,eta,phi "<< im->track()->pt()<<","<<im->track()->eta()<<","<<im->track()->phi()
+// 	    <<std::endl;
+
+
+
    if (!theMuon || (im->track()->pt() > theMuon->track()->pt()) ) theMuon = &(*im); 
   }
    // best RPC muon
   TrajectoryStateOnSurface tsos;
   if (theMuon) { 
-    muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi());
+    muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi(), theMuon->track()->charge());
     muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(),  theMuon->isCaloMuon(), theMuon->isMatchesValid());
 
 /*
@@ -150,11 +236,14 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
 
     // get muon tsos for muon matching to RPC
     TrajectoryStateOnSurface muTSOS;
-    if (theMuon->isStandAloneMuon()) { 
-       muTSOS = TrajectoryStateTransform().innerStateOnSurface(*(theMuon->outerTrack()), *globalGeometry, magField.product());
-    } else {
-       muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(theMuon->track()), *globalGeometry, magField.product());
-    }
+//     if (theMuon->isStandAloneMuon()) { 
+//        muTSOS = TrajectoryStateTransform().innerStateOnSurface(*(theMuon->outerTrack()), *globalGeometry, magField.product());
+//     } else {
+//        muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(theMuon->track()), *globalGeometry, magField.product());
+//     }
+
+    muTSOS = TrajectoryStateTransform().innerStateOnSurface(*(theMuon->track()), *globalGeometry, magField.product());
+
     tsos = muTSOS;
 
 
@@ -164,7 +253,8 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     edm::ESHandle<RPCGeometry> rpcGeometry;
     es.get<MuonGeometryRecord>().get(rpcGeometry);
     edm::ESHandle<Propagator> propagator;
-    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
+    //    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator);
+    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
     
     typedef RPCRecHitCollection::const_iterator IH;
     for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
@@ -179,8 +269,16 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
       float distY = hitPoint.y()-trackAtRPCPoint.y();
       float pullX = distX/ sqrt( trackAtRPCError.xx()+hitError.xx());
       float pullY = distY/ sqrt( trackAtRPCError.yy()+hitError.yy());
-      if(theMuon->isStandAloneMuon()) hPullX_Sta->Fill(pullX); else  hPullX_Tk->Fill(pullX);
-      if(theMuon->isStandAloneMuon()) hPullY_Sta->Fill(pullY); else  hPullY_Tk->Fill(pullY);
+//       if(theMuon->isStandAloneMuon()) hPullX_Sta->Fill(pullX); else  hPullX_Tk->Fill(pullX);
+//       if(theMuon->isStandAloneMuon()) hPullY_Sta->Fill(pullY); else  hPullY_Tk->Fill(pullY);
+      if(theMuon->isStandAloneMuon()) hPullX_Sta->Fill(pullX);
+      hPullX_Tk->Fill(pullX);
+      if(theMuon->isStandAloneMuon()) hPullY_Sta->Fill(pullY); 
+      hPullY_Tk->Fill(pullY);
+
+      std::cout<< "i-mu pull x,y"<< pullX<< ","<<pullY<<std::endl;
+
+
       bool hitCompatible = (fabs(pullX) < 3.5 && fabs(pullY) < 3.5 );
       if (hitCompatible) {
         int region = rpcDet.region();
@@ -189,9 +287,12 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
           int sI = rpcDet.layer(); 
           int layer = (sM <=2)? 2*(sM-1)+sI : sM+2;
           hitBarrel[layer-1]=true;
+	  std::cout<< "hitCompatible: i-mu pull x,y"<< pullX<< ","<<pullY<<" region "<<region<< " "<<layer<<std::endl;
         } else {
           hitEndcap[rpcDet.station()-1]=true;
+	  std::cout<< "hitCompatible: i-mu pull x,y"<< pullX<< ","<<pullY<<" region "<<region<< " "<<rpcDet.station()-1<<std::endl;
         }
+      
       }
     }
 
@@ -250,7 +351,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     if (muTrack.pt() < track->pt()) continue;
     TrajectoryStateOnSurface tTSOS = TrajectoryStateTransform().outerStateOnSurface(muTrack, *globalGeometry, magField.product());
     TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("dtcscMatcherPSet"));
-
+// sprawdzic matchowanie
     bool isTrackCompatible = false;
     std::vector<bool> l1OthersThisTrackMatching(l1Others.size(),false);
 
@@ -262,7 +363,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     }
     if (isTrackCompatible) {
       if (!theMuon) tsos = tTSOS;
-      track->setKine( muTrack.pt(), muTrack.eta(), muTrack.phi());
+      track->setKine( muTrack.pt(), muTrack.eta(), muTrack.phi(), muTrack.charge());
       l1OthersMatching = l1OthersThisTrackMatching;
     }
   }

@@ -37,6 +37,9 @@ private:
   TrackObj* track;
   std::vector<bool> hitBarrel, hitEndcap;
   std::vector<unsigned int> detBarrel, detEndcap;
+  std::vector<unsigned int> validPRCHitsBarrel, validPRCEndcap;
+  std::vector<unsigned int> validDTHitsBarrel, validDTEndcap;
+  std::vector<unsigned int> validCSCHitsBarrel, validCSCEndcap;
   L1ObjColl * l1RpcColl; 
   L1ObjColl * l1OtherColl; 
 

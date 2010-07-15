@@ -31,12 +31,14 @@ void EfficiencyAnalysis::beginJob()
   TGraphErrors * hGraph = new TGraphErrors(); 
   TH1D * hMuonPt = new TH1D("hMuonPt","hMuonPt",50,2.,15.);  histos.Add(hMuonPt);
   TH1D * hMuonEta = new TH1D("hMuonEta","hMuonEta",32,-1.6,1.6);  histos.Add(hMuonEta);
-  TH1D * hMuonPhi = new TH1D("hMuonPhi","hMuonPhi",50,-M_PI,M_PI);  histos.Add(hMuonPhi);
+    TH1D * hMuonPhi = new TH1D("hMuonPhi","hMuonPhi",50,-M_PI,M_PI);  histos.Add(hMuonPhi);
+    //TH1D * hMuonPhi = new TH1D("hMuonPhi","hMuonPhi",200,-M_PI,M_PI);  histos.Add(hMuonPhi);
 
   //track kine
   TH1D * hTrackPt = new TH1D("hTrackPt","hTrackPt",50,2.,15.);  histos.Add(hTrackPt);
   TH1D * hTrackEta = new TH1D("hTrackEta","hTrackEta",32,-1.6,1.6);  histos.Add(hTrackEta);
-  TH1D * hTrackPhi = new TH1D("hTrackPhi","hTrackPhi",50,-M_PI,M_PI);  histos.Add(hTrackPhi);
+   TH1D * hTrackPhi = new TH1D("hTrackPhi","hTrackPhi",50,-M_PI,M_PI);  histos.Add(hTrackPhi);
+   // TH1D * hTrackPhi = new TH1D("hTrackPhi","hTrackPhi",200,-M_PI,M_PI);  histos.Add(hTrackPhi);
 
   // hit histos;
   TH1D * hHitsB = new TH1D("hHitsB","hHitsB",7,0.,7.);  histos.Add(hHitsB);
@@ -73,11 +75,40 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",50,2.,15.);  histos.Add(hEfficTkPt_N);
   TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",50,2.,15.);  histos.Add(hEfficTkPt_D);
 
-  TH2D* hDistL1Rpc   = new TH2D("hDistL1Rpc","hDistL1Rpc",144,0,2*M_PI,33,-1.6,1.6); histos.Add(hDistL1Rpc);
-  TH2D* hDistL1Other = new TH2D("hDistL1Other","hDistL1Other",144,0,2*M_PI,33,-1.6,1.6); histos.Add(hDistL1Other);
+  TH2D* hDistL1Rpc   = new TH2D("hDistL1Rpc","hDistL1Rpc",145,0,2*M_PI,132,-1.6,1.6); histos.Add(hDistL1Rpc);
+  TH2D* hDistL1Other = new TH2D("hDistL1Other","hDistL1Other",145,0,2*M_PI,132,-1.6,1.6); histos.Add(hDistL1Other);
 
   TH1D* hEffLumi = new TH1D("hEffLumi","hEffLumi",100,0.,1.); histos.Add(hEffLumi);
+
   TH1D* hL1RpcBX = new TH1D("hL1RpcBX","hL1RpcBX",5,-2.5,2.5); histos.Add(hL1RpcBX);
+  TH1D* hL1RpcBX_only = new TH1D("hL1RpcBX_only","hL1RpcBX_only",5,-2.5,2.5); histos.Add(hL1RpcBX_only);
+  TH1D* hL1RpcBX_all = new TH1D("hL1RpcBX_all","hL1RpcBX_all",5,-2.5,2.5); histos.Add(hL1RpcBX_all);
+
+  TH1D* hL1RpcEta = new TH1D("hL1RpcEta","hL1RpcEta",132,1.6,1.6); histos.Add(hL1RpcEta);
+  TH1D* hL1RpcPhi = new TH1D("hL1RpcPhi","hL1RpcPhi",290,0,2*M_PI); histos.Add(hL1RpcPhi);
+
+  TH1D* hL1RpcEta_q0 = new TH1D("hL1RpcEta_q0","hL1RpcEta_q0",132,1.6,1.6); histos.Add(hL1RpcEta_q0);
+  TH1D* hL1RpcPhi_q0 = new TH1D("hL1RpcPhi_q0","hL1RpcPhi_q0",290,0,2*M_PI); histos.Add(hL1RpcPhi_q0);
+  TH1D* hL1RpcEta_q1 = new TH1D("hL1RpcEta_q1","hL1RpcEta_q1",132,1.6,1.6); histos.Add(hL1RpcEta_q1);
+  TH1D* hL1RpcPhi_q1 = new TH1D("hL1RpcPhi_q1","hL1RpcPhi_q1",290,0,2*M_PI); histos.Add(hL1RpcPhi_q1);
+  TH1D* hL1RpcEta_q2 = new TH1D("hL1RpcEta_q2","hL1RpcEta_q2",132,1.6,1.6); histos.Add(hL1RpcEta_q2);
+  TH1D* hL1RpcPhi_q2 = new TH1D("hL1RpcPhi_q2","hL1RpcPhi_q2",290,0,2*M_PI); histos.Add(hL1RpcPhi_q2);
+  TH1D* hL1RpcEta_q3 = new TH1D("hL1RpcEta_q3","hL1RpcEta_q3",132,1.6,1.6); histos.Add(hL1RpcEta_q3);
+  TH1D* hL1RpcPhi_q3 = new TH1D("hL1RpcPhi_q3","hL1RpcPhi_q3",290,0,2*M_PI); histos.Add(hL1RpcPhi_q3);
+
+  TH2D* h2L1RpcBX1   = new TH2D("h2L1RpcBX1","h2L1RpcBX1",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX1);
+  TH2D* h2L1RpcBX1_q0   = new TH2D("h2L1RpcBX1_q0","h2L1RpcBX1_q0",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX1_q0);
+  TH2D* h2L1RpcBX1_q1   = new TH2D("h2L1RpcBX1_q1","h2L1RpcBX1_q1",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX1_q1);
+  TH2D* h2L1RpcBX1_q2   = new TH2D("h2L1RpcBX1_q2","h2L1RpcBX1_q2",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX1_q2);
+  TH2D* h2L1RpcBX1_q3   = new TH2D("h2L1RpcBX1_q3","h2L1RpcBX1_q3",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX1_q3);
+
+  TH2D* h2L1RpcBX   = new TH2D("h2L1RpcBX","h2L1RpcBX",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX);
+  TH2D* h2L1RpcBX_q0   = new TH2D("h2L1RpcBX_q0","h2L1RpcBX_q0",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX_q0);
+  TH2D* h2L1RpcBX_q1   = new TH2D("h2L1RpcBX_q1","h2L1RpcBX_q1",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX_q1);
+  TH2D* h2L1RpcBX_q2   = new TH2D("h2L1RpcBX_q2","h2L1RpcBX_q2",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX_q2);
+  TH2D* h2L1RpcBX_q3   = new TH2D("h2L1RpcBX_q3","h2L1RpcBX_q3",132,-1.6,1.6,145,0,2*M_PI); histos.Add(h2L1RpcBX_q3);
+
+
 
   typedef std::map< std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int> > EffLumiMap;
   EffLumiMap effLumiMap;
@@ -92,6 +123,10 @@ void EfficiencyAnalysis::beginJob()
   std::vector<bool> *hitEndcap = 0;
   std::vector<unsigned int> *detBarrel = 0;
   std::vector<unsigned int> *detEndcap = 0;
+  std::vector<unsigned int> *validPRCEndcap = 0;
+  std::vector<unsigned int> *validDTEndcap = 0;
+  std::vector<unsigned int> *validCSCEndcap = 0;
+
 
   EventObj * event = 0;
   TrackObj * track = 0;
@@ -101,6 +136,7 @@ void EfficiencyAnalysis::beginJob()
   TBranch *bhitEndcap=0;
   TBranch *bdetBarrel=0;
   TBranch *bdetEndcap=0;
+
 
   L1ObjColl* l1RpcColl = 0;
   L1ObjColl* l1OtherColl = 0;
@@ -129,8 +165,10 @@ void EfficiencyAnalysis::beginJob()
     event->lumi=0;
     std::cout <<" BITS: "<<muon->isGlobal()<<muon->isTracker()<<muon->isOuter()<<muon->isMatched()<<std::endl;
     if (effLumiMap.find(std::make_pair(event->run,event->lumi)) == effLumiMap.end()) 
-        effLumiMap[make_pair(event->run,event->lumi)] = make_pair(0,0);
+          effLumiMap[make_pair(event->run,event->lumi)] = make_pair(0,0);
     if (!muon->isGlobal() || !muon->isTracker()||!muon->isOuter()|| muon->pt() < 5.5 || fabs(muon->eta()) > 1.5 ) continue;
+    //if (!muon->isGlobal() || !muon->isTracker()||!muon->isOuter()|| muon->pt() < 2   || fabs(muon->eta()) > 1.5 ) continue;
+    //if (!muon->isGlobal() || !muon->isTracker()||!muon->isOuter() ) continue;
 
     effLumiMap[make_pair(event->run,event->lumi)].second++;
 
@@ -139,10 +177,34 @@ void EfficiencyAnalysis::beginJob()
     if (l1Rpcs.size() > 0) {
       effLumiMap[make_pair(event->run,event->lumi)].first++;
       int firstBX = 100;
-      for (std::vector<L1Obj>::const_iterator it=l1Rpcs.begin(); it!= l1Rpcs.end(); ++it) 
-          if ( (it->bx) < firstBX) firstBX = it->bx;
-      hL1RpcBX->Fill(firstBX);
+      for (std::vector<L1Obj>::const_iterator it=l1Rpcs.begin(); it!= l1Rpcs.end(); ++it) {
+	if ( (it->bx) < firstBX) {firstBX = it->bx;hL1RpcBX_only->Fill(firstBX);
+	hL1RpcBX->Fill(firstBX);
+	hL1RpcBX_all->Fill(it->bx);
+	hL1RpcEta->Fill(it->eta);
+	hL1RpcPhi->Fill(it->phi);
+	h2L1RpcBX->Fill(it->eta,it->phi);
+	if (it->q == 0){ hL1RpcEta_q0->Fill(it->eta); hL1RpcPhi_q0->Fill(it->phi);h2L1RpcBX_q0->Fill(it->eta,it->phi); }
+	if (it->q == 1){ hL1RpcEta_q1->Fill(it->eta); hL1RpcPhi_q1->Fill(it->phi);h2L1RpcBX_q1->Fill(it->eta,it->phi); }
+	if (it->q == 2){ hL1RpcEta_q2->Fill(it->eta); hL1RpcPhi_q2->Fill(it->phi);h2L1RpcBX_q2->Fill(it->eta,it->phi); }
+	if (it->q == 3){ hL1RpcEta_q3->Fill(it->eta); hL1RpcPhi_q3->Fill(it->phi);h2L1RpcBX_q3->Fill(it->eta,it->phi); }
+	
+	if (it->bx){
+	  h2L1RpcBX1->Fill(it->eta,it->phi);
+	  if (it->q == 0){ h2L1RpcBX1_q0->Fill(it->eta,it->phi);}
+	  if (it->q == 1){ h2L1RpcBX1_q1->Fill(it->eta,it->phi);}
+	  if (it->q == 2){ h2L1RpcBX1_q2->Fill(it->eta,it->phi);}
+	  if (it->q == 3){ h2L1RpcBX1_q3->Fill(it->eta,it->phi);}
+	}
+
+	}
+
+
+//	if ( (it->bx) < firstBX) firstBX = it->bx;
+//	hL1RpcBX->Fill(firstBX);
+ 
      }
+    }
       
 
     std::cout<< "EV: "<<event->id<<" run: "<< event->run<< " RPC: "<< l1Rpcs.size()<<" rand: "<<(float) rand()/RAND_MAX;
@@ -157,6 +219,14 @@ void EfficiencyAnalysis::beginJob()
       hMuonPt->Fill(muon->pt());
       hMuonEta->Fill(muon->eta());
       hMuonPhi->Fill(muon->phi());
+
+//       cout<< "mk  " <<hitBarrel->size()<<endl;
+
+//       cout<<"muon "<<muon->pt()
+// 	  <<" "<<muon->eta()
+// 	  <<" "<<muon->phi();
+//       cout <<" gl.tr.sta.m "<<muon->isGlobal()<<muon->isTracker()<<muon->isOuter()<<muon->isMatched()<<endl;
+
 
       int nHitsB = 0; for (int i=0; i<6; i++) if( hitBarrel->at(i) ) nHitsB++;
       int nHitsBL= 0; for (int i=0; i<4; i++) if( hitBarrel->at(i) ) nHitsBL++;
