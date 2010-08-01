@@ -27,18 +27,18 @@ void EfficiencyAnalysis::beginJob()
   TObjArray histos;
   histos.SetOwner();
 
-  //muon kine 
+  // RECO muon kinematics (Reco::MuonCollection "muons", after cuts: track, vertex, pt, eta, RPC,CSC,DT hits)   
   TGraphErrors * hGraph = new TGraphErrors(); 
-  TH1D * hMuonPt = new TH1D("hMuonPt","hMuonPt",50,2.,15.);  histos.Add(hMuonPt);
-  TH1D * hMuonEta = new TH1D("hMuonEta","hMuonEta",32,-1.6,1.6);  histos.Add(hMuonEta);
-    TH1D * hMuonPhi = new TH1D("hMuonPhi","hMuonPhi",50,-M_PI,M_PI);  histos.Add(hMuonPhi);
-    //TH1D * hMuonPhi = new TH1D("hMuonPhi","hMuonPhi",200,-M_PI,M_PI);  histos.Add(hMuonPhi);
+  TH1D * hMuonPt  = new TH1D("hMuonPt","Reco muon Pt [GeV]",50,2.,15.);  histos.Add(hMuonPt);
+  TH1D * hMuonEta = new TH1D("hMuonEta","Reco muon Eta",32,-1.6,1.6);  histos.Add(hMuonEta);
+  TH1D * hMuonPhi = new TH1D("hMuonPhi","Reco muon Phi [rad]",50,-M_PI,M_PI);  histos.Add(hMuonPhi);
+  //TH1D * hMuonPhi = new TH1D("hMuonPhi","Reco muon Phi [rad]",200,-M_PI,M_PI);  histos.Add(hMuonPhi);
 
-  //track kine
-  TH1D * hTrackPt = new TH1D("hTrackPt","hTrackPt",50,2.,15.);  histos.Add(hTrackPt);
-  TH1D * hTrackEta = new TH1D("hTrackEta","hTrackEta",32,-1.6,1.6);  histos.Add(hTrackEta);
-   TH1D * hTrackPhi = new TH1D("hTrackPhi","hTrackPhi",50,-M_PI,M_PI);  histos.Add(hTrackPhi);
-   // TH1D * hTrackPhi = new TH1D("hTrackPhi","hTrackPhi",200,-M_PI,M_PI);  histos.Add(hTrackPhi);
+  // RECO track kinematics (Reco::TrackCollection "generalTracks", track matched to RECO muon above)
+  TH1D * hTrackPt  = new TH1D("hTrackPt","Muon-matched track Pt [GeV]",50,2.,15.);  histos.Add(hTrackPt);
+  TH1D * hTrackEta = new TH1D("hTrackEta","Muon-matched track Eta",32,-1.6,1.6);  histos.Add(hTrackEta);
+  TH1D * hTrackPhi = new TH1D("hTrackPhi","Muon-matched track Phi [rad]",50,-M_PI,M_PI);  histos.Add(hTrackPhi);
+  // TH1D * hTrackPhi = new TH1D("hTrackPhi","Muon-matched track Phi [rad]",200,-M_PI,M_PI);  histos.Add(hTrackPhi);
 
   // hit histos;
   TH1D * hHitsB = new TH1D("hHitsB","hHitsB",7,0.,7.);  histos.Add(hHitsB);
@@ -178,17 +178,25 @@ void EfficiencyAnalysis::beginJob()
       effLumiMap[make_pair(event->run,event->lumi)].first++;
       int firstBX = 100;
       for (std::vector<L1Obj>::const_iterator it=l1Rpcs.begin(); it!= l1Rpcs.end(); ++it) {
-	if ( (it->bx) < firstBX) {firstBX = it->bx;hL1RpcBX_only->Fill(firstBX);
-	hL1RpcBX->Fill(firstBX);
+
+	// find the earliest candidate
+	if ( (it->bx) < firstBX) {
+	  firstBX = it->bx;
+	}
+
+	// fill histograms for all candidates
 	hL1RpcBX_all->Fill(it->bx);
 	hL1RpcEta->Fill(it->eta);
 	hL1RpcPhi->Fill(it->phi);
 	h2L1RpcBX->Fill(it->eta,it->phi);
+
+	// all BX-es
 	if (it->q == 0){ hL1RpcEta_q0->Fill(it->eta); hL1RpcPhi_q0->Fill(it->phi);h2L1RpcBX_q0->Fill(it->eta,it->phi); }
 	if (it->q == 1){ hL1RpcEta_q1->Fill(it->eta); hL1RpcPhi_q1->Fill(it->phi);h2L1RpcBX_q1->Fill(it->eta,it->phi); }
 	if (it->q == 2){ hL1RpcEta_q2->Fill(it->eta); hL1RpcPhi_q2->Fill(it->phi);h2L1RpcBX_q2->Fill(it->eta,it->phi); }
 	if (it->q == 3){ hL1RpcEta_q3->Fill(it->eta); hL1RpcPhi_q3->Fill(it->phi);h2L1RpcBX_q3->Fill(it->eta,it->phi); }
-	
+
+	// off peak BX-es ?
 	if (it->bx){
 	  h2L1RpcBX1->Fill(it->eta,it->phi);
 	  if (it->q == 0){ h2L1RpcBX1_q0->Fill(it->eta,it->phi);}
@@ -196,16 +204,41 @@ void EfficiencyAnalysis::beginJob()
 	  if (it->q == 2){ h2L1RpcBX1_q2->Fill(it->eta,it->phi);}
 	  if (it->q == 3){ h2L1RpcBX1_q3->Fill(it->eta,it->phi);}
 	}
+      }
+      // the earliest candidate
+      hL1RpcBX->Fill(firstBX);
+      hL1RpcBX_only->Fill(firstBX);
 
-	}
-
-
-//	if ( (it->bx) < firstBX) firstBX = it->bx;
-//	hL1RpcBX->Fill(firstBX);
- 
-     }
+      //############################################
+      // TRAP for PRE-FIRED/POST-FIRED RPC TRIGGERS
+      //############################################
+      if(firstBX<0) {
+	std::cout<< "RPC Pre-firing! "
+		 << " Run:"<< event->run
+		 << " Evt:"<<event->id
+		 << " LumiSec: "<< event->lumi
+		 << " Time: "<< event->time
+		 << " Orbit: "<< event->orbit
+	         << " BX:"<< event->orbit
+		 << " / "
+		 << " size_L1RPC: "<< l1Rpcs.size() 
+		 << " first_L1RPC_BX: " << firstBX
+	         << std::endl;
+      } else if(firstBX>0) {
+	std::cout<< "RPC Post-firing! "
+		 << " Run:"<< event->run
+		 << " Evt:"<<event->id
+		 << " LumiSec: "<< event->lumi
+		 << " Time: "<< event->time
+		 << " Orbit: "<< event->orbit
+	         << " BX:"<< event->orbit
+		 << " / "
+		 << " size_L1RPC: "<< l1Rpcs.size() 
+		 << " first_L1RPC_BX: " << firstBX
+	         << std::endl;
+      }
     }
-      
+
 
     std::cout<< "EV: "<<event->id<<" run: "<< event->run<< " RPC: "<< l1Rpcs.size()<<" rand: "<<(float) rand()/RAND_MAX;
     std::cout << std::endl;
