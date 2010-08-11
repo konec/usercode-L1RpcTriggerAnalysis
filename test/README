@@ -22,6 +22,7 @@ cvs co PhysicsTools/PythonAnalysis
 scramv1 b clean
 scramv1 b
 setenv MYCODE `pwd`
+cd $MYCODE; cmsenv; cd -
 
 
 
