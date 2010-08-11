@@ -18,7 +18,7 @@ cvs co -r V00-02-01 UserCode/L1RpcTriggerAnalysis
 cvs co -r V04-03-34 DQM/RPCMonitorClient
 cvs co -r lumi-210710 RecoLuminosity/LumiDB
 cvs co -r HEAD FWCore/PythonUtilities
-cvs co PhysicsTools/PythonAnalysis  # not needed for ver >= 3_8_0 
+cvs co PhysicsTools/PythonAnalysis  
 scramv1 b clean
 scramv1 b
 setenv MYCODE `pwd`
