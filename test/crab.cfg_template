@@ -1,0 +1,40 @@
+[CRAB]
+jobtype = cmssw
+scheduler = caf
+use_server = 0
+#server_name = caf 
+
+[CMSSW]
+lumi_mask = _JSON_FILE_
+#runselection = 123456
+#runselection = 123456-564321
+total_number_of_lumis = -1
+lumis_per_job = 100
+#total_number_of_events = -1
+#total_number_of_events = 100
+#events_per_job = 1000
+#number_of_jobs = 10
+
+use_parent=1
+
+output_file = rawMonitor.root,synchroAnalysis.root,efficiencyHelper.root,efficiencyTree.root
+datasetpath = _DATASET_NAME_
+pset = synchroAnalysis.py
+
+[CAF]
+queue = cmscaf1nh
+#queue = cmscaf1nd
+
+[USER]
+return_data = 1
+copy_data = 0
+#user_remote_dir = /castor/cern.ch/user/r/rybinska/
+#storage_element = T2_CH_CAF
+
+publish_data=0
+
+#thresholdLevel = 100
+#eMail = name@cern.ch
+
+[GRID]
+rb = CERN
