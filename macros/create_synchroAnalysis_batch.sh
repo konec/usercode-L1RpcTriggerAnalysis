@@ -31,8 +31,8 @@ if ! [ $# -eq 4 ]; then
  echo
  echo "  The PYTHON file must use the following mechanisms for providing     "
  echo "  input files and lumi masks:                                         "
- echo "  ... mylist = FileUtils.loadListFromFile(_LIST_OF_FILES_) ...        "
- echo "  ... Lumis = LumiList.LumiList(filename=_JSON_FILE_) ...             "
+ echo "  ... mylist = FileUtils.loadListFromFile(\"_LIST_OF_FILES_\") ...    "
+ echo "  ... Lumis = LumiList.LumiList(filename=\"_JSON_FILE_\") ...         "
  echo "  For each job the script will create a separate directory            " 
  echo "  called job_YYMMDD_hhmm_<i> with the following files:                "
  echo "       <json_file>                                                    "
@@ -113,7 +113,7 @@ for job in `seq 0 $(( ${njobs}-1 ))`; do
  mkdir ${jobdir}
  cp ${filejson} ${jobdir}/${json}
  mv ${list}     ${jobdir}/.
- cat "${fileana}" | sed s%_LIST_OF_FILES_%"'${list}'"% | sed s%_JSON_FILE_%"'${json}'"% > ${jobdir}/${ana}
+ cat "${fileana}" | sed s%_LIST_OF_FILES_%${list}% | sed s%_JSON_FILE_%${json}% > ${jobdir}/${ana}
 
  cat > ${jobdir}/${jobdir}.sh <<EOF
 #!/bin/csh

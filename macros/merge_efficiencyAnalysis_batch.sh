@@ -71,7 +71,7 @@ if ! [ -f "${template}" ]; then
  echo "Can't find template PYTHON file ${template}"
  exit -1
 fi
-cat ${template} | sed s%_LIST_OF_FILES_%"'${list}'"% > ./efficiencyAnalysis.py
+cat ${template} | sed s%_LIST_OF_FILES_%${list}% > ./efficiencyAnalysis.py
 if ! [ -f "./efficiencyAnalysis.py" ] || ! [ -f "${list}" ];   then
  echo "Can't find efficiencyAnalysis.py or ${list}."
  exit -1
