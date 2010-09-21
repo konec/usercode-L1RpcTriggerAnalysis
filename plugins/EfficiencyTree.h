@@ -3,6 +3,7 @@
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
 #include <vector>
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
@@ -13,11 +14,13 @@
 #include "TObjArray.h"
 
 
-
 namespace edm { class Event; class EventSetup; }
+namespace reco { class Muon; }
 class TTree; 
 class TFile;
 class TH1F;
+class TH2F;
+class RPCDetId; 
 
 class EfficiencyTree : public edm::EDAnalyzer {
 public:
@@ -26,7 +29,20 @@ public:
   virtual ~EfficiencyTree(){} 
   virtual void analyze(const edm::Event &ev, const edm::EventSetup &es); 
   virtual void endJob();
+
 private:
+
+  class BarrelAndLayer {
+  public:
+    BarrelAndLayer(const RPCDetId & rpcDet);
+    bool isBarrel() const { return theBarrel; }
+    unsigned int layer() const { return theLayer; }
+  private:
+    bool theBarrel; unsigned int theLayer;
+  };
+
+  TrajectoryStateOnSurface trackAtSurface(const reco::Muon*, const RPCDetId&, const edm::Event&, const edm::EventSetup& ) const;
+
   edm::ParameterSet theConfig;
                     
   TFile *theFile;
@@ -44,9 +60,12 @@ private:
   L1ObjColl * l1OtherColl; 
 
   TObjArray histos;
-  TH1F *hPullX_Sta, *hPullY_Sta, *hPullX_Tk, *hPullY_Tk;
-  TH1F *hDeltaR_Sta, *hDeltaR_TkMu, *hDeltaR_TkTk;
+//  TH1F *hPullX_Sta, *hPullY_Sta, *hPullX_Tk, *hPullY_Tk;
+  TH1F *hPullX_B[6], *hPullX_E[3], *hDistX_B[6], *hDistX_E[3] ,*hPullY; 
+  TH1F *hDeltaR_Mu, *hDeltaR_Tk;
   TH1F *hPropToDetDeltaR;
+  TH1F *hMinDeltaRTrajMu;
+//  TH2F *hTmp;
 
 }; 
 #endif

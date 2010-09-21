@@ -41,15 +41,25 @@ void EfficiencyAnalysis::beginJob()
     1.24, 1.36, 1.48, 1.61, 1.73, 1.85, 1.97, 2.10
   };
 
+  // variable-size PT bins corresponding to L1 trigger scale. 
+  // Lower bound of bin ipt corresponds to L1Pt(ipt),
+  // with exception of ipt=0 and 1 (which should be NAN and 0.)
+  const Int_t nPtBins=32;
+  Double_t PtBins[nPtBins+1] = {
+   0., 0.1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6., 7., 8., 10., 
+  12., 14., 16., 18., 20., 25., 30., 35., 40., 45., 50., 60., 70., 80., 90., 100., 120., 140., 
+  150.   
+  };
 
-  TH1D * hMuonPt  = new TH1D("hMuonPt","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",50,6.,56.);  histos.Add(hMuonPt);
-  TH1D * hMuonEta = new TH1D("hMuonEta","All global muons Eta;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hMuonEta);
-  TH1D * hMuonPhi = new TH1D("hMuonPhi","All global muons Phi;Glb.muon #phi [rad];Muons / bin",150,-M_PI,M_PI);  histos.Add(hMuonPhi);
+
+  TH1D * hMuonPt  = new TH1D("hMuonPt","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",nPtBins,PtBins);  histos.Add(hMuonPt);
+  TH1D * hMuonEta = new TH1D("hMuonEta","All global muons Eta;Glb.muon #eta;Muons / bin",nEtaBins,EtaBins);  histos.Add(hMuonEta);
+  TH1D * hMuonPhi = new TH1D("hMuonPhi","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi);
 
   // RECO track kinematics (Reco::TrackCollection "generalTracks", track matched to RECO muon above)
-  TH1D * hTrackPt  = new TH1D("hTrackPt","Muon-matched track Pt;Track p_{T} [GeV];Tracks / bin",50,6.,56.);  histos.Add(hTrackPt);
-  TH1D * hTrackEta = new TH1D("hTrackEta","Muon-matched track Eta;Track #eta;Tracks / bin",64,-1.6,1.6);  histos.Add(hTrackEta);
-  TH1D * hTrackPhi = new TH1D("hTrackPhi","Muon-matched track Phi;Track #phi [rad];Tracks / bin",150,-M_PI,M_PI);  histos.Add(hTrackPhi);
+  TH1D * hTrackPt  = new TH1D("hTrackPt","L1Muon-matched track Pt;Track p_{T} [GeV];Tracks / bin",nPtBins,PtBins);  histos.Add(hTrackPt);
+  TH1D * hTrackEta = new TH1D("hTrackEta","L1Muon-matched track Eta;Track #eta;Tracks / bin",nEtaBins,EtaBins);  histos.Add(hTrackEta);
+  TH1D * hTrackPhi = new TH1D("hTrackPhi","L1Muon-matched track Phi;Track #phi [rad];Tracks / bin",90,-M_PI,M_PI);  histos.Add(hTrackPhi);
 
   // hit histos
   // barrel |eta|<0,8, endcap 1.25<|eta|<1.55 
@@ -88,8 +98,10 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",50,6.,56.);  histos.Add(hEfficTkPt_D);
 
 
-  TH2D* hDistL1Rpc   = new TH2D("hDistL1Rpc","All L1 RPC candidates (#phi,#eta);L1 RPC #eta;L1 RPC #phi [rad];Muons / bin",nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Rpc);  
-  TH2D* hDistL1Other = new TH2D("hDistL1Other","All L1 DT/CSC candidates (#phi,#eta);L1 obj #eta;L1 obj #phi [rad];DT/CSC muons / bin",nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Other);
+  TH2D* hDistL1Rpc   = new TH2D("hDistL1Rpc","All L1 RPC candidates (#phi,#eta);L1 RPC #eta;L1 RPC #phi [rad];Muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Rpc);  
+  TH2D* hDistL1Other = new TH2D("hDistL1Other","All L1 DT/CSC candidates (#phi,#eta);L1 obj #eta;L1 obj #phi [rad];DT/CSC muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Other);
 
   TH1D* hEffLumi = new TH1D("hEffLumi","Efficiency per LS;Efficiency per LS;No of LS / bin",100,0.,1.); histos.Add(hEffLumi);
   TH1D* hEffRun = new TH1D("hEffRun","Efficiency per run;Efficiency per run;No of runs / bin",100,0.,1.); histos.Add(hEffRun);
@@ -145,9 +157,10 @@ void EfficiencyAnalysis::beginJob()
   std::vector<bool> *hitEndcap = 0;
   std::vector<unsigned int> *detBarrel = 0;
   std::vector<unsigned int> *detEndcap = 0;
-  std::vector<unsigned int> *validPRCEndcap = 0;
-  std::vector<unsigned int> *validDTEndcap = 0;
-  std::vector<unsigned int> *validCSCEndcap = 0;
+
+//  std::vector<unsigned int> *validPRCEndcap = 0;
+//  std::vector<unsigned int> *validDTEndcap = 0;
+//  std::vector<unsigned int> *validCSCEndcap = 0;
 
 
   EventObj * event = 0;
@@ -179,68 +192,63 @@ void EfficiencyAnalysis::beginJob()
   Int_t nentries = (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
 
-//  float l1Cut = theConfig.getParameter<double>("l1Cut");
-
   for (int ev=0; ev<nentries; ev++) {
     chain.GetEntry(ev);
 
-    //event->lumi=0;   // BUG ????
-
-    // fill efficiency per LumiSection
-    //    std::cout <<" BITS: "<<muon->isGlobal()<<muon->isTracker()<<muon->isOuter()<<muon->isMatched()<<std::endl;
-    if (effLumiMap.find(std::make_pair(event->run,event->lumi)) == effLumiMap.end()) 
-          effLumiMap[make_pair(event->run,event->lumi)] = make_pair(0,0);
+    if (effLumiMap.find( std::make_pair(event->run, event->lumi)) == effLumiMap.end()) 
+        effLumiMap[ make_pair( event->run, event->lumi)] = make_pair(0,0);
     if (effRunMap.find(event->run) == effRunMap.end()) 
-          effRunMap[event->run] = make_pair(0,0);
+        effRunMap[event->run] = make_pair(0,0);
 
-    if (!muon->isGlobal() || !muon->isTracker()||!muon->isOuter()||
- muon->pt() < theConfig.getParameter<double>("ptMin") || fabs(muon->eta()) > 1.5 ) continue;
-
-    //if (!muon->isGlobal() || !muon->isTracker()||!muon->isOuter()|| muon->pt() < 2   || fabs(muon->eta()) > 1.5 ) continue;
-    //if (!muon->isGlobal() || !muon->isTracker()||!muon->isOuter() ) continue;
-
-    effLumiMap[make_pair(event->run,event->lumi)].second++;
-    effRunMap[event->run].second++;
+    if (   !muon->isGlobal() 
+        || !muon->isTracker()||!muon->isOuter()
+        || muon->pt()<theConfig.getParameter<double>("ptMin") 
+        || fabs(muon->eta()) > 1.5 
+        ) continue;
 
     hMuGBX->Fill(event->bx);
-
     std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsMatched(); 
-    //  std::cout<< "EV: "<<event->id<<" run: "<< event->run<< " RPC: "<< l1Rpcs.size() << std::endl;
-    //	     <<" rand: "<<(float) rand()/RAND_MAX << std::endl;
 
+    //
+    // L1RPC EFFICIENCY
+    //
+    effLumiMap[make_pair(event->run,event->lumi)].second++;
+    effRunMap[event->run].second++;
     if (l1Rpcs.size() > 0) {
       effLumiMap[make_pair(event->run,event->lumi)].first++;
       effRunMap[event->run].first++;
+    }
+    //(float) rand()/RAND_MAX << std::endl;
+
+
+    //
+    // TIMING
+    // 
+    if (l1Rpcs.size() > 0) {
       int firstBX = 100;
       for (std::vector<L1Obj>::const_iterator it=l1Rpcs.begin(); it!= l1Rpcs.end(); ++it) {
 
-	// find the earliest candidate
-	if ( (it->bx) < firstBX) {
-	  firstBX = it->bx;
-	}
-	//std::cout<< "  L1 RPC candidate: bx="<<it->bx<<" eta="<<it->eta<<" phi="<<it->phi<<std::endl;
+        if ( (it->bx) < firstBX) { firstBX = it->bx; }
 
-	// fill histograms for all candidates
-	hL1RpcBX_all->Fill(it->bx);
-	hL1RpcEta->Fill(it->eta);
-	hL1RpcPhi->Fill(it->phi);
-	h2L1RpcBX->Fill(it->eta,it->phi);
-	hL1RpcGBX_all->Fill(event->bx+it->bx); // global bunch crossing number of L1RPC candidate
+        hL1RpcBX_all->Fill(it->bx);
+        hL1RpcEta->Fill(it->eta);
+        hL1RpcPhi->Fill(it->phi);
+        h2L1RpcBX->Fill(it->eta,it->phi);
+        hL1RpcGBX_all->Fill(event->bx+it->bx); // global bunch crossing number of L1RPC candidate
 
-	// all BX-es
-	if (it->q == 0){ hL1RpcEta_q0->Fill(it->eta); hL1RpcPhi_q0->Fill(it->phi);h2L1RpcBX_q0->Fill(it->eta,it->phi); }
-	if (it->q == 1){ hL1RpcEta_q1->Fill(it->eta); hL1RpcPhi_q1->Fill(it->phi);h2L1RpcBX_q1->Fill(it->eta,it->phi); }
-	if (it->q == 2){ hL1RpcEta_q2->Fill(it->eta); hL1RpcPhi_q2->Fill(it->phi);h2L1RpcBX_q2->Fill(it->eta,it->phi); }
-	if (it->q == 3){ hL1RpcEta_q3->Fill(it->eta); hL1RpcPhi_q3->Fill(it->phi);h2L1RpcBX_q3->Fill(it->eta,it->phi); }
+        if (it->q == 0){ hL1RpcEta_q0->Fill(it->eta); hL1RpcPhi_q0->Fill(it->phi);h2L1RpcBX_q0->Fill(it->eta,it->phi); }
+        if (it->q == 1){ hL1RpcEta_q1->Fill(it->eta); hL1RpcPhi_q1->Fill(it->phi);h2L1RpcBX_q1->Fill(it->eta,it->phi); }
+        if (it->q == 2){ hL1RpcEta_q2->Fill(it->eta); hL1RpcPhi_q2->Fill(it->phi);h2L1RpcBX_q2->Fill(it->eta,it->phi); }
+        if (it->q == 3){ hL1RpcEta_q3->Fill(it->eta); hL1RpcPhi_q3->Fill(it->phi);h2L1RpcBX_q3->Fill(it->eta,it->phi); }
 
-	// off peak BX-es ?
-	if (it->bx){
-	  h2L1RpcBX1->Fill(it->eta,it->phi);
-	  if (it->q == 0){ h2L1RpcBX1_q0->Fill(it->eta,it->phi);}
-	  if (it->q == 1){ h2L1RpcBX1_q1->Fill(it->eta,it->phi);}
-	  if (it->q == 2){ h2L1RpcBX1_q2->Fill(it->eta,it->phi);}
-	  if (it->q == 3){ h2L1RpcBX1_q3->Fill(it->eta,it->phi);}
-	}
+        // off peak BX-es ?
+        if (it->bx){
+          h2L1RpcBX1->Fill(it->eta,it->phi);
+          if (it->q == 0) h2L1RpcBX1_q0->Fill( it->eta, it->phi);
+          if (it->q == 1) h2L1RpcBX1_q1->Fill( it->eta, it->phi);
+          if (it->q == 2) h2L1RpcBX1_q2->Fill( it->eta, it->phi);
+          if (it->q == 3) h2L1RpcBX1_q3->Fill( it->eta, it->phi);
+        }
       }
       // the earliest candidate
       hL1RpcBX->Fill(firstBX);
@@ -249,49 +257,33 @@ void EfficiencyAnalysis::beginJob()
       //############################################
       // TRAP for PRE-FIRED/POST-FIRED RPC TRIGGERS
       //############################################
-      if(firstBX<0) {
-	std::cout<< "RPC Pre-firing! "
-		 << " Run:"<< event->run
-		 << " Evt:"<<event->id
-		 << " LumiSec: "<< event->lumi
-		 << " Time: "<< event->time
-		 << " Orbit: "<< event->orbit
-	         << " BX:"<< event->bx
-		 << " / "
-		 << " size_L1RPC: "<< l1Rpcs.size() 
-		 << " first_L1RPC_BX: " << firstBX
-	         << std::endl;
-      } else if(firstBX>0) {
-	std::cout<< "RPC Post-firing! "
-		 << " Run:"<< event->run
-		 << " Evt:"<<event->id
-		 << " LumiSec: "<< event->lumi
-		 << " Time: "<< event->time
-		 << " Orbit: "<< event->orbit
-	         << " BX:"<< event->bx
-		 << " / "
-		 << " size_L1RPC: "<< l1Rpcs.size() 
-		 << " first_L1RPC_BX: " << firstBX
-	         << std::endl;
-      }
+      if (firstBX !=0) {
+        if (firstBX < 0) std::cout<< "RPC Pre-firing! ";
+        if (firstBX > 0) std::cout<< "RPC Post-firing! ";
+        std::cout<< " Run:"<< event->run
+                 << " Evt:"<<event->id
+                 << " LumiSec: "<< event->lumi
+                 << " Time: "<< event->time
+                 << " Orbit: "<< event->orbit
+                 << " BX:"<< event->bx
+                 << " / "
+                 << " size_L1RPC: "<< l1Rpcs.size() 
+                 << " first_L1RPC_BX: " << firstBX
+                 << std::endl;
+      } 
     }
 
+    //
+    // MUON HITS AND CROSSED DETS ANALYSIS
+    //
     bool isMuon = (muon->pt() > theConfig.getParameter<double>("ptMin") );
-    if(isMuon) {
+    if (isMuon) {
       //if (fabs(muon.eta) > 0.8) continue;
       //if (fabs(muon.eta) < 1.24) continue;
 
       hMuonPt->Fill(muon->pt());
       hMuonEta->Fill(muon->eta());
       hMuonPhi->Fill(muon->phi());
-
-//       cout<< "mk  " <<hitBarrel->size()<<endl;
-
-//       cout<<"muon "<<muon->pt()
-// 	  <<" "<<muon->eta()
-// 	  <<" "<<muon->phi();
-//       cout <<" gl.tr.sta.m "<<muon->isGlobal()<<muon->isTracker()<<muon->isOuter()<<muon->isMatched()<<endl;
-
 
       int nHitsB = 0; for (int i=0; i<6; i++) if( hitBarrel->at(i) ) nHitsB++;
       int nHitsBL= 0; for (int i=0; i<4; i++) if( hitBarrel->at(i) ) nHitsBL++;
@@ -301,13 +293,13 @@ void EfficiencyAnalysis::beginJob()
       int nDetsE = 0;  for (int i=0; i<3; i++) if( detEndcap->at(i) ) nDetsE++;
 
       for (int i=0; i<6;++i) {
-        if (detBarrel->at(i)) {hEfficChambBar_D->Fill(i+1.);
-	  if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);}
+        if (detBarrel->at(i)) hEfficChambBar_D->Fill(i+1.);
+	  if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
 //        if (!detBarrel->at(i) && hitBarrel->at(i)) hChambEffBar_V->Fill(i+1.);
       }
       for (int i=0; i<3;++i) {
-        if (detEndcap->at(i)) {hEfficChambEnd_D->Fill(i+1.);
-	  if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);}
+        if (detEndcap->at(i)) hEfficChambEnd_D->Fill(i+1.);
+	  if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
       }
 
       // pure Barrel

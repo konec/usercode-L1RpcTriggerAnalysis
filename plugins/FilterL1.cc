@@ -45,6 +45,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
   ev.getByLabel(l1MuReadout,pCollection);
 
   L1MuGMTReadoutCollection const* gmtrc = pCollection.product();
+
   if (!gmtrc) return goodEvent;
 
   vector<L1MuGMTReadoutRecord> gmt_records = gmtrc->getRecords();
