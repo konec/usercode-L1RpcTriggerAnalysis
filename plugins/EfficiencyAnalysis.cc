@@ -30,7 +30,6 @@ void EfficiencyAnalysis::beginJob()
   // RECO muon kinematics (Reco::MuonCollection "muons", after cuts: track, vertex, pt, eta, RPC,CSC,DT hits)   
   TGraphErrors * hGraphLumi = new TGraphErrors();
   TGraphErrors * hGraphRun = new TGraphErrors(); 
-  TGraphErrors * hGraph = new TGraphErrors(); //nEtaBins,EtaBins
 
   // variable-size ETA bins corresponding to PAC trigger granularity
   const Int_t nEtaBins=33;
@@ -61,8 +60,21 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hTrackEta = new TH1D("hTrackEta","L1Muon-matched track Eta;Track #eta;Tracks / bin",nEtaBins,EtaBins);  histos.Add(hTrackEta);
   TH1D * hTrackPhi = new TH1D("hTrackPhi","L1Muon-matched track Phi;Track #phi [rad];Tracks / bin",90,-M_PI,M_PI);  histos.Add(hTrackPhi);
 
+
   // hit histos
   // barrel |eta|<0,8, endcap 1.25<|eta|<1.55 
+  TH1D *hEfficDetB_N[6],  *hEfficHitB_N[6], *hEfficDetE_N[3], *hEfficHitE_N[3]; 
+  TH1D *hEfficHitDet_D= new TH1D( "hEfficHitDet_D", "hEfficHitDet_D", nEtaBins,EtaBins);  histos.Add( hEfficHitDet_D);
+  for (unsigned int i=1; i<=6; ++i) {
+    std::stringstream name;
+    name.str(""); name<<"hEfficDetB_N"<< i; hEfficDetB_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), nEtaBins,EtaBins);  histos.Add( hEfficDetB_N[i-1]);
+    name.str(""); name<<"hEfficHitB_N"<< i; hEfficHitB_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), nEtaBins,EtaBins);  histos.Add( hEfficHitB_N[i-1]);
+    if (i<=3) {
+    name.str(""); name <<"hEfficDetE_N"<< i; hEfficDetE_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), nEtaBins,EtaBins);  histos.Add( hEfficDetE_N[i-1]);
+    name.str(""); name <<"hEfficHitE_N"<< i; hEfficHitE_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), nEtaBins,EtaBins);  histos.Add( hEfficHitE_N[i-1]);
+    }
+  }
+
   TH1D * hHitsB = new TH1D("hHitsB","Layers with RPC hits matching propagated muon - Barrel;No of layers;Muons",7,-0.5,6.5);  histos.Add(hHitsB);
   TH1D * hHitsE = new TH1D("hHitsE","Layers with RPC hits matching propagated muon - Endcap;No of layers;Muons",4,-0.5,3.5);  histos.Add(hHitsE);
   TH1D * hDetsB_100 = new TH1D("hDetsB_100","Layers with RPCs crossed by propagated muon - Barrel;No of layers;Muons",7,-0.5,6.5);  histos.Add(hDetsB_100);
@@ -70,10 +82,13 @@ void EfficiencyAnalysis::beginJob()
 
   // efficiency for hits
   // barrel |eta|<0,8, endcap 1.25<|eta|<1.55 
-  TH1D * hEfficHits_N  = new TH1D("hEfficHits_N","Propaged muons matching RPC hits;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficHits_N);
-  TH1D * hEfficHits_H  = new TH1D("hEfficHits_H","RPC triggers;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficHits_H);
-  TH1D * hEfficHits_D = new TH1D("hEfficHits_D","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficHits_D);
+  TH1D * hEfficGeom_M = new TH1D("hEfficGeom_M","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_M);
+  TH1D * hEfficGeom_H = new TH1D("hEfficGeom_H","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_H);
+  TH1D * hEfficGeom_D = new TH1D("hEfficGeom_D","RPC triggers;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_D);
+  TH1D * hEfficGeom_T = new TH1D("hEfficGeom_T","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_T);
 
+
+  // in order to get numbewr of crossed layers
   TH1D * hEfficChambBar_N = new TH1D("hEfficChambBar_N","Propaged muons matching RPC hits - Barrel;Layer;Muons",6,0.5,6.5); histos.Add(hEfficChambBar_N); 
   TH1D * hEfficChambBar_D = new TH1D("hEfficChambBar_D","Propaged muons crossing RPCs - Barrel;Layer;Muons",6,0.5,6.5); histos.Add(hEfficChambBar_D); 
   TH1D * hEfficChambEnd_N = new TH1D("hEfficChambEnd_N","Propaged muons matching RPC hits - Endcap;Layer;Muons",3,0.5,3.5); histos.Add(hEfficChambEnd_N);
@@ -201,7 +216,8 @@ void EfficiencyAnalysis::beginJob()
         effRunMap[event->run] = make_pair(0,0);
 
     if (   !muon->isGlobal() 
-        || !muon->isTracker()||!muon->isOuter()
+        || !muon->isTracker()
+        || !muon->isOuter()
         || muon->pt()<theConfig.getParameter<double>("ptMin") 
         || fabs(muon->eta()) > 1.5 
         ) continue;
@@ -210,7 +226,26 @@ void EfficiencyAnalysis::beginJob()
     std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsMatched(); 
 
     //
-    // L1RPC EFFICIENCY
+    // MAIN RPC EFFICIENCY HISTORGAMS
+    //
+    bool toto = false;
+    bool isMuon = (muon->pt() > theConfig.getParameter<double>("ptMin") );
+    if (isMuon) {
+      //if (fabs(muon.eta) > 0.8) continue;
+      //if (fabs(muon.eta) < 1.24) continue;
+
+      hMuonPt->Fill(muon->pt());
+      hMuonEta->Fill(muon->eta());
+      hMuonPhi->Fill(muon->phi());
+      hEfficMu_D->Fill(muon->eta());
+      if (l1Rpcs.size()) hEfficMu_N->Fill(muon->eta()); 
+
+      hEfficMuPt_D->Fill(muon->pt());
+      if (l1Rpcs.size())  hEfficMuPt_N->Fill(muon->pt());
+      if (l1RpcColl->getL1ObjsMatched(7.).size()) hEfficMuPt7_N->Fill(muon->pt()); 
+    }
+    //
+    // L1RPC EFFICIENCY AS FUNCTION OF RUN/LUMI
     //
     effLumiMap[make_pair(event->run,event->lumi)].second++;
     effRunMap[event->run].second++;
@@ -220,6 +255,60 @@ void EfficiencyAnalysis::beginJob()
     }
     //(float) rand()/RAND_MAX << std::endl;
 
+
+    //
+    // MUON HITS AND CROSSED DETS ANALYSIS
+    //
+    if (isMuon) {
+
+      int nHitsB = 0; for (int i=0; i<6; i++) if( hitBarrel->at(i) ) nHitsB++;
+      int nHitsBL= 0; for (int i=0; i<4; i++) if( hitBarrel->at(i) ) nHitsBL++;
+      int nHitsE = 0; for (int i=0; i<3; i++) if( hitEndcap->at(i) ) nHitsE++;
+
+      int nDetsB = 0;  for (int i=0; i<6; i++) if( detBarrel->at(i) ) nDetsB++;
+      int nDetsBL= 0;  for (int i=0; i<4; i++) if( detBarrel->at(i) ) nDetsBL++;
+      int nDetsE = 0;  for (int i=0; i<3; i++) if( detEndcap->at(i) ) nDetsE++;
+
+      hEfficHitDet_D->Fill(muon->eta());
+      for (int i=0; i<6;++i) {
+        if (detBarrel->at(i)) hEfficChambBar_D->Fill(i+1.);
+	  if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
+        if (detBarrel->at(i)) hEfficDetB_N[i]->Fill(muon->eta());
+        if (hitBarrel->at(i)) hEfficHitB_N[i]->Fill(muon->eta());
+      }
+      for (int i=0; i<3;++i) {
+        if (detEndcap->at(i)) hEfficChambEnd_D->Fill(i+1.);
+	  if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
+        if (detEndcap->at(i)) hEfficDetE_N[i]->Fill(muon->eta());
+        if (hitEndcap->at(i)) hEfficHitE_N[i]->Fill(muon->eta());
+      }
+
+      
+
+      // pure Barrel
+      if (fabs(muon->eta()) < 0.8) {
+        hHitsB->Fill(nHitsB);
+        hDetsB_100->Fill(nDetsB);
+        hEfficGeom_M->Fill(muon->eta());      
+        if (nDetsBL>=3 || (nDetsB>=4 && (detBarrel->at(4)||detBarrel->at(5)) ) ) hEfficGeom_D->Fill(muon->eta());
+        if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5)) ) ) {
+          hEfficGeom_H->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeom_T->Fill(muon->eta());
+        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+      }
+      // pure Endcap
+      if (fabs(muon->eta()) > 1.25 && fabs(muon->eta()) < 1.5) { 
+        hHitsE->Fill(nHitsE);
+        hDetsE_100->Fill(nDetsE);
+        hEfficGeom_M->Fill(muon->eta());      
+        if (nDetsE==3) hEfficGeom_D->Fill(muon->eta());
+        if (nHitsE==3) {
+          hEfficGeom_H->Fill(muon->eta());
+          if (l1Rpcs.size()) hEfficGeom_T->Fill(muon->eta());
+        }
+        if (l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
+      }
+    }
 
     //
     // TIMING
@@ -257,7 +346,10 @@ void EfficiencyAnalysis::beginJob()
       //############################################
       // TRAP for PRE-FIRED/POST-FIRED RPC TRIGGERS
       //############################################
-      if (firstBX !=0) {
+     
+    //  if (firstBX !=0) {
+      if (toto) {
+        std::cout <<" event: " << ev << std::endl;
         if (firstBX < 0) std::cout<< "RPC Pre-firing! ";
         if (firstBX > 0) std::cout<< "RPC Post-firing! ";
         std::cout<< " Run:"<< event->run
@@ -273,64 +365,11 @@ void EfficiencyAnalysis::beginJob()
       } 
     }
 
+
+ 
     //
-    // MUON HITS AND CROSSED DETS ANALYSIS
+    // ADDITIONAL HISTOGRAMS WITH TRACK AS DENOM.
     //
-    bool isMuon = (muon->pt() > theConfig.getParameter<double>("ptMin") );
-    if (isMuon) {
-      //if (fabs(muon.eta) > 0.8) continue;
-      //if (fabs(muon.eta) < 1.24) continue;
-
-      hMuonPt->Fill(muon->pt());
-      hMuonEta->Fill(muon->eta());
-      hMuonPhi->Fill(muon->phi());
-
-      int nHitsB = 0; for (int i=0; i<6; i++) if( hitBarrel->at(i) ) nHitsB++;
-      int nHitsBL= 0; for (int i=0; i<4; i++) if( hitBarrel->at(i) ) nHitsBL++;
-      int nHitsE = 0; for (int i=0; i<3; i++) if( hitEndcap->at(i) ) nHitsE++;
-
-      int nDetsB = 0;  for (int i=0; i<6; i++) if( detBarrel->at(i) ) nDetsB++;
-      int nDetsE = 0;  for (int i=0; i<3; i++) if( detEndcap->at(i) ) nDetsE++;
-
-      for (int i=0; i<6;++i) {
-        if (detBarrel->at(i)) hEfficChambBar_D->Fill(i+1.);
-	  if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
-//        if (!detBarrel->at(i) && hitBarrel->at(i)) hChambEffBar_V->Fill(i+1.);
-      }
-      for (int i=0; i<3;++i) {
-        if (detEndcap->at(i)) hEfficChambEnd_D->Fill(i+1.);
-	  if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
-      }
-
-      // pure Barrel
-      if (fabs(muon->eta()) < 0.8) {
-        hHitsB->Fill(nHitsB);
-        hDetsB_100->Fill(nDetsB);
-        hEfficHits_D->Fill(muon->eta());      
-        if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5)) ) ) {
-          hEfficHits_N->Fill(muon->eta());
-          if (l1Rpcs.size()>0) hEfficHits_H->Fill(muon->eta());
-        }
-      }
-      // pure Endcap
-      if (fabs(muon->eta()) > 1.25 && fabs(muon->eta()) < 1.55) { 
-        hHitsE->Fill(nHitsE);
-        hDetsE_100->Fill(nDetsE);
-        hEfficHits_D->Fill(muon->eta());      
-        if (nHitsE==3) {
-          hEfficHits_N->Fill(muon->eta());
-          if (l1Rpcs.size()) hEfficHits_H->Fill(muon->eta());
-        }
-      }
-
-      hEfficMu_D->Fill(muon->eta());
-      if (l1Rpcs.size()) hEfficMu_N->Fill(muon->eta()); 
-
-      hEfficMuPt_D->Fill(muon->pt());
-      if (l1Rpcs.size())  hEfficMuPt_N->Fill(muon->pt());
-      if (l1RpcColl->getL1ObjsMatched(7.).size()) hEfficMuPt7_N->Fill(muon->pt()); 
-    }
-
     bool isTrack = (track->pt() > theConfig.getParameter<double>("ptMin") );
     if (isTrack) {
       //if (fabs(track.eta) > 0.8) continue;
@@ -355,6 +394,8 @@ void EfficiencyAnalysis::beginJob()
 
   } // end of event loop
 
+  //
+  // SUMMARIES RUN/LUMI EFFIC INTO GRAPH
   // average efficiency per LumiSection
   hGraphLumi->Set(effLumiMap.size());
   unsigned int iPoint=0;
@@ -373,7 +414,6 @@ void EfficiencyAnalysis::beginJob()
 
   // average efficiency per Run
   hGraphRun->Set(effRunMap.size());
-  hGraph->Set(effRunMap.size());
   iPoint=0;
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) {
     float eff = 0.;
@@ -384,8 +424,6 @@ void EfficiencyAnalysis::beginJob()
     hEffRun->Fill(eff);
     hGraphRun->SetPoint(iPoint, im->first, eff);
     hGraphRun->SetPointError(iPoint, 0., effErr);
-    hGraph->SetPoint(iPoint,iPoint, eff);
-    hGraph->SetPointError(iPoint, 0., effErr);
     iPoint++;
   } 
 
@@ -395,7 +433,6 @@ void EfficiencyAnalysis::beginJob()
   histos.Write();
   hGraphLumi->Write("hGraphLumi");
   hGraphRun->Write("hGraphRun");
-  hGraph->Write("hGraph");
   f.Close();
  
   cout <<"KUKU"<<endl;

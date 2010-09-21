@@ -93,10 +93,12 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   GlobalPoint detPosition = det->position();
 
   TrajectoryStateOnSurface muTSOS = muTrajectory.empty() ?
-       //TrajectoryStateTransform().innerStateOnSurface(*(mu->track()), *globalGeometry, &*magField)
+       //TrajectoryStateTransform().innerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
        TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField)
-       //TrajectoryStateTransform().outerStateOnSurface(*(mu->globalTrack()), *globalGeometry, &*magField)
-    :  muTrajectory.closestMeasurement(detPosition).updatedState();
+       //TrajectoryStateTransform().outerStateOnSurface(*(mu->globalTrack()), *globalGeometry, &*magField);
+//    :  muTrajectory.closestMeasurement(detPosition).forwardPredictedState();
+//    :  muTrajectory.closestMeasurement(detPosition).backwardPredictedState();
+      :  muTrajectory.closestMeasurement(detPosition).updatedState();
 
   bool along = true;
   if (BarrelAndLayer(rpc).isBarrel()) {
@@ -109,6 +111,14 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   es.get<TrackingComponentsRecord>().get(propagatorName, propagator);
 
   TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, det->surface());
+
+  //temporary hack!!!!
+  if (!result.isValid() && !muTrajectory.empty()) {
+    muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
+    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong",propagator);
+    result =  propagator->propagate(muTSOS, det->surface());
+  }
+  
   return result;
 }
 
@@ -171,6 +181,8 @@ void EfficiencyTree::endJob()
 
 void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
 {
+//if (ev.id().event() != 44) return;
+//std::cout <<"EVENT IS: " << ev.id().event() << std::endl;
   //clean event
   event = new EventObj;
   event->bx = ev.bunchCrossing();
@@ -179,6 +191,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
   event->id = ev.id().event();
   event->run = ev.run();
   event->lumi = ev.luminosityBlock();
+
 
   muon = new MuonObj();
   track = new TrackObj();
@@ -235,6 +248,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
                                                 <<im->globalTrack()->pt()<<" "
                                                 <<im->globalTrack()->eta()<<" "
                                                 <<im->globalTrack()->phi()
+                                                <<" number of RPC hits: " <<im->globalTrack()->hitPattern().numberOfValidMuonRPCHits() 
                                                 <<std::endl;
     else std::cout <<"global brak " <<" Hits:Tk "<< nTrackerHits <<" RPC "<< nRPCHits <<" DT "<< nDTHits <<" CSC "<< nCSCHits <<std::endl;
 
@@ -266,7 +280,13 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
 
       RPCDetId rpcDet = ih->rpcId();
+
+//const GeomDet * det = globalGeometry->idToDet(rpcDet);
+//GlobalPoint detPosition = det->position();
+//std::cout <<"checking for hit in Det: r= "<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()<<std::endl;
+//std::cout <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer()<<std::endl;
       TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, rpcDet, ev, es);
+//if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
       if (!trackAtHit.isValid()) continue;
       LocalPoint HitPoint = ih->localPosition();
       LocalError hitError = ih->localPositionError();
@@ -278,7 +298,10 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
       float pullY = distY/ sqrt( trackAtHitError.yy()+hitError.yy());
 
       BarrelAndLayer place(rpcDet);
-      bool hitCompatible = (fabs(pullX) < 3.5 && fabs(pullY) < 3.5 );
+      //bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+      bool hitCompatible = (fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+//std::cout <<" DISTX: "<<distX<<" DISTY: "<< distY<<" PULLX: "<<pullX<<" pullY: "<<pullY<<std::endl; 
+//if (hitCompatible) std::cout <<" HIT COMPATIBLE" << std::endl;
       if (place.isBarrel()) {
         if (hitCompatible) hitBarrel[place.layer()-1]=true;
         hPullX_B[place.layer()-1]->Fill(pullX);
