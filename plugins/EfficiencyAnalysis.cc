@@ -89,6 +89,12 @@ void EfficiencyAnalysis::beginJob()
 
 
   // in order to get numbewr of crossed layers
+  TH1D * hEfficChambBarHP_N = new TH1D("hEfficChambBarHP_N","hEfficChambBarHP_N",6,0.5,6.5); histos.Add(hEfficChambBarHP_N); 
+  TH1D * hEfficChambBarHP_D = new TH1D("hEfficChambBarHP_D","hEfficChambBarHP_D",6,0.5,6.5); histos.Add(hEfficChambBarHP_D); 
+  TH1D * hEfficChambEndHP_N = new TH1D("hEfficChambEndHP_N","hEfficChambEndHP_N",3,0.5,3.5); histos.Add(hEfficChambEndHP_N);
+  TH1D * hEfficChambEndHP_D = new TH1D("hEfficChambEndHP_D","hEfficChambEndHP_D",3,0.5,3.5); histos.Add(hEfficChambEndHP_D); 
+
+
   TH1D * hEfficChambBar_N = new TH1D("hEfficChambBar_N","Propaged muons matching RPC hits - Barrel;Layer;Muons",6,0.5,6.5); histos.Add(hEfficChambBar_N); 
   TH1D * hEfficChambBar_D = new TH1D("hEfficChambBar_D","Propaged muons crossing RPCs - Barrel;Layer;Muons",6,0.5,6.5); histos.Add(hEfficChambBar_D); 
   TH1D * hEfficChambEnd_N = new TH1D("hEfficChambEnd_N","Propaged muons matching RPC hits - Endcap;Layer;Muons",3,0.5,3.5); histos.Add(hEfficChambEnd_N);
@@ -172,6 +178,10 @@ void EfficiencyAnalysis::beginJob()
   std::vector<bool> *hitEndcap = 0;
   std::vector<unsigned int> *detBarrel = 0;
   std::vector<unsigned int> *detEndcap = 0;
+  std::vector<bool> *hitBarrelHP = 0;
+  std::vector<bool> *hitEndcapHP = 0;
+  std::vector<unsigned int> *detBarrelHP = 0;
+  std::vector<unsigned int> *detEndcapHP = 0;
 
 //  std::vector<unsigned int> *validPRCEndcap = 0;
 //  std::vector<unsigned int> *validDTEndcap = 0;
@@ -186,6 +196,10 @@ void EfficiencyAnalysis::beginJob()
   TBranch *bhitEndcap=0;
   TBranch *bdetBarrel=0;
   TBranch *bdetEndcap=0;
+  TBranch *bhitBarrelHP=0;
+  TBranch *bhitEndcapHP=0;
+  TBranch *bdetBarrelHP=0;
+  TBranch *bdetEndcapHP=0;
 
 
   L1ObjColl* l1RpcColl = 0;
@@ -200,6 +214,10 @@ void EfficiencyAnalysis::beginJob()
   chain.SetBranchAddress("hitEndcap",&hitEndcap, &bhitEndcap);
   chain.SetBranchAddress("detBarrel",&detBarrel, &bdetBarrel);
   chain.SetBranchAddress("detEndcap",&detEndcap, &bdetEndcap);
+  chain.SetBranchAddress("hitBarrelHP",&hitBarrelHP, &bhitBarrelHP);
+  chain.SetBranchAddress("hitEndcapHP",&hitEndcapHP, &bhitEndcapHP);
+  chain.SetBranchAddress("detBarrelHP",&detBarrelHP, &bdetBarrelHP);
+  chain.SetBranchAddress("detEndcapHP",&detEndcapHP, &bdetEndcapHP);
 
   chain.SetBranchAddress("l1RpcColl",&l1RpcColl);
   chain.SetBranchAddress("l1OtherColl",&l1OtherColl);
@@ -271,16 +289,26 @@ void EfficiencyAnalysis::beginJob()
 
       hEfficHitDet_D->Fill(muon->eta());
       for (int i=0; i<6;++i) {
-        if (detBarrel->at(i)) hEfficChambBar_D->Fill(i+1.);
-	  if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
+        if (detBarrel->at(i) || hitBarrelHP->at(i)) hEfficChambBar_D->Fill(i+1.);
+	  if (hitBarrel->at(i) || hitBarrelHP->at(i)) hEfficChambBar_N->Fill(i+1.);
+	  //if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
         if (detBarrel->at(i)) hEfficDetB_N[i]->Fill(muon->eta());
         if (hitBarrel->at(i)) hEfficHitB_N[i]->Fill(muon->eta());
+        if (detBarrelHP->at(i)) {
+          hEfficChambBarHP_D->Fill(i+1.); 
+          if (hitBarrelHP->at(i)) hEfficChambBarHP_N->Fill(i+1.); 
+        }
       }
       for (int i=0; i<3;++i) {
-        if (detEndcap->at(i)) hEfficChambEnd_D->Fill(i+1.);
-	  if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
+        if (detEndcap->at(i) || hitEndcapHP->at(i))  hEfficChambEnd_D->Fill(i+1.);
+	  if (hitEndcap->at(i) || hitEndcapHP->at(i)) hEfficChambEnd_N->Fill(i+1.);
+	  // if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
         if (detEndcap->at(i)) hEfficDetE_N[i]->Fill(muon->eta());
         if (hitEndcap->at(i)) hEfficHitE_N[i]->Fill(muon->eta());
+        if (detEndcapHP->at(i)) { 
+          hEfficChambEndHP_D->Fill(i+1.); 
+          if (hitEndcapHP->at(i)) hEfficChambEndHP_N->Fill(i+1.); 
+        }
       }
 
       

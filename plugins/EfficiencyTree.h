@@ -41,7 +41,7 @@ private:
     bool theBarrel; unsigned int theLayer;
   };
 
-  TrajectoryStateOnSurface trackAtSurface(const reco::Muon*, const RPCDetId&, const edm::Event&, const edm::EventSetup& ) const;
+  TrajectoryStateOnSurface trackAtSurface(const reco::Muon*, const RPCDetId&, const edm::Event&, const edm::EventSetup&, bool fromTk=false ) const;
 
   edm::ParameterSet theConfig;
                     
@@ -53,6 +53,8 @@ private:
   TrackObj* track;
   std::vector<bool> hitBarrel, hitEndcap;
   std::vector<unsigned int> detBarrel, detEndcap;
+  std::vector<bool> hitBarrelHP, hitEndcapHP;
+  std::vector<unsigned int> detBarrelHP, detEndcapHP;
   std::vector<unsigned int> validPRCHitsBarrel, validPRCEndcap;
   std::vector<unsigned int> validDTHitsBarrel, validDTEndcap;
   std::vector<unsigned int> validCSCHitsBarrel, validCSCEndcap;

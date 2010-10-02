@@ -42,6 +42,7 @@
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/RPCRecHit/interface/RPCRecHitCollection.h"
 #include "DataFormats/DetId/interface/DetIdCollection.h"
+#include "DataFormats/TrackReco/interface/HitPattern.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -59,7 +60,7 @@ EfficiencyTree::BarrelAndLayer::BarrelAndLayer(const RPCDetId & rpcDet)
 }
 
 
-TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, const RPCDetId& rpc, const edm::Event &ev, const edm::EventSetup &es) const
+TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, const RPCDetId& rpc, const edm::Event &ev, const edm::EventSetup &es, bool fromTk) const
 {
 
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
@@ -68,11 +69,7 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   edm::ESHandle<MagneticField> magField;
   es.get<IdealMagneticFieldRecord>().get(magField);
 
-//  edm::ESHandle<RPCGeometry> rpcGeometry;
-//  es.get<MuonGeometryRecord>().get(rpcGeometry);
-
   edm::ESHandle<Propagator> propagator;
-
 
   typedef std::vector<Trajectory> Trajectories;
   edm::Handle<Trajectories> trajectories;
@@ -92,14 +89,13 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   const GeomDet * det = globalGeometry->idToDet(rpc);
   GlobalPoint detPosition = det->position();
 
-  TrajectoryStateOnSurface muTSOS = muTrajectory.empty() ?
-       //TrajectoryStateTransform().innerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
-       TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField)
-       //TrajectoryStateTransform().outerStateOnSurface(*(mu->globalTrack()), *globalGeometry, &*magField);
-//    :  muTrajectory.closestMeasurement(detPosition).forwardPredictedState();
-//    :  muTrajectory.closestMeasurement(detPosition).backwardPredictedState();
+  TrajectoryStateOnSurface muTSOS  = muTrajectory.empty() ?
+         TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField)
       :  muTrajectory.closestMeasurement(detPosition).updatedState();
 
+  TrajectoryStateOnSurface result;
+
+  if (!fromTk) {
   bool along = true;
   if (BarrelAndLayer(rpc).isBarrel()) {
     if (muTSOS.globalPosition().perp() > detPosition.perp()) along = false;
@@ -109,14 +105,14 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
 
   std::string propagatorName = along? "SteppingHelixPropagatorAlong" : "SteppingHelixPropagatorOpposite";
   es.get<TrackingComponentsRecord>().get(propagatorName, propagator);
-
-  TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, det->surface());
-
+  result =  propagator->propagate(muTSOS, det->surface());
+  } else {
   //temporary hack!!!!
-  if (!result.isValid() && !muTrajectory.empty()) {
-    muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
-    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong",propagator);
-    result =  propagator->propagate(muTSOS, det->surface());
+  //if (!result.isValid() && !muTrajectory.empty()) {
+  //  muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(mu->globalTrack()), *globalGeometry, &*magField);
+  muTSOS = TrajectoryStateTransform().innerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong",propagator);
+  result =  propagator->propagate(muTSOS, det->surface());
   }
   
   return result;
@@ -140,6 +136,11 @@ void EfficiencyTree::beginJob()
   theTree->Branch("hitEndcap",&hitEndcap);
   theTree->Branch("detBarrel",&detBarrel);
   theTree->Branch("detEndcap",&detEndcap);
+
+  theTree->Branch("hitBarrelHP",&hitBarrelHP);
+  theTree->Branch("hitEndcapHP",&hitEndcapHP);
+  theTree->Branch("detBarrelHP",&detBarrelHP);
+  theTree->Branch("detEndcapHP",&detEndcapHP);
 
   theTree->Branch("l1RpcColl","L1ObjColl",&l1RpcColl,32000,99);
   theTree->Branch("l1OtherColl","L1ObjColl",&l1OtherColl,32000,99);
@@ -193,6 +194,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
   event->lumi = ev.luminosityBlock();
 
 
+
   muon = new MuonObj();
   track = new TrackObj();
 
@@ -200,6 +202,11 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
   hitEndcap = std::vector<bool>(3,false);
   detBarrel = std::vector<unsigned int>(6,0);
   detEndcap = std::vector<unsigned int>(3,0);
+
+  hitBarrelHP = std::vector<bool>(6,false);
+  hitEndcapHP = std::vector<bool>(3,false);
+  detBarrelHP = std::vector<unsigned int>(6,0);
+  detEndcapHP = std::vector<unsigned int>(3,0);
 
   l1RpcColl = new L1ObjColl;
   l1OtherColl = new L1ObjColl;
@@ -225,6 +232,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
   const reco::Muon * theMuon = 0;
   for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
     if (!im->isTrackerMuon()) continue;
+    if (im->track()->charge()<0) continue;
     if (im->track()->pt() < theConfig.getParameter<double>("minPt")) continue;
     if (fabs(im->track()->eta()) >  theConfig.getParameter<double>("maxEta")) continue;
     if (im->track()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
@@ -244,25 +252,31 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
       nDTHits = hp.numberOfValidMuonDTHits();
       nCSCHits = hp.numberOfValidMuonCSCHits();
     }
-    if(im->globalTrack().isNonnull()) std::cout <<"global muon (pt,eta,phi) "
-                                                <<im->globalTrack()->pt()<<" "
-                                                <<im->globalTrack()->eta()<<" "
-                                                <<im->globalTrack()->phi()
-                                                <<" number of RPC hits: " <<im->globalTrack()->hitPattern().numberOfValidMuonRPCHits() 
-                                                <<std::endl;
-    else std::cout <<"global brak " <<" Hits:Tk "<< nTrackerHits <<" RPC "<< nRPCHits <<" DT "<< nDTHits <<" CSC "<< nCSCHits <<std::endl;
 
     if (nTrackerHits<=0) continue;
     if ( nRPCHits==0 &&nDTHits==0 &&nCSCHits==0  ) continue;
+static int nHits = 0;
+    nHits += nRPCHits;
+    std::cout <<" RPC HITS: " << nHits << std:: endl;
     if (!im->globalTrack().isNonnull()) continue;
 
     if (!theMuon || (im->track()->pt() > theMuon->track()->pt()) ) theMuon = &(*im); 
+    
   }
 
+static int nMuons = 0;
+if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
 
    // best RPC muon
+int compHit = 0;
   TrajectoryStateOnSurface tsos;
   if (theMuon) { 
+    if(theMuon->globalTrack().isNonnull()) std::cout <<"global muon (pt,eta,phi) "
+                                                     <<theMuon->globalTrack()->pt()<<" "
+                                                     <<theMuon->globalTrack()->eta()<<" "
+                                                     <<theMuon->globalTrack()->phi()
+                                                     <<" number of RPC hits: " <<theMuon->globalTrack()->hitPattern().numberOfValidMuonRPCHits() 
+                                                     <<std::endl;
     muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi(), theMuon->track()->charge());
     muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
 
@@ -276,17 +290,32 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
     //
     edm::Handle<RPCRecHitCollection> recHits;
     ev.getByLabel("rpcRecHits", recHits);
+    
+//int compDet = 0;
     typedef RPCRecHitCollection::const_iterator IH;
     for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
+static int nRPCRecHits = 0;
+   std::cout <<" nRPCRecHits: "<< ++nRPCRecHits << std::endl;
 
       RPCDetId rpcDet = ih->rpcId();
-
+//     const GeomDet * det = globalGeometry->idToDet(rpcDet);
+      GlobalPoint detPosition = globalGeometry->idToDet(rpcDet)->position();
+if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) { 
+  std::cout <<" CHECKING HIT, det "<<rpcDet.rawId()<<"  r="<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()
+                                   <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer();
+            
+}
+      
+//std::cout <<" position r: " << detPosition.perp()<<" phi"<<detPosition.phi()<<" z:"<<detPosition.z()<<" delta: " << 
+//reco::deltaPhi(detPosition.phi(), theMuon->momentum().phi())<< std::endl;
 //const GeomDet * det = globalGeometry->idToDet(rpcDet);
 //GlobalPoint detPosition = det->position();
 //std::cout <<"checking for hit in Det: r= "<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()<<std::endl;
 //std::cout <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer()<<std::endl;
       TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, rpcDet, ev, es);
-//if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
+//if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) {
+   if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
+//}
       if (!trackAtHit.isValid()) continue;
       LocalPoint HitPoint = ih->localPosition();
       LocalError hitError = ih->localPositionError();
@@ -297,11 +326,19 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
       float pullX = distX/ sqrt( trackAtHitError.xx()+hitError.xx());
       float pullY = distY/ sqrt( trackAtHitError.yy()+hitError.yy());
 
-      BarrelAndLayer place(rpcDet);
-      //bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
-      bool hitCompatible = (fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+      //bool hitCompatible = det->surface().bounds().inside(trackAtHit.localPosition());
+      //bool hitCompatible = fabs(pullX) < 3.5 && fabs(pullY) < 3.5 ;
+// std::cout <<"HIT  compatible!, det is: " << rpcDet.rawId() << std::endl;
+ compHit++;
+      bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+      //bool hitCompatible = (fabs(distX<10.))  && fabs(pullY) < 3.5 ;
 //std::cout <<" DISTX: "<<distX<<" DISTY: "<< distY<<" PULLX: "<<pullX<<" pullY: "<<pullY<<std::endl; 
 //if (hitCompatible) std::cout <<" HIT COMPATIBLE" << std::endl;
+      BarrelAndLayer place(rpcDet);
+      if (hitCompatible) std::cout <<" COMPATIBLE HIT "
+<<" in: "<<globalGeometry->idToDet(rpcDet)->surface().bounds().inside(trackAtHit.localPosition())
+<<" is BARREL: " << place.isBarrel() <<" layer: " << place.layer(); 
+      std::cout << std::endl; 
       if (place.isBarrel()) {
         if (hitCompatible) hitBarrel[place.layer()-1]=true;
         hPullX_B[place.layer()-1]->Fill(pullX);
@@ -325,20 +362,68 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
 
       const GeomDet * det = rpcGeometry->idToDet(*it);
       GlobalPoint detPosition = det->position();
-      if (deltaR(muon->eta(), muon->phi(), detPosition.eta(), detPosition.phi()) > 0.7) continue;
-
       RPCDetId rpcDet(*it);
+//std::cout << std::endl<<"checking Det: " << rpcDet.rawId();
+//    std::cout <<" position r: " << detPosition.perp()<<" phi"<<detPosition.phi()<<" z:"<<detPosition.z()<<" delta: " << 
+//    reco::deltaPhi(detPosition.phi(), theMuon->momentum().phi()) << std::endl;
+      if (deltaR(muon->eta(), muon->phi(), detPosition.eta(), detPosition.phi()) > 0.7) continue;
+//      std::cout <<" CHECKING DET, id:"<<rpcDet.rawId()<<std::endl;
       TrajectoryStateOnSurface trackAtDet= trackAtSurface(theMuon, rpcDet, ev, es);
       if (!trackAtDet.isValid()) continue;
       if (! (det->surface().bounds().inside(trackAtDet.localPosition()))) continue;
       hPropToDetDeltaR->Fill(deltaR(muon->eta(), muon->phi(), detPosition.eta(), detPosition.phi()));
       BarrelAndLayer place(rpcDet);
+      std::cout <<" COMPATIBLE DET, isbarrel: " << place.isBarrel() <<" layrer: " << place.layer() << std::endl;
       if (place.isBarrel()) detBarrel[place.layer()-1]++; else detEndcap[place.layer()-1]++;
     }
     }
   }
 
-  //create L1muon helper 
+  //
+  //additional way of matching hits and dets from HitPattern;
+  //
+  std::cout <<"HIT PATTERN"<< std::endl;
+  if (theMuon && theMuon->isGlobalMuon()) {
+    const reco::HitPattern& hp = theMuon->globalTrack()->hitPattern(); 
+    for(int i=0; i < hp.numberOfHits(); i++) {
+      uint32_t hit = hp.getHitPattern(i);
+      if (!hp.validHitFilter(hit)) continue;
+      if (hp.muonDTHitFilter(hit)) {
+        int layer = -1;
+        if (hp.getMuonStation(hit) <=2) {
+           if (hp.getDTSuperLayer(hit) ==1) layer=2*(hp.getMuonStation(hit)-1)+1;
+           if (hp.getDTSuperLayer(hit) ==3) layer=2*(hp.getMuonStation(hit)-1)+2;
+        } else {
+           if (hp.getDTSuperLayer(hit) ==1) layer=hp.getMuonStation(hit)+2;
+        }
+        //  std::cout <<"DT station:"<< hp.getMuonStation(hit)<<" sublayer: " <<hp.getDTSuperLayer(hit)<<" layer: "<<layer<<std::endl;
+        if (layer>0 ) detBarrelHP[layer-1]++;
+      }
+      if (hp.muonCSCHitFilter(hit)) {
+        if (hp.getCSCRing(hit) >=2) {
+        int layer = hp.getMuonStation(hit);   
+        //std::cout <<"CSC tation:"<< hp.getMuonStation(hit)<<" ring "<<hp.getCSCRing(hit)<<" layer: "<<layer<<std::endl;
+         if (layer>0 && layer <=3) detEndcapHP[layer-1]++; else if (layer >0) std::cout <<"KUKU" << std::endl;
+        }
+      }
+      if (hp.muonRPCHitFilter(hit)) {
+        if (!hp.getRPCregion(hit)) {
+          int layer = (hp.getMuonStation(hit) <=2) ?  2*(hp.getMuonStation(hit)-1)+hp.getRPCLayer(hit):  hp.getMuonStation(hit)+2;
+          hitBarrelHP[layer-1] = true;
+          std::cout <<"HP RPC barrel, layer: " << layer << std::endl;
+        } 
+        else {
+          int layer=hp.getMuonStation(hit);
+          hitEndcapHP[layer-1] = true; 
+          std::cout <<"HP RPC endcap, layer: "<< layer << std::endl;
+        }
+      } 
+    }
+    if (compHit != theMuon->globalTrack()->hitPattern().numberOfValidMuonRPCHits()) std::cout << "PROBLEM" << std::endl;
+  }
+
+  for (unsigned int i=0; i<=5;++i) if (!hitBarrel[i] && hitBarrelHP[i]) std::cout <<" HitHP but no Hit, barrel layer: "<<i+1<<std::endl;
+  
   edm::InputTag l1Tag(theConfig.getParameter<edm::InputTag>("l1MuReadout"));
   L1ObjMaker l1(l1Tag,ev);
 
