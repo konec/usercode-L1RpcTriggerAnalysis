@@ -41,7 +41,8 @@ private:
     bool theBarrel; unsigned int theLayer;
   };
 
-  TrajectoryStateOnSurface trackAtSurface(const reco::Muon*, const RPCDetId&, const edm::Event&, const edm::EventSetup&, bool fromTk=false ) const;
+  TrajectoryStateOnSurface trackAtSurface(const reco::Muon*, const GlobalPoint&, const edm::Event&, const edm::EventSetup&) const;
+  TrajectoryStateOnSurface trackAtSurface(const reco::Muon*, const RPCDetId&, const edm::Event&, const edm::EventSetup&) const;
 
   edm::ParameterSet theConfig;
                     

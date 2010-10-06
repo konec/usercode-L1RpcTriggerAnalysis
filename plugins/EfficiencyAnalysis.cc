@@ -289,9 +289,8 @@ void EfficiencyAnalysis::beginJob()
 
       hEfficHitDet_D->Fill(muon->eta());
       for (int i=0; i<6;++i) {
-        if (detBarrel->at(i) || hitBarrelHP->at(i)) hEfficChambBar_D->Fill(i+1.);
-	  if (hitBarrel->at(i) || hitBarrelHP->at(i)) hEfficChambBar_N->Fill(i+1.);
-	  //if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
+        if (detBarrel->at(i)) hEfficChambBar_D->Fill(i+1.);
+	  if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
         if (detBarrel->at(i)) hEfficDetB_N[i]->Fill(muon->eta());
         if (hitBarrel->at(i)) hEfficHitB_N[i]->Fill(muon->eta());
         if (detBarrelHP->at(i)) {
@@ -300,9 +299,8 @@ void EfficiencyAnalysis::beginJob()
         }
       }
       for (int i=0; i<3;++i) {
-        if (detEndcap->at(i) || hitEndcapHP->at(i))  hEfficChambEnd_D->Fill(i+1.);
-	  if (hitEndcap->at(i) || hitEndcapHP->at(i)) hEfficChambEnd_N->Fill(i+1.);
-	  // if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
+        if (detEndcap->at(i))  hEfficChambEnd_D->Fill(i+1.);
+	  if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
         if (detEndcap->at(i)) hEfficDetE_N[i]->Fill(muon->eta());
         if (hitEndcap->at(i)) hEfficHitE_N[i]->Fill(muon->eta());
         if (detEndcapHP->at(i)) { 

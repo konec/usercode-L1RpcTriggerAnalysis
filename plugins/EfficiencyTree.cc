@@ -27,6 +27,11 @@
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 
+#include "DataFormats/GeometrySurface/interface/BoundCylinder.h"
+#include "DataFormats/GeometrySurface/interface/SimpleCylinderBounds.h"
+#include "DataFormats/GeometrySurface/interface/BoundDisk.h"
+#include "DataFormats/GeometrySurface/interface/SimpleDiskBounds.h"
+
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
@@ -60,7 +65,7 @@ EfficiencyTree::BarrelAndLayer::BarrelAndLayer(const RPCDetId & rpcDet)
 }
 
 
-TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, const RPCDetId& rpc, const edm::Event &ev, const edm::EventSetup &es, bool fromTk) const
+TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, const GlobalPoint& point, const edm::Event &ev, const edm::EventSetup &es) const
 {
 
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
@@ -86,35 +91,44 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   }
   hMinDeltaRTrajMu->Fill(minDR);
 
-  const GeomDet * det = globalGeometry->idToDet(rpc);
-  GlobalPoint detPosition = det->position();
-
   TrajectoryStateOnSurface muTSOS  = muTrajectory.empty() ?
          TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField)
-      :  muTrajectory.closestMeasurement(detPosition).updatedState();
+      :  muTrajectory.closestMeasurement(point).updatedState();
 
-  TrajectoryStateOnSurface result;
 
-  if (!fromTk) {
+  bool barrel = fabs(point.z()) < 700. ? true : false;
+  ReferenceCountingPointer<Surface> surface = barrel ?
+      ReferenceCountingPointer<Surface>( new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( point.perp(),  point.perp(), -700., 700. ) ))
+    : ReferenceCountingPointer<Surface>( new  BoundDisk( GlobalPoint(0.,0.,point.z()), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
+       
   bool along = true;
-  if (BarrelAndLayer(rpc).isBarrel()) {
-    if (muTSOS.globalPosition().perp() > detPosition.perp()) along = false;
+  if (barrel) {
+    if (muTSOS.globalPosition().perp() > point.perp()) along = false;
   } else {
-    if ( fabs(muTSOS.globalPosition().z()) > fabs(detPosition.z()) ) along = false;
+    if ( fabs(muTSOS.globalPosition().z()) > fabs(point.z()) ) along = false;
   }
-
   std::string propagatorName = along? "SteppingHelixPropagatorAlong" : "SteppingHelixPropagatorOpposite";
+
   es.get<TrackingComponentsRecord>().get(propagatorName, propagator);
-  result =  propagator->propagate(muTSOS, det->surface());
-  } else {
-  //temporary hack!!!!
-  //if (!result.isValid() && !muTrajectory.empty()) {
-  //  muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(mu->globalTrack()), *globalGeometry, &*magField);
-  muTSOS = TrajectoryStateTransform().innerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
-  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong",propagator);
-  result =  propagator->propagate(muTSOS, det->surface());
-  }
+  TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, *surface);
   
+  return result;
+}
+
+TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, const RPCDetId& rpc, const edm::Event &ev, const edm::EventSetup &es) const
+{
+
+  edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
+  es.get<GlobalTrackingGeometryRecord>().get(globalGeometry);
+  edm::ESHandle<MagneticField> magField;
+  es.get<IdealMagneticFieldRecord>().get(magField);
+  edm::ESHandle<Propagator> propagator;
+
+  const GeomDet * det = globalGeometry->idToDet(rpc);
+  TrajectoryStateOnSurface muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong",propagator);
+  TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, det->surface());
+
   return result;
 }
 
@@ -232,7 +246,7 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
   const reco::Muon * theMuon = 0;
   for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
     if (!im->isTrackerMuon()) continue;
-    if (im->track()->charge()<0) continue;
+//    if (im->track()->charge()!=-1) continue;
     if (im->track()->pt() < theConfig.getParameter<double>("minPt")) continue;
     if (fabs(im->track()->eta()) >  theConfig.getParameter<double>("maxEta")) continue;
     if (im->track()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
@@ -300,6 +314,7 @@ static int nRPCRecHits = 0;
       RPCDetId rpcDet = ih->rpcId();
 //     const GeomDet * det = globalGeometry->idToDet(rpcDet);
       GlobalPoint detPosition = globalGeometry->idToDet(rpcDet)->position();
+      GlobalPoint hitPosition = globalGeometry->idToDet(rpcDet)->toGlobal(ih->localPosition());
 if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) { 
   std::cout <<" CHECKING HIT, det "<<rpcDet.rawId()<<"  r="<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()
                                    <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer();
@@ -312,17 +327,29 @@ if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) {
 //GlobalPoint detPosition = det->position();
 //std::cout <<"checking for hit in Det: r= "<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()<<std::endl;
 //std::cout <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer()<<std::endl;
-      TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, rpcDet, ev, es);
+//      TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, rpcDet, ev, es);
+      TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, hitPosition, ev, es);
 //if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) {
    if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
 //}
       if (!trackAtHit.isValid()) continue;
+
+/*
       LocalPoint HitPoint = ih->localPosition();
       LocalError hitError = ih->localPositionError();
       LocalPoint trackAtHitPoint = trackAtHit.localPosition() ;
       LocalError trackAtHitError = trackAtHit.localError().positionError();
       float distX = HitPoint.x()-trackAtHitPoint.x();
       float distY = HitPoint.y()-trackAtHitPoint.y();
+*/
+      GlobalPoint hitPoint = globalGeometry->idToDet(rpcDet)->toGlobal(ih->localPosition());
+      LocalError hitError = ih->localPositionError();
+      GlobalPoint trackAtHitPoint = trackAtHit.globalPosition();
+      LocalError trackAtHitError = trackAtHit.localError().positionError();
+ //     float distX = HitPoint.x()-trackAtHitPoint.x();
+ //     float distY = HitPoint.y()-trackAtHitPoint.y();
+      float distX = hitPoint.perp()*deltaPhi((float) hitPoint.phi(), (float) trackAtHitPoint.phi());
+      float distY = BarrelAndLayer(rpcDet).isBarrel() ? hitPoint.z()-trackAtHitPoint.z() : hitPoint.perp()-trackAtHitPoint.perp() ;
       float pullX = distX/ sqrt( trackAtHitError.xx()+hitError.xx());
       float pullY = distY/ sqrt( trackAtHitError.yy()+hitError.yy());
 
@@ -330,7 +357,8 @@ if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) {
       //bool hitCompatible = fabs(pullX) < 3.5 && fabs(pullY) < 3.5 ;
 // std::cout <<"HIT  compatible!, det is: " << rpcDet.rawId() << std::endl;
  compHit++;
-      bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+//      bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+      bool hitCompatible = true;
       //bool hitCompatible = (fabs(distX<10.))  && fabs(pullY) < 3.5 ;
 //std::cout <<" DISTX: "<<distX<<" DISTY: "<< distY<<" PULLX: "<<pullX<<" pullY: "<<pullY<<std::endl; 
 //if (hitCompatible) std::cout <<" HIT COMPATIBLE" << std::endl;
