@@ -151,10 +151,10 @@ void EfficiencyTree::beginJob()
   theTree->Branch("detBarrel",&detBarrel);
   theTree->Branch("detEndcap",&detEndcap);
 
-  theTree->Branch("hitBarrelHP",&hitBarrelHP);
-  theTree->Branch("hitEndcapHP",&hitEndcapHP);
-  theTree->Branch("detBarrelHP",&detBarrelHP);
-  theTree->Branch("detEndcapHP",&detEndcapHP);
+//  theTree->Branch("hitBarrelHP",&hitBarrelHP);
+//  theTree->Branch("hitEndcapHP",&hitEndcapHP);
+//  theTree->Branch("detBarrelHP",&detBarrelHP);
+//  theTree->Branch("detEndcapHP",&detEndcapHP);
 
   theTree->Branch("l1RpcColl","L1ObjColl",&l1RpcColl,32000,99);
   theTree->Branch("l1OtherColl","L1ObjColl",&l1OtherColl,32000,99);
@@ -217,10 +217,10 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
   detBarrel = std::vector<unsigned int>(6,0);
   detEndcap = std::vector<unsigned int>(3,0);
 
-  hitBarrelHP = std::vector<bool>(6,false);
-  hitEndcapHP = std::vector<bool>(3,false);
-  detBarrelHP = std::vector<unsigned int>(6,0);
-  detEndcapHP = std::vector<unsigned int>(3,0);
+//  hitBarrelHP = std::vector<bool>(6,false);
+//  hitEndcapHP = std::vector<bool>(3,false);
+//  detBarrelHP = std::vector<unsigned int>(6,0);
+//  detEndcapHP = std::vector<unsigned int>(3,0);
 
   l1RpcColl = new L1ObjColl;
   l1OtherColl = new L1ObjColl;
@@ -269,9 +269,6 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
 
     if (nTrackerHits<=0) continue;
     if ( nRPCHits==0 &&nDTHits==0 &&nCSCHits==0  ) continue;
-static int nHits = 0;
-    nHits += nRPCHits;
-    std::cout <<" RPC HITS: " << nHits << std:: endl;
     if (!im->globalTrack().isNonnull()) continue;
 
     if (!theMuon || (im->track()->pt() > theMuon->track()->pt()) ) theMuon = &(*im); 
@@ -282,7 +279,6 @@ static int nMuons = 0;
 if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
 
    // best RPC muon
-int compHit = 0;
   TrajectoryStateOnSurface tsos;
   if (theMuon) { 
     if(theMuon->globalTrack().isNonnull()) std::cout <<"global muon (pt,eta,phi) "
@@ -312,36 +308,23 @@ static int nRPCRecHits = 0;
    std::cout <<" nRPCRecHits: "<< ++nRPCRecHits << std::endl;
 
       RPCDetId rpcDet = ih->rpcId();
-//     const GeomDet * det = globalGeometry->idToDet(rpcDet);
       GlobalPoint detPosition = globalGeometry->idToDet(rpcDet)->position();
       GlobalPoint hitPosition = globalGeometry->idToDet(rpcDet)->toGlobal(ih->localPosition());
-if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) { 
-  std::cout <<" CHECKING HIT, det "<<rpcDet.rawId()<<"  r="<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()
+      if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) > M_PI/2.) continue; 
+      std::cout <<" CHECKING HIT, det "<<rpcDet.rawId()<<"  r="<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()
                                    <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer();
             
-}
       
-//std::cout <<" position r: " << detPosition.perp()<<" phi"<<detPosition.phi()<<" z:"<<detPosition.z()<<" delta: " << 
-//reco::deltaPhi(detPosition.phi(), theMuon->momentum().phi())<< std::endl;
-//const GeomDet * det = globalGeometry->idToDet(rpcDet);
-//GlobalPoint detPosition = det->position();
-//std::cout <<"checking for hit in Det: r= "<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()<<std::endl;
-//std::cout <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer()<<std::endl;
-//      TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, rpcDet, ev, es);
       TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, hitPosition, ev, es);
-//if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) {
-   if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
-//}
+      if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
       if (!trackAtHit.isValid()) continue;
 
-/*
-      LocalPoint HitPoint = ih->localPosition();
-      LocalError hitError = ih->localPositionError();
-      LocalPoint trackAtHitPoint = trackAtHit.localPosition() ;
-      LocalError trackAtHitError = trackAtHit.localError().positionError();
-      float distX = HitPoint.x()-trackAtHitPoint.x();
-      float distY = HitPoint.y()-trackAtHitPoint.y();
-*/
+//      LocalPoint HitPoint = ih->localPosition();
+//      LocalError hitError = ih->localPositionError();
+//      LocalPoint trackAtHitPoint = trackAtHit.localPosition() ;
+//      LocalError trackAtHitError = trackAtHit.localError().positionError();
+//      float distX = HitPoint.x()-trackAtHitPoint.x();
+//      float distY = HitPoint.y()-trackAtHitPoint.y();
       GlobalPoint hitPoint = globalGeometry->idToDet(rpcDet)->toGlobal(ih->localPosition());
       LocalError hitError = ih->localPositionError();
       GlobalPoint trackAtHitPoint = trackAtHit.globalPosition();
@@ -353,19 +336,12 @@ if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) {
       float pullX = distX/ sqrt( trackAtHitError.xx()+hitError.xx());
       float pullY = distY/ sqrt( trackAtHitError.yy()+hitError.yy());
 
-      //bool hitCompatible = det->surface().bounds().inside(trackAtHit.localPosition());
-      //bool hitCompatible = fabs(pullX) < 3.5 && fabs(pullY) < 3.5 ;
-// std::cout <<"HIT  compatible!, det is: " << rpcDet.rawId() << std::endl;
- compHit++;
-//      bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
-      bool hitCompatible = true;
-      //bool hitCompatible = (fabs(distX<10.))  && fabs(pullY) < 3.5 ;
-//std::cout <<" DISTX: "<<distX<<" DISTY: "<< distY<<" PULLX: "<<pullX<<" pullY: "<<pullY<<std::endl; 
-//if (hitCompatible) std::cout <<" HIT COMPATIBLE" << std::endl;
+      bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+//      bool hitCompatible = true;
       BarrelAndLayer place(rpcDet);
-      if (hitCompatible) std::cout <<" COMPATIBLE HIT "
-<<" in: "<<globalGeometry->idToDet(rpcDet)->surface().bounds().inside(trackAtHit.localPosition())
-<<" is BARREL: " << place.isBarrel() <<" layer: " << place.layer(); 
+      if (hitCompatible) std::cout <<" COMPATIBLE HIT " 
+          <<" in: "<<globalGeometry->idToDet(rpcDet)->surface().bounds().inside(trackAtHit.localPosition())
+          <<" is BARREL: " << place.isBarrel() <<" layer: " << place.layer(); 
       std::cout << std::endl; 
       if (place.isBarrel()) {
         if (hitCompatible) hitBarrel[place.layer()-1]=true;
@@ -406,52 +382,12 @@ if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) < M_PI/2.) {
     }
     }
   }
+  for (unsigned int i=0; i<=5; ++i) if (hitBarrel[i] && !detBarrel[i]) std::cout <<"PROBLEM-NO DET BARREL BUT HIT, i="<<i+1<<std::endl;
+  for (unsigned int i=0; i<=2; ++i) if (hitEndcap[i] && !detEndcap[i]) std::cout <<"PROBLEM-NO DET ENDCAP BUT HIT, i="<<i+1<<std::endl;
 
   //
   //additional way of matching hits and dets from HitPattern;
   //
-  std::cout <<"HIT PATTERN"<< std::endl;
-  if (theMuon && theMuon->isGlobalMuon()) {
-    const reco::HitPattern& hp = theMuon->globalTrack()->hitPattern(); 
-    for(int i=0; i < hp.numberOfHits(); i++) {
-      uint32_t hit = hp.getHitPattern(i);
-      if (!hp.validHitFilter(hit)) continue;
-      if (hp.muonDTHitFilter(hit)) {
-        int layer = -1;
-        if (hp.getMuonStation(hit) <=2) {
-           if (hp.getDTSuperLayer(hit) ==1) layer=2*(hp.getMuonStation(hit)-1)+1;
-           if (hp.getDTSuperLayer(hit) ==3) layer=2*(hp.getMuonStation(hit)-1)+2;
-        } else {
-           if (hp.getDTSuperLayer(hit) ==1) layer=hp.getMuonStation(hit)+2;
-        }
-        //  std::cout <<"DT station:"<< hp.getMuonStation(hit)<<" sublayer: " <<hp.getDTSuperLayer(hit)<<" layer: "<<layer<<std::endl;
-        if (layer>0 ) detBarrelHP[layer-1]++;
-      }
-      if (hp.muonCSCHitFilter(hit)) {
-        if (hp.getCSCRing(hit) >=2) {
-        int layer = hp.getMuonStation(hit);   
-        //std::cout <<"CSC tation:"<< hp.getMuonStation(hit)<<" ring "<<hp.getCSCRing(hit)<<" layer: "<<layer<<std::endl;
-         if (layer>0 && layer <=3) detEndcapHP[layer-1]++; else if (layer >0) std::cout <<"KUKU" << std::endl;
-        }
-      }
-      if (hp.muonRPCHitFilter(hit)) {
-        if (!hp.getRPCregion(hit)) {
-          int layer = (hp.getMuonStation(hit) <=2) ?  2*(hp.getMuonStation(hit)-1)+hp.getRPCLayer(hit):  hp.getMuonStation(hit)+2;
-          hitBarrelHP[layer-1] = true;
-          std::cout <<"HP RPC barrel, layer: " << layer << std::endl;
-        } 
-        else {
-          int layer=hp.getMuonStation(hit);
-          hitEndcapHP[layer-1] = true; 
-          std::cout <<"HP RPC endcap, layer: "<< layer << std::endl;
-        }
-      } 
-    }
-    if (compHit != theMuon->globalTrack()->hitPattern().numberOfValidMuonRPCHits()) std::cout << "PROBLEM" << std::endl;
-  }
-
-  for (unsigned int i=0; i<=5;++i) if (!hitBarrel[i] && hitBarrelHP[i]) std::cout <<" HitHP but no Hit, barrel layer: "<<i+1<<std::endl;
-  
   edm::InputTag l1Tag(theConfig.getParameter<edm::InputTag>("l1MuReadout"));
   L1ObjMaker l1(l1Tag,ev);
 

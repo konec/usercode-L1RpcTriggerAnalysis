@@ -54,8 +54,6 @@ private:
   TrackObj* track;
   std::vector<bool> hitBarrel, hitEndcap;
   std::vector<unsigned int> detBarrel, detEndcap;
-  std::vector<bool> hitBarrelHP, hitEndcapHP;
-  std::vector<unsigned int> detBarrelHP, detEndcapHP;
   std::vector<unsigned int> validPRCHitsBarrel, validPRCEndcap;
   std::vector<unsigned int> validDTHitsBarrel, validDTEndcap;
   std::vector<unsigned int> validCSCHitsBarrel, validCSCEndcap;
@@ -63,7 +61,6 @@ private:
   L1ObjColl * l1OtherColl; 
 
   TObjArray histos;
-//  TH1F *hPullX_Sta, *hPullY_Sta, *hPullX_Tk, *hPullY_Tk;
   TH1F *hPullX_B[6], *hPullX_E[3], *hDistX_B[6], *hDistX_E[3] ,*hPullY; 
   TH1F *hDeltaR_Mu, *hDeltaR_Tk;
   TH1F *hPropToDetDeltaR;

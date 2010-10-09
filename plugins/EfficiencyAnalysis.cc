@@ -82,27 +82,21 @@ void EfficiencyAnalysis::beginJob()
 
   // efficiency for hits
   // barrel |eta|<0,8, endcap 1.25<|eta|<1.55 
-  TH1D * hEfficGeom_M = new TH1D("hEfficGeom_M","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_M);
-  TH1D * hEfficGeom_H = new TH1D("hEfficGeom_H","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_H);
-  TH1D * hEfficGeom_D = new TH1D("hEfficGeom_D","RPC triggers;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_D);
-  TH1D * hEfficGeom_T = new TH1D("hEfficGeom_T","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",64,-1.6,1.6);  histos.Add(hEfficGeom_T);
+  TH1D * hEfficGeom_M = new TH1D("hEfficGeom_M","Propaged muons matching RPC Geom;Glb.muon #eta;Muons /bin", nEtaBins,EtaBins);  histos.Add(hEfficGeom_M);
+  TH1D * hEfficGeom_H = new TH1D("hEfficGeom_H","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin", nEtaBins,EtaBins);  histos.Add(hEfficGeom_H);
+  TH1D * hEfficGeom_D = new TH1D("hEfficGeom_D","RPC triggers;Glb.muon #eta;Muons / bin",nEtaBins,EtaBins);  histos.Add(hEfficGeom_D);
+  TH1D * hEfficGeom_T = new TH1D("hEfficGeom_T","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",nEtaBins,EtaBins);  histos.Add(hEfficGeom_T);
 
 
   // in order to get numbewr of crossed layers
-  TH1D * hEfficChambBarHP_N = new TH1D("hEfficChambBarHP_N","hEfficChambBarHP_N",6,0.5,6.5); histos.Add(hEfficChambBarHP_N); 
-  TH1D * hEfficChambBarHP_D = new TH1D("hEfficChambBarHP_D","hEfficChambBarHP_D",6,0.5,6.5); histos.Add(hEfficChambBarHP_D); 
-  TH1D * hEfficChambEndHP_N = new TH1D("hEfficChambEndHP_N","hEfficChambEndHP_N",3,0.5,3.5); histos.Add(hEfficChambEndHP_N);
-  TH1D * hEfficChambEndHP_D = new TH1D("hEfficChambEndHP_D","hEfficChambEndHP_D",3,0.5,3.5); histos.Add(hEfficChambEndHP_D); 
-
-
   TH1D * hEfficChambBar_N = new TH1D("hEfficChambBar_N","Propaged muons matching RPC hits - Barrel;Layer;Muons",6,0.5,6.5); histos.Add(hEfficChambBar_N); 
   TH1D * hEfficChambBar_D = new TH1D("hEfficChambBar_D","Propaged muons crossing RPCs - Barrel;Layer;Muons",6,0.5,6.5); histos.Add(hEfficChambBar_D); 
   TH1D * hEfficChambEnd_N = new TH1D("hEfficChambEnd_N","Propaged muons matching RPC hits - Endcap;Layer;Muons",3,0.5,3.5); histos.Add(hEfficChambEnd_N);
   TH1D * hEfficChambEnd_D = new TH1D("hEfficChambEnd_D","Propaged muons crossing RPCs - Endcap;Layer;Muons",3,0.5,3.5); histos.Add(hEfficChambEnd_D); 
 
   // efficiency for trigger wrt Mu 
-  TH1D * hEfficMu_N =  new TH1D("hEfficMu_N","hEfficMu_N",64,-1.6,1.6);  histos.Add(hEfficMu_N);
-  TH1D * hEfficMu_D =  new TH1D("hEfficMu_D","hEfficMu_D",64,-1.6,1.6);  histos.Add(hEfficMu_D);
+  TH1D * hEfficMu_N =  new TH1D("hEfficMu_N","hEfficMu_N",nEtaBins,EtaBins);  histos.Add(hEfficMu_N);
+  TH1D * hEfficMu_D =  new TH1D("hEfficMu_D","hEfficMu_D",nEtaBins,EtaBins);  histos.Add(hEfficMu_D);
 
   // efficiency for trigger wrt L1Other
   TH1D * hEfficTk_N =  new TH1D("hEfficTk_N","hEfficTk_N",64,-1.6,1.6);  histos.Add(hEfficTk_N);
@@ -178,10 +172,6 @@ void EfficiencyAnalysis::beginJob()
   std::vector<bool> *hitEndcap = 0;
   std::vector<unsigned int> *detBarrel = 0;
   std::vector<unsigned int> *detEndcap = 0;
-  std::vector<bool> *hitBarrelHP = 0;
-  std::vector<bool> *hitEndcapHP = 0;
-  std::vector<unsigned int> *detBarrelHP = 0;
-  std::vector<unsigned int> *detEndcapHP = 0;
 
 //  std::vector<unsigned int> *validPRCEndcap = 0;
 //  std::vector<unsigned int> *validDTEndcap = 0;
@@ -196,11 +186,6 @@ void EfficiencyAnalysis::beginJob()
   TBranch *bhitEndcap=0;
   TBranch *bdetBarrel=0;
   TBranch *bdetEndcap=0;
-  TBranch *bhitBarrelHP=0;
-  TBranch *bhitEndcapHP=0;
-  TBranch *bdetBarrelHP=0;
-  TBranch *bdetEndcapHP=0;
-
 
   L1ObjColl* l1RpcColl = 0;
   L1ObjColl* l1OtherColl = 0;
@@ -214,10 +199,6 @@ void EfficiencyAnalysis::beginJob()
   chain.SetBranchAddress("hitEndcap",&hitEndcap, &bhitEndcap);
   chain.SetBranchAddress("detBarrel",&detBarrel, &bdetBarrel);
   chain.SetBranchAddress("detEndcap",&detEndcap, &bdetEndcap);
-  chain.SetBranchAddress("hitBarrelHP",&hitBarrelHP, &bhitBarrelHP);
-  chain.SetBranchAddress("hitEndcapHP",&hitEndcapHP, &bhitEndcapHP);
-  chain.SetBranchAddress("detBarrelHP",&detBarrelHP, &bdetBarrelHP);
-  chain.SetBranchAddress("detEndcapHP",&detEndcapHP, &bdetEndcapHP);
 
   chain.SetBranchAddress("l1RpcColl",&l1RpcColl);
   chain.SetBranchAddress("l1OtherColl",&l1OtherColl);
@@ -293,23 +274,13 @@ void EfficiencyAnalysis::beginJob()
 	  if (hitBarrel->at(i)) hEfficChambBar_N->Fill(i+1.);
         if (detBarrel->at(i)) hEfficDetB_N[i]->Fill(muon->eta());
         if (hitBarrel->at(i)) hEfficHitB_N[i]->Fill(muon->eta());
-        if (detBarrelHP->at(i)) {
-          hEfficChambBarHP_D->Fill(i+1.); 
-          if (hitBarrelHP->at(i)) hEfficChambBarHP_N->Fill(i+1.); 
-        }
       }
       for (int i=0; i<3;++i) {
-        if (detEndcap->at(i))  hEfficChambEnd_D->Fill(i+1.);
+        if (detEndcap->at(i)) hEfficChambEnd_D->Fill(i+1.);
 	  if (hitEndcap->at(i)) hEfficChambEnd_N->Fill(i+1.);
         if (detEndcap->at(i)) hEfficDetE_N[i]->Fill(muon->eta());
         if (hitEndcap->at(i)) hEfficHitE_N[i]->Fill(muon->eta());
-        if (detEndcapHP->at(i)) { 
-          hEfficChambEndHP_D->Fill(i+1.); 
-          if (hitEndcapHP->at(i)) hEfficChambEndHP_N->Fill(i+1.); 
-        }
       }
-
-      
 
       // pure Barrel
       if (fabs(muon->eta()) < 0.8) {
@@ -323,12 +294,12 @@ void EfficiencyAnalysis::beginJob()
         } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
       }
       // pure Endcap
-      if (fabs(muon->eta()) > 1.25 && fabs(muon->eta()) < 1.5) { 
+      if (fabs(muon->eta()) > 1.25  && fabs(muon->eta()) < 1.6) { 
         hHitsE->Fill(nHitsE);
         hDetsE_100->Fill(nDetsE);
         hEfficGeom_M->Fill(muon->eta());      
-        if (nDetsE==3) hEfficGeom_D->Fill(muon->eta());
-        if (nHitsE==3) {
+        if (nDetsE>=3) hEfficGeom_D->Fill(muon->eta());
+        if (nHitsE>=3) {
           hEfficGeom_H->Fill(muon->eta());
           if (l1Rpcs.size()) hEfficGeom_T->Fill(muon->eta());
         }
