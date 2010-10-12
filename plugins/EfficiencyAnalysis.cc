@@ -21,6 +21,7 @@
 
 
 using namespace std;
+template <class T> T sqr( T t) {return t*t;}
 
 void EfficiencyAnalysis::beginJob()
 {
@@ -103,14 +104,19 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficTk_D  = new TH1D("hEfficTk_D","hEfficTk_D",64,-1.6,1.6);  histos.Add(hEfficTk_D);
 
   // efficiency for  L1rpc vs Pt 
+/*
   TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",50,6.,56.);  histos.Add(hEfficMuPt7_N);
   TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",50,6.,56.);  histos.Add(hEfficMuPt_N);
   TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",50,6.,56.);  histos.Add(hEfficMuPt_D);
+*/
+  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N);
+  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",nPtBins,PtBins);  histos.Add(hEfficMuPt_N);
+  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",nPtBins,PtBins);  histos.Add(hEfficMuPt_D);
 
   // efficiency for  L1rpc vs Pt 
-  TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",50,6.,56.);  histos.Add(hEfficTkPt7_N);
-  TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",50,6.,56.);  histos.Add(hEfficTkPt_N);
-  TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",50,6.,56.);  histos.Add(hEfficTkPt_D);
+  TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",150,6.,156.);  histos.Add(hEfficTkPt7_N);
+  TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",150,6.,156.);  histos.Add(hEfficTkPt_N);
+  TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",150,6.,156.);  histos.Add(hEfficTkPt_D);
 
 
   TH2D* hDistL1Rpc   = new TH2D("hDistL1Rpc","All L1 RPC candidates (#phi,#eta);L1 RPC #eta;L1 RPC #phi [rad];Muons / bin",
@@ -241,7 +247,7 @@ void EfficiencyAnalysis::beginJob()
 
       hEfficMuPt_D->Fill(muon->pt());
       if (l1Rpcs.size())  hEfficMuPt_N->Fill(muon->pt());
-      if (l1RpcColl->getL1ObjsMatched(7.).size()) hEfficMuPt7_N->Fill(muon->pt()); 
+      if (l1RpcColl->getL1ObjsMatched(30.).size()) hEfficMuPt7_N->Fill(muon->pt()); 
     }
     //
     // L1RPC EFFICIENCY AS FUNCTION OF RUN/LUMI
@@ -380,7 +386,7 @@ void EfficiencyAnalysis::beginJob()
 
       hEfficTkPt_D->Fill(track->pt());
       if (l1Rpcs.size())     hEfficTkPt_N->Fill(track->pt());
-      if (l1RpcColl->getL1ObjsMatched(7.).size()) hEfficTkPt7_N->Fill(track->pt()); 
+      if (l1RpcColl->getL1ObjsMatched(30.).size()) hEfficTkPt7_N->Fill(track->pt()); 
     }
 
     // L1 RPC candidates
@@ -391,6 +397,8 @@ void EfficiencyAnalysis::beginJob()
 
   } // end of event loop
 
+
+  /*
   //
   // SUMMARIES RUN/LUMI EFFIC INTO GRAPH
   // average efficiency per LumiSection
@@ -409,16 +417,43 @@ void EfficiencyAnalysis::beginJob()
     iPoint++;
   } 
 
+  */
+
+
+  // average efficiency per Lumi
+  int nPoints = 0; 
+  for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) if (im->second.first != 0) ++nPoints; 
+  hGraphLumi->Set(nPoints);
+
+  int  iPoint=0;
+  for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) {
+    float eff = 0.;
+    if (im->second.first==0 ) continue;
+    if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
+    float effM1 = float(im->second.first-1)/float(im->second.second);
+    float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second; 
+    hEffLumi->Fill(eff, 1./sqr(effErr));
+    hGraphLumi->SetPoint(iPoint, im->first.first + im->first.second*0.001, eff);
+    hGraphLumi->SetPointError(iPoint, 0., effErr);
+    iPoint++;
+  } 
+
+ 
   // average efficiency per Run
-  hGraphRun->Set(effRunMap.size());
+  nPoints = 0; 
+  for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) if (im->second.first != 0) ++nPoints; 
+  hGraphRun->Set(nPoints);
+
   iPoint=0;
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) {
     float eff = 0.;
+    if (im->second.first==0 ) continue;
     if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
-    float effErr = sqrt( (1-eff)*im->second.first)/im->second.second; 
+    float effM1 = float(im->second.first-1)/float(im->second.second);
+    float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second; 
     std::cout <<" RUN: "<<im->first
               <<" Effic: "<< eff <<" ("<<im->second.first<<"/"<<im->second.second<<")"<<std::endl; 
-    hEffRun->Fill(eff);
+    hEffRun->Fill(eff, 1./sqr(effErr));
     hGraphRun->SetPoint(iPoint, im->first, eff);
     hGraphRun->SetPointError(iPoint, 0., effErr);
     iPoint++;
