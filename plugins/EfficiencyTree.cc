@@ -99,8 +99,9 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   bool barrel = fabs(point.z()) < 700. ? true : false;
   ReferenceCountingPointer<Surface> surface = barrel ?
       ReferenceCountingPointer<Surface>( new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( point.perp(),  point.perp(), -700., 700. ) ))
-    : ReferenceCountingPointer<Surface>( new  BoundDisk( GlobalPoint(0.,0.,point.z()), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
+    : ReferenceCountingPointer<Surface>( new  BoundDisk( GlobalPoint(0.,0.,point.z()), TkRotation<float>(), SimpleDiskBounds( 300., 720., -0.0001, 0.0001 ) ) );
        
+/*
   bool along = true;
   if (barrel) {
     if (muTSOS.globalPosition().perp() > point.perp()) along = false;
@@ -108,8 +109,10 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
     if ( fabs(muTSOS.globalPosition().z()) > fabs(point.z()) ) along = false;
   }
   std::string propagatorName = along? "SteppingHelixPropagatorAlong" : "SteppingHelixPropagatorOpposite";
-
   es.get<TrackingComponentsRecord>().get(propagatorName, propagator);
+*/
+
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
   TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, *surface);
   
   return result;
@@ -127,7 +130,8 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   const GeomDet * det = globalGeometry->idToDet(rpc);
   TrajectoryStateOnSurface muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
   es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong",propagator);
-  TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, det->surface());
+  Plane::PlanePointer surface = Plane::build(det->position(), det->rotation());
+  TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, *surface);
 
   return result;
 }
@@ -301,11 +305,10 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
     edm::Handle<RPCRecHitCollection> recHits;
     ev.getByLabel("rpcRecHits", recHits);
     
-//int compDet = 0;
     typedef RPCRecHitCollection::const_iterator IH;
     for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
-static int nRPCRecHits = 0;
-   std::cout <<" nRPCRecHits: "<< ++nRPCRecHits << std::endl;
+   //static int nRPCRecHits = 0;
+   //std::cout <<" nRPCRecHits: "<< ++nRPCRecHits << std::endl;
 
       RPCDetId rpcDet = ih->rpcId();
       GlobalPoint detPosition = globalGeometry->idToDet(rpcDet)->position();
@@ -337,10 +340,9 @@ static int nRPCRecHits = 0;
       float pullY = distY/ sqrt( trackAtHitError.yy()+hitError.yy());
 
       bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
-//      bool hitCompatible = true;
       BarrelAndLayer place(rpcDet);
       if (hitCompatible) std::cout <<" COMPATIBLE HIT " 
-          <<" in: "<<globalGeometry->idToDet(rpcDet)->surface().bounds().inside(trackAtHit.localPosition())
+          <<" in: "<<globalGeometry->idToDet(rpcDet)->surface().bounds().inside(ih->localPosition())
           <<" is BARREL: " << place.isBarrel() <<" layer: " << place.layer(); 
       std::cout << std::endl; 
       if (place.isBarrel()) {
@@ -368,22 +370,25 @@ static int nRPCRecHits = 0;
       GlobalPoint detPosition = det->position();
       RPCDetId rpcDet(*it);
 //std::cout << std::endl<<"checking Det: " << rpcDet.rawId();
-//    std::cout <<" position r: " << detPosition.perp()<<" phi"<<detPosition.phi()<<" z:"<<detPosition.z()<<" delta: " << 
-//    reco::deltaPhi(detPosition.phi(), theMuon->momentum().phi()) << std::endl;
+ //   std::cout <<" position r: " << detPosition.perp()<<" phi"<<detPosition.phi()<<" z:"<<detPosition.z()<<" delta: " << 
+ //   reco::deltaPhi(detPosition.phi(), theMuon->momentum().phi()) << std::endl;
       if (deltaR(muon->eta(), muon->phi(), detPosition.eta(), detPosition.phi()) > 0.7) continue;
-//      std::cout <<" CHECKING DET, id:"<<rpcDet.rawId()<<std::endl;
+ //     std::cout <<" CHECKING DET, id:"<<rpcDet.rawId(); //<<std::endl;
       TrajectoryStateOnSurface trackAtDet= trackAtSurface(theMuon, rpcDet, ev, es);
+      if (!trackAtDet.isValid()) std::cout <<" TRAJ NIT VALID!" << std::endl;
       if (!trackAtDet.isValid()) continue;
+//    if (!  (det->surface().bounds().inside(trackAtDet.localPosition()))) std::cout<<" TRAJ NOT INSIDE, local pos: "<<trackAtDet.localPosition()
+//         <<" det:width="<< det->surface().bounds().width()/2.<<" det:lengths="<<det->surface().bounds().length()/2.<<std::endl;
       if (! (det->surface().bounds().inside(trackAtDet.localPosition()))) continue;
       hPropToDetDeltaR->Fill(deltaR(muon->eta(), muon->phi(), detPosition.eta(), detPosition.phi()));
       BarrelAndLayer place(rpcDet);
-      std::cout <<" COMPATIBLE DET, isbarrel: " << place.isBarrel() <<" layrer: " << place.layer() << std::endl;
+      std::cout <<" COMPATIBLE DET, isbarrel: " << place.isBarrel() <<" layer: " << place.layer() <<" localPos: " <<trackAtDet.localPosition()<< std::endl;
       if (place.isBarrel()) detBarrel[place.layer()-1]++; else detEndcap[place.layer()-1]++;
     }
     }
   }
-  for (unsigned int i=0; i<=5; ++i) if (hitBarrel[i] && !detBarrel[i]) std::cout <<"PROBLEM-NO DET BARREL BUT HIT, i="<<i+1<<std::endl;
-  for (unsigned int i=0; i<=2; ++i) if (hitEndcap[i] && !detEndcap[i]) std::cout <<"PROBLEM-NO DET ENDCAP BUT HIT, i="<<i+1<<std::endl;
+  for (unsigned int i=0; i<=5; ++i) if (hitBarrel[i] && !detBarrel[i]) std::cout <<"WARNING-NO DET BARREL BUT HIT, i="<<i+1<<std::endl;
+  for (unsigned int i=0; i<=2; ++i) if (hitEndcap[i] && !detEndcap[i]) std::cout <<"WARNING-NO DET ENDCAP BUT HIT, i="<<i+1<<std::endl;
 
   //
   //additional way of matching hits and dets from HitPattern;
