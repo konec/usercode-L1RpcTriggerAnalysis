@@ -53,26 +53,26 @@ void EfficiencyAnalysis::beginJob()
 
 
   TH1D * hMuonPt  = new TH1D("hMuonPt","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",nPtBins,PtBins);  histos.Add(hMuonPt);
-  TH1D * hMuonEta = new TH1D("hMuonEta","All global muons Eta;Glb.muon #eta;Muons / bin",61,-2,2);  histos.Add(hMuonEta);
+  TH1D * hMuonEta = new TH1D("hMuonEta","All global muons Eta;Glb.muon #eta;Muons / bin",60,-2,2);  histos.Add(hMuonEta);
   TH1D * hMuonPhi = new TH1D("hMuonPhi","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi);
 
   // RECO track kinematics (Reco::TrackCollection "generalTracks", track matched to RECO muon above)
   TH1D * hTrackPt  = new TH1D("hTrackPt","L1Muon-matched track Pt;Track p_{T} [GeV];Tracks / bin",nPtBins,PtBins);  histos.Add(hTrackPt);
-  TH1D * hTrackEta = new TH1D("hTrackEta","L1Muon-matched track Eta;Track #eta;Tracks / bin",61,-2,2);  histos.Add(hTrackEta);
+  TH1D * hTrackEta = new TH1D("hTrackEta","L1Muon-matched track Eta;Track #eta;Tracks / bin",60,-2,2);  histos.Add(hTrackEta);
   TH1D * hTrackPhi = new TH1D("hTrackPhi","L1Muon-matched track Phi;Track #phi [rad];Tracks / bin",90,-M_PI,M_PI);  histos.Add(hTrackPhi);
 
 
   // hit histos
   // barrel |eta|<0,8, endcap 1.25<|eta|<1.55 
   TH1D *hEfficDetB_N[6],  *hEfficHitB_N[6], *hEfficDetE_N[3], *hEfficHitE_N[3]; 
-  TH1D *hEfficHitDet_D= new TH1D( "hEfficHitDet_D", "hEfficHitDet_D", 61,-2,2);  histos.Add( hEfficHitDet_D);
+  TH1D *hEfficHitDet_D= new TH1D( "hEfficHitDet_D", "hEfficHitDet_D", 60,-2,2);  histos.Add( hEfficHitDet_D);
   for (unsigned int i=1; i<=6; ++i) {
     std::stringstream name;
-    name.str(""); name<<"hEfficDetB_N"<< i; hEfficDetB_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 61,-2,2);  histos.Add( hEfficDetB_N[i-1]);
-    name.str(""); name<<"hEfficHitB_N"<< i; hEfficHitB_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 61,-2,2);  histos.Add( hEfficHitB_N[i-1]);
+    name.str(""); name<<"hEfficDetB_N"<< i; hEfficDetB_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 60,-2,2);  histos.Add( hEfficDetB_N[i-1]);
+    name.str(""); name<<"hEfficHitB_N"<< i; hEfficHitB_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 60,-2,2);  histos.Add( hEfficHitB_N[i-1]);
     if (i<=3) {
-    name.str(""); name <<"hEfficDetE_N"<< i; hEfficDetE_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 61,-2,2);  histos.Add( hEfficDetE_N[i-1]);
-    name.str(""); name <<"hEfficHitE_N"<< i; hEfficHitE_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 61,-2,2);  histos.Add( hEfficHitE_N[i-1]);
+    name.str(""); name <<"hEfficDetE_N"<< i; hEfficDetE_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 60,-2,2);  histos.Add( hEfficDetE_N[i-1]);
+    name.str(""); name <<"hEfficHitE_N"<< i; hEfficHitE_N[i-1]= new TH1D( name.str().c_str(), name.str().c_str(), 60,-2,2);  histos.Add( hEfficHitE_N[i-1]);
     }
   }
 
@@ -83,10 +83,10 @@ void EfficiencyAnalysis::beginJob()
 
   // efficiency for hits
   // barrel |eta|<0,8, endcap 1.25<|eta|<1.55 
-  TH1D * hEfficGeom_M = new TH1D("hEfficGeom_M","Propaged muons matching RPC Geom;Glb.muon #eta;Muons /bin", 61,-2,2);  histos.Add(hEfficGeom_M);
-  TH1D * hEfficGeom_H = new TH1D("hEfficGeom_H","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin", 61,-2,2);  histos.Add(hEfficGeom_H);
-  TH1D * hEfficGeom_D = new TH1D("hEfficGeom_D","RPC triggers;Glb.muon #eta;Muons / bin",61,-2,2);  histos.Add(hEfficGeom_D);
-  TH1D * hEfficGeom_T = new TH1D("hEfficGeom_T","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",61,-2,2);  histos.Add(hEfficGeom_T);
+  TH1D * hEfficGeom_M = new TH1D("hEfficGeom_M","Propaged muons matching RPC Geom;Glb.muon #eta;Muons /bin", 60,-2,2);  histos.Add(hEfficGeom_M);
+  TH1D * hEfficGeom_H = new TH1D("hEfficGeom_H","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin", 60,-2,2);  histos.Add(hEfficGeom_H);
+  TH1D * hEfficGeom_D = new TH1D("hEfficGeom_D","RPC triggers;Glb.muon #eta;Muons / bin",60,-2,2);  histos.Add(hEfficGeom_D);
+  TH1D * hEfficGeom_T = new TH1D("hEfficGeom_T","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",60,-2,2);  histos.Add(hEfficGeom_T);
 
 
   // in order to get numbewr of crossed layers
@@ -96,12 +96,12 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficChambEnd_D = new TH1D("hEfficChambEnd_D","Propaged muons crossing RPCs - Endcap;Layer;Muons",3,0.5,3.5); histos.Add(hEfficChambEnd_D); 
 
   // efficiency for trigger wrt Mu 
-  TH1D * hEfficMu_N =  new TH1D("hEfficMu_N","hEfficMu_N",61,-2,2);  histos.Add(hEfficMu_N);
-  TH1D * hEfficMu_D =  new TH1D("hEfficMu_D","hEfficMu_D",61,-2,2);  histos.Add(hEfficMu_D);
+  TH1D * hEfficMu_N =  new TH1D("hEfficMu_N","hEfficMu_N",60,-2,2);  histos.Add(hEfficMu_N);
+  TH1D * hEfficMu_D =  new TH1D("hEfficMu_D","hEfficMu_D",60,-2,2);  histos.Add(hEfficMu_D);
 
   // efficiency for trigger wrt L1Other
-  TH1D * hEfficTk_N =  new TH1D("hEfficTk_N","hEfficTk_N",61,-2,2);  histos.Add(hEfficTk_N);
-  TH1D * hEfficTk_D  = new TH1D("hEfficTk_D","hEfficTk_D",61,-2,2);  histos.Add(hEfficTk_D);
+  TH1D * hEfficTk_N =  new TH1D("hEfficTk_N","hEfficTk_N",60,-2,2);  histos.Add(hEfficTk_N);
+  TH1D * hEfficTk_D  = new TH1D("hEfficTk_D","hEfficTk_D",60,-2,2);  histos.Add(hEfficTk_D);
 
   // efficiency for  L1rpc vs Pt 
 /*
