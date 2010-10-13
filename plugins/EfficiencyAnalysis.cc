@@ -216,7 +216,7 @@ void EfficiencyAnalysis::beginJob()
 	    << std::endl;
 
 
-  std::cout << " WARNING ============= REJECTED RUNS: 147155 146417 146421 ==============" << std::endl; 
+  //  std::cout << " WARNING ============= REJECTED RUNS: 147155 146417 146421 ==============" << std::endl; 
 
 
   for (int ev=0; ev<nentries; ev++) {
@@ -224,7 +224,7 @@ void EfficiencyAnalysis::beginJob()
 
       
   // reject wrong runs:
-  if(event->run == 147155 || event->run == 146417 || event->run == 146421 ) continue;
+  //if(event->run == 147155 || event->run == 146417 || event->run == 146421 ) continue;
 
 
 
@@ -443,7 +443,7 @@ void EfficiencyAnalysis::beginJob()
   int  iPoint=0;
   for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) {
     //reject wrong runs
-    if(im->first.first == 147155. || im->first.first == 146417. || im->first.first == 146421. ) continue;
+    // if(im->first.first == 147155. || im->first.first == 146417. || im->first.first == 146421. ) continue;
   
 
     float eff = 0.;
@@ -467,7 +467,7 @@ void EfficiencyAnalysis::beginJob()
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) {
 
     //reject wrong runs
-    if(im->first == 147155. || im->first == 146417. || im->first == 146421. ) continue;
+    //if(im->first == 147155. || im->first == 146417. || im->first == 146421. ) continue;
   
 
     float eff = 0.;
