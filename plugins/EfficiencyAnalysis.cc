@@ -109,14 +109,25 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",50,6.,56.);  histos.Add(hEfficMuPt_N);
   TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",50,6.,56.);  histos.Add(hEfficMuPt_D);
 */
-  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N);
-  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",nPtBins,PtBins);  histos.Add(hEfficMuPt_N);
-  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",nPtBins,PtBins);  histos.Add(hEfficMuPt_D);
+//   TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N);
+//   TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",nPtBins,PtBins);  histos.Add(hEfficMuPt_N);
+//   TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",nPtBins,PtBins);  histos.Add(hEfficMuPt_D);
+
+//   // efficiency for  L1rpc vs Pt 
+//   TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",75,0.,150.);  histos.Add(hEfficTkPt7_N);
+//   TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",75,0.,150.);  histos.Add(hEfficTkPt_N);
+//   TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",75,0.,150.);  histos.Add(hEfficTkPt_D);
+
+
+  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",50,5.,55.);  histos.Add(hEfficMuPt7_N);
+  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",50,5.,55.);  histos.Add(hEfficMuPt_N);
+  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",50,5.,55.);  histos.Add(hEfficMuPt_D);
 
   // efficiency for  L1rpc vs Pt 
-  TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",75,0.,150.);  histos.Add(hEfficTkPt7_N);
-  TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",75,0.,150.);  histos.Add(hEfficTkPt_N);
-  TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",75,0.,150.);  histos.Add(hEfficTkPt_D);
+  TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",50,5.,55.);  histos.Add(hEfficTkPt7_N);
+  TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",50,5.,55.);  histos.Add(hEfficTkPt_N);
+  TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",50,5.,55.);  histos.Add(hEfficTkPt_D);
+
 
 
   TH2D* hDistL1Rpc   = new TH2D("hDistL1Rpc","All L1 RPC candidates (#phi,#eta);L1 RPC #eta;L1 RPC #phi [rad];Muons / bin",
@@ -216,7 +227,7 @@ void EfficiencyAnalysis::beginJob()
 	    << std::endl;
 
 
-  //  std::cout << " WARNING ============= REJECTED RUNS: 147155 146417 146421 ==============" << std::endl; 
+    std::cout << " WARNING ============= REJECTED RUNS: 147155 146417 146421 ==============" << std::endl; 
 
 
   for (int ev=0; ev<nentries; ev++) {
@@ -224,7 +235,7 @@ void EfficiencyAnalysis::beginJob()
 
       
   // reject wrong runs:
-  //if(event->run == 147155 || event->run == 146417 || event->run == 146421 ) continue;
+  if(event->run == 147115 || event->run == 146417 || event->run == 146421 ) continue;
 
 
 
@@ -437,15 +448,19 @@ void EfficiencyAnalysis::beginJob()
 
   // average efficiency per Lumi
   int nPoints = 0; 
-  for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) if (im->second.first != 0) ++nPoints; 
+  for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) {
+    //reject wrong runs
+    if(im->first.first == 147115. || im->first.first == 146417. || im->first.first == 146421. ) continue;
+    
+  if (im->second.first != 0) ++nPoints; 
+  }
   hGraphLumi->Set(nPoints);
 
   int  iPoint=0;
   for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) {
     //reject wrong runs
-    // if(im->first.first == 147155. || im->first.first == 146417. || im->first.first == 146421. ) continue;
-  
-
+     if(im->first.first == 147115. || im->first.first == 146417. || im->first.first == 146421. ) continue;
+     
     float eff = 0.;
     if (im->second.first==0 ) continue;
     if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
@@ -460,14 +475,18 @@ void EfficiencyAnalysis::beginJob()
  
   // average efficiency per Run
   nPoints = 0; 
-  for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) if (im->second.first != 0) ++nPoints; 
+  for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im){
+  //reject wrong runs
+    if(im->first == 147115. || im->first == 146417 || im->first == 146421 ) continue;
+    if (im->second.first != 0) ++nPoints; 
+  }
   hGraphRun->Set(nPoints);
 
   iPoint=0;
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) {
 
     //reject wrong runs
-    //if(im->first == 147155. || im->first == 146417. || im->first == 146421. ) continue;
+    if(im->first == 147115 || im->first == 146417 || im->first == 146421 ) continue;
   
 
     float eff = 0.;
