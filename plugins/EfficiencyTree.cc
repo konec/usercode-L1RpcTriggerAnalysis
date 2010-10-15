@@ -339,7 +339,7 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
       float pullX = distX/ sqrt( trackAtHitError.xx()+hitError.xx());
       float pullY = distY/ sqrt( trackAtHitError.yy()+hitError.yy());
 
-      bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX<10.))  && fabs(pullY) < 3.5 ;
+      bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX) < 10.)  && fabs(pullY) < 3.5 ;
       BarrelAndLayer place(rpcDet);
       if (hitCompatible) std::cout <<" COMPATIBLE HIT " 
           <<" in: "<<globalGeometry->idToDet(rpcDet)->surface().bounds().inside(ih->localPosition())

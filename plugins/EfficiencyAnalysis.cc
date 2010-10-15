@@ -104,23 +104,19 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficTk_D  = new TH1D("hEfficTk_D","hEfficTk_D",64, -1.6, 1.6);  histos.Add(hEfficTk_D);
 
 // efficiency for  L1rpc vs Pt 
-//  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",50,6.,56.);  histos.Add(hEfficMuPt7_N);
-//  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",50,6.,56.);  histos.Add(hEfficMuPt_N);
-//  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",50,6.,56.);  histos.Add(hEfficMuPt_D);
+//  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",50,6.,156.);  histos.Add(hEfficMuPt7_N);
+//  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",50,6.,156.);  histos.Add(hEfficMuPt_N);
+//  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",50,6.,156.);  histos.Add(hEfficMuPt_D);
 
-//   TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N);
-//   TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",nPtBins,PtBins);  histos.Add(hEfficMuPt_N);
-//   TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",nPtBins,PtBins);  histos.Add(hEfficMuPt_D);
+   TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N);
+   TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",nPtBins,PtBins);  histos.Add(hEfficMuPt_N);
+   TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",nPtBins,PtBins);  histos.Add(hEfficMuPt_D);
 
 //   // efficiency for  L1rpc vs Pt 
 //   TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",75,0.,150.);  histos.Add(hEfficTkPt7_N);
 //   TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",75,0.,150.);  histos.Add(hEfficTkPt_N);
 //   TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",75,0.,150.);  histos.Add(hEfficTkPt_D);
 
-
-  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",50,5.,55.);  histos.Add(hEfficMuPt7_N);
-  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",50,5.,55.);  histos.Add(hEfficMuPt_N);
-  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",50,5.,55.);  histos.Add(hEfficMuPt_D);
 
   // efficiency for  L1rpc vs Pt 
   TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",50,5.,55.);  histos.Add(hEfficTkPt7_N);
