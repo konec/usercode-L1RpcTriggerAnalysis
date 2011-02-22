@@ -25,6 +25,29 @@
 <use name=SimTracker/TrackerHitAssociation>
 <use name=SimDataFormats/TrackerDigiSimLink>
 
+<use name=L1Trigger/RPCTrigger>
+
+
+<use name=FWCore/Framework>
+<use name=RecoTracker/TkHitPairs>
+<use name=RecoTracker/TkTrackingRegions>
+<use name=SimTracker/TrackerHitAssociation>
+<use name=SimDataFormats/TrackerDigiSimLink>
+<use name=DataFormats/L1Trigger>
+<use name=DataFormats/CSCDigi>
+<use name=DataFormats/L1CSCTrackFinder>
+<use name=CondFormats/L1TObjects>
+<use name=L1Trigger/CSCTrackFinder>
+<use name=DataFormats/L1GlobalMuonTrigger>
+<use name=DataFormats/L1GlobalTrigger>
+<use name=DQMServices/Core>
+<use name=DQMServices/ClientConfig>
+<use name=DataFormats/FEDRawData>
+<use name=CommonTools/UtilAlgos>
+<use name=PhysicsTools/UtilAlgos>
+<use   name=FWCore/PluginManager>
+<use   name=xerces-c>
+
 
 <export>
   <lib name=UserCodeL1RpcTriggerAnalysis>
@@ -39,5 +62,6 @@
 <use name=L1Trigger/CSCTrackFinder>
 <use name=DataFormats/L1GlobalMuonTrigger>
 <use name=DataFormats/L1GlobalTrigger>
+
 
 </export>

@@ -24,3 +24,7 @@ DEFINE_FWK_MODULE(EfficiencyTree);
 
 #include "EfficiencyAnalysis.h"
 DEFINE_FWK_MODULE(EfficiencyAnalysis);
+
+#include "L1RpcMCEfficiency.h"
+DEFINE_FWK_MODULE(L1RpcMCEfficiency);
+
