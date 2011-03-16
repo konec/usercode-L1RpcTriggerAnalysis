@@ -1,0 +1,4 @@
+<use   name="UserCode/L1RpcTriggerAnalysis"/>
+<library   file="*.cc" name="UserCodeL1RpcTriggerAnalysisPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>
