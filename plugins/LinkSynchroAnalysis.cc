@@ -14,6 +14,7 @@
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroSelectorTrack.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroSelectorMuon.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroSelectorL1Muon.h"
 
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "TFile.h"
@@ -44,6 +45,7 @@ void LinkSynchroAnalysis::beginJob()
 
   if (theAnaConfig.exists("synchroSelectorMuon"))  theSynchroFilters.push_back( new SynchroSelectorMuon(theAnaConfig.getParameter<edm::ParameterSet>("synchroSelectorMuon"), theHistos) );
   if (theAnaConfig.exists("synchroSelectorTrack")) theSynchroFilters.push_back( new SynchroSelectorTrack(theAnaConfig.getParameter<edm::ParameterSet>("synchroSelectorTrack"), theHistos) );
+  if (theAnaConfig.exists("synchroSelectorL1Muon")) theSynchroFilters.push_back( new SynchroSelectorL1Muon(theAnaConfig.getParameter<edm::ParameterSet>("synchroSelectorL1Muon"), theHistos) );
   std::cout << "SIZE OF SELECTORS IS: " << theSynchroFilters.size()<<std::endl;
 
 }
@@ -77,6 +79,8 @@ const RPCRawSynchro::ProdItem& LinkSynchroAnalysis::select(const RPCRawSynchro::
     theCabling = readoutMapping->convert();
     LogTrace("") << "LinkSynchroAnalysis - record has CHANGED!!, read map, VERSION: " << theCabling->version();
   }
+
+  for (std::vector<SynchroSelector* >::iterator ix=theSynchroFilters.begin(); ix != theSynchroFilters.end(); ++ix) (*ix)->update(ev,es);
 
   for(RPCRawSynchro::ProdItem::const_iterator it = vItem.begin(); it != vItem.end(); ++it) {
     const LinkBoardElectronicIndex & path = it->first;

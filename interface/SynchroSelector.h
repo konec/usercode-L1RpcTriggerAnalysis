@@ -16,6 +16,7 @@ public:
   public: SynchroSelector( const edm::ParameterSet & cfg = edm::ParameterSet() );
   virtual ~SynchroSelector(){}
 
+  virtual void update(const edm::Event&ev, const edm::EventSetup& es) {}
   virtual bool takeIt(const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es) {return false; }
 
 protected:
