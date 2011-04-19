@@ -361,9 +361,22 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
     //rpc dets compatible with muon
     // 
     edm::ESHandle<RPCGeometry> rpcGeometry;
-    es.get<MuonGeometryRecord>().get(rpcGeometry);
-    const TrackingGeometry::DetIdContainer & detIds = rpcGeometry->detIds();
-    if ( muon->pt() >7. ) {
+     es.get<MuonGeometryRecord>().get(rpcGeometry);
+     const TrackingGeometry::DetIdContainer & detIds = rpcGeometry->detIds();
+
+
+/*    if ( muon->pt() >7. ) {
+    	for (TrackingGeometry::DetIdContainer::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
+
+    	      const GeomDet * det = rpcGeometry->idToDet(*it);
+    	      GlobalPoint detPosition = det->position();
+    	      RPCDetId rpcDet(*it);
+    	      if (detPosition.phi() < 2) affected_station = true;
+    	}
+
+    }*/
+
+    if ( muon->pt() >7.) {
     for (TrackingGeometry::DetIdContainer::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
 
       const GeomDet * det = rpcGeometry->idToDet(*it);
@@ -373,6 +386,7 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
  //   std::cout <<" position r: " << detPosition.perp()<<" phi"<<detPosition.phi()<<" z:"<<detPosition.z()<<" delta: " << 
  //   reco::deltaPhi(detPosition.phi(), theMuon->momentum().phi()) << std::endl;
       if (deltaR(muon->eta(), muon->phi(), detPosition.eta(), detPosition.phi()) > 0.7) continue;
+    		  //|| (  fabs(detPosition.eta()) < 0.27   &&   detPosition.phi() > 3.4 && detPosition.phi() < 4.0)) continue;
  //     std::cout <<" CHECKING DET, id:"<<rpcDet.rawId(); //<<std::endl;
       TrajectoryStateOnSurface trackAtDet= trackAtSurface(theMuon, rpcDet, ev, es);
       if (!trackAtDet.isValid()) std::cout <<" TRAJ NIT VALID!" << std::endl;
@@ -394,7 +408,9 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
   //additional way of matching hits and dets from HitPattern;
   //
   edm::InputTag l1Tag(theConfig.getParameter<edm::InputTag>("l1MuReadout"));
-  L1ObjMaker l1(l1Tag,ev);
+  edm::InputTag l1TagEmu(theConfig.getParameter<edm::InputTag>("l1MuReadoutEmu"));
+
+  L1ObjMaker l1(l1Tag,l1TagEmu,ev);
 
   // set L1Others
   std::vector<L1Obj> l1Others=  l1(L1ObjMaker::DT,L1ObjMaker::CSC);
