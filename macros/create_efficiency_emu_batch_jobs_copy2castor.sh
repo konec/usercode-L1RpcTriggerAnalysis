@@ -2,10 +2,10 @@
 . /etc/bashrc 
 #
 
-castor=/castor/cern.ch/user/r/rybinska/TriggerAnalysis2011/162822-162929_19042011_emu/tree
+castor=/castor/cern.ch/user/r/rybinska/TriggerAnalysis2011/162822-162929_19042011_emu_3z6
 #castor=/castor/cern.ch/cms/store/caf/user/ccmuon/RPC/RPCTrigger/Synchro/Runs_142928_144114/
 #cmsswdir=/afs/cern.ch/cms/L1/rpc/soft/synchro_v0/CMSSW_4_1_1/src
-cmsswdir=/afs/cern.ch/cms/L1/rpc/EffWithEmu/CMSSW_4_1_4_patch2/src/
+cmsswdir=/afs/cern.ch/cms/L1/rpc/EffWithEmu/test_cvs/CMSSW_4_1_4_patch2/src/
 scriptdir=`dirname $0`
 cd ${scriptdir}; scriptdir=`pwd`; cd -
 if ! [ -d "${scriptdir}" ]; then
@@ -138,9 +138,9 @@ cmsRun ${ana} |& tee ${jobdir}.log
 echo "END cmsRun"
 date;pwd
 
-mv emu_4z6.root ${jobdir}_emu_4z6.root
-rfcp ${jobdir}_emu_4z6.root ${castor}
-echo rfcp ${jobdir}_emu_4z6.root ${castor}
+mv emu.root ${jobdir}_emu.root
+rfcp ${jobdir}_emu.root ${castor}
+echo rfcp ${jobdir}_emu.root ${castor}
 
 
 
