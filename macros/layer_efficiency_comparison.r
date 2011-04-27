@@ -17,7 +17,7 @@
 
 
 //Comment or uncomment what needed
-//Default - Layer efficiency comparision of 2 root files.
+//Default - Layer efficiency comparison of 2 root files.
 
 //Layer efficiency comparision of 2 (3) root files.
 //File names: efficiencyHistos_1.root, efficiencyHistos_2.root, (efficiencyHistos_3.root)
@@ -91,7 +91,7 @@
   heffChambEnd_3->SetLineColor(kRed);
   heffChambEnd_3->DrawCopy("E same"); */
 
-//Layer efficiency comparision between data from 1 rootfile and detector group data
+//Layer efficiency comparison between data from 1 rootfile and detector group data
 //To use put values of layer efficiency taken from detector group in place of 0.9 in lines heffChambXXX_2->SetBinContent(1,0.9); 
 //and error values in place of 0. or 0.000001 in lines heffChambXXX_2->SetBinError(1,0.000001);
 //Small value in the first bin - no error bars.
