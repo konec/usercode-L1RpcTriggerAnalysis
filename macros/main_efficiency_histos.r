@@ -24,8 +24,7 @@
   c0Mu.cd(3);
   hMuonPhi->SetMinimum(0);
   hMuonPhi->DrawCopy();
-  c0Mu.Print(0,".eps");
-  c0Mu.Print(0,".gif");
+  c0Mu.Print(0,".png");
 
   //----track distribution
   c0Tk = new TCanvas("c0Tk","track distribution",1200,400);
@@ -68,8 +67,7 @@
   legend.AddEntry(hDB5,"layer 5","l");
   legend.AddEntry(hDB6,"layer 6","l");
   legend.Draw();
-  c1EDB->Print(0,".eps");
-  c1EDB->Print(0,".gif");
+  c1EDB->Print(0,".png");
 
   //---hits barrel
   c1EHB = new TCanvas("c1EHB","barrel hits populatoin",500,500); 
@@ -97,8 +95,7 @@
   legend2.AddEntry(hHB5,"layer 5","l");
   legend2.AddEntry(hHB6,"layer 6","l");
   legend2.Draw();
-  c1EHB->Print(0,".eps");
-  c1EHB->Print(0,".gif");
+  c1EHB->Print(0,".png");
   
   //
   // HIT AND LAYER EFFICIENCY AS ETA
@@ -120,8 +117,7 @@
   legendDE.AddEntry(hDE2,"layer 2","l");
   legendDE.AddEntry(hDE3,"layer 3","l");
   legendDE.Draw();
-  c1EDE->Print(0,".eps");
-  c1EDE->Print(0,".gif");
+  c1EDE->Print(0,".png");
 
   //---hits endcap
   c1EHE = new TCanvas("c1EHE"," endcap hits populatoin",500,500); 
@@ -140,8 +136,7 @@
   legendHE.AddEntry(hHE2,"layer 2","l");
   legendHE.AddEntry(hHE3,"layer 3","l");
   legendHE.Draw();
-  c1EHE->Print(0,".eps");
-  c1EHE->Print(0,".gif");
+  c1EHE->Print(0,".png");
 
 //
 // HITS AND LAYER SUMMARY 
@@ -166,8 +161,7 @@
   heffChambEnd->SetYTitle("efficiency");
   heffChambEnd->DrawCopy("E");
   heffChambEnd->Print("all");
-  c9.Print(0,".eps");
-  c9.Print(0,".gif");
+  c9.Print(0,".png");
 
 //
 // CROSSED LAYERS AND DETS
@@ -191,8 +185,7 @@
   std::cout <<" EndcapDet (3-3): "<< hDetsE_100->GetBinContent(4) <<std::endl;
   hDetsE_100.SetMinimum(0.);
   hDetsE_100.DrawCopy();
-  c1D.Print(0,".eps");
-  c1D.Print(0,".gif");
+  c1D.Print(0,".png");
 
   //----number of hits left  
   c1H = new TCanvas("c1H","hits populatoin",900,500);
@@ -212,8 +205,7 @@
   std::cout <<" EndcapHit (3-3): "<< hHitsE->GetBinContent(4) <<std::endl;
   hHitsE.SetMinimum(0.);
   hHitsE.DrawCopy();
-  c1H.Print(0,".eps");
-  c1H.Print(0,".gif");
+  c1H.Print(0,".png");
 
   //
   // EXPECTED EFFICIENCY FROM HITS
@@ -310,8 +302,7 @@
   heffD->DrawCopy("hist same");
 
   legend3.Draw();
-  c2->Print(0,".eps");
-  c2->Print(0,".gif");
+  c2->Print(0,".png");
 
   c2_3z6 = new TCanvas("c2_3z6","det in concidence for trigger",-2);
   c2_3z6->SetFillColor(0);
@@ -321,8 +312,7 @@
   heffD_3z6->DrawCopy("hist same");
   
   legend3.Draw();
-  c2_3z6->Print(0,".eps"); 
-  c2_3z6->Print(0,".gif");
+  c2_3z6->Print(0,".png");
 
 
 
@@ -349,8 +339,7 @@
   heffM->SetMarkerStyle(25);
   heffM->SetMarkerColor(4);
   heffM->DrawCopy("E");
-  c3.Print(0,".eps");
-  c3.Print(0,".gif");
+  c3.Print(0,".png");
 
   //---- efficiency for trigger wrt Tk 
   c4 =  new TCanvas("c4","c4",-2);
@@ -363,8 +352,7 @@
   heffT->SetMarkerStyle(25);
   heffT->SetMarkerColor(4);
   heffT->DrawCopy("E");
-  c4.Print(0,".eps");
-  c4.Print(0,".gif");
+  c4.Print(0,".png");
 
   c5 = new TCanvas("c5","c5",-2);
   c5->SetFillColor(0);
@@ -380,8 +368,7 @@
   heffMuPt7->SetMarkerStyle(23);
   heffMuPt7->SetMarkerColor(2);
   heffMuPt7->DrawCopy("E same");
-  c5.Print(0,".eps");
-  c5.Print(0,".gif");
+  c5.Print(0,".png");
   
   //barrel
   
@@ -399,8 +386,6 @@
   heffMuPt7_barrel->SetMarkerStyle(23);
   heffMuPt7_barrel->SetMarkerColor(2);
   heffMuPt7_barrel->DrawCopy("E same");
-  c5_barrel.Print(0,".eps");
-  c5_barrel.Print(0,".gif");
   c5_barrel.Print(0,".png");
   
     //overlap
@@ -419,8 +404,6 @@
   heffMuPt7_overlap->SetMarkerStyle(23);
   heffMuPt7_overlap->SetMarkerColor(2);
   heffMuPt7_overlap->DrawCopy("E same");
-  c5_overlap.Print(0,".eps");
-  c5_overlap.Print(0,".gif");
   c5_overlap.Print(0,".png");
   
     //endcap
@@ -439,8 +422,6 @@
   heffMuPt7_endcap->SetMarkerStyle(23);
   heffMuPt7_endcap->SetMarkerColor(2);
   heffMuPt7_endcap->DrawCopy("E same");
-  c5_endcap.Print(0,".eps");
-  c5_endcap.Print(0,".gif");
   c5_endcap.Print(0,".png");
   
     //endcapN
@@ -459,8 +440,6 @@
   heffMuPt7_endcapN->SetMarkerStyle(23);
   heffMuPt7_endcapN->SetMarkerColor(2);
   heffMuPt7_endcapN->DrawCopy("E same");
-  c5_endcapN.Print(0,".eps");
-  c5_endcapN.Print(0,".gif");
   c5_endcapN.Print(0,".png");
   
     //endcapP
@@ -479,8 +458,6 @@
   heffMuPt7_endcapP->SetMarkerStyle(23);
   heffMuPt7_endcapP->SetMarkerColor(2);
   heffMuPt7_endcapP->DrawCopy("E same");
-  c5_endcapP.Print(0,".eps");
-  c5_endcapP.Print(0,".gif");
   c5_endcapP.Print(0,".png");
 
   c6 = new TCanvas("c6","c6",-2);
@@ -497,8 +474,7 @@
   heffTkPt7->SetMarkerStyle(23);
   heffTkPt7->SetMarkerColor(2);
   heffTkPt7->DrawCopy("E same");
-  c6.Print(0,".eps");
-  c6.Print(0,".gif");
+  c6.Print(0,".png");
 
   c7 = new TCanvas("c7","c7",1200,500);
   c7->SetFillColor(0);
@@ -507,8 +483,7 @@
   hDistL1Rpc->DrawCopy("box");
   c7->cd(2);
   hDistL1Other->DrawCopy("box");
-  c7.Print(0,".eps");
-  c7.Print(0,".gif");
+  c7.Print(0,".png");
 
   c8= new TCanvas("c8","c8",-2);
   c8->SetFillColor(0);
@@ -518,8 +493,7 @@
   gPad->SetLogy();
   hL1RpcBX->SetNdivisions(605,"X");
   hL1RpcBX->DrawCopy();
-  c8.Print(0,".eps");
-  c8.Print(0,".gif");
+  c8.Print(0,".png");
 
   //----chamber  efficiency
   c10 =  new TCanvas("c10","c10",-1);  
@@ -534,8 +508,7 @@
   hGraphRun->SetMarkerStyle(25);
   hGraphRun->SetMarkerColor(2);
   hGraphRun->Draw("Paint E");
-  c10.Print(0,".eps");
-  c10.Print(0,".gif");
+  c10.Print(0,".png");
 
   //----chamber  efficiency
   c10l =  new TCanvas("c10l","c10l",-1);
@@ -551,8 +524,7 @@
   hGraphLumi->SetMarkerStyle(25);
   hGraphLumi->SetMarkerColor(2);
   hGraphLumi->Draw("Paint E");
-  c10l.Print(0,".eps");
-  c10l.Print(0,".gif");
+  c10l.Print(0,".png");
 }
 
 
