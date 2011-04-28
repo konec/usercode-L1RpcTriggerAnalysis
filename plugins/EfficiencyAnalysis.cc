@@ -56,6 +56,13 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hMuonEta = new TH1D("hMuonEta","All global muons Eta;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hMuonEta);
   TH1D * hMuonPhi = new TH1D("hMuonPhi","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi);
 
+  //Without affected stations
+
+  TH1D * hMuonPt_good  = new TH1D("hMuonPt_good","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",nPtBins,PtBins);  histos.Add(hMuonPt_good);
+  TH1D * hMuonEta_good = new TH1D("hMuonEta_good","All global muons Eta;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hMuonEta_good);
+  TH1D * hMuonPhi_good = new TH1D("hMuonPhi_good","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi_good);
+
+
   // RECO track kinematics (Reco::TrackCollection "generalTracks", track matched to RECO muon above)
   TH1D * hTrackPt  = new TH1D("hTrackPt","L1Muon-matched track Pt;Track p_{T} [GeV];Tracks / bin",nPtBins,PtBins);  histos.Add(hTrackPt);
   TH1D * hTrackEta = new TH1D("hTrackEta","L1Muon-matched track Eta;Track #eta;Tracks / bin",64, -1.6, 1.6);  histos.Add(hTrackEta);
@@ -88,6 +95,30 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficGeom_D = new TH1D("hEfficGeom_D","RPC triggers;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_D);
   TH1D * hEfficGeom_T = new TH1D("hEfficGeom_T","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_T);
 
+  TH1D * hEfficGeom_H_3z6 = new TH1D("hEfficGeom_H_3z6","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin", 64, -1.6, 1.6);  histos.Add(hEfficGeom_H_3z6);
+  TH1D * hEfficGeom_D_3z6 = new TH1D("hEfficGeom_D_3z6","RPC triggers;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_D_3z6);
+  TH1D * hEfficGeom_T_3z6 = new TH1D("hEfficGeom_T_3z6","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_T_3z6);
+
+  //without affected stations
+
+  TH1D * hEfficGeom_M_good = new TH1D("hEfficGeom_M_good","Propaged muons matching RPC Geom;Glb.muon #eta;Muons /bin", 64, -1.6, 1.6);  histos.Add(hEfficGeom_M_good);
+  TH1D * hEfficGeom_H_good = new TH1D("hEfficGeom_H_good","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin", 64, -1.6, 1.6);  histos.Add(hEfficGeom_H_good);
+  TH1D * hEfficGeom_D_good = new TH1D("hEfficGeom_D_good","RPC triggers;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_D_good);
+  TH1D * hEfficGeom_T_good = new TH1D("hEfficGeom_T_good","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_T_good);
+
+  TH1D * hEfficGeom_H_3z6_good = new TH1D("hEfficGeom_H_3z6_good","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin", 64, -1.6, 1.6);  histos.Add(hEfficGeom_H_3z6_good);
+  TH1D * hEfficGeom_D_3z6_good = new TH1D("hEfficGeom_D_3z6_good","RPC triggers;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_D_3z6_good);
+  TH1D * hEfficGeom_T_3z6_good = new TH1D("hEfficGeom_T_3z6_good","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hEfficGeom_T_3z6_good);
+
+
+
+ // efficiency for hits
+  // full region
+  TH1D * hEfficGeomTot_M = new TH1D("hEfficGeomTot_M","Propaged muons matching RPC Geom;Glb.muon #eta;Muons /bin", 128, -1.6, 1.6);  histos.Add(hEfficGeomTot_M);
+  TH1D * hEfficGeomTot_H = new TH1D("hEfficGeomTot_H","Propaged muons matching RPC Geom;Glb.muon #eta;Muons / bin", 128, -1.6, 1.6);  histos.Add(hEfficGeomTot_H);
+  TH1D * hEfficGeomTot_D = new TH1D("hEfficGeomTot_D","RPC triggers;Glb.muon #eta;Muons / bin",128, -1.6, 1.6);  histos.Add(hEfficGeomTot_D);
+  TH1D * hEfficGeomTot_T = new TH1D("hEfficGeomTot_T","Propaged muons crossing RPCs;Glb.muon #eta;Muons / bin",128, -1.6, 1.6);  histos.Add(hEfficGeomTot_T);
+
 
   // in order to get numbewr of crossed layers
   TH1D * hEfficChambBar_N = new TH1D("hEfficChambBar_N","Propaged muons matching RPC hits - Barrel;Layer;Muons",6,0.5,6.5); histos.Add(hEfficChambBar_N); 
@@ -99,29 +130,51 @@ void EfficiencyAnalysis::beginJob()
   TH1D * hEfficMu_N =  new TH1D("hEfficMu_N","hEfficMu_N",64, -1.6, 1.6);  histos.Add(hEfficMu_N);
   TH1D * hEfficMu_D =  new TH1D("hEfficMu_D","hEfficMu_D",64, -1.6, 1.6);  histos.Add(hEfficMu_D);
 
+  //Without Affected stations
+
+  TH1D * hEfficMu_N_good =  new TH1D("hEfficMu_N_good","hEfficMu_N_good",64, -1.6, 1.6);  histos.Add(hEfficMu_N_good);
+  TH1D * hEfficMu_D_good =  new TH1D("hEfficMu_D_good","hEfficMu_D_good",64, -1.6, 1.6);  histos.Add(hEfficMu_D_good);
+
+
   // efficiency for trigger wrt L1Other
   TH1D * hEfficTk_N =  new TH1D("hEfficTk_N","hEfficTk_N",64, -1.6, 1.6);  histos.Add(hEfficTk_N);
   TH1D * hEfficTk_D  = new TH1D("hEfficTk_D","hEfficTk_D",64, -1.6, 1.6);  histos.Add(hEfficTk_D);
 
 // efficiency for  L1rpc vs Pt 
-//  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",50,6.,156.);  histos.Add(hEfficMuPt7_N);
-//  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",50,6.,156.);  histos.Add(hEfficMuPt_N);
-//  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",50,6.,156.);  histos.Add(hEfficMuPt_D);
+//  TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",75,0.,150.);  histos.Add(hEfficMuPt7_N);
+//  TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",75,0.,150.);  histos.Add(hEfficMuPt_N);
+//  TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",75,0.,150.);  histos.Add(hEfficMuPt_D);
 
+   TH1D * hEfficMuPt7All_N = new TH1D("hEfficMuPt7All_N","hEfficMuPt7All_N",nPtBins,PtBins);  histos.Add(hEfficMuPt7All_N);
    TH1D * hEfficMuPt7_N = new TH1D("hEfficMuPt7_N","hEfficMuPt7_N",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N);
+   TH1D * hEfficMuPt7_N_barrel = new TH1D("hEfficMuPt7_N_barrel","hEfficMuPt7_N_barrel",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N_barrel);
+   TH1D * hEfficMuPt7_N_overlap = new TH1D("hEfficMuPt7_N_overlap","hEfficMuPt7_N_overlap",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N_overlap);
+   TH1D * hEfficMuPt7_N_endcap = new TH1D("hEfficMuPt7_N_endcap","hEfficMuPt7_N_endcap",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N_endcap);
+   TH1D * hEfficMuPt7_N_endcapN = new TH1D("hEfficMuPt7_N_endcapN","hEfficMuPt7_N_endcapN",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N_endcapN);
+   TH1D * hEfficMuPt7_N_endcapP = new TH1D("hEfficMuPt7_N_endcapP","hEfficMuPt7_N_endcapP",nPtBins,PtBins);  histos.Add(hEfficMuPt7_N_endcapP);
    TH1D * hEfficMuPt_N = new TH1D("hEfficMuPt_N","hEfficMuPt_N",nPtBins,PtBins);  histos.Add(hEfficMuPt_N);
+   TH1D * hEfficMuPt_N_barrel = new TH1D("hEfficMuPt_N_barrel","hEfficMuPt_N_barrel",nPtBins,PtBins);  histos.Add(hEfficMuPt_N_barrel);
+   TH1D * hEfficMuPt_N_overlap = new TH1D("hEfficMuPt_N_overlap","hEfficMuPt_N_overlap",nPtBins,PtBins);  histos.Add(hEfficMuPt_N_overlap);
+   TH1D * hEfficMuPt_N_endcap = new TH1D("hEfficMuPt_N_endcap","hEfficMuPt_N_endcap",nPtBins,PtBins);  histos.Add(hEfficMuPt_N_endcap);
+   TH1D * hEfficMuPt_N_endcapN = new TH1D("hEfficMuPt_N_endcapN","hEfficMuPt_N_endcapN",nPtBins,PtBins);  histos.Add(hEfficMuPt_N_endcapN);
+   TH1D * hEfficMuPt_N_endcapP = new TH1D("hEfficMuPt_N_endcapP","hEfficMuPt_N_endcapP",nPtBins,PtBins);  histos.Add(hEfficMuPt_N_endcapP);
    TH1D * hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D",nPtBins,PtBins);  histos.Add(hEfficMuPt_D);
+   TH1D * hEfficMuPt_D_barrel = new TH1D("hEfficMuPt_D_barrel","hEfficMuPt_D_barrel",nPtBins,PtBins);  histos.Add(hEfficMuPt_D_barrel);
+   TH1D * hEfficMuPt_D_overlap = new TH1D("hEfficMuPt_D_overlap","hEfficMuPt_D_overlap",nPtBins,PtBins);  histos.Add(hEfficMuPt_D_overlap);
+   TH1D * hEfficMuPt_D_endcap = new TH1D("hEfficMuPt_D_endcap","hEfficMuPt_D_endcap",nPtBins,PtBins);  histos.Add(hEfficMuPt_D_endcap);
+   TH1D * hEfficMuPt_D_endcapN = new TH1D("hEfficMuPt_D_endcapN","hEfficMuPt_D_endcapN",nPtBins,PtBins);  histos.Add(hEfficMuPt_D_endcapN);
+   TH1D * hEfficMuPt_D_endcapP = new TH1D("hEfficMuPt_D_endcapP","hEfficMuPt_D_endcapP",nPtBins,PtBins);  histos.Add(hEfficMuPt_D_endcapP);
 
 //   // efficiency for  L1rpc vs Pt 
-//   TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",75,0.,150.);  histos.Add(hEfficTkPt7_N);
-//   TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",75,0.,150.);  histos.Add(hEfficTkPt_N);
-//   TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",75,0.,150.);  histos.Add(hEfficTkPt_D);
+   TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",75,0.,150.);  histos.Add(hEfficTkPt7_N);
+   TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",75,0.,150.);  histos.Add(hEfficTkPt_N);
+   TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",75,0.,150.);  histos.Add(hEfficTkPt_D);
 
 
   // efficiency for  L1rpc vs Pt 
-  TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",50,5.,55.);  histos.Add(hEfficTkPt7_N);
-  TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",50,5.,55.);  histos.Add(hEfficTkPt_N);
-  TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",50,5.,55.);  histos.Add(hEfficTkPt_D);
+//  TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",50,5.,55.);  histos.Add(hEfficTkPt7_N);
+//  TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",50,5.,55.);  histos.Add(hEfficTkPt_N);
+//  TH1D * hEfficTkPt_D = new TH1D("hEfficTkPt_D","hEfficTkPt_D",50,5.,55.);  histos.Add(hEfficTkPt_D);
 
 
 
@@ -129,6 +182,26 @@ void EfficiencyAnalysis::beginJob()
                                 nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Rpc);  
   TH2D* hDistL1Other = new TH2D("hDistL1Other","All L1 DT/CSC candidates (#phi,#eta);L1 obj #eta;L1 obj #phi [rad];DT/CSC muons / bin",
                                 nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Other);
+
+  TH2D* hDistN = new TH2D("hDistN","All global muons with RPC L1T (#phi,#eta);Global Muon #eta;Global muon #phi [rad];Global muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistN);
+  TH2D* hDistD = new TH2D("hDistD","All global muons (#phi,#eta);Global Muon #eta;Global muon #phi [rad];Global muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistD);
+
+  TH2D* hRpcPtCode = new TH2D("hRpcPtCode","pt vs ptCode;ptCode;pt; Muons / bin",
+                                140,0,140,140,0,140); histos.Add(hRpcPtCode);  
+
+  //Without affected sectors
+
+  TH2D* hDistL1Rpc_good   = new TH2D("hDistL1Rpc_good ","All L1 RPC candidates (#phi,#eta);L1 RPC #eta;L1 RPC #phi [rad];Muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Rpc_good );
+  TH2D* hDistL1Other_good  = new TH2D("hDistL1Other_good ","All L1 DT/CSC candidates (#phi,#eta);L1 obj #eta;L1 obj #phi [rad];DT/CSC muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistL1Other_good );
+
+  TH2D* hDistN_good = new TH2D("hDistN_good","All global muons with RPC L1T (#phi,#eta);Global Muon #eta;Global muon #phi [rad];Global muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistN_good);
+  TH2D* hDistD_good = new TH2D("hDistD_good","All global muons (#phi,#eta);Global Muon #eta;Global muon #phi [rad];Global muons / bin",
+                                nEtaBins,EtaBins,144,-0.2e-3,2*M_PI-0.2e-3); histos.Add(hDistD_good);
 
   TH1D* hEffLumi = new TH1D("hEffLumi","Efficiency per LS;Efficiency per LS;No of LS / bin",100,0.,1.); histos.Add(hEffLumi);
   TH1D* hEffRun = new TH1D("hEffRun","Efficiency per run;Efficiency per run;No of runs / bin",100,0.,1.); histos.Add(hEffRun);
@@ -219,18 +292,38 @@ void EfficiencyAnalysis::beginJob()
   std::cout <<" ENTRIES: " << nentries << std::endl;
   std::cout <<"CUTS:  pt_reco: "<<theConfig.getParameter<double>("ptMin")
 	    <<"  pt_l1Cut "<<theConfig.getParameter<double>("l1Cut")
+	   // <<"  selected_RUN "<<theConfig.getParameter<double>("noRun")
+
 	    << std::endl;
 
 
-    std::cout << " WARNING ============= REJECTED RUNS: 147155 146417 146421 ==============" << std::endl; 
+    std::cout << " WARNING ============= REJECTED RUNS: 147155 146417 146421 147749==============" << std::endl; 
 
+int RPCTriggers = 0;
+int RPCTriggersOnly = 0;
+int OtherTriggers = 0;
+int OtherTriggersOnly = 0;
 
   for (int ev=0; ev<nentries; ev++) {
     chain.GetEntry(ev);
 
       
   // reject wrong runs:
-  if(event->run == 147115 || event->run == 146417 || event->run == 146421 ) continue;
+//  if(event->run == 147421 ||event->run == 147417) 
+ if(event->run == 147115|| event->run == 147421 ||event->run == 147417 || event->run == 147749) continue;
+ // if(event->run != theConfig.getParameter<double>("noRun") ) continue;
+ //if(event->run < theConfig.getParameter<double>("noRun") ) continue;
+
+std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs();
+std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsMatched();
+if(l1Others.size() ==0 && l1Rpcs.size() !=0 ) RPCTriggersOnly++;
+if(l1Others.size() !=0 && l1Rpcs.size() ==0 ) OtherTriggersOnly++;
+if(l1Rpcs.size() !=0 ) RPCTriggers++;
+if(l1Others.size() !=0 ) OtherTriggers++;
+
+if(l1Others.size() ==0 ) continue;
+
+
 
 
 
@@ -249,7 +342,7 @@ void EfficiencyAnalysis::beginJob()
         ) continue;
 
     hMuGBX->Fill(event->bx);
-    std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsMatched(); 
+//    std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsMatched();
 
     //
     // MAIN RPC EFFICIENCY HISTORGAMS
@@ -264,12 +357,62 @@ void EfficiencyAnalysis::beginJob()
       hMuonEta->Fill(muon->eta());
       hMuonPhi->Fill(muon->phi());
       hEfficMu_D->Fill(muon->eta());
-      if (l1Rpcs.size()) hEfficMu_N->Fill(muon->eta()); 
+      hDistD->Fill(muon->eta(),muon->phi());
+      if (l1Rpcs.size()) {
+    	  hEfficMu_N->Fill(muon->eta());
+    	  hDistN->Fill(muon->eta(),muon->phi());
+      }
+      //Without Affected stations
+
+      if (  !(muon->phi() < 2. && muon->phi() > -0.2) &&  !(muon->phi() < -1.4 && muon->phi() > -3.14)  && !(muon->phi() >2.9 && muon->phi() < 3.14)) {
+
+
+    	  hMuonPt_good->Fill(muon->pt());
+    	  hMuonEta_good->Fill(muon->eta());
+    	  hMuonPhi_good->Fill(muon->phi());
+    	  hEfficMu_D_good->Fill(muon->eta());
+    	  hDistD_good->Fill(muon->eta(),muon->phi());
+      	  if (l1Rpcs.size()) {
+      		  hEfficMu_N_good->Fill(muon->eta());
+      		  hDistN_good->Fill(muon->eta(),muon->phi());
+      	  }
+
+      }
 
       hEfficMuPt_D->Fill(muon->pt());
       if (l1Rpcs.size())  hEfficMuPt_N->Fill(muon->pt());
-      if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N->Fill(muon->pt()); 
-    }
+
+      if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N->Fill(muon->pt());
+      if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("ptMin")).size()) hEfficMuPt7All_N->Fill(muon->pt());
+
+
+
+     if (fabs(muon->eta()) < 0.8){
+    	  hEfficMuPt_D_barrel->Fill(muon->pt());
+          if (l1Rpcs.size())  hEfficMuPt_N_barrel->Fill(muon->pt());
+          if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N_barrel->Fill(muon->pt());
+      }
+      if (fabs(muon->eta()) < 1.24 && fabs(muon->eta()) > 0.8){
+    	  hEfficMuPt_D_overlap->Fill(muon->pt());
+          if (l1Rpcs.size())  hEfficMuPt_N_overlap->Fill(muon->pt());
+          if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N_overlap->Fill(muon->pt());
+      }
+      if (fabs(muon->eta()) > 1.24 && fabs(muon->eta()) < 1.6){
+    	  hEfficMuPt_D_endcap->Fill(muon->pt());
+          if (l1Rpcs.size())  hEfficMuPt_N_endcap->Fill(muon->pt());
+          if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N_endcap->Fill(muon->pt());
+      }
+      if (muon->eta() > 1.24 && muon->eta() < 1.6){
+    	  hEfficMuPt_D_endcapP->Fill(muon->pt());
+          if (l1Rpcs.size())  hEfficMuPt_N_endcapP->Fill(muon->pt());
+          if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N_endcapP->Fill(muon->pt());
+      }
+      if (muon->eta() < -1.24 && muon->eta() > -1.6){
+    	  hEfficMuPt_D_endcapN->Fill(muon->pt());
+          if (l1Rpcs.size())  hEfficMuPt_N_endcapN->Fill(muon->pt());
+          if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N_endcapN->Fill(muon->pt());
+      }  
+ }
     //
     // L1RPC EFFICIENCY AS FUNCTION OF RUN/LUMI
     //
@@ -286,14 +429,30 @@ void EfficiencyAnalysis::beginJob()
     // MUON HITS AND CROSSED DETS ANALYSIS
     //
     if (isMuon) {
-
+      //number of layers with hits, counting: nHitsB - all 6 barrel layers, nHitsBL - first 4 barrel layers, nHitsE - all 3 endcap layers
       int nHitsB = 0; for (int i=0; i<6; i++) if( hitBarrel->at(i) ) nHitsB++;
       int nHitsBL= 0; for (int i=0; i<4; i++) if( hitBarrel->at(i) ) nHitsBL++;
       int nHitsE = 0; for (int i=0; i<3; i++) if( hitEndcap->at(i) ) nHitsE++;
 
+      //number of barrel stations with hits
+      int nStationHitsB = 0;
+      if( hitBarrel->at(0)|| hitBarrel->at(1)) nStationHitsB++;
+      if( hitBarrel->at(2)|| hitBarrel->at(3)) nStationHitsB++;
+      if( hitBarrel->at(4)) nStationHitsB++;
+      if( hitBarrel->at(5)) nStationHitsB++;
+
+      //number of layers crossed by the muon, counting: nDetsB - all 6 barrel layers, nDetsBL - first 4 barrel layers, nDetsE - all 3 endcap layers
       int nDetsB = 0;  for (int i=0; i<6; i++) if( detBarrel->at(i) ) nDetsB++;
       int nDetsBL= 0;  for (int i=0; i<4; i++) if( detBarrel->at(i) ) nDetsBL++;
       int nDetsE = 0;  for (int i=0; i<3; i++) if( detEndcap->at(i) ) nDetsE++;
+
+      //number of barrel stations crossed by the muon
+      int nStationsB = 0;
+      if( detBarrel->at(0)|| detBarrel->at(1)) nStationsB++;
+      if( detBarrel->at(2)|| detBarrel->at(3)) nStationsB++;
+      if( detBarrel->at(4)) nStationsB++;
+      if( detBarrel->at(5)) nStationsB++;
+
 
       hEfficHitDet_D->Fill(muon->eta());
       for (int i=0; i<6;++i) {
@@ -309,29 +468,201 @@ void EfficiencyAnalysis::beginJob()
         if (hitEndcap->at(i)) hEfficHitE_N[i]->Fill(muon->eta());
       }
 
+      //Fill histograms: hEfficGeom_M - 	all global muons
+      //				 hEfficGeom_D - 	global muons crossing >= no. of layers required to fire the trigger, 4/6 algo
+      //				 hEfficGeom_D_3z6 - global muons crossing >= no. of layers (low pt muons) or stations (high pt muons) required to fire the trigger, 3/6 algo
+      //				 hEfficGeom_H - 	global muons leaving hits in >= no. of layers required to fire the trigger, 4/6 algo
+      //				 hEfficGeom_H_3z6 - global muons leaving hits in >= no. of layers low pt muons) or stations (high pt muons) required to fire the trigger, 3/6 algo
+      //				 hEfficGeom_T - 	global muons leaving hits in >= no. of layers required to fire the trigger and firing the trigger, 4/6 algo,
+      //				 hEfficGeom_T_3z6 - global muons leaving hits in >= no. of layers low pt muons) or stations (high pt muons) required to fire the trigger and firing the trigger, 3/6 algo
       // pure Barrel
       if (fabs(muon->eta()) < 0.8) {
+        
         hHitsB->Fill(nHitsB);
         hDetsB_100->Fill(nDetsB);
         hEfficGeom_M->Fill(muon->eta());      
-        if (nDetsBL>=3 || (nDetsB>=4 && (detBarrel->at(4)||detBarrel->at(5)) ) ) hEfficGeom_D->Fill(muon->eta());
-        if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5)) ) ) {
+        if (nDetsBL>=3 || nDetsB>=4) hEfficGeom_D->Fill(muon->eta());
+        if (nDetsBL>=3 || nStationsB>=3) hEfficGeom_D_3z6->Fill(muon->eta());
+        if (nHitsBL>=3 || nHitsB>=4) {
           hEfficGeom_H->Fill(muon->eta());
           if (l1Rpcs.size()>0) hEfficGeom_T->Fill(muon->eta());
+        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+        if (nHitsBL>=3 || nStationHitsB>=3) {
+          hEfficGeom_H_3z6->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeom_T_3z6->Fill(muon->eta());
+        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+      }
+
+      // pure Endcap
+      if (fabs(muon->eta()) > 1.25  && fabs(muon->eta()) < 1.6) {
+        if (l1Rpcs.size())  hRpcPtCode->Fill(l1Rpcs[0].pt, muon->pt());
+        hHitsE->Fill(nHitsE);
+        hDetsE_100->Fill(nDetsE);
+        hEfficGeom_M->Fill(muon->eta());
+        if (nDetsE>=3){
+        	hEfficGeom_D->Fill(muon->eta());
+        	hEfficGeom_D_3z6->Fill(muon->eta());
+        }
+        if (nHitsE>=3) {
+          hEfficGeom_H->Fill(muon->eta());
+          hEfficGeom_H_3z6->Fill(muon->eta());
+          if (l1Rpcs.size()){
+        	  hEfficGeom_T->Fill(muon->eta());
+        	  hEfficGeom_T_3z6->Fill(muon->eta());
+          }
+        }
+        if (l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
+      }
+
+      //Without Affected stations
+
+      if (  fabs(muon->eta()) < 0.8 &&  !(muon->phi() < 2. && muon->phi() > -0.2) &&  !(muon->phi() < -1.4 && muon->phi() > -3.14)  && !(muon->phi() >2.9 && muon->phi() < 3.14)) {
+        //hHitsB->Fill(nHitsB);
+        //hDetsB_100->Fill(nDetsB);
+        hEfficGeom_M_good->Fill(muon->eta());
+        if (nDetsBL>=3 || nDetsB>=4) hEfficGeom_D_good->Fill(muon->eta());
+        if (nDetsBL>=3 || nStationsB>=3) hEfficGeom_D_3z6_good->Fill(muon->eta());
+        if (nHitsBL>=3 || nHitsB>=4) {
+          hEfficGeom_H_good->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeom_T_good->Fill(muon->eta());
+        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+        if (nHitsBL>=3 || nStationHitsB>=3) {
+          hEfficGeom_H_3z6_good->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeom_T_3z6_good->Fill(muon->eta());
+        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+      }
+
+      // pure Endcap
+      if (fabs(muon->eta()) > 1.25  && fabs(muon->eta() ) < 1.6 && !(muon->phi() < 2. && muon->phi() > -0.2) &&  !(muon->phi() < -1.4 && muon->phi() > -3.14)  && !(muon->phi() >2.9 && muon->phi() < 3.14)) {
+        hHitsE->Fill(nHitsE);
+        hDetsE_100->Fill(nDetsE);
+        hEfficGeom_M_good->Fill(muon->eta());
+        if (nDetsE>=3){
+        	hEfficGeom_D_good->Fill(muon->eta());
+        	hEfficGeom_D_3z6_good->Fill(muon->eta());
+        }
+        if (nHitsE>=3) {
+          hEfficGeom_H_good->Fill(muon->eta());
+          hEfficGeom_H_3z6_good->Fill(muon->eta());
+          if (l1Rpcs.size()){
+        	  hEfficGeom_T_good->Fill(muon->eta());
+        	  hEfficGeom_T_3z6_good->Fill(muon->eta());
+          }
+        }
+        if (l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
+      }
+
+
+      //full Detector
+      // pure Barrel
+      if (fabs(muon->eta()) < 0.8 ) {
+        hEfficGeomTot_M->Fill(muon->eta());      
+// warunek Marcina dodatkowe wymagania dla layerow 5 lub 6 jesli 4/6
+//          if (nDetsBL>=3 || (nDetsB>=4 && (detBarrel->at(4)||detBarrel->at(5)) ) ) hEfficGeomTot_D->Fill(muon->eta());
+// 	 //         if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5)) && !hitBarrel->at(0) ) ) {
+//          if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5))  ) ) {
+// ogolny waunek na 3/6 lub 4/6
+       if (nDetsBL>=3 || nStationsB>=3)  hEfficGeomTot_D->Fill(muon->eta());
+       // if ( (nHitsBL>=3 || nStationHitsB>=3)  && !hitBarrel->at(0)  ) { //dlaczego && !hitBarrel->at(0) ?????
+       if ( nHitsBL>=3 || nStationHitsB>=3) {
+          hEfficGeomTot_H->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeomTot_T->Fill(muon->eta());
         } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
       }
       // pure Endcap
       if (fabs(muon->eta()) > 1.25  && fabs(muon->eta()) < 1.6) { 
-        hHitsE->Fill(nHitsE);
-        hDetsE_100->Fill(nDetsE);
-        hEfficGeom_M->Fill(muon->eta());      
-        if (nDetsE>=3) hEfficGeom_D->Fill(muon->eta());
+        hEfficGeomTot_M->Fill(muon->eta());      
+        if (nDetsE>=3) hEfficGeomTot_D->Fill(muon->eta());
         if (nHitsE>=3) {
-          hEfficGeom_H->Fill(muon->eta());
-          if (l1Rpcs.size()) hEfficGeom_T->Fill(muon->eta());
+          hEfficGeomTot_H->Fill(muon->eta());
+          if (l1Rpcs.size()) hEfficGeomTot_T->Fill(muon->eta());
         }
         if (l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
       }
+      //overlap 
+      //tower 6 like barrel
+      if (fabs(muon->eta()) >=0.8  && fabs(muon->eta()) < 0.93) { 
+        hEfficGeomTot_M->Fill(muon->eta()); 
+// 	if (nDetsBL>=3 || (nDetsB>=4 && (detBarrel->at(4)||detBarrel->at(5)) ) ) hEfficGeomTot_D->Fill(muon->eta());
+// 	if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5))  ) ) {
+// 	if (nDetsBL>=3 || (nDetsB>=4 && (detBarrel->at(4) && !detBarrel->at(5)) ) ) hEfficGeomTot_D->Fill(muon->eta());
+// 	if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4) && !hitBarrel->at(5))  ) ) {
+        if (nDetsBL>=3 || nStationsB>=3)  hEfficGeomTot_D->Fill(muon->eta());
+        if ( nHitsBL>=3 || nStationHitsB>=3)  {
+
+          hEfficGeomTot_H->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeomTot_T->Fill(muon->eta());
+        }
+      }
+      //tower 7 : 3/4 & 4/5 & EndcapL2 off
+      if (fabs(muon->eta()) >=0.93  && fabs(muon->eta()) < 1.04) { 
+        hEfficGeomTot_M->Fill(muon->eta()); 
+	if (nDetsBL>=3 || ( (nDetsBL+nDetsE)>=4 && !detEndcap->at(1)) ) hEfficGeomTot_D->Fill(muon->eta());
+	if (nHitsBL>=3 || ( (nHitsBL+nHitsE)>=4 && !hitEndcap->at(1)) ) {
+	          hEfficGeomTot_H->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeomTot_T->Fill(muon->eta());
+        }
+      }
+      //tower 8:  3/4  Bar L1,L2,Endcap L1,L2 
+      if (fabs(muon->eta()) >=1.04  && fabs(muon->eta()) < 1.14) { 
+        hEfficGeomTot_M->Fill(muon->eta()); 
+	if (( (nDetsBL+nDetsE)>=3 && !detBarrel->at(2)) ) hEfficGeomTot_D->Fill(muon->eta());
+	if (( (nHitsBL+nHitsE)>=3 && !hitBarrel->at(2)) ) {
+	          hEfficGeomTot_H->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeomTot_T->Fill(muon->eta());
+        }
+      }
+      //tower 9:  3/4  Bar L1,L2,Endcap L1,L2 
+      if (fabs(muon->eta()) >=1.14  && fabs(muon->eta()) <= 1.25) { 
+        hEfficGeomTot_M->Fill(muon->eta()); 
+	if (( (nDetsBL+nDetsE)>=3 && !detBarrel->at(1) && !detEndcap->at(0)) ) hEfficGeomTot_D->Fill(muon->eta());
+	if (( (nHitsBL+nHitsE)>=3 && !hitBarrel->at(1) && !hitEndcap->at(0)) ) {
+	          hEfficGeomTot_H->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeomTot_T->Fill(muon->eta());
+        }
+      }
+
+
+      /*
+      //overlap 
+      if (fabs(muon->eta()) >=0.8  && fabs(muon->eta()) <= 1.25) { 
+        hEfficGeomTot_M->Fill(muon->eta()); 
+// 	if (nDetsBL>=3 || (nDetsB>=4 && (detBarrel->at(4)||detBarrel->at(5)) ) || nDetsE>=3) hEfficGeomTot_D->Fill(muon->eta());
+// 	if (nHitsBL>=3 || (nHitsB>=4 && (hitBarrel->at(4)||hitBarrel->at(5)) ) || nHitsE>=3) {
+	
+
+	bool war0 = (nHitsB+nHitsE) >= 3;
+	bool war1=  (nHitsB>=1 && nHitsE >= 2 && hitEndcap->at(1) && hitEndcap->at(2) )|| nHitsBL >=3 ;
+
+
+	if ( fabs(muon->eta()) >1.04 && fabs(muon->eta()) <1.24 && ( ( nHitsB+nHitsE) >= 3)  != 
+	     (( nHitsB>=1 && nHitsE >= 2 && hitEndcap->at(1) && hitEndcap->at(2) )|| nHitsBL >=3 ))
+	  std::cout<<"coto "<< muon->eta()
+		   <<" war.ogol " << war0
+		   <<" war.szcz " << war1
+		   << " det "<<nDetsB <<" "<< nDetsBL<<" "<< nDetsE
+		   << " hits "<<nHitsB <<" "<< nHitsBL<<" "<< nHitsE
+		   <<" "<<nHitsB+nHitsE<< " trig:" << l1Rpcs.size();
+	std::cout<< "    BarrelHits: ";
+	for(int i=0;i<6;i++)std::cout<<hitBarrel->at(i);
+	std::cout<< "  EndcapHits: ";
+	for(int  i=0;i<3;i++)std::cout<<hitEndcap->at(i);
+	std::cout<<endl;
+
+
+	
+ 	if ((nDetsB+nDetsE) >= 3) hEfficGeomTot_D->Fill(muon->eta());
+ 	if ((nHitsB+nHitsE) >= 3) {
+
+// 	if (nDetsB+nDetsE >= 3) hEfficGeomTot_D->Fill(muon->eta());
+// 	if (( nHitsB>=1 && nHitsE >= 2 && hitEndcap->at(1) && hitEndcap->at(2) ) 
+// 	    || ( fabs(muon->eta()) <= .93 && nHitsBL>=3 )) {
+
+          hEfficGeomTot_H->Fill(muon->eta());
+          if (l1Rpcs.size()>0) hEfficGeomTot_T->Fill(muon->eta());
+        }
+      }
+      */
     }
 
     //
@@ -411,12 +742,21 @@ void EfficiencyAnalysis::beginJob()
     }
 
     // L1 RPC candidates
-    if (l1Rpcs.size()) hDistL1Rpc->Fill(l1Rpcs[0].eta, l1Rpcs[0].phi); // TODO: why [0] ??
-    // L1 DT/CSC candidate
-    std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs(); 
-    if (l1Others.size()) hDistL1Other->Fill(l1Others[0].eta, l1Others[0].phi); // TODO: why [0] ??
+    if (l1Rpcs.size()) hDistL1Rpc->Fill(l1Rpcs[0].eta, l1Rpcs[0].phi);
 
+   
+    // L1 DT/CSC candidate
+    if (l1Others.size()) hDistL1Other->Fill(l1Others[0].eta, l1Others[0].phi);
+
+    //Without affected stations
+
+    if (  !(muon->phi() < 2. && muon->phi() > -0.2) &&  !(muon->phi() < -1.4 && muon->phi() > -3.14)  && !(muon->phi() >2.9 && muon->phi() < 3.14)) {
+    if (l1Rpcs.size()) hDistL1Rpc_good->Fill(l1Rpcs[0].eta, l1Rpcs[0].phi); // TODO: why [0] ??
+    // L1 DT/CSC candidate
+    if (l1Others.size()) hDistL1Other_good->Fill(l1Others[0].eta, l1Others[0].phi); // TODO: why [0] ??
+    }
   } // end of event loop
+ std::cout <<"RPCTriggers: "<< RPCTriggers << " RPCTriggersOnly: " << RPCTriggersOnly <<  "OtherTriggers: "<<OtherTriggers<< " OtherTriggersOnly: "<< OtherTriggersOnly <<std::endl;
 
 
   /*
@@ -445,8 +785,12 @@ void EfficiencyAnalysis::beginJob()
   int nPoints = 0; 
   for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) {
     //reject wrong runs
-    if(im->first.first == 147115. || im->first.first == 146417. || im->first.first == 146421. ) continue;
-    
+//    if(im->first.first == 146417. || im->first.first == 146421. ) continue;
+    if(im->first.first == 147115. || im->first.first == 146417. || im->first.first == 146421. || im->first.first ==147749. ) continue;
+// if( im->first.first < theConfig.getParameter<double>("noRun") ) continue;
+  std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs();
+ if(l1Others.size() ==0 ) continue;
+
   if (im->second.first != 0) ++nPoints; 
   }
   hGraphLumi->Set(nPoints);
@@ -454,8 +798,12 @@ void EfficiencyAnalysis::beginJob()
   int  iPoint=0;
   for( EffLumiMap::const_iterator im = effLumiMap.begin(); im != effLumiMap.end(); ++im) {
     //reject wrong runs
-     if(im->first.first == 147115. || im->first.first == 146417. || im->first.first == 146421. ) continue;
-     
+//     if(im->first.first == 146417. || im->first.first == 146421. ) continue;
+     if(im->first.first == 147115. || im->first.first == 146417. || im->first.first == 146421. || im->first.first ==147749. ) continue;
+ //if( im->first.first < theConfig.getParameter<double>("noRun") ) continue;
+ 
+    std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs();
+if(l1Others.size() ==0 ) continue;
     float eff = 0.;
     if (im->second.first==0 ) continue;
     if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
@@ -472,7 +820,12 @@ void EfficiencyAnalysis::beginJob()
   nPoints = 0; 
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im){
   //reject wrong runs
-    if(im->first == 147115. || im->first == 146417 || im->first == 146421 ) continue;
+//    if(im->first == 146417 || im->first == 146421 ) continue;
+if(im->first == 147115. || im->first == 146417 || im->first == 146421 ) continue;
+// if( im->first < theConfig.getParameter<double>("noRun") ) continue;
+
+std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs();
+if(l1Others.size() ==0 ) continue;
     if (im->second.first != 0) ++nPoints; 
   }
   hGraphRun->Set(nPoints);
@@ -481,8 +834,12 @@ void EfficiencyAnalysis::beginJob()
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) {
 
     //reject wrong runs
-    if(im->first == 147115 || im->first == 146417 || im->first == 146421 ) continue;
-  
+//    if(im->first == 146417 || im->first == 146421 ) continue;
+  if(im->first == 147115 || im->first == 146417 || im->first == 146421 ) continue;
+//  if( im->first < theConfig.getParameter<double>("noRun") ) continue;
+
+  std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs();
+if(l1Others.size() ==0 ) continue;
 
     float eff = 0.;
     if (im->second.first==0 ) continue;
