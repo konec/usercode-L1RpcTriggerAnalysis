@@ -7,7 +7,7 @@ import FWCore.Utilities.FileUtils as FileUtils
 mylist = FileUtils.loadListFromFile(_LIST_OF_FILES_) 
 process.source = cms.Source("PoolSource", 
 fileNames = cms.untracked.vstring( *mylist )
-inputCommands=cms.untracked.vstring( 'keep *', 'drop *_hltL1GtObjectMap_*_*')
+#inputCommands=cms.untracked.vstring( 'keep *', 'drop *_hltL1GtObjectMap_*_*')
 )
 
 # apply lumi section mask from JSON file
@@ -66,7 +66,7 @@ process.load("TrackingTools.TrackRefitter.globalMuonTrajectories_cff")
 
 process.efficiencyTree = cms.EDAnalyzer("EfficiencyTree",
   histoFileName = cms.string("efficiencyHelper.root"),
-  treeFileName = cms.string("efficiencyTree_emu_test.root"),
+  treeFileName = cms.string("efficiencyTree.root"),
   muonColl = cms.string("muons"),
   trackColl = cms.string("generalTracks"),
   beamSpot = cms.InputTag("offlineBeamSpot"),
