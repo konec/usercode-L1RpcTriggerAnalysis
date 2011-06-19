@@ -53,7 +53,7 @@ def countFiles(jsonFile,samplePath):
 #########################################
 def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,samplePath,nJobs,prefix="./"):
 
-    topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"   
+    topPath = "/afs/cern.ch/cms/L1/rpc/Shift/Crab/"   
     ###Prepare the crab.cfg
     os.system("mkdir -p "+prefix+datasetpath)
     os.system("cp "+fileName+" "+prefix+datasetpath)
@@ -96,8 +96,8 @@ if __name__ == '__main__':
 	aDataSet = "Run2011A/ExpressPhysics/FEVT/"
 	samplePath = "/store/express/Run2011A/ExpressPhysics/FEVT/Express-v4/000/"
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
-	jsonFile = makeLatestJSON()
-	nJobs = 1
+	jsonFile = makeLatestJSON(jsonsPath)
+	nJobs = 100
 	###################	
 	prepareCrabCfg("crab_read_CAFData.cfg", 
 		       aDataSet, 
