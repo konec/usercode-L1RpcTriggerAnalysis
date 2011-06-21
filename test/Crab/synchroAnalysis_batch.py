@@ -16,6 +16,7 @@ import FWCore.ParameterSet.Types as CfgTypes
 myLumis = LumiList.LumiList(filename='goodRuns.json').getCMSSWString().split(',')
 process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
 process.source.lumisToProcess.extend(myLumis)
+process.source.skipBadFiles = cms.untracked.bool(True)
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 #process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
@@ -66,7 +67,9 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 '''
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-#process.options.wantSummary = True
+process.options = cms.untracked.PSet(
+    wantSummary = cms.untracked.bool(True)
+    )
 
 process.load("DQM.L1TMonitor.L1TRPCTF_cfi")
 process.l1trpctf.rpctfSource =  cms.InputTag("gtDigis")
