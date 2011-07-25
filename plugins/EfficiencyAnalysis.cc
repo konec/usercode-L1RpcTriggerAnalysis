@@ -18,6 +18,7 @@
 #include "TH2F.h"
 #include "TH1D.h"
 #include "TGraphErrors.h"
+#include "TF1.h"
 
 
 using namespace std;
@@ -31,6 +32,8 @@ void EfficiencyAnalysis::beginJob()
   // RECO muon kinematics (Reco::MuonCollection "muons", after cuts: track, vertex, pt, eta, RPC,CSC,DT hits)   
   TGraphErrors * hGraphLumi = new TGraphErrors();
   TGraphErrors * hGraphRun = new TGraphErrors(); 
+  TGraphErrors * hGraphRunBarrel = new TGraphErrors(); 
+  TGraphErrors * hGraphRunEndcap = new TGraphErrors(); 
 
   // variable-size ETA bins corresponding to PAC trigger granularity
   const Int_t nEtaBins=33;
@@ -50,8 +53,7 @@ void EfficiencyAnalysis::beginJob()
   12., 14., 16., 18., 20., 25., 30., 35., 40., 45., 50., 60., 70., 80., 90., 100., 120., 140., 
   150.   
   };
-
-
+  
   TH1D * hMuonPt  = new TH1D("hMuonPt","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",nPtBins,PtBins);  histos.Add(hMuonPt);
   TH1D * hMuonEta = new TH1D("hMuonEta","All global muons Eta;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hMuonEta);
   TH1D * hMuonPhi = new TH1D("hMuonPhi","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi);
@@ -165,6 +167,22 @@ void EfficiencyAnalysis::beginJob()
    TH1D * hEfficMuPt_D_endcapN = new TH1D("hEfficMuPt_D_endcapN","hEfficMuPt_D_endcapN",nPtBins,PtBins);  histos.Add(hEfficMuPt_D_endcapN);
    TH1D * hEfficMuPt_D_endcapP = new TH1D("hEfficMuPt_D_endcapP","hEfficMuPt_D_endcapP",nPtBins,PtBins);  histos.Add(hEfficMuPt_D_endcapP);
 
+
+   TH2D *hEfficMuPtVsEta_D = new TH2D("hEfficMuPtVsEta_D","",128,-1.6,1.6,nPtBins,PtBins);
+   TH2D *hEfficMuPtVsEta_N = new TH2D("hEfficMuPtVsEta_N","",128,-1.6,1.6,nPtBins,PtBins);
+   histos.Add(hEfficMuPtVsEta_D);
+   histos.Add(hEfficMuPtVsEta_N);
+
+   TH2D *hEfficMuPtVsPhi_D = new TH2D("hEfficMuPtVsPhi_D","",64,-3.2,3.2,nPtBins,PtBins);
+   TH2D *hEfficMuPtVsPhi_N = new TH2D("hEfficMuPtVsPhi_N","",64,-3.2,3.2,nPtBins,PtBins);
+   histos.Add(hEfficMuPtVsPhi_D);
+   histos.Add(hEfficMuPtVsPhi_N);
+
+   TH2D *hDeltaPtVsEta = new TH2D("hDeltaPtVsEta","",nEtaBins,EtaBins,200,-1,20);
+   //histos.Add(hDeltaPtVsEta);
+   std::map< unsigned int,TH2D* > histoRunMap;
+  
+
 //   // efficiency for  L1rpc vs Pt 
    TH1D * hEfficTkPt7_N = new TH1D("hEfficTkPt7_N","hEfficTkPt7_N",75,0.,150.);  histos.Add(hEfficTkPt7_N);
    TH1D * hEfficTkPt_N = new TH1D("hEfficTkPt_N","hEfficTkPt_N",75,0.,150.);  histos.Add(hEfficTkPt_N);
@@ -247,6 +265,9 @@ void EfficiencyAnalysis::beginJob()
   // average efficiency per Run
   typedef std::map< unsigned int, std::pair<unsigned int, unsigned int> > EffRunMap;
   EffRunMap effRunMap;
+  EffRunMap effRunMapBarrel;
+  EffRunMap effRunMapEndcap;
+  
 
   // define chain
   TChain chain("tL1Rpc");
@@ -324,21 +345,19 @@ if(l1Others.size() !=0 ) OtherTriggers++;
 if(l1Others.size() ==0 ) continue;
 
 
-
-
-
-
-
-    if (effLumiMap.find( std::make_pair(event->run, event->lumi)) == effLumiMap.end()) 
+ if (effLumiMap.find( std::make_pair(event->run, event->lumi)) == effLumiMap.end())
         effLumiMap[ make_pair( event->run, event->lumi)] = make_pair(0,0);
-    if (effRunMap.find(event->run) == effRunMap.end()) 
+    if (effRunMap.find(event->run) == effRunMap.end()){
         effRunMap[event->run] = make_pair(0,0);
+	effRunMapBarrel[event->run] = make_pair(0,0);
+	effRunMapEndcap[event->run] = make_pair(0,0);
+    }
 
     if (   !muon->isGlobal() 
         || !muon->isTracker()
         || !muon->isOuter()
         || muon->pt()<theConfig.getParameter<double>("ptMin") 
-        || fabs(muon->eta()) > 1.6 
+        || fabs(muon->eta()) > 1.61 
         ) continue;
 
     hMuGBX->Fill(event->bx);
@@ -382,6 +401,28 @@ if(l1Others.size() ==0 ) continue;
       hEfficMuPt_D->Fill(muon->pt());
       if (l1Rpcs.size())  hEfficMuPt_N->Fill(muon->pt());
 
+      ///AK
+      hEfficMuPtVsEta_D->Fill(muon->eta(),muon->pt());
+      if (l1Rpcs.size()) hEfficMuPtVsEta_N->Fill(muon->eta(),muon->pt());  
+
+      if(fabs(muon->eta())<1.24 && fabs(muon->eta())>1.14){
+      hEfficMuPtVsPhi_D->Fill(muon->phi(),muon->pt());
+      if (l1Rpcs.size()){
+	hEfficMuPtVsPhi_N->Fill(muon->phi(),muon->pt());  
+      }
+      }      
+      if(l1Rpcs.size() && muon->pt()>8 && muon->pt()<10){
+	float deltaPt = (l1Rpcs[0].pt - muon->pt())/muon->pt();
+	hDeltaPtVsEta->Fill(muon->eta(),deltaPt);  
+      }
+      if(histoRunMap.find(event->run)==histoRunMap.end())
+	histoRunMap[event->run] = (TH2D*)hDeltaPtVsEta->Clone(Form("hDeltaPtVsEta%d",event->run));
+      else{
+	histoRunMap[event->run]->Add(hDeltaPtVsEta);
+      }
+      hDeltaPtVsEta->Reset();
+      /////
+
       if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("l1Cut")).size()) hEfficMuPt7_N->Fill(muon->pt());
       if (l1RpcColl->getL1ObjsMatched(theConfig.getParameter<double>("ptMin")).size()) hEfficMuPt7All_N->Fill(muon->pt());
 
@@ -422,9 +463,17 @@ if(l1Others.size() ==0 ) continue;
       effLumiMap[make_pair(event->run,event->lumi)].first++;
       effRunMap[event->run].first++;
     }
-    //(float) rand()/RAND_MAX << std::endl;
+    if (fabs(muon->eta()) <0.8){
+      effRunMapBarrel[event->run].second++;
+      if (l1Rpcs.size() > 0) effRunMapBarrel[event->run].first++;    
+    }
 
-
+    
+    if (fabs(muon->eta()) < 1.6 && fabs(muon->eta()) > 0.8){
+      effRunMapEndcap[event->run].second++;
+      if (l1Rpcs.size() > 0) effRunMapEndcap[event->run].first++;    
+    }    
+  
     //
     // MUON HITS AND CROSSED DETS ANALYSIS
     //
@@ -486,11 +535,11 @@ if(l1Others.size() ==0 ) continue;
         if (nHitsBL>=3 || nHitsB>=4) {
           hEfficGeom_H->Fill(muon->eta());
           if (l1Rpcs.size()>0) hEfficGeom_T->Fill(muon->eta());
-        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+        } else if (false && l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
         if (nHitsBL>=3 || nStationHitsB>=3) {
           hEfficGeom_H_3z6->Fill(muon->eta());
           if (l1Rpcs.size()>0) hEfficGeom_T_3z6->Fill(muon->eta());
-        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+        } else if (false && l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
       }
 
       // pure Endcap
@@ -511,7 +560,7 @@ if(l1Others.size() ==0 ) continue;
         	  hEfficGeom_T_3z6->Fill(muon->eta());
           }
         }
-        if (l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
+        if (false && l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
       }
 
       //Without Affected stations
@@ -525,11 +574,11 @@ if(l1Others.size() ==0 ) continue;
         if (nHitsBL>=3 || nHitsB>=4) {
           hEfficGeom_H_good->Fill(muon->eta());
           if (l1Rpcs.size()>0) hEfficGeom_T_good->Fill(muon->eta());
-        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+        } else if (false && l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
         if (nHitsBL>=3 || nStationHitsB>=3) {
           hEfficGeom_H_3z6_good->Fill(muon->eta());
           if (l1Rpcs.size()>0) hEfficGeom_T_3z6_good->Fill(muon->eta());
-        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+        } else if (false && l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
       }
 
       // pure Endcap
@@ -549,7 +598,7 @@ if(l1Others.size() ==0 ) continue;
         	  hEfficGeom_T_3z6_good->Fill(muon->eta());
           }
         }
-        if (l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
+        if (false && l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
       }
 
 
@@ -567,7 +616,7 @@ if(l1Others.size() ==0 ) continue;
        if ( nHitsBL>=3 || nStationHitsB>=3) {
           hEfficGeomTot_H->Fill(muon->eta());
           if (l1Rpcs.size()>0) hEfficGeomTot_T->Fill(muon->eta());
-        } else if (l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
+        } else if (false && l1Rpcs.size()>0) { toto=true; std::cout <<"nHitsBL: " << nHitsBL<<" nHitsB: "<< nHitsB<< std::endl; }
       }
       // pure Endcap
       if (fabs(muon->eta()) > 1.25  && fabs(muon->eta()) < 1.6) { 
@@ -577,7 +626,7 @@ if(l1Others.size() ==0 ) continue;
           hEfficGeomTot_H->Fill(muon->eta());
           if (l1Rpcs.size()) hEfficGeomTot_T->Fill(muon->eta());
         }
-        if (l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
+        if (false && l1Rpcs.size()>0 && nHitsE!=3) { toto=true; std::cout <<"NHITS E: " << nHitsE<< std::endl; }
       }
       //overlap 
       //tower 6 like barrel
@@ -703,7 +752,7 @@ if(l1Others.size() ==0 ) continue;
       //############################################
      
     //  if (firstBX !=0) {
-      if (toto) {
+      if (false && toto) {
         std::cout <<" event: " << ev << std::endl;
         if (firstBX < 0) std::cout<< "RPC Pre-firing! ";
         if (firstBX > 0) std::cout<< "RPC Post-firing! ";
@@ -829,6 +878,8 @@ if(l1Others.size() ==0 ) continue;
     if (im->second.first != 0) ++nPoints; 
   }
   hGraphRun->Set(nPoints);
+  hGraphRunBarrel->Set(nPoints);
+  hGraphRunEndcap->Set(nPoints);
 
   iPoint=0;
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) {
@@ -852,7 +903,59 @@ if(l1Others.size() ==0 ) continue;
     hGraphRun->SetPoint(iPoint, im->first, eff);
     hGraphRun->SetPointError(iPoint, 0., effErr);
     iPoint++;
-  } 
+  }
+  ////////////////////
+  iPoint=0;
+  for( EffRunMap::const_iterator im = effRunMapBarrel.begin(); im != effRunMapBarrel.end(); ++im) {
+    if(im->first == 147115 || im->first == 146417 || im->first == 146421 ) continue;
+
+    std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs();
+    if(l1Others.size() ==0 ) continue;
+
+    float eff = 0.;
+    if (im->second.first==0 ) continue;
+    if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
+    float effM1 = float(im->second.first-1)/float(im->second.second);
+    float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second; 
+    std::cout <<" RUN: "<<im->first
+              <<" Effic barrel: "<< eff <<" ("<<im->second.first<<"/"<<im->second.second<<")"<<std::endl; 
+    hGraphRunBarrel->SetPoint(iPoint, im->first, eff);
+    hGraphRunBarrel->SetPointError(iPoint, 0., effErr);
+    iPoint++;
+  }
+ ////////////////////
+  iPoint=0;
+  for( EffRunMap::const_iterator im = effRunMapEndcap.begin(); im != effRunMapEndcap.end(); ++im) {
+    if(im->first == 147115 || im->first == 146417 || im->first == 146421 ) continue;
+
+    std::vector<L1Obj> l1Others = l1OtherColl->getL1Objs();
+    if(l1Others.size() ==0 ) continue;
+
+    float eff = 0.;
+    if (im->second.first==0 ) continue;
+    if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
+    float effM1 = float(im->second.first-1)/float(im->second.second);
+    float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second; 
+    std::cout <<" RUN: "<<im->first
+              <<" Effic endcap: "<< eff <<" ("<<im->second.first<<"/"<<im->second.second<<")"<<std::endl; 
+    hGraphRunEndcap->SetPoint(iPoint, im->first, eff);
+    hGraphRunEndcap->SetPointError(iPoint, 0., effErr);
+    iPoint++;
+  }
+  unsigned int iRun = 1;
+  TH2D *hDeltaPtVsEtaVsRun = new TH2D("hDeltaPtVsEtaVsRun","",nEtaBins,EtaBins,histoRunMap.size()+1,-0.5,histoRunMap.size()+0.5);
+  histos.Add(hDeltaPtVsEtaVsRun);
+  for(std::map< unsigned int,TH2D* >::const_iterator im = histoRunMap.begin(); im != histoRunMap.end(); ++im) {	    
+    TH2D *hTmp =   im->second;
+    TH1D *hShift = getDeltaPtFit(hTmp);
+    histos.Add(hTmp);
+    for(int iBin=0;iBin<hShift->GetNbinsX()+1;++iBin){
+      hDeltaPtVsEtaVsRun->SetBinContent(iBin,iRun,hShift->GetBinContent(iBin));
+    }
+    hDeltaPtVsEtaVsRun->GetYaxis()->SetBinLabel(iRun,Form("%d",im->first));
+    iRun++;
+  }
+
 
   //  chain.ResetBranchAddresses(); 
   std::string histoFile = theConfig.getParameter<std::string>("histoFileName");
@@ -860,7 +963,44 @@ if(l1Others.size() ==0 ) continue;
   histos.Write();
   hGraphLumi->Write("hGraphLumi");
   hGraphRun->Write("hGraphRun");
+  hGraphRunBarrel->Write("hGraphRunBarrel");
+  hGraphRunEndcap->Write("hGraphRunEndcap");
   f.Close();
  
   cout <<"KUKU"<<endl;
 }
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+TH1D* EfficiencyAnalysis::getDeltaPtFit(TH2D *hDeltaPtVsEta){
+
+  TF1 *func = new TF1("func","gaus(0)",-1,5);
+  func->SetParameter(0,1);
+  func->SetParameter(1,1);
+  func->SetParameter(2,1);
+
+  TH1D *hShifts =  hDeltaPtVsEta->ProjectionX("hShifts");
+  hShifts->Reset();
+
+  //for(int iBinX=17;iBinX<18;++iBinX){
+  for(int iBinX=0;iBinX<18;++iBinX){
+  //for(int iBinX=5;iBinX<33;++iBinX){ Tower 12
+    TH1D *hProjTowerM = hDeltaPtVsEta->ProjectionY("hProjTowerM",iBinX,iBinX);
+    TH1D *hProjTowerP = hDeltaPtVsEta->ProjectionY("hProjTowerP",34-iBinX,34-iBinX);    
+    hProjTowerM->SetLineColor(2);
+    hProjTowerM->Add(hProjTowerP);
+    hProjTowerM->Fit(func,"");
+    float meanShift = func->GetParameter(1);
+    float meanShiftError = func->GetParError(1);
+    if(fabs(meanShift-1.0)<1e-5) meanShift = 0.0;
+    hShifts->SetBinContent(iBinX,meanShift);
+    hShifts->SetBinError(iBinX,meanShiftError);
+    func->SetParameter(0,1);
+    func->SetParameter(1,1);
+    func->SetParameter(2,1);
+  }
+
+  delete func;
+  return hShifts;
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////

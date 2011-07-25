@@ -113,7 +113,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
   if (brlRPC || fwdRPC || CSC || DT) goodEvent = true;
 //  if (brlRPC || fwdRPC) goodEvent = true;
   if (goodEvent) theCounter++;
-  if (goodEvent) std::cout << str.str() << std::endl;
+  //AK if (goodEvent) std::cout << str.str() << std::endl;
   return goodEvent;
 //  return true;
 }

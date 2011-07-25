@@ -41,7 +41,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 #process.es_prefer_RPCEMap = cms.ESPrefer("PoolDBESSource","RPCCabling");
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'GR_R_311_V2::All'
+process.GlobalTag.globaltag = 'GR_P_V20::All'
 
 process.load("L1TriggerConfig.L1GtConfigProducers.L1GtConfig_cff")
 process.load("L1TriggerConfig.GMTConfigProducers.L1MuGMTParametersConfig_cff")
@@ -54,6 +54,7 @@ process.load("DQMServices.Components.test.dqm_onlineEnv_cfi")
 process.dqmSaver.convention = 'Online'
 process.dqmEnv.subSystemFolder = 'R2DTEST'
 
+'''
 process.MessageLogger = cms.Service("MessageLogger",
     #debugModules = cms.untracked.vstring('rpcunpacker','rpcMonitorLinkSynchro'),
     #debugModules = cms.untracked.vstring('muonRPCDigis','rpc*','rpcMonitorRaw'),
@@ -61,6 +62,10 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout'),
     cout = cms.untracked.PSet( threshold = cms.untracked.string('DEBUG'))
 )
+'''
+process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+process.options.wantSummary = True
+
 
 process.load("DQM.L1TMonitor.L1TRPCTF_cfi")
 process.l1trpctf.rpctfSource =  cms.InputTag("gtDigis")

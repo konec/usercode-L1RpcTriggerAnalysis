@@ -83,7 +83,7 @@ def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,sample
 #########################################    
 ################
 if __name__ == '__main__':	
-	prefix = "./19_06_2011/"
+	prefix = "./19_07_2011/"
 	version = "v1/"	
 	###Backup software	
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
@@ -96,8 +96,10 @@ if __name__ == '__main__':
 	aDataSet = "Run2011A/ExpressPhysics/FEVT/"
 	samplePath = "/store/express/Run2011A/ExpressPhysics/FEVT/Express-v4/000/"
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
-	jsonFile = makeLatestJSON(jsonsPath)
-	nJobs = 100
+	jsonFile = makeLatestJSON(jsonsPath)               #Automatically create a JSON with new runs
+	#jsonFile = jsonsPath+"/GoodRuns_167551-167746.json" #In case you want to run with your JSON
+	nJobs = 500
+	'''
 	###################	
 	prepareCrabCfg("crab_read_CAFData.cfg", 
 		       aDataSet, 
@@ -106,7 +108,8 @@ if __name__ == '__main__':
 		       "/u/akalinow/CMS/RPCTest/",
 		       samplePath,
 		       nJobs,
-		       prefix+version)        
+		       prefix+version)
+        '''
 
 
 

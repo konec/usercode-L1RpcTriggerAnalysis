@@ -6,6 +6,9 @@
 
 namespace edm { class Event; class EventSetup; }
 
+class TH1D;
+class TH2D;
+
 class EfficiencyAnalysis : public edm::EDAnalyzer {
 public:
   EfficiencyAnalysis(const edm::ParameterSet & cfg) : theConfig(cfg) {}
@@ -14,7 +17,12 @@ public:
   virtual void beginJob();
   virtual void endJob(){}
 private:
+
+
+  TH1D* getDeltaPtFit(TH2D *hDeltaPtVsEta);
+
   edm::ParameterSet theConfig;
+
 }; 
 
 #endif

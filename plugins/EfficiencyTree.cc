@@ -280,17 +280,19 @@ void EfficiencyTree::analyze(const edm::Event &ev, const edm::EventSetup &es)
   }
 
 static int nMuons = 0;
-if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
+//AK if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
 
    // best RPC muon
   TrajectoryStateOnSurface tsos;
   if (theMuon) { 
+    /* AK
     if(theMuon->globalTrack().isNonnull()) std::cout <<"global muon (pt,eta,phi) "
                                                      <<theMuon->globalTrack()->pt()<<" "
                                                      <<theMuon->globalTrack()->eta()<<" "
                                                      <<theMuon->globalTrack()->phi()
                                                      <<" number of RPC hits: " <<theMuon->globalTrack()->hitPattern().numberOfValidMuonRPCHits() 
                                                      <<std::endl;
+    */
     muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi(), theMuon->track()->charge());
     muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
 
@@ -314,12 +316,14 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
       GlobalPoint detPosition = globalGeometry->idToDet(rpcDet)->position();
       GlobalPoint hitPosition = globalGeometry->idToDet(rpcDet)->toGlobal(ih->localPosition());
       if (fabs(reco::deltaPhi(detPosition.phi(),theMuon->phi())) > M_PI/2.) continue; 
+      /* AK
       std::cout <<" CHECKING HIT, det "<<rpcDet.rawId()<<"  r="<<detPosition.perp()<<" phi="<<detPosition.phi()<<" z="<< detPosition.z()
                                    <<"Barrel: "<<BarrelAndLayer(rpcDet).isBarrel()<<" layer: "<<BarrelAndLayer(rpcDet).layer();
+      */
             
       
       TrajectoryStateOnSurface trackAtHit= trackAtSurface(theMuon, hitPosition, ev, es);
-      if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
+      //AK if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
       if (!trackAtHit.isValid()) continue;
 
 //      LocalPoint HitPoint = ih->localPosition();
@@ -341,10 +345,12 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
 
       bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX) < 10.)  && fabs(pullY) < 3.5 ;
       BarrelAndLayer place(rpcDet);
+      /* AK
       if (hitCompatible) std::cout <<" COMPATIBLE HIT " 
           <<" in: "<<globalGeometry->idToDet(rpcDet)->surface().bounds().inside(ih->localPosition())
           <<" is BARREL: " << place.isBarrel() <<" layer: " << place.layer(); 
       std::cout << std::endl; 
+      */
       if (place.isBarrel()) {
         if (hitCompatible) hitBarrel[place.layer()-1]=true;
         hPullX_B[place.layer()-1]->Fill(pullX);
@@ -396,12 +402,12 @@ if (theMuon) std::cout <<"Muons: "<< ++nMuons << std::endl;
       if (! (det->surface().bounds().inside(trackAtDet.localPosition()))) continue;
       hPropToDetDeltaR->Fill(deltaR(muon->eta(), muon->phi(), detPosition.eta(), detPosition.phi()));
       BarrelAndLayer place(rpcDet);
-      std::cout <<" COMPATIBLE DET, isbarrel: " << place.isBarrel() <<" layer: " << place.layer() <<" localPos: " <<trackAtDet.localPosition()<< std::endl;
+      //AK std::cout <<" COMPATIBLE DET, isbarrel: " << place.isBarrel() <<" layer: " << place.layer() <<" localPos: " <<trackAtDet.localPosition()<< std::endl;
       if (place.isBarrel()) detBarrel[place.layer()-1]++; else detEndcap[place.layer()-1]++;
     }
     }
   }
-  for (unsigned int i=0; i<=5; ++i) if (hitBarrel[i] && !detBarrel[i]) std::cout <<"WARNING-NO DET BARREL BUT HIT, i="<<i+1<<std::endl;
+  //AK for (unsigned int i=0; i<=5; ++i) if (hitBarrel[i] && !detBarrel[i]) std::cout <<"WARNING-NO DET BARREL BUT HIT, i="<<i+1<<std::endl;
   for (unsigned int i=0; i<=2; ++i) if (hitEndcap[i] && !detEndcap[i]) std::cout <<"WARNING-NO DET ENDCAP BUT HIT, i="<<i+1<<std::endl;
 
   //

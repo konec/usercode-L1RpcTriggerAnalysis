@@ -7,7 +7,7 @@ data1ChainFileNames = cms.PSet(
 
 ##Add data
 path = "/afs/cern.ch/cms/L1/rpc/Shift/Crab/"
-datesToAdd = ["09_06_2011/v1/","10_06_2011/v1/","19_06_2011/v1/"] #Will used date from those directories
+datesToAdd = ["09_06_2011/v1/","10_06_2011/v1/","19_06_2011/v1/","22_06_2011/v1","27_06_2011/v1","05_07_2011/v1"] #Will used date from those directories
 for date in datesToAdd:
     for fname in os.listdir(path+date):
         if fname=="ROOT":
@@ -24,7 +24,7 @@ process.efficiency = cms.EDAnalyzer("EfficiencyAnalysis",
   data1ChainFileNames,
   histoFileName = cms.string("efficiencyHistos.root"),
   l1Cut = cms.double(15.),
-  ptMin = cms.double(8.)
+  ptMin = cms.double(15.)
 )
 
 process.p = cms.Path(process.efficiency)
