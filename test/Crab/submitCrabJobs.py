@@ -51,13 +51,13 @@ def countFiles(jsonFile,samplePath):
 		counter+=int(files)
 	return counter 	
 #########################################
-def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,samplePath,nJobs,prefix="./"):
+def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,nJobs,prefix="./"):
 
-    topPath = "/afs/cern.ch/cms/L1/rpc/Shift/Crab/"   
+    topPath =  os.getenv("PWD")+"/"   
     ###Prepare the crab.cfg
     os.system("mkdir -p "+prefix+datasetpath)
     os.system("cp "+fileName+" "+prefix+datasetpath)
-    os.system("cp "+topPath+pset+" "+prefix+datasetpath)
+    os.system("cp "+topPath+"/"+pset+" "+prefix+datasetpath)
     os.system("cp "+topPath+"/readCAFData.sh "+prefix+datasetpath)
     os.system("cp "+jsonFile+" "+prefix+datasetpath+"/goodRuns.json")
     os.system("mv "+topPath+"/runreg.cfg "+prefix+datasetpath)
@@ -66,24 +66,20 @@ def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,sample
     psetFullPath = commands.getstatusoutput("pwd")[1] + "/" + prefix + datasetpath + "/"
     file.close() #Closes the file (read session)
     file = open(prefix+datasetpath+"/Tmp_"+fileName, "w")
-    ##Count number of files
-    counter = countFiles(jsonFile,samplePath)
-    ##
-    grouping = int(counter/nJobs+1)
-    text1 = text.replace("script_arguments =","script_arguments = " + samplePath + ", "+str(grouping))
+    ###
+    text1 = text.replace("datasetpath =","datasetpath = "+datasetpath)
     text2 = text1.replace("pset =","pset = "+ psetFullPath + pset)
     text3 = text2.replace("user_remote_dir =","user_remote_dir = /castor/cern.ch/user/"+user_remote_dir)
     text4 = text3.replace("number_of_jobs =","number_of_jobs =  "+str(nJobs))
-    text5 = text4.replace("/castor/cern.ch/user/","/castor/cern.ch/user/"+user_remote_dir)
-    text6 = text5.replace("additional_input_files = ","additional_input_files = "+topPath+prefix+datasetpath+"/goodRuns.json")
-    file.write(text6)
+    text5 = text4.replace("lumi_mask =","lumi_mask = "+topPath+prefix+datasetpath+"/goodRuns.json")
+    file.write(text5)
     file.close() #Closes the file (write session)
     os.system("cd "+prefix+datasetpath+"; crab -create -submit -cfg Tmp_"+fileName+"; cd -")
 #########################################
 #########################################    
 ################
 if __name__ == '__main__':	
-	prefix = "./19_07_2011/"
+	prefix = "./26_07_2011/"
 	version = "v1/"	
 	###Backup software	
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
@@ -93,24 +89,21 @@ if __name__ == '__main__':
 	os.system("cp -r "+os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/interface/ "+prefix+version)
 	os.system("cp -r "+os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/synchroAnalysis_batch.py "+prefix+version)	
 	###################
-	aDataSet = "Run2011A/ExpressPhysics/FEVT/"
-	samplePath = "/store/express/Run2011A/ExpressPhysics/FEVT/Express-v4/000/"
+	#aDataSet = "/ExpressPhysics/Run2011A-Express-v5/FEVT"
+	aDataSet = "/ExpressPhysics/Run2011A-Express-v4/FEVT"
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
+	jsonsPath = "/afs/cern.ch/cms/L1/rpc/soft/akalinow/CMSSW_4_2_3_patch2/src/UserCode/L1RpcTriggerAnalysis/test/Crab/JSON/"
 	jsonFile = makeLatestJSON(jsonsPath)               #Automatically create a JSON with new runs
-	#jsonFile = jsonsPath+"/GoodRuns_167551-167746.json" #In case you want to run with your JSON
-	nJobs = 500
-	'''
+	#jsonFile = jsonsPath+"/GoodRuns_JSONfromPromptRecoRR_170348-171116.json" #In case you want to run with your JSON
+	nJobs = 499	
 	###################	
 	prepareCrabCfg("crab_read_CAFData.cfg", 
 		       aDataSet, 
 		       jsonFile,
 		       "synchroAnalysis_batch.py",
 		       "/u/akalinow/CMS/RPCTest/",
-		       samplePath,
 		       nJobs,
-		       prefix+version)
-        '''
-
+		       prefix+version)                 
 
 
    
