@@ -59,21 +59,33 @@ TGraphErrors * getEffChangeVsRun(TGraphErrors *hGraph){
 TH1F * getEffVsRunHisto(TGraphErrors *hGraph){
 
   int nPoints = hGraph->GetN();
-  TH1F *histo = new TH1F("histo","",nPoints,-0.5,nPoints-0.5);
+  ////Count good Runs(=with small error on eff)
+  Double_t xTmp, yTmp;
+  int nGoodRuns = 0;
+  for(int i=0;i<nPoints;++i){
+    hGraph->GetPoint(i,xTmp,yTmp);
+    error = hGraph->GetErrorY(i);
+    if(yTmp>1E-5 && error/yTmp<0.05) nGoodRuns++;
+  }
+  ///
+
+  TH1F *histo = new TH1F("histo","",nGoodRuns,-0.5,nGoodRuns-0.5);
   histo->SetMaximum(1.);
-  histo->SetMinimum(0.65); 
+  histo->SetMinimum(0.75); 
   histo->SetYTitle("L1 RPC Efficiency");
   histo->SetLineWidth(2);
 
   Double_t xTmp, yTmp;
   Double_t error = 0;
+  nGoodRuns = 0;
   for(int i=0;i<nPoints;++i){
     hGraph->GetPoint(i,xTmp,yTmp);
     error = hGraph->GetErrorY(i);
-    histo->SetBinContent(i+1,yTmp);
-    histo->SetBinError(i+1,error);
-    histo->GetXaxis()->SetBinLabel(i+1,Form("%d",int(xTmp)));
-    if(int(xTmp)==167807) std::cout<<int(xTmp)<<" "<<i<<std::endl;
+    if(yTmp<1e-5 || error/yTmp>0.05) continue;
+    histo->SetBinContent(nGoodRuns+1,yTmp);
+    histo->SetBinError(nGoodRuns+1,error);
+    histo->GetXaxis()->SetBinLabel(nGoodRuns+1,Form("%d",int(xTmp)));
+    nGoodRuns++;
   }
 
   return histo;
@@ -187,7 +199,7 @@ void plotEfficVsRun(TFile *file){
   hAll->Draw();
   getPressVsRunHisto(hAll)->Draw("same P");
   aLatex->DrawLatex(x,y,"|#eta|<1.6");
-  aLine->Draw();
+  //aLine->Draw();
 
   c11->cd(2);
   gPad->SetLeftMargin(0);
@@ -197,7 +209,7 @@ void plotEfficVsRun(TFile *file){
   hBarrel->Draw();
   getPressVsRunHisto(hBarrel)->Draw("same P");
   aLatex->DrawLatex(x,y,"|#eta|<0.8");
-  aLine->Draw();
+  //aLine->Draw();
 
   c11->cd(3);
   gPad->SetLeftMargin(0);
@@ -221,7 +233,7 @@ void plotEfficVsRun(TFile *file){
   axis->Draw();
   y = 0.95;
   aLatex->DrawLatex(x,y,"0.8<|#eta|<1.6");
-  aLine->Draw();
+  //aLine->Draw();
 
   c11->Print("png/L1RPCEffVsRun.png");
   c11->Print("png/L1RPCEffVsRun.eps");
@@ -294,6 +306,7 @@ void plotEffVsMu(TFile *file){
 /////////////////////////////////////////////////////////
 void plotDeltaPt(TFile *file){
 
+  ///Choose specific run by setting the file name
   TH2D *hDeltaPtVsEta = (TH2D*)file->Get("hDeltaPtVsEta166841");
 
   TF1 *func = new TF1("func","gaus(0)",-1,2);
@@ -305,8 +318,8 @@ void plotDeltaPt(TFile *file){
   hShifts->Reset();
 
   //for(int iBinX=17;iBinX<18;++iBinX){
-  //for(int iBinX=0;iBinX<33;++iBinX){
-  for(int iBinX=5;iBinX<33;++iBinX){ //Tower 12
+  for(int iBinX=0;iBinX<33;++iBinX){
+  //for(int iBinX=5;iBinX<33;++iBinX){ //Tower 12
     TH1D *hProjTower = hDeltaPtVsEta->ProjectionY("hProjTower",iBinX,iBinX);
     std::cout<<"Low edge: "<<hDeltaPtVsEta->GetXaxis()->GetBinLowEdge(iBinX)<<std::endl;
     std::cout<<"Low edge: "<<hDeltaPtVsEta->GetXaxis()->GetBinUpEdge(34-iBinX)<<std::endl;
@@ -321,7 +334,7 @@ void plotDeltaPt(TFile *file){
     func->SetParameter(0,1);
     func->SetParameter(1,1);
     func->SetParameter(2,1);
-    return;
+    //return;
   }
 
   hShifts->Draw("hist");

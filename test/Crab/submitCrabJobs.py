@@ -79,7 +79,7 @@ def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,nJobs,
 #########################################    
 ################
 if __name__ == '__main__':	
-	prefix = "./26_07_2011/"
+	prefix = "./27_07_2011/"
 	version = "v1/"	
 	###Backup software	
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
@@ -89,8 +89,7 @@ if __name__ == '__main__':
 	os.system("cp -r "+os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/interface/ "+prefix+version)
 	os.system("cp -r "+os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/synchroAnalysis_batch.py "+prefix+version)	
 	###################
-	#aDataSet = "/ExpressPhysics/Run2011A-Express-v5/FEVT"
-	aDataSet = "/ExpressPhysics/Run2011A-Express-v4/FEVT"
+        aDataSet = "/ExpressPhysics/Run2011A-Express-v5/FEVT"
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/soft/akalinow/CMSSW_4_2_3_patch2/src/UserCode/L1RpcTriggerAnalysis/test/Crab/JSON/"
 	jsonFile = makeLatestJSON(jsonsPath)               #Automatically create a JSON with new runs

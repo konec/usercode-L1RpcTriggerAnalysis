@@ -893,7 +893,6 @@ if(l1Others.size() ==0 ) continue;
 if(l1Others.size() ==0 ) continue;
 
     float eff = 0.;
-    if (im->second.first==0 ) continue;
     if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
     float effM1 = float(im->second.first-1)/float(im->second.second);
     float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second; 
@@ -913,7 +912,6 @@ if(l1Others.size() ==0 ) continue;
     if(l1Others.size() ==0 ) continue;
 
     float eff = 0.;
-    if (im->second.first==0 ) continue;
     if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
     float effM1 = float(im->second.first-1)/float(im->second.second);
     float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second; 
@@ -932,7 +930,6 @@ if(l1Others.size() ==0 ) continue;
     if(l1Others.size() ==0 ) continue;
 
     float eff = 0.;
-    if (im->second.first==0 ) continue;
     if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second); 
     float effM1 = float(im->second.first-1)/float(im->second.second);
     float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second; 
@@ -942,6 +939,7 @@ if(l1Others.size() ==0 ) continue;
     hGraphRunEndcap->SetPointError(iPoint, 0., effErr);
     iPoint++;
   }
+  
   unsigned int iRun = 1;
   TH2D *hDeltaPtVsEtaVsRun = new TH2D("hDeltaPtVsEtaVsRun","",nEtaBins,EtaBins,histoRunMap.size()+1,-0.5,histoRunMap.size()+0.5);
   histos.Add(hDeltaPtVsEtaVsRun);
@@ -955,7 +953,7 @@ if(l1Others.size() ==0 ) continue;
     hDeltaPtVsEtaVsRun->GetYaxis()->SetBinLabel(iRun,Form("%d",im->first));
     iRun++;
   }
-
+ 
 
   //  chain.ResetBranchAddresses(); 
   std::string histoFile = theConfig.getParameter<std::string>("histoFileName");
