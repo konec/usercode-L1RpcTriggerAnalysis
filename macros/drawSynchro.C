@@ -547,7 +547,7 @@ void synchro(// a text file with BX histograms for all links
     
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".gif" );
+  c1->Print( outfile + "_" + h->GetName() + ".png" );
   c1->Print( outfile + "_" + h->GetName() + ".eps" );
 
   ////////////////////////////////////////////////////////////////
@@ -647,7 +647,7 @@ void synchro(// a text file with BX histograms for all links
   
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".gif" );
+  c1->Print( outfile + "_" + h->GetName() + ".png" );
   c1->Print( outfile + "_" + h->GetName() + ".eps" );
 
   ////////////////////////////////////////////////////////////////
@@ -748,7 +748,7 @@ void synchro(// a text file with BX histograms for all links
     
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".gif" );
+  c1->Print( outfile + "_" + h->GetName() + ".png" );
   c1->Print( outfile + "_" + h->GetName() + ".eps" );
 
   ////////////////////////////////////////////////////////////////
@@ -864,7 +864,7 @@ void synchro(// a text file with BX histograms for all links
 
   //h2->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h2->GetName() + ".gif" );
+  c1->Print( outfile + "_" + h2->GetName() + ".png" );
   c1->Print( outfile + "_" + h2->GetName() + ".eps" );
 
   ////////////////////////////////////////////////////////////////
@@ -954,7 +954,7 @@ void synchro(// a text file with BX histograms for all links
     
     //h->Write();
     c1->Write();
-    c1->Print( outfile + "_" + h->GetName() + ".gif" );
+    c1->Print( outfile + "_" + h->GetName() + ".png" );
     c1->Print( outfile + "_" + h->GetName() + ".eps" );
 
   } // end of threshold loop
@@ -1065,7 +1065,7 @@ void synchro(// a text file with BX histograms for all links
     
   //p->Write();
   c1->Write();
-  c1->Print( outfile + "_" + p->GetName() + ".gif" );
+  c1->Print( outfile + "_" + p->GetName() + ".png" );
   c1->Print( outfile + "_" + p->GetName() + ".eps" );
 
   ////////////////////////////////////////////////////////////////
@@ -1162,7 +1162,7 @@ void synchro(// a text file with BX histograms for all links
     
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".gif" );
+  c1->Print( outfile + "_" + h->GetName() + ".png" );
   c1->Print( outfile + "_" + h->GetName() + ".eps" );
 
   ////////////////////////////////////////////////////////////////
@@ -1271,7 +1271,7 @@ void synchro(// a text file with BX histograms for all links
     
   //p->Write();
   c1->Write();
-  c1->Print( outfile + "_" + p->GetName() + ".gif" );
+  c1->Print( outfile + "_" + p->GetName() + ".png" );
   c1->Print( outfile + "_" + p->GetName() + ".eps" );
 
   ////////////////////////////////////////////////////////////////
@@ -1440,7 +1440,7 @@ void synchro_history(TString h_name, TString p_name = "",Int_t log=1)
   //t = new TLatex(0.74,0.84-i*0.05, "138919-139458"); i++;
   //t->SetNDC(true);t->SetTextSize(0.035); t->SetTextColor(1); t->DrawClone();
 
-  c1->Print( p_name + ".gif" );
+  c1->Print( p_name + ".png" );
   c1->Print( p_name + ".eps" );
 
   //  c1->Print(p_name+".png");
@@ -1550,7 +1550,7 @@ void top10(TString datafile,
   f.cd("Synchro");
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "occup.gif" );
+  c1->Print( outfile + "occup.png" );
   c1->Print( outfile + "occup.eps" );
   fin.cd();
 
@@ -1609,7 +1609,7 @@ void top10(TString datafile,
   f.cd("Synchro");
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "spread.gif" );
+  c1->Print( outfile + "spread.png" );
   c1->Print( outfile + "spread.eps" );
   fin.cd();
 

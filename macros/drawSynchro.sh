@@ -22,13 +22,13 @@ if [ $# -ne 3 ]; then
  echo 
  echo "The script will process 'delays_*.txt' files located in the current"
  echo "directory and produce synchronization plots in three formats:"
- echo ".root, .gif and .eps. They will be stored in 'root', 'gif' and 'eps'"
+ echo ".root, .png and .eps. They will be stored in 'root', 'png' and 'eps'"
  echo "subdirectories respectively. For example:"
  echo "   "`basename $0`" \"140000-150000\" \"Cosmics\" \"plot\""
- echo "will produce .gif files like this:"
- echo "   gif/plot_Barrel+Endcap_*.gif"
- echo "   gif/plot_Barrel_*.gif"
- echo "   gif/plot_Endcap_*.gif, etc, etc"
+ echo "will produce .png files like this:"
+ echo "   png/plot_Barrel+Endcap_*.png"
+ echo "   png/plot_Barrel_*.png"
+ echo "   png/plot_Endcap_*.png, etc, etc"
  echo "and .root files like this:"
  echo "   root/plot_Barrel+Endcap.root"
  echo "   root/plot_Barrel.root"
@@ -53,11 +53,11 @@ if ! [ -f "${scriptdir}/Style.C" ]; then
 fi
 #
 root.exe -l -q "${string}"
-mkdir -p root eps gif
+mkdir -p root eps png
 ls -lart
 \mv `\ls -1 ${prefix}*.root` root/.
 \mv `\ls -1 ${prefix}*.eps` eps/.
-\mv `\ls -1 ${prefix}*.gif` gif/.
+\mv `\ls -1 ${prefix}*.png` png/.
 
 cd ${pdir}
 echo Done.

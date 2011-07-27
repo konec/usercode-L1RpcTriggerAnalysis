@@ -56,6 +56,7 @@ for dir in "$@"; do
   \rm C*.stdout rawMonitor*.root synchroAnalysis*.root
   tar xzf $f "C*.stdout" "rawMonitor*.root" "synchroAnalysis*.root"
   cat C*.stdout | grep -i lb | grep -i mean >> out.txt
+  ls -la out.txt
   \rm C*.stdout  
   for e in `ls rawMonitor*.root`; do
    mv ${e} ___`basename ${e} .root`___${n1}.root
