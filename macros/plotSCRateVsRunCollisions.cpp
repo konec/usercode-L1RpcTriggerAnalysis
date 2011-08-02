@@ -107,7 +107,7 @@ TList* getListOfFiles(string dir){
 //////////////////////////////////////////////////////
 std::vector<TH1F*> getHistoVecForRuns(int nMu, string region){
 
-  string path = "/home/akalinow/scratch/CMS/PAC/MonitorHistos/";
+  string path = "./" ; // "/home/akalinow/scratch/CMS/PAC/MonitorHistos/";
   vector<TH1F*> histos;
   TList *files = getListOfFiles(path);
   TIter next(files);
@@ -131,7 +131,8 @@ std::vector<TH1F*> getHistoVecForRuns(int nMu, string region){
   }
   delete files;
 
-  TSystemDirectory aDir1("Directory1","/home/akalinow/scratch/CMS/PAC/soft/");
+  //TSystemDirectory aDir1("Directory1","/home/akalinow/scratch/CMS/PAC/soft/");
+  TSystemDirectory aDir1("Directory1","./");
   aDir1.GetListOfFiles();
 
   return histos;
@@ -297,9 +298,13 @@ TH1F *getHistoFromGraph(TH1F *histo){
 //////////////////////////////////////////////////////
 void printRunsOnPlot(TH1F* h, string region="B"){
 
-  string runs[6] = {"163296","163340","163758","166565","170298","XXXXX"};
+  string runs[7] = {"160406", "163296","163340","163758","166565", "169985", "XXXXX"};
+  const int nRuns=sizeof(runs)/sizeof(string);
+  // XXXXX will be replaced by the last run number from PressureGraph.root
 
-  runs[5] = h->GetXaxis()->GetBinLabel(h->GetNbinsX());
+  if (nRuns<1) return;
+  //runs[5] = h->GetXaxis()->GetBinLabel(h->GetNbinsX());
+  runs[nRuns-1] = h->GetXaxis()->GetBinLabel(h->GetNbinsX());
 
   float x = 0;
   float y = 0.135;
@@ -309,16 +314,27 @@ void printRunsOnPlot(TH1F* h, string region="B"){
     yMin = 0.15;
   }
   TLatex *aLatex = new TLatex(x,y,"");
-  aLatex->SetTextAngle(90);
   TArrow *aArrow = new TArrow(0,0,1,1);
   aArrow->SetArrowSize(0.01);
+  aLatex->SetTextColor(kBlue);
+  aArrow->SetLineColor(kBlue);
 
-  for(int i=0;i<6;++i){
+  for(int i=0;i<nRuns;++i){
     for(int iBin=1;iBin<=h->GetNbinsX();++iBin){
       string label(h->GetXaxis()->GetBinLabel(iBin));
       x = h->GetBinCenter(iBin);
       if(runs[i]==label){
-	aLatex->DrawLatex(x+0.06,y,label.c_str());
+	if((float)(x-h->GetBinCenter(1))/
+	   (float)(h->GetBinCenter(h->GetNbinsX())-h->GetBinCenter(1))<0.06) {
+	  // avoid overlaying Y axis labels
+	  aLatex->SetTextAlign(13); // default, bottom
+	  aLatex->SetTextAngle(90-10);
+	} else {
+	  aLatex->SetTextAlign(11); // top
+	  aLatex->SetTextAngle(90+10);
+	}
+	aLatex->DrawLatex(x,y,label.c_str());
+	//aLatex->DrawLatex(x+0.06,y,label.c_str());
 	aArrow->DrawArrow(x,y-0.001,x,yMin);
       }
     }
@@ -326,12 +342,12 @@ void printRunsOnPlot(TH1F* h, string region="B"){
 }
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
-void test(){
+void plotSCRateVsRunCollisions(){
 
   int ptCode = 13;
 
   TCanvas *c2 = new TCanvas("c2","Rates for runs",12,33,1576,500);
-  c2->SetLeftMargin(0.05);
+  c2->SetLeftMargin(0.06);
   c2->SetRightMargin(0.04);
   c2->Draw();
 
@@ -373,7 +389,7 @@ void test(){
   axis->Draw();
   ////////////////////////
   c2->Print("eps/RateAtPointBarrelCollisions.eps");
-  c2->Print("eps/RateAtPointBarrelCollisions.png");
+  c2->Print("png/RateAtPointBarrelCollisions.png");
   /////////////
   /////////////
   ////Endcap, first muon  
@@ -410,7 +426,7 @@ void test(){
   axis->Draw();
   ////////////////////////
   c2->Print("eps/RateAtPointEndcapCollisions.eps");
-  c2->Print("eps/RateAtPointEndcapCollisions.png");
+  c2->Print("png/RateAtPointEndcapCollisions.png");
   ////  
   //plotVsRun(nMu,"E");
   ///

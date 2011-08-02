@@ -196,6 +196,7 @@ void plotEfficVsRun(TFile *file){
   gPad->SetRightMargin(0.001);
   TGraphErrors *hGraphRun = (TGraphErrors*)file->Get("hGraphRun");
   TH1F * hAll  = getEffVsRunHisto(hGraphRun);
+  hAll->GetXaxis()->LabelsOption("v");
   hAll->Draw();
   getPressVsRunHisto(hAll)->Draw("same P");
   aLatex->DrawLatex(x,y,"|#eta|<1.6");
@@ -206,6 +207,7 @@ void plotEfficVsRun(TFile *file){
   gPad->SetRightMargin(0.002);
   TGraphErrors *hGraphRunBarrel = (TGraphErrors*)file->Get("hGraphRunBarrel");
   TH1F *hBarrel = getEffVsRunHisto(hGraphRunBarrel);
+  hBarrel->GetXaxis()->LabelsOption("v");
   hBarrel->Draw();
   getPressVsRunHisto(hBarrel)->Draw("same P");
   aLatex->DrawLatex(x,y,"|#eta|<0.8");
@@ -216,6 +218,7 @@ void plotEfficVsRun(TFile *file){
   gPad->SetRightMargin(0.09);
   TGraphErrors *hGraphRunEndcap = (TGraphErrors*)file->Get("hGraphRunEndcap");
   TH1F* hEndcap = getEffVsRunHisto(hGraphRunEndcap);
+  hEndcap->GetXaxis()->LabelsOption("v");
   hEndcap->Draw();
   hEndcap->Print("all");
   TH1F *hPress = getPressVsRunHisto(hEndcap);
