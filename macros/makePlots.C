@@ -32,6 +32,7 @@ TGraphErrors * getEffChangeVsRun(TGraphErrors *hGraph){
   int nPoints = hGraph->GetN();
   Double_t xVec[1000];
   Double_t yVec[1000];
+
   Double_t xTmp, yTmp;
   Double_t mean = 0;
   Double_t error = 0;
@@ -71,7 +72,7 @@ TH1F * getEffVsRunHisto(TGraphErrors *hGraph){
 
   TH1F *histo = new TH1F("histo","",nGoodRuns,-0.5,nGoodRuns-0.5);
   histo->SetMaximum(1.);
-  histo->SetMinimum(0.75); 
+  histo->SetMinimum(0.65); 
   histo->SetYTitle("L1 RPC Efficiency");
   histo->SetLineWidth(2);
 
@@ -131,7 +132,9 @@ TH1F *getPressVsRunHisto(TH1F *histo){
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-void plotEfficVsEta(TFile *file){
+void plotEffVsEta(TFile *file){
+  file->cd();   
+  file->ls();
 
  //----chamber  efficiency
   c11 = getDefaultCanvas(12,53,1029,600);
@@ -168,7 +171,9 @@ void plotEfficVsEta(TFile *file){
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-void plotEfficVsRun(TFile *file){
+void plotEffVsRun(TFile *file){
+  file->cd();   
+  file->ls();
 
 //-------------------- 
   gStyle->SetOptStat(0);
@@ -280,6 +285,8 @@ void plotEfficVsRun(TFile *file){
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 void plotEffVsMu(TFile *file){
+  file->cd();   
+  file->ls();
 
   TCanvas *c3 = getDefaultCanvas();
 
@@ -308,6 +315,8 @@ void plotEffVsMu(TFile *file){
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 void plotDeltaPt(TFile *file){
+  file->cd();   
+  file->ls();
 
   ///Choose specific run by setting the file name
   TH2D *hDeltaPtVsEta = (TH2D*)file->Get("hDeltaPtVsEta166841");
@@ -346,6 +355,8 @@ void plotDeltaPt(TFile *file){
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 void plot(TFile *file){
+  file->cd();   
+  file->ls();
 
   TH2D* hDeltaPtVsEtaVsRun = (TH2D*)file->Get("hDeltaPtVsEtaVsRun");
 
@@ -370,12 +381,13 @@ void plot(TFile *file){
 void makePlots(){
 
   TFile *file = new TFile("efficiencyHistos.root");
+  file->ls();
   gStyle->SetPalette(1);
   
-  plotEfficVsRun(file);
-  //plotEffVsMu(file);
-  //plotEfficVsEta(file);
-  //plotDeltaPt(file);
+  plotEffVsRun(file);
+  plotEffVsMu(file);
+  plotEffVsEta(file);
+  plotDeltaPt(file);
   //plot(file);
 
 }

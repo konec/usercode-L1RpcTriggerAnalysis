@@ -298,6 +298,7 @@ compactList = {}
 QF_ALL_SYS=["Hcal","Track","Strip","Egam","Es","Dt","Csc","Pix","Muon","Rpc","Castor","Jmet","Ecal","L1t","Hlt","Lumi","NONE"]
 QF_ALL_STAT=["GOOD","BAD","EXCL","NONE"]
 DCS_ALL=['Bpix','Fpix','Tibtid','TecM','TecP','Tob','Ebminus','Ebplus','EeMinus','EePlus','EsMinus','EsPlus','HbheA','HbheB','HbheC','Ho','Hf','Dtminus','Dtplus','Dt0','CscMinus','CscPlus','Rpc','Castor',"NONE"]
+BEAM_ALL=['1Stable','2Stable','1Present','2Present',"NONE"]
 
 # reading config file
 if len(sys.argv)==2:
@@ -322,6 +323,8 @@ BFIELD=CONFIG.get('Common','BField_thr')
 LSPARSE=CONFIG.get('Common','LSCOMMENT')
 DCSSTAT=CONFIG.get('Common','DCS')
 DCSLIST=string.split(DCSSTAT,',')
+BEAMSTAT=CONFIG.get('Common','BEAM') # MC
+BEAMLIST=string.split(BEAMSTAT,',') # MC
 
 #optional item
 BEAMENE="-1"
@@ -358,7 +361,11 @@ for dcs in DCSLIST:
     if dcs not in DCS_ALL:
         print "DCS not valid:",dcs
         sys.exit(1)
-
+        
+for dcs in BEAMLIST:
+    if dcs not in BEAM_ALL:
+        print "BEAM not valid:",dcs
+        sys.exit(1)
 
 JSONFILE=CONFIG.get('Common','JSONFILE')
 
@@ -384,6 +391,9 @@ for SS in QF_Req.keys():
 print "and with the following DCS status:"
 for dcs in DCSLIST:
     print dcs
+print "and with the following BEAM status:"
+for dcs in BEAMLIST:
+    print dcs
 print "Manual bad LS in comment column:",LSCOMMENT
 
 if BEAMENE=="-1":
@@ -407,22 +417,28 @@ server = xmlrpclib.ServerProxy(FULLADDRESS)
 # build up selection in RUN table
 sel_runtable="{groupName} ='"+GROUP+"' and {runNumber} >= "+RUNMIN+" and {runNumber} <= "+RUNMAX+" and {bfield}>"+BFIELD+" and {datasetName} LIKE '"+DATASET+"'"
 
-# the lumisection selection is on the Express dataset:
-sel_dstable="{groupName} ='"+GROUP+"' and {runNumber} >= "+RUNMIN+" and {runNumber} <= "+RUNMAX+" and {bfield}>"+BFIELD+" and {datasetName} LIKE '%Express%'"
+# the lumisection selection
+sel_dstable="{groupName} ='"+GROUP+"' and {runNumber} >= "+RUNMIN+" and {runNumber} <= "+RUNMAX+" and {bfield}>"+BFIELD+" and {datasetName} LIKE '%PromptReco%'"
 
 for key in QF_Req.keys():
     if key != "Lumi" and key != "NONE" and QF_Req[key]!="NONE":
         sel_runtable+=" and {cmp"+key+"} = '"+QF_Req[key]+"'"
 #        sel_dstable+=" and {cmp"+key+"} = '"+QF_Req[key]+"'"
-#print sel_runtable
+print sel_runtable
 
 # build up selection in RUNLUMISECTION table, not requestuing bfield here because only runs in the run table selection will be considered
-sel_dcstable="{groupName} ='"+GROUP+"' and {runNumber} >= "+RUNMIN+" and {runNumber} <= "+RUNMAX+" and {datasetName} LIKE '%Online%'"
+sel_dcstable="{groupName} ='"+GROUP+"' and {runNumber} >= "+RUNMIN+" and {runNumber} <= "+RUNMAX+" and {datasetName} LIKE '%PromptReco%'"
 for dcs in DCSLIST:
     if dcs !="NONE":
         sel_dcstable+=" and {parDcs"+dcs+"} = 1"
 # = 'True'"
-# print sel_dcstable
+for dcs in BEAMLIST:
+    if dcs !="NONE":
+        sel_dcstable+=" and {parBeam"+dcs+"} = 1"
+# = 'True'"
+print sel_dcstable
+
+
 
 Tries=0
 print " " 

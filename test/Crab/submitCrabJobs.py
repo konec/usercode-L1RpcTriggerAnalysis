@@ -7,7 +7,7 @@ import math
 
 from FWCore.PythonUtilities.LumiList import *
 #########################################
-def makeLatestJSON(jsonsPath):
+def makeLatestJSON(jsonsPath,aDataSet):
 	##Check last analysed run number
 	maxRun = 0
 	runregCfgFile = "runregTemplate.cfg"
@@ -24,8 +24,9 @@ def makeLatestJSON(jsonsPath):
 	text = file.read()
 	file.close()
 	text1 = text.replace("RunMin=","RunMin=" + str(maxRun+1))
+	text2 = text1.replace("DBS_PDS=","DBS_PDS=" + aDataSet) # enable cross check with DBS
 	file = open("runreg.cfg", "w")
-	file.write(text1)
+	file.write(text2)
 	file.close()
 	##Create the JSON
 	os.system("./runregparse.py")
@@ -44,12 +45,17 @@ def countFiles(jsonFile,samplePath):
 	runList = jsonList.getRuns()
 	base="/castor/cern.ch/cms/"
 	counter = 0
-	for run in runList:		
+	for run in runList:       
 		path = base+"/"+samplePath+"/"+run[0:3]+"/"+run[3:len(run)]
-		command = "nsls "+path+" | grep .root | wc -l"
+                #command = "nsls "+path+" | grep .root | wc -l"
+		command1 = "nsls "+path
+		if commands.getstatusoutput(command1)[0] != 0:
+			print "Skipping run: "+run
+			continue
+		command = command1+" | grep .root | wc -l"
 		files = commands.getstatusoutput(command)[1]
 		counter+=int(files)
-	return counter 	
+	return counter
 #########################################
 def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,nJobs,prefix="./"):
 
@@ -74,12 +80,40 @@ def prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,nJobs,
     text5 = text4.replace("lumi_mask =","lumi_mask = "+topPath+prefix+datasetpath+"/goodRuns.json")
     file.write(text5)
     file.close() #Closes the file (write session)
-    os.system("cd "+prefix+datasetpath+"; crab -create -submit -cfg Tmp_"+fileName+"; cd -")
+    #os.system("cd "+prefix+datasetpath+"; crab -create -submit -cfg Tmp_"+fileName+"; cd -")
+    #os.system("cd "+prefix+datasetpath+"; crab -create -cfg Tmp_"+fileName+"; cd -")
+    command1 = "cd "+prefix+datasetpath
+    result1 = os.system("cd "+prefix+datasetpath); # result of 'cd...'
+    if result1 != 0:
+	    print "ERROR: Cannot switch to directory: "+prefix+datasetpath
+	    exit()
+    command2 = command1+"; crab -create -cfg Tmp_"+fileName
+    result2 = os.system(command2); # check result of 'crab -create...'
+    if result2 != 0:
+	    print "ERROR: Failed to create CRAB jobs using cmd: "+command2
+	    exit()
+    print "\nNew CRAB jobs have been created in: "
+    os.system("ls -drt1 "+topPath+prefix+datasetpath+"/crab_*_*_* | tail -1");
+    print "To actually submit the jobs do the following:"
+    print "  cd "+topPath+prefix+datasetpath
+    print "  crab -submit all"
+    print "or:"
+    print "  crab -submit 50 -continue      # to submit next 50 jobs"
+    print "or:"
+    print "  crab -submit 11-20 -continue   # to submit jobs #11...#20"
+    print "or:"
+    print "  crab -submit 52, -continue     # to submit job #52 (comma is important!)\n"
+    print "To resubmit job #33 do the following:"
+    print "  crab -status   # this is important"
+    print "  crab -get 33,  # this is important"
+    print "  crab -resubmit 33,\n"
+    
 #########################################
 #########################################    
 ################
 if __name__ == '__main__':	
-	prefix = "./27_07_2011/"
+	#prefix = "./05_08_2011/"
+	prefix = "./25_08_2011/"
 	version = "v1/"	
 	###Backup software	
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
@@ -89,20 +123,20 @@ if __name__ == '__main__':
 	os.system("cp -r "+os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/interface/ "+prefix+version)
 	os.system("cp -r "+os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/synchroAnalysis_batch.py "+prefix+version)	
 	###################
-        aDataSet = "/ExpressPhysics/Run2011A-Express-v5/FEVT"
+        #aDataSet = "/ExpressPhysics/Run2011A-Express-v5/FEVT"
+	aDataSet = "/ExpressPhysics/Run2011A-Express-v6/FEVT"
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
-	jsonsPath = "/afs/cern.ch/cms/L1/rpc/soft/akalinow/CMSSW_4_2_3_patch2/src/UserCode/L1RpcTriggerAnalysis/test/Crab/JSON/"
-	jsonFile = makeLatestJSON(jsonsPath)               #Automatically create a JSON with new runs
-	#jsonFile = jsonsPath+"/GoodRuns_JSONfromPromptRecoRR_170348-171116.json" #In case you want to run with your JSON
-	nJobs = 499	
-	###################	
-	prepareCrabCfg("crab_read_CAFData.cfg", 
+	#jsonsPath = "/afs/cern.ch/cms/L1/rpc/soft/akalinow/CMSSW_4_2_3_patch2/src/UserCode/L1RpcTriggerAnalysis/test/Crab/JSON/"
+	jsonFile = makeLatestJSON(jsonsPath,aDataSet) #Automatically create a JSON with new runs
+	#jsonFile = jsonsPath+"/GoodRuns_173198-173664.json" #In case you want to run with your JSON
+	nJobs = 499
+	###################
+	castorRpcDir = "/u/"+os.getenv("USER")+"/RPCShift/"
+	#castorRpcDir = "/u/akalinow/CMS/RPCTest/"
+	prepareCrabCfg("crab_read_CAFData.cfg",
 		       aDataSet, 
 		       jsonFile,
 		       "synchroAnalysis_batch.py",
-		       "/u/akalinow/CMS/RPCTest/",
+		       castorRpcDir,
 		       nJobs,
 		       prefix+version)                 
-
-
-   

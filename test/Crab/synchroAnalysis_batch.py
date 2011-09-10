@@ -57,7 +57,6 @@ process.dqmEnv.subSystemFolder = 'R2DTEST'
 
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-'''
 process.MessageLogger = cms.Service("MessageLogger",
     #debugModules = cms.untracked.vstring('rpcunpacker','rpcMonitorLinkSynchro'),
     #debugModules = cms.untracked.vstring('muonRPCDigis','rpc*','rpcMonitorRaw'),
@@ -67,6 +66,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 '''
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+'''
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
     )
@@ -145,7 +145,7 @@ process.p = cms.Path(
   process.gtDigis*
   process.filterL1_GM* 
   process.muonRPCDigis*
-  #process.rpcFEDIntegrity*process.rpcMonitorRaw*
-  #process.linkSynchroAnalysis*
+  process.rpcFEDIntegrity*process.rpcMonitorRaw*
+  process.linkSynchroAnalysis*
   process.globalMuons*
   process.efficiencyTree)
