@@ -1,5 +1,21 @@
-#include "FigUtils.C"
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TF1.h"
+#include "TCanvas.h"
+#include "TLegend.h"
+#include "TLatex.h"
+#include "TGraph.h"
+#include "TGraphErrors.h"
+#include "TGraphAsymmErrors.h"
+#include "TFile.h"
+#include "TStyle.h"
+#include "TGaxis.h"
+#include "TLine.h"
 #include <map>
+#include "FigUtils.C"
+
 
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
@@ -50,14 +66,14 @@ TGraphErrors * getEffChangeVsRun(TGraphErrors *hGraph){
     yVec[i]/=mean;
   }
 
-  TGraphErrors *gr = new TGraph(nPoints,xVec,yVec);
+  TGraphErrors *gr = (TGraphErrors*) new TGraph(nPoints,xVec,yVec);
   gr->SetMarkerStyle(25);
   gr->SetMarkerColor(2);
   return gr;
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-TH1F * getEffVsRunHisto(TGraphErrors *hGraph){
+TH1D * getEffVsRunHisto(TGraphErrors *hGraph){
 
   int nPoints = hGraph->GetN();
   ////Count good Runs(=with small error on eff)
@@ -71,7 +87,7 @@ TH1F * getEffVsRunHisto(TGraphErrors *hGraph){
   }
   ///
 
-  TH1F *histo = new TH1F("histo","",nGoodRuns,-0.5,nGoodRuns-0.5);
+  TH1D *histo = new TH1D("histo","",nGoodRuns,-0.5,nGoodRuns-0.5);
   histo->SetMaximum(1.);
   histo->SetMinimum(0.65); 
   histo->SetYTitle("L1 RPC Efficiency");
@@ -92,7 +108,7 @@ TH1F * getEffVsRunHisto(TGraphErrors *hGraph){
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-TH1F *getPressVsRunHisto(TH1F *histo){
+TH1D *getPressVsRunHisto(TH1D *histo){
 
  ////Load pressure graph, and transfer into map
   TFile *file = new TFile("PressureGraph.root");
@@ -111,7 +127,7 @@ TH1F *getPressVsRunHisto(TH1F *histo){
   float axisMin = histo->GetMinimum();
   float axisMax = histo->GetMaximum();
   /////
-  TH1F *h = (TH1F*)histo->Clone("h");
+  TH1D *h = (TH1D*)histo->Clone("h");
   h->Reset();
   for(int i=1;i<=h->GetNbinsX();++i){
     int run = atoi(h->GetXaxis()->GetBinLabel(i));
@@ -136,10 +152,12 @@ void plotEffVsEta(TFile *file, TFile *outFile=NULL){
   file->ls();
 
   //----chamber  efficiency
-  c11 = getDefaultCanvas("EffVsPtVsEta","L1 RPC efficiency vs Eta vs p_{T}",12,53,1029,600);
+  TCanvas *c11 = getDefaultCanvas("EffVsPtVsEta","L1 RPC efficiency vs Eta vs p_{T}",12,53,1029,600);
   c11->SetLeftMargin(0.08);
   c11->SetRightMargin(0.15);
 
+  TH2D *hEfficMuPtVsEta_N = (TH2D*)(gROOT->FindObject("hEfficMuPtVsEta_N"));
+  TH2D *hEfficMuPtVsEta_D = (TH2D*)(gROOT->FindObject("hEfficMuPtVsEta_D"));
   hEfficMuPtVsEta_N->Divide(hEfficMuPtVsEta_D);
 
   hEfficMuPtVsEta_N->SetXTitle("#eta");
@@ -187,51 +205,60 @@ void plotEffVsRun(TFile *file, TFile *outFile=NULL){
 
 
  //----chamber  efficiency
-  c11 = getDefaultCanvas("L1RPCEffVsRun","L1 RPC efficiency vs run",12,53,1376,421);
+  TCanvas *c11 = getDefaultCanvas("L1RPCEffVsRun","L1 RPC efficiency vs run",12,53,1376,421);
   c11->SetLeftMargin(0.05);
   c11->SetRightMargin(0.05);
   c11->Divide(3,1);
 
   TLatex *aLatex = new TLatex(0,0,"");
-  aLatex->SetTextSize(0.15);
-  float x = 5.0;
-  float y = 0.815;
+  aLatex->SetNDC(true);
+  aLatex->SetTextSize(0.10);
+  aLatex->SetTextAlign(21);
+  float x=0.5, y;
 
   TLine *aLine = new TLine(56,0.8,56,1.0);
   aLine->SetLineColor(9);
   aLine->SetLineWidth(2);
 
   c11->cd(1);
-  gPad->SetLeftMargin(0.12);
-  gPad->SetRightMargin(0.001);
+  gPad->SetLeftMargin(0.14);
+  gPad->SetRightMargin(0.08);
+  gPad->SetFillStyle(4000);  // will be transparent
   TGraphErrors *hGraphRun = (TGraphErrors*)file->Get("hGraphRun");
-  TH1F * hAll  = getEffVsRunHisto(hGraphRun);
+  TH1D * hAll  = getEffVsRunHisto(hGraphRun);
   hAll->GetXaxis()->LabelsOption("v");
+  hAll->GetYaxis()->SetTitleOffset(1.3);
   hAll->Draw();
   getPressVsRunHisto(hAll)->Draw("same P");
+  y=0.80; 
   aLatex->DrawLatex(x,y,"|#eta|<1.6");
   //aLine->Draw();
 
   c11->cd(2);
-  gPad->SetLeftMargin(0);
-  gPad->SetRightMargin(0.002);
+  gPad->SetLeftMargin(0.08);
+  gPad->SetRightMargin(0.14);
+  gPad->SetFillStyle(4000);  // will be transparent
   TGraphErrors *hGraphRunBarrel = (TGraphErrors*)file->Get("hGraphRunBarrel");
-  TH1F *hBarrel = getEffVsRunHisto(hGraphRunBarrel);
+  TH1D *hBarrel = getEffVsRunHisto(hGraphRunBarrel);
   hBarrel->GetXaxis()->LabelsOption("v");
   hBarrel->Draw();
+  hBarrel->GetYaxis()->SetTitle("");
   getPressVsRunHisto(hBarrel)->Draw("same P");
+  y=0.20; 
   aLatex->DrawLatex(x,y,"|#eta|<0.8");
   //aLine->Draw();
 
   c11->cd(3);
-  gPad->SetLeftMargin(0);
-  gPad->SetRightMargin(0.09);
+  gPad->SetLeftMargin(0.08);
+  gPad->SetRightMargin(0.14);
+  gPad->SetFillStyle(4000);  // will be transparent
   TGraphErrors *hGraphRunEndcap = (TGraphErrors*)file->Get("hGraphRunEndcap");
-  TH1F* hEndcap = getEffVsRunHisto(hGraphRunEndcap);
+  TH1D* hEndcap = getEffVsRunHisto(hGraphRunEndcap);
   hEndcap->GetXaxis()->LabelsOption("v");
   hEndcap->Draw();
+  hEndcap->GetYaxis()->SetTitle("");
   hEndcap->Print("all");
-  TH1F *hPress = getPressVsRunHisto(hEndcap);
+  TH1D *hPress = getPressVsRunHisto(hEndcap);
   hPress->Draw("same P");
   TGaxis *axis = new TGaxis(hPress->GetXaxis()->GetXmax(),hPress->GetMinimum(),
 			    hPress->GetXaxis()->GetXmax(),hPress->GetMaximum(),
@@ -241,10 +268,10 @@ void plotEffVsRun(TFile *file, TFile *outFile=NULL){
   axis->SetLineColor(kRed);
   axis->SetLabelColor(kRed);
   axis->SetTitleColor(kRed);
-  axis->SetTitle("Pressure [mb]");
-  axis->SetTitleOffset(1.2);
+  axis->SetTitle("Pressure [mbar]");
+  axis->SetTitleOffset(1.3);
   axis->Draw();
-  y = 0.95;
+  y = 0.80;
   aLatex->DrawLatex(x,y,"0.8<|#eta|<1.6");
   //aLine->Draw();
 
@@ -311,22 +338,26 @@ void plotEffVsMu(TFile *file, TFile *outFile=NULL){
   TCanvas *c3 = getDefaultCanvas("EffVsMu","L1RPC efficiency wrt global muon p_{T}");
 
   TGraphAsymmErrors *grEff = new TGraphAsymmErrors();
+  TH1D *hEfficTkPt_N = (TH1D*)(gROOT->FindObject("hEfficTkPt_N"));
+  TH1D *hEfficTkPt_D = (TH1D*)(gROOT->FindObject("hEfficTkPt_D"));
   grEff->Divide(hEfficTkPt_N,hEfficTkPt_D);
   grEff->SetMarkerStyle(25);
   grEff->SetMarkerColor(4);
   TGraphAsymmErrors *grEff1 = new TGraphAsymmErrors();
+  TH1D *hEfficMuPt_N_overlap = (TH1D*)(gROOT->FindObject("hEfficMuPt_N_overlap"));
+  TH1D *hEfficMuPt_D_overlap = (TH1D*)(gROOT->FindObject("hEfficMuPt_D_overlap"));
   grEff1->Divide(hEfficMuPt_N_overlap,hEfficMuPt_D_overlap);
   grEff1->SetMarkerStyle(25);
   grEff1->SetMarkerColor(2);
 
-
+  TH1D *hEfficMuPt_N = (TH1D*)(gROOT->FindObject("hEfficMuPt_N"));
   hEfficMuPt_N->Reset();
   hEfficMuPt_N->SetMinimum(0.);
   hEfficMuPt_N->SetMaximum(1.002);
   hEfficMuPt_N->SetXTitle("p_{T} [GeV/c]");
   hEfficMuPt_N->SetYTitle("Efficiency");
 
-  hEfficMuPt_N->Draw();
+  hEfficMuPt_N->Draw();  // draw frame
   grEff->Draw("EP");
   grEff1->Draw("EP");
 
