@@ -95,6 +95,7 @@ TH1F* getNormalisedRateHistoForRun(TFile *file, int nMu, string region="B"){
 
   char hName[100];
   sprintf(hName,"FS_HIST_CODE_%s%d_ptCode",region.c_str(),nMu-1);
+  file->cd();
   TCanvas *aCanvas = (TCanvas *)file->Get("SC_fsHisits");
   if(!aCanvas){
     std::cout<<"No canvas in file: "<<file->GetName()<<std::endl;
@@ -130,7 +131,7 @@ TH1F* getNormalisedRateHistoForRun(TFile *file, int nMu, string region="B"){
       hIntFloat->SetBinError(iBin,(float)hInt->GetBinError(iBin)/(float)hInt->GetBinContent(1));
       // DEBUG
       //std::cout<<"### getNormalisedRateHistoForRun: iBin="<<iBin<<" val="<<hIntFloat->GetBinContent(iBin)
-      //             <<" err="<<hIntFloat->GetBinError(iBin)<<std::endl;
+      //	       <<" err="<<hIntFloat->GetBinError(iBin)<<std::endl;
       // DEBUG
     }
   }
@@ -156,9 +157,10 @@ TList* getListOfFiles(string dir){
 //////////////////////////////////////////////////////
 std::vector<TH1F*> getNormalisedRateHistoVecForRuns(int nMu, string region){
 
-  string path = "./" ; // "/home/akalinow/scratch/CMS/PAC/MonitorHistos/";
+  string oldpath=gSystem->pwd();
+  string path = oldpath+"/MonitorHistos/"; // "/home/akalinow/scratch/CMS/PAC/MonitorHistos/";
   vector<TH1F*> histos;
-  TList *files = getListOfFiles(path);
+  TList *files = getListOfFiles(path); // this changes current PWD!
   TIter next(files);
   TObject *obj = 0;
   int counter = 0;
@@ -183,7 +185,7 @@ std::vector<TH1F*> getNormalisedRateHistoVecForRuns(int nMu, string region){
   delete files;
 
   //TSystemDirectory aDir1("Directory1","/home/akalinow/scratch/CMS/PAC/soft/");
-  TSystemDirectory aDir1("Directory1","./");
+  TSystemDirectory aDir1("Directory1", oldpath.c_str());
   aDir1.GetListOfFiles();
 
   return histos;
@@ -214,10 +216,10 @@ void plotNormalisedRateForRuns(int nMu, string region){
     histos[i]->SetStats(kFALSE);
     histos[i]->SetTitle("");
     if(!isFrame){
-      histos[i]->Draw("");
+      histos[i]->DrawCopy("");
       isFrame=true;
     }
-    else histos[i]->Draw("same");
+    else histos[i]->DrawCopy("same");
   }
   
   char name[100];
@@ -376,14 +378,20 @@ TH1F* getHistoFromNormalisedRateVsRunGraph(TGraphErrors *graph,
 // taken into account.
 //
 //////////////////////////////////////////////////////
-TGraphErrors* getPressureVsRunGraph(const char* pressureGraphFile="./PressureGraph.root") {
+TGraphErrors* getPressureVsRunGraph(const char* pressureGraphFile="PressureGraph.root") {
 
   //Load pressure graph, and transfer into map
-  TFile *file = new TFile(pressureGraphFile); // "./PressureGraph.root");
+  string name = gSystem->pwd();
+  name+="/";
+  name+=pressureGraphFile;
+  TFile *file = new TFile(name.c_str()); // "./PressureGraph.root");
   if(!file) {
-    std::cout<<"ERROR: Can't open file: "<<pressureGraphFile<<std::endl;
+    //    std::cout<<"ERROR: Can't open file: "<<pressureGraphFile<<std::endl;
+    std::cout<<"ERROR: Can't open file: "<<name<<std::endl;
     return NULL;
   }
+  file->cd();
+  file->ls();
   TGraph *graph = (TGraph*)file->Get("Graph");
   if(!graph) {
     std::cout<<"ERROR: Can't find TGraph in file: "<<pressureGraphFile<<std::endl;
@@ -480,11 +488,12 @@ TH1F *getHistoFromPressureVsRunGraph(TGraph *graph,
 //////////////////////////////////////////////////////
 void printRunsOnPlot(TH1F* h) {
 
-  string runs[6] = {"160406 LHC6_1", 
-		    "165537 LHC7",
-		    "165970 LHC7_1EX",
-		    "167913 TS:start",
-		    "169985 TS:end", "XXXXX"};
+  string runs[6] = {"160406 key LHC6_1", 
+		    "165537 key LHC7",
+		    "165970 key LHC7_1EX",
+		    "169985 Jun TS end", 
+		    "175832 Aug TS end",
+		    "XXXXX"};
   const int nRuns=sizeof(runs)/sizeof(string);
   // XXXXX will be replaced by the last run number from PressureGraph.root
 
@@ -603,12 +612,13 @@ bool compareXlabels(TH1* h1, TH1 *h2) {
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
 void plotSCRateVsRunCollisionsByRegion(int ptCode=13, 
-			     string region="B",       // "B" / "E"
-			     float rateMin=9999,      // 0.1 / 0.15
-			     float rateMax=-9999,     // 0.15 / 0.4
-			     string pressureGraphFile="./PressureGraph.root",
-			     float pressMin=9999,
-			     float pressMax=-9999){
+				       string region="B",       // "B" / "E"
+				       TFile *outFile=NULL,
+				       float rateMin=9999,      // 0.1 / 0.15
+				       float rateMax=-9999,     // 0.15 / 0.4
+				       string pressureGraphFile="PressureGraph.root",
+				       float pressMin=9999,
+				       float pressMax=-9999){
 
   int nMu=1;  // first muon
   string title;
@@ -638,15 +648,16 @@ void plotSCRateVsRunCollisionsByRegion(int ptCode=13,
       Double_t mean, rms;
       if(getMeanRmsFromHisto(hPress, mean, rms, true)) {
 	std::cout<<">>>>> hPress meanY="<<mean<<" rmsY="<<rms<<std::endl;
-	hPress->SetMinimum(mean-3.0*rms); // 3*sigma
-	hPress->SetMaximum(mean+3.0*rms); // 3*sigma
+	hPress->SetMinimum(mean-3.0*rms); // default: 3*sigma
+	hPress->SetMaximum(mean+3.0*rms); // default: 3*sigma
       }
     }
   }
 
-  TCanvas *c2;
   TPad *pad1, *pad2;
-  c2 = new TCanvas("c2","Normalized rates for runs",12,33,1576,500);
+  TCanvas *c2 = new TCanvas(Form("Rate_%dmu_PtCode%d_%s_Collisions",nMu,ptCode,regionName.c_str()),
+			    Form("Normalized SC rate vs run : %d mu, p_{T} code %d, %s",
+				 nMu, ptCode, regionName.c_str()),12,33,1576,500);
   c2->SetLeftMargin(0.06);
   c2->SetRightMargin(0.06);
   c2->Draw();
@@ -672,12 +683,12 @@ void plotSCRateVsRunCollisionsByRegion(int ptCode=13,
     hRate->SetMinimum(rateMin);
     hRate->SetMaximum(rateMax);
   } else {
-    // adjust range automatically
+    //adjust range automatically
     Double_t mean, rms;
     if(getMeanRmsFromHisto(hRate, mean, rms, true)) {
       std::cout<<">>>>> hRate meanY="<<mean<<" rmsY="<<rms<<std::endl;
-      hRate->SetMinimum(mean-2.5*rms); // 3*sigma
-      hRate->SetMaximum(mean+2.5*rms); // 3*sigma
+      hRate->SetMinimum(mean-2.0*rms); // default: 2.5*sigma
+      hRate->SetMaximum(mean+2.0*rms); // default: 2.5*sigma
     }
   }
   hRate->SetName(Form("histo%s",regionName.c_str()));
@@ -712,11 +723,11 @@ void plotSCRateVsRunCollisionsByRegion(int ptCode=13,
 	     <<" ymax="<<ymax
 	     <<" dx="<<dx<<" dy="<<dy<<std::endl;
     std::cout<<"(xmax-xmin)="<<(xmax-xmin)<<" L="<<pad1->GetLeftMargin()
-	     <<" R="<<pad1->GetRightMargin()<<std::endl;
+    	     <<" R="<<pad1->GetRightMargin()<<std::endl;
     pad2->Range(xmin-c2->GetLeftMargin()*dx,
-		ymin-c2->GetBottomMargin()*dy,
-		xmax+c2->GetRightMargin()*dx,
-		ymax+c2->GetTopMargin()*dy);
+    		ymin-c2->GetBottomMargin()*dy,
+    		xmax+c2->GetRightMargin()*dx,
+    		ymax+c2->GetTopMargin()*dy);
     pad2->Draw();
     pad2->cd();
     hPress->SetLineColor(kRed);
@@ -730,9 +741,8 @@ void plotSCRateVsRunCollisionsByRegion(int ptCode=13,
     axis->SetTitle("Pressure [mbar]");
     axis->SetTitleOffset(0.8);
     axis->Draw();
-
+    
     printRunsOnPlot(hPress); //,region);
-
     pad2->Update();
   }
   c2->Modified();
@@ -740,21 +750,43 @@ void plotSCRateVsRunCollisionsByRegion(int ptCode=13,
   c2->Print(Form("eps/Rate_PtCode%d_%s_Collisions.eps",ptCode,regionName.c_str()));
   c2->Print(Form("png/Rate_PtCode%d_%s_Collisions.png",ptCode,regionName.c_str()));
   c2->Print(Form("C/Rate_PtCode%d_%s_Collisions.C",ptCode,regionName.c_str()));
-
+  if(outFile) {
+    outFile->cd();
+    c2->Write();
+  }
+  //c2->Print(Form("root/Rate_PtCode%d_%s_Collisions.root",ptCode,regionName.c_str()));
+  delete pad1;
+  delete pad2;
+  delete c2;
 }
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
 
-void plotSCRateVsRunCollisions(int ptCode=10) {
+void plotSCRateVsRunCollisions() {
+
   // create output plot directories
   gSystem->mkdir("./C");
   gSystem->mkdir("./eps");
   gSystem->mkdir("./png");
-  // BARREL
-  plotSCRateVsRunCollisionsByRegion(ptCode, "B"); // , 0.1, 0.15,
-  //				    "./PressureGraph.root", 945.0, 985.0 );
-  // ENDCAP 
-  plotSCRateVsRunCollisionsByRegion(ptCode, "E"); //, 0.15, 0.4,
-  //				    "./PressureGraph.root", 945.0, 985.0 );
+  gSystem->mkdir("./root");
 
+  std::vector<int> ptCode;
+  ptCode.push_back(5);  
+  ptCode.push_back(10);  
+  ptCode.push_back(13);
+  ptCode.push_back(15);
+  ptCode.push_back(20);
+  ptCode.push_back(25);
+
+  TFile *outFile = new TFile("./root/SCrateVsRunPlots.root","RECREATE");
+  for(int icode=0; icode<ptCode.size(); icode++) {
+    std::cout<<"Doing plots for PT code: "<<ptCode[icode]<<std::endl;
+    // BARREL
+    plotSCRateVsRunCollisionsByRegion(ptCode[icode], "B", outFile); // , 0.1, 0.15,
+    //				    "PressureGraph.root", 945.0, 985.0 );
+    // ENDCAP 
+    plotSCRateVsRunCollisionsByRegion(ptCode[icode], "E", outFile); //, 0.15, 0.4,
+    //				    "PressureGraph.root", 945.0, 985.0 );
+  }
+  outFile->Close();
 }

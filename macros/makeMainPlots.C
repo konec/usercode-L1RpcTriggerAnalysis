@@ -5,6 +5,11 @@
 void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root", 
 		   string outDir="", string outPrefix="mainPlots")
 {
+  gSystem->mkdir("./png");
+  gSystem->mkdir("./eps");
+  gSystem->mkdir("./C");
+  gSystem->mkdir("./root");
+
   gROOT->Reset();
   gROOT->GetList()->Delete();
   gROOT->GetListOfCanvases()->Delete();
@@ -63,6 +68,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c0Tk->GetName()<<".png";
   c0Tk->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c0Tk->GetName()<<".eps";
+  c0Tk->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c0Tk->GetName()<<".C";
   c0Tk->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c0Tk);
@@ -104,6 +112,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c1EDB->GetName()<<".png";
   c1EDB->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c1EDB->GetName()<<".eps";
+  c1EDB->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c1EDB->GetName()<<".C";
   c1EDB->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c1EDB);
@@ -139,6 +150,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c1EHB->GetName()<<".png";
   c1EHB->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c1EHB->GetName()<<".eps";
+  c1EHB->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c1EHB->GetName()<<".C";
   c1EHB->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c1EHB);
@@ -168,6 +182,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c1EDE->GetName()<<".png";
   c1EDE->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c1EDE->GetName()<<".eps";
+  c1EDE->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c1EDE->GetName()<<".C";
   c1EDE->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c1EDE);
@@ -193,6 +210,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c1EHE->GetName()<<".png";
   c1EHE->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c1EHE->GetName()<<".eps";
+  c1EHE->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c1EHE->GetName()<<".C";
   c1EHE->Print(outName.str().c_str(),"cxx");
@@ -226,6 +246,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c9->GetName()<<".png";
   c9->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c9->GetName()<<".eps";
+  c9->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c9->GetName()<<".C";
   c9->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c9);
@@ -257,6 +280,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c1D->GetName()<<".png";
   c1D->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c1D->GetName()<<".eps";
+  c1D->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c1D->GetName()<<".C";
   c1D->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c1D);
@@ -283,6 +309,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c1H->GetName()<<".png";
   c1H->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c1H->GetName()<<".eps";
+  c1H->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c1H->GetName()<<".C";
   c1H->Print(outName.str().c_str(),"cxx");
@@ -392,6 +421,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c2->GetName()<<".png";
   c2->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c2->GetName()<<".eps";
+  c2->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c2->GetName()<<".C";
   c2->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c2);
@@ -415,6 +447,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c2_3z6->GetName()<<".png";
   c2_3z6->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c2_3z6->GetName()<<".eps";
+  c2_3z6->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c2_3z6->GetName()<<".C";
   c2_3z6->Print(outName.str().c_str(),"cxx");
@@ -447,6 +482,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c3->GetName()<<".png";
   c3->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c3->GetName()<<".eps";
+  c3->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c3->GetName()<<".C";
   c3->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c3);
@@ -469,6 +507,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c4->GetName()<<".png";
   c4->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c4->GetName()<<".eps";
+  c4->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c4->GetName()<<".C";
   c4->Print(outName.str().c_str(),"cxx");
@@ -502,6 +543,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c5->GetName()<<".png";
   c5->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c5->GetName()<<".eps";
+  c5->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c5->GetName()<<".C";
   c5->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c5);
@@ -533,6 +577,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c5_barrel->GetName()<<".png";
   c5_barrel->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c5_barrel->GetName()<<".eps";
+  c5_barrel->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c5_barrel->GetName()<<".C";
   c5_barrel->Print(outName.str().c_str(),"cxx");
@@ -566,6 +613,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c5_overlap->GetName()<<".png";
   c5_overlap->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c5_overlap->GetName()<<".eps";
+  c5_overlap->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c5_overlap->GetName()<<".C";
   c5_overlap->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c5_overlap);
@@ -597,6 +647,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c5_endcap->GetName()<<".png";
   c5_endcap->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c5_endcap->GetName()<<".eps";
+  c5_endcap->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c5_endcap->GetName()<<".C";
   c5_endcap->Print(outName.str().c_str(),"cxx");
@@ -630,6 +683,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c5_endcapN->GetName()<<".png";
   c5_endcapN->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c5_endcapN->GetName()<<"eps";
+  c5_endcapN->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c5_endcapN->GetName()<<".C";
   c5_endcapN->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c5_endcapN);
@@ -661,6 +717,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c5_endcapP->GetName()<<".png";
   c5_endcapP->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c5_endcapP->GetName()<<".eps";
+  c5_endcapP->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c5_endcapP->GetName()<<".C";
   c5_endcapP->Print(outName.str().c_str(),"cxx");
@@ -694,6 +753,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c6->GetName()<<".png";
   c6->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c6->GetName()<<".eps";
+  c6->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c6->GetName()<<".C";
   c6->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c6);
@@ -713,6 +775,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c7->GetName()<<".png";
   c7->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c7->GetName()<<".eps";
+  c7->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c7->GetName()<<".C";
   c7->Print(outName.str().c_str(),"cxx");
@@ -735,6 +800,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c7_col->GetName()<<".png";
   c7_col->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c7_col->GetName()<<".eps";
+  c7_col->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c7_col->GetName()<<".C";
   c7_col->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c7_col);
@@ -755,6 +823,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c8->GetName()<<".png";
   c8->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c8->GetName()<<".eps";
+  c8->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c8->GetName()<<".C";
   c8->Print(outName.str().c_str(),"cxx");
@@ -780,6 +851,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c10->GetName()<<".png";
   c10->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c10->GetName()<<".eps";
+  c10->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c10->GetName()<<".C";
   c10->Print(outName.str().c_str(),"cxx");
@@ -818,6 +892,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c11->GetName()<<".png";
   c11->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c11->GetName()<<".eps";
+  c11->Print(outName.str().c_str(),"eps");
+  outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c11->GetName()<<".C";
   c11->Print(outName.str().c_str(),"cxx");
   canvasToWrite.push_back(c11);
@@ -845,6 +922,9 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c10_ls->GetName()<<".png";
   c10_ls->Print(outName.str().c_str(),"png");
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c10_ls->GetName()<<".eps";
+  c10_ls->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c10_ls->GetName()<<".C";
   c10_ls->Print(outName.str().c_str(),"cxx");

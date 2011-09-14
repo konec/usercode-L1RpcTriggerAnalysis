@@ -3,9 +3,9 @@
 
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-TCanvas * getDefaultCanvas(float x=10,float y=30,float w=650,float h=600){
+TCanvas * getDefaultCanvas(string name="c1", string title="c1", float x=10,float y=30,float w=650,float h=600){
 
-  TCanvas *c1 = new TCanvas("c1","Jet LL",x,y,w,h);
+  TCanvas *c1 = new TCanvas(name.c_str(),title.c_str(),x,y,w,h);
   c1->SetGrid(0,0);
   c1->SetFillStyle(4000);
   c1->SetLeftMargin(0.16);
@@ -62,6 +62,7 @@ TH1F * getEffVsRunHisto(TGraphErrors *hGraph){
   int nPoints = hGraph->GetN();
   ////Count good Runs(=with small error on eff)
   Double_t xTmp, yTmp;
+  Double_t error = 0;
   int nGoodRuns = 0;
   for(int i=0;i<nPoints;++i){
     hGraph->GetPoint(i,xTmp,yTmp);
@@ -76,8 +77,6 @@ TH1F * getEffVsRunHisto(TGraphErrors *hGraph){
   histo->SetYTitle("L1 RPC Efficiency");
   histo->SetLineWidth(2);
 
-  Double_t xTmp, yTmp;
-  Double_t error = 0;
   nGoodRuns = 0;
   for(int i=0;i<nPoints;++i){
     hGraph->GetPoint(i,xTmp,yTmp);
@@ -132,12 +131,12 @@ TH1F *getPressVsRunHisto(TH1F *histo){
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-void plotEffVsEta(TFile *file){
+void plotEffVsEta(TFile *file, TFile *outFile=NULL){
   file->cd();   
   file->ls();
 
- //----chamber  efficiency
-  c11 = getDefaultCanvas(12,53,1029,600);
+  //----chamber  efficiency
+  c11 = getDefaultCanvas("EffVsPtVsEta","L1 RPC efficiency vs Eta vs p_{T}",12,53,1029,600);
   c11->SetLeftMargin(0.08);
   c11->SetRightMargin(0.15);
 
@@ -151,8 +150,15 @@ void plotEffVsEta(TFile *file){
   hEfficMuPtVsEta_N->GetYaxis()->SetRange(0,iBinY);
   hEfficMuPtVsEta_N->Draw("colz");
 
-  c1->Print("png/EffVsPtVsEta.png");
-
+  c11->Print("png/EffVsPtVsEta.png");
+  c11->Print("eps/EffVsPtVsEta.eps");
+  c11->Print("C/EffVsPtVsEta.C","cxx");
+  if(outFile) {
+    outFile->cd();
+    c11->Write();
+    file->cd();
+  }
+  
   return;
 
   //Normalize
@@ -171,7 +177,7 @@ void plotEffVsEta(TFile *file){
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-void plotEffVsRun(TFile *file){
+void plotEffVsRun(TFile *file, TFile *outFile=NULL){
   file->cd();   
   file->ls();
 
@@ -181,7 +187,7 @@ void plotEffVsRun(TFile *file){
 
 
  //----chamber  efficiency
-  c11 = getDefaultCanvas(12,53,1376,421);
+  c11 = getDefaultCanvas("L1RPCEffVsRun","L1 RPC efficiency vs run",12,53,1376,421);
   c11->SetLeftMargin(0.05);
   c11->SetRightMargin(0.05);
   c11->Divide(3,1);
@@ -194,7 +200,6 @@ void plotEffVsRun(TFile *file){
   TLine *aLine = new TLine(56,0.8,56,1.0);
   aLine->SetLineColor(9);
   aLine->SetLineWidth(2);
-
 
   c11->cd(1);
   gPad->SetLeftMargin(0.12);
@@ -244,14 +249,22 @@ void plotEffVsRun(TFile *file){
   //aLine->Draw();
 
   c11->Print("png/L1RPCEffVsRun.png");
-  c11->Print("png/L1RPCEffVsRun.eps");
+  c11->Print("eps/L1RPCEffVsRun.eps");
+  c11->Print("C/L1RPCEffVsRun.C","cxx");
+  if(outFile) {
+    outFile->cd();
+    c11->Write();
+    file->cd();
+  }  
 
-  return;
+  //return;
 
   TGraphErrors *grAll = getEffChangeVsRun((TGraphErrors*)hGraphRun);
   TGraphErrors *grBarrel = getEffChangeVsRun((TGraphErrors*)hGraphRunBarrel);
   TGraphErrors *grEndcap = getEffChangeVsRun((TGraphErrors*)hGraphRunEndcap);
 
+  c11->SetName("EffChangesVsRun");
+  c11->SetTitle("L1RPC efficiency changes vs run");
   c11->cd(1);
   grAll->SetMinimum(0.95);
   grAll->SetMaximum(1.05);
@@ -280,15 +293,22 @@ void plotEffVsRun(TFile *file){
   aLatex->DrawLatex(x,y,"0.8<|#eta|<1.6");
 
   c11->Print("png/EffChangesVsRun.png");
+  c11->Print("eps/EffChangesVsRun.eps");
+  c11->Print("C/EffChangesVsRun.C","cxx");
+  if(outFile) {
+    outFile->cd();
+    c11->Write();
+    file->cd();
+  }  
 
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-void plotEffVsMu(TFile *file){
+void plotEffVsMu(TFile *file, TFile *outFile=NULL){
   file->cd();   
   file->ls();
 
-  TCanvas *c3 = getDefaultCanvas();
+  TCanvas *c3 = getDefaultCanvas("EffVsMu","L1RPC efficiency wrt global muon p_{T}");
 
   TGraphAsymmErrors *grEff = new TGraphAsymmErrors();
   grEff->Divide(hEfficTkPt_N,hEfficTkPt_D);
@@ -311,6 +331,14 @@ void plotEffVsMu(TFile *file){
   grEff1->Draw("EP");
 
   c3->Print("png/EffVsMu.png");
+  c3->Print("eps/EffVsMu.eps");
+  c3->Print("C/EffVsMu.C","cxx");
+  if(outFile) {
+    outFile->cd();
+    c3->Write();
+    file->cd();
+  }  
+
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
@@ -381,13 +409,23 @@ void plot(TFile *file){
 void makePlots(){
 
   TFile *file = new TFile("efficiencyHistos.root");
+  if (file==NULL) return;
   file->ls();
   gStyle->SetPalette(1);
-  
-  plotEffVsRun(file);
-  plotEffVsMu(file);
-  plotEffVsEta(file);
-  plotDeltaPt(file);
+
+  // create output plot directories
+  gSystem->mkdir("./C");
+  gSystem->mkdir("./eps");
+  gSystem->mkdir("./png");
+  gSystem->mkdir("./root");
+
+  TFile *outFile = new TFile("./root/efficiencyVsRunPlots.root", "RECREATE");
+  // make plots  
+  plotEffVsRun(file, outFile);
+  plotEffVsMu(file, outFile);
+  plotEffVsEta(file, outFile);
+  //plotDeltaPt(file);
   //plot(file);
+  outFile->Close();
 
 }
