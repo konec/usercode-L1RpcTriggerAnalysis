@@ -7,7 +7,7 @@ data1ChainFileNames = cms.PSet(
 
 ##Add data
 path = "/afs/cern.ch/cms/L1/rpc/Shift/Crab/"
-datesToAdd = ["05_08_2011/v1/","13_08_2011/v1/","25_08_2011/v1/"]
+datesToAdd = ["2011_08_05/v1/","2011_08_13/v1/","2011_08_25/v1/"]
 #datesToAdd = ["09_06_2011/v1/","10_06_2011/v1/","19_06_2011/v1/","22_06_2011/v1","27_06_2011/v1","05_07_2011/v1","01_08_2011/v1/"]
 for date in datesToAdd:
     for fname in os.listdir(path+date):

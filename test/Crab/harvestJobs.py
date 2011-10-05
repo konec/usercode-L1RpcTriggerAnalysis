@@ -116,7 +116,9 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName6+".gz "+castor2+"; cd -"
         os.system(command)
         print "Copying JSON files:",jsonFileName,",",jsonFileNameLumiSummary,"to CASTOR path: ",castor2
-        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+jsonFileName+" "+jsonFileNameLumiSummary+" "+castor2+"; cd -"
+        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+jsonFileName+" "+castor2+"; cd -"
+        os.system(command)
+        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+jsonFileNameLumiSummary+" "+castor2+"; cd -"
         os.system(command)
         # Remove TEMP DIR
         os.system("rm -rf /tmp/${USER}/_HADD_TMP_")
@@ -124,8 +126,8 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
 #########################################
 ####################################################################
 if __name__ == '__main__':	
-	prefix = "./25_08_2011/"
+	prefix = "./2011_09_14/"
 	version = "v1/"
-        aDataSet = "ExpressPhysics/Run2011A-Express-v6/FEVT"
+        aDataSet = "ExpressPhysics/Run2011B-Express-v1/FEVT"
         castor = "${CASTOR_HOME}/RPCShift/"
         unpackAndMergeFiles(aDataSet,prefix+version,castor)
