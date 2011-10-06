@@ -1,6 +1,6 @@
-#include "FigUtils.C"
-#include "TCanvas.h"
 #include <vector>
+#include "TCanvas.h"
+#include "FigUtils.C"
 
 void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root", 
 		   string outDir="", string outPrefix="mainPlots")
@@ -25,6 +25,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
 //--
   //TFile file("efficiencyHistos.root");
   TFile * file = new TFile(name.c_str());
+  file->cd();
   file->ls();
 //-------------------- 
   gStyle->SetOptStat(0);
@@ -34,6 +35,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   //----muon distribution
   c0Mu = new TCanvas("plot_GlbMu","Global muons distributions",1200,400);
   c0Mu->SetFillColor(0);
+  c0Mu->Draw();
   c0Mu->Divide(3,1);
   c0Mu->cd(1);
   hMuonPt->DrawCopy();
@@ -44,10 +46,14 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   hMuonPhi->SetMinimum(0);
   hMuonPhi->DrawCopy();
 
-  //c0Mu->Print(0,".png");
+  //c0Mu->Print(0,"png");
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c0Mu->GetName()<<".png";
   c0Mu->Print(outName.str().c_str(),"png");
+  c0Mu->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
+  outName.str(""); // reset stream 
+  outName<<outDir<<"eps/"<<c0Mu->GetName()<<".eps";
+  c0Mu->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c0Mu->GetName()<<".C";
   c0Mu->Print(outName.str().c_str(),"cxx");
@@ -55,6 +61,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
 
   //----track distribution
   c0Tk = new TCanvas("plot_TrkMu","Tracker muons distributions",1200,400);
+  c0Tk->Draw();
   c0Tk->SetFillColor(0);
   c0Tk->Divide(3,1);
   c0Tk->cd(1);
@@ -64,9 +71,11 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   c0Tk->cd(3);
   hTrackPhi->DrawCopy();
 
+  //c0Tk->Print(0,".png");
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c0Tk->GetName()<<".png";
   c0Tk->Print(outName.str().c_str(),"png");
+  c0Tk->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c0Tk->GetName()<<".eps";
   c0Tk->Print(outName.str().c_str(),"eps");
@@ -245,6 +254,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c9->GetName()<<".png";
   c9->Print(outName.str().c_str(),"png");
+  c9->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c9->GetName()<<".eps";
   c9->Print(outName.str().c_str(),"eps");
@@ -279,6 +289,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c1D->GetName()<<".png";
   c1D->Print(outName.str().c_str(),"png");
+  c1D->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c1D->GetName()<<".eps";
   c1D->Print(outName.str().c_str(),"eps");
@@ -309,6 +320,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c1H->GetName()<<".png";
   c1H->Print(outName.str().c_str(),"png");
+  c1H->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c1H->GetName()<<".eps";
   c1H->Print(outName.str().c_str(),"eps");
@@ -683,7 +695,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName<<outDir<<"png/"<<c5_endcapN->GetName()<<".png";
   c5_endcapN->Print(outName.str().c_str(),"png");
   outName.str(""); // reset stream 
-  outName<<outDir<<"eps/"<<c5_endcapN->GetName()<<"eps";
+  outName<<outDir<<"eps/"<<c5_endcapN->GetName()<<".eps";
   c5_endcapN->Print(outName.str().c_str(),"eps");
   outName.str(""); // reset stream 
   outName<<outDir<<"C/"<<c5_endcapN->GetName()<<".C";
@@ -775,6 +787,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c7->GetName()<<".png";
   c7->Print(outName.str().c_str(),"png");
+  c7->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c7->GetName()<<".eps";
   c7->Print(outName.str().c_str(),"eps");
@@ -799,6 +812,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c7_col->GetName()<<".png";
   c7_col->Print(outName.str().c_str(),"png");
+  c7_col->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c7_col->GetName()<<".eps";
   c7_col->Print(outName.str().c_str(),"eps");
@@ -851,6 +865,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c10->GetName()<<".png";
   c10->Print(outName.str().c_str(),"png");
+  c10->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c10->GetName()<<".eps";
   c10->Print(outName.str().c_str(),"eps");
@@ -891,6 +906,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c11->GetName()<<".png";
   c11->Print(outName.str().c_str(),"png");
+  c11->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c11->GetName()<<".eps";
   c11->Print(outName.str().c_str(),"eps");
@@ -922,6 +938,7 @@ void makeMainPlots(float ptCut=15.0, string name="efficiencyHistos.root",
   outName.str(""); // reset stream 
   outName<<outDir<<"png/"<<c10_ls->GetName()<<".png";
   c10_ls->Print(outName.str().c_str(),"png");
+  c10_ls->Print(outName.str().c_str(),"png"); // this crazy line is need to properly create PNG when c->Divide is used
   outName.str(""); // reset stream 
   outName<<outDir<<"eps/"<<c10_ls->GetName()<<".eps";
   c10_ls->Print(outName.str().c_str(),"eps");
