@@ -143,13 +143,13 @@ def prepareCrabCfg(prefix,
 ################
 if __name__ == '__main__':	
 	###################
-	prefix = "./2011_09_14/"
+	prefix = "./2011_10_08/"
 	version = "v1/"	
 	aDataSet = "/ExpressPhysics/Run2011B-Express-v1/FEVT"
 	nJobs = 499
 	###################
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
-        analysisPy = topPath+"/synchroAnalysis_batch.py"
+        analysisPy = topPath+"/synchroAnalysisCrab.py"
 	runRegCfg  = topPath+"/runregTemplate.cfg"
 	runRegPy   = topPath+"/../runregparse.py"
 	readCafCfg = topPath+"/crab_read_CAFData.cfg"

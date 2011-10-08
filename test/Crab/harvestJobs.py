@@ -126,7 +126,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
 #########################################
 ####################################################################
 if __name__ == '__main__':	
-	prefix = "./2011_09_14/"
+	prefix = "./2011_10_08/"
 	version = "v1/"
         aDataSet = "ExpressPhysics/Run2011B-Express-v1/FEVT"
         castor = "${CASTOR_HOME}/RPCShift/"
