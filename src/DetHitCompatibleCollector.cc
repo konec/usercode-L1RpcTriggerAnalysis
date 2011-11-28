@@ -151,7 +151,7 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleDets( const reco::Muo
     if (! (det->surface().bounds().inside(stateAtDet.localPosition()))) continue;
     if (deepInside) {
       LocalError stateAtDetError = stateAtDet.localError().positionError();
-      LocalPoint farEdge( fabs(stateAtDet.localPosition().x())+3.5*sqrt(stateAtDetError.xx()),  fabs(stateAtDet.localPosition().y())+3.5*sqrt(stateAtDetError.yy())); 
+      LocalPoint farEdge( fabs(stateAtDet.localPosition().x())+3.5*sqrt(stateAtDetError.xx())+5.,  fabs(stateAtDet.localPosition().y())+3.5*sqrt(stateAtDetError.yy())+5.); 
       if (! det->surface().bounds().inside(farEdge) ) continue;
     }
     if (detsCrossedByMuon.end() == find(detsCrossedByMuon.begin(),detsCrossedByMuon.end(),rpcDet.rawId()) )
