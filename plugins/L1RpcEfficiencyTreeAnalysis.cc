@@ -96,7 +96,7 @@ void L1RpcEfficiencyTreeAnalysis::beginJob()
     anaRpcMisc.run(event,muon,l1RpcColl,l1OtherColl);
 //    std::cout <<"----------"<<std::endl;
     anaEmu.run ( muon, l1RpcCollEmu, l1RpcColl);
-    anaDet.debug = anaEmu.debug; if (anaDet.debug) std::cout <<" Event: "<<(*event).id <<" Lumi: "<<(*event).lumi<< std::endl;
+//    anaDet.debug = anaEmu.debug; if (anaDet.debug) std::cout <<" Event: "<<(*event).id <<" Lumi: "<<(*event).lumi<< std::endl;
     anaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
 //    anaRpcVsOth.run(muon,l1RpcCollEmu,l1OtherColl);
 //    anaEff.run(muon,l1RpcCollEmu,l1OtherColl);

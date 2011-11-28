@@ -143,23 +143,27 @@ def prepareCrabCfg(prefix,
 ################
 if __name__ == '__main__':	
 	###################
-	prefix = "./2011_10_08/"
-	version = "v1/"	
-	aDataSet = "/ExpressPhysics/Run2011B-Express-v1/FEVT"
+	prefix = "./2011_11_20/"
+	version = "w_old/"	
+# 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
+#  	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
+#	aDataSet = "/MinimumBias/Run2011B-MuonTrack-PromptSkim-v1/RAW-RECO"
+   	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
+#  	aDataSet = "/ExpressPhysics/Run2011B-Express-v1/FEVT"
 	nJobs = 499
 	###################
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
-        analysisPy = topPath+"/synchroAnalysisCrab.py"
+#  analysisPy = topPath+"/synchroAnalysis_batch.py"
+	analysisPy = topPath+"/l1RpcAnalysis_batch.py"
 	runRegCfg  = topPath+"/runregTemplate.cfg"
 	runRegPy   = topPath+"/../runregparse.py"
 	readCafCfg = topPath+"/crab_read_CAFData.cfg"
 	readCafSh  = topPath+"/readCAFData.sh"
 	###################
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
-	#jsonsPath = "/afs/cern.ch/cms/L1/rpc/soft/akalinow/CMSSW_4_2_3_patch2/src/UserCode/L1RpcTriggerAnalysis/test/Crab/JSON/"
-	#jsonsPath = "/afs/cern.ch/user/c/cwiok/scratch0/rpc2011/joby_14sep2011/JSON/"
-	jsonFile = makeLatestJSON(jsonsPath,aDataSet,runRegCfg,runRegPy) # automatically create a JSON for runs not analyzed yet
-	#jsonFile = jsonsPath+"/GoodRuns_175832-176023.json" #In case you want to run with your JSON
+	#jsonFile = makeLatestJSON(jsonsPath,aDataSet,runRegCfg,runRegPy) # automatically create a JSON for runs not analyzed yet
+	jsonFile = jsonsPath+"/GoodRuns_175832-178162.json" #In case you want to run with your JSON
+	#jsonFile = jsonsPath+"/GoodRuns_178365-180252.json" #In case you want to run with your JSON
 	###################
 	castorRpcDir = "/u/"+os.getenv("USER")+"/RPCShift/"
 	###################

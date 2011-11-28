@@ -27,28 +27,17 @@ void L1ObjMaker::get(vector<L1Obj> & objs, L1ObjMaker::TYPE type)
   edm::Handle<L1MuGMTReadoutCollection> pCollection;
   theEv.getByLabel(theReadout,pCollection);
 
-  edm::Handle<L1MuGMTReadoutCollection> pCollectionEmu;
-  theEv.getByLabel(theReadoutEmu,pCollectionEmu);
-
   L1MuGMTReadoutCollection const* gmtrc = pCollection.product();
   if (!gmtrc) return;
-
-  L1MuGMTReadoutCollection const* gmtrcEmu = pCollectionEmu.product();
-  if (!gmtrcEmu) return;
 
   vector<L1MuGMTReadoutRecord> gmt_records = gmtrc->getRecords();
   vector<L1MuGMTReadoutRecord>::const_iterator RRItr;
   typedef vector<L1MuRegionalCand>::const_iterator ITC;
-
-  vector<L1MuGMTReadoutRecord> gmt_recordsEmu = gmtrcEmu->getRecords();
-  vector<L1MuGMTReadoutRecord>::const_iterator RRItrEmu;
-  typedef vector<L1MuRegionalCand>::const_iterator ITCEmu;
-
   for( RRItr = gmt_records.begin() ; RRItr != gmt_records.end() ; RRItr++ ) {
-	  vector<L1MuRegionalCand> cands;
-	  switch (type) {
-      case RPCB: break;
-      case RPCF: break;
+    vector<L1MuRegionalCand> cands;
+    switch (type) {
+      case RPCB: { cands = RRItr->getBrlRPCCands(); break; }  
+      case RPCF: { cands = RRItr->getFwdRPCCands(); break; }
       case DT:   { cands = RRItr->getDTBXCands(); break; }
       case CSC:  { cands = RRItr->getCSCCands(); break; }
       default: break;
@@ -64,25 +53,4 @@ void L1ObjMaker::get(vector<L1Obj> & objs, L1ObjMaker::TYPE type)
       objs.push_back(obj);
     }
   }
-  for( RRItrEmu = gmt_records.begin() ; RRItrEmu != gmt_records.end() ; RRItrEmu++ ) {
-	   vector<L1MuRegionalCand> candsEmu;
-       switch (type) {
-       case RPCB: { candsEmu = RRItrEmu->getBrlRPCCands(); break; }
-       case RPCF: { candsEmu = RRItrEmu->getFwdRPCCands(); break; }
-       case DT:   break;
-       case CSC:  break;
-       default: break;
-     };
-     for(ITCEmu it = candsEmu.begin() ; it != candsEmu.end() ; ++it ) {
-       if (it->empty()) continue;
-       L1Obj obj;
-       obj.bx = it->bx();
-       obj.q  = it->quality();
-       obj.pt = it->ptValue();
-       obj.eta = it->etaValue();
-       obj.phi = it->phiValue();
-       objs.push_back(obj);
-     }
-   }
-
 }

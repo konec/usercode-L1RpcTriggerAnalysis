@@ -60,11 +60,14 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         jsonFileName = "GoodRuns_"+str(minRun)+"-"+str(maxRun)+".json"
         jsonFileNameLumiSummary = "lumiSummary-"+str(minRun)+"-"+str(maxRun)+".json"
         sampleName  = "efficiencyTree-"+str(minRun)+"-"+str(maxRun)+".root"
+        sampleName2 = "efficiencyHelper-"+str(minRun)+"-"+str(maxRun)+".root"
         sampleName3 = "synchroAnalysis-"+str(minRun)+"-"+str(maxRun)+".root"
         sampleName4 = "rawMonitor-"+str(minRun)+"-"+str(maxRun)+".root"
         sampleName6 = "out-"+str(minRun)+"-"+str(maxRun)+".txt"
         print "Doing hadd for ",sampleName
         os.system("cd "+pathCrabResultsTMP+"; hadd /tmp/${USER}/_HADD_TMP_/"+sampleName+" efficiencyTree_*.root")
+        print "Doing hadd for ",sampleName2
+        os.system("cd "+pathCrabResultsTMP+"; hadd /tmp/${USER}/_HADD_TMP_/"+sampleName2+" efficiencyHelper_*.root")
         print "Doing hadd for ",sampleName3
         os.system("cd "+pathCrabResultsTMP+"; hadd /tmp/${USER}/_HADD_TMP_/"+sampleName3+" synchroAnalysis_*.root")
         print "Doing hadd for ",sampleName4
@@ -77,6 +80,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         os.system("cp "+prefix+datasetpath+"/goodRuns.json"+" "+pathTMP+prefix+"/ROOT/"+jsonFileName)
         os.system("cp "+pathCrabResults+"/lumiSummary.json"+" "+pathTMP+prefix+"/ROOT/"+jsonFileNameLumiSummary)
         os.system("cp "+pathTMP+sampleName+" "+pathTMP+prefix+"/ROOT/")
+        os.system("cp "+pathTMP+sampleName2+" "+pathTMP+prefix+"/ROOT/")
         os.system("cp "+pathTMP+sampleName3+" "+pathTMP+prefix+"/ROOT/")
         os.system("cp "+pathTMP+sampleName4+" "+pathTMP+prefix+"/ROOT/")
         os.system("gzip "+pathTMP+sampleName6+"; cp "+pathTMP+sampleName6+".gz "+pathTMP+prefix+"/ROOT/")
@@ -86,6 +90,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         os.system("cp "+prefix+datasetpath+"/goodRuns.json"+" "+ prefix+"/ROOT/"+jsonFileName)
         os.system("cp "+pathCrabResults+"/lumiSummary.json"+" "+ prefix+"/ROOT/"+jsonFileNameLumiSummary)
         os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName+" "+prefix+"/ROOT/")
+        os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName2+" "+prefix+"/ROOT/")
         os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName3+" "+prefix+"/ROOT/")
         os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName4+" "+prefix+"/ROOT/")
         os.system("gzip /tmp/${USER}/_HADD_TMP_/"+sampleName6+"; cp /tmp/${USER}/_HADD_TMP_/"+sampleName6+".gz "+prefix+"/ROOT/")
@@ -106,6 +111,9 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         print "Copying merged data",sampleName,"to CASTOR path: ",castor2
         command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName+" "+castor2+"; cd -"
         os.system(command)
+        print "Copying merged data",sampleName2,"to CASTOR path: ",castor2
+        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName2+" "+castor2+"; cd -"
+        os.system(command)
         print "Copying merged data",sampleName3,"to CASTOR path: ",castor2
         command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName3+" "+castor2+"; cd -"
         os.system(command)
@@ -116,9 +124,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName6+".gz "+castor2+"; cd -"
         os.system(command)
         print "Copying JSON files:",jsonFileName,",",jsonFileNameLumiSummary,"to CASTOR path: ",castor2
-        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+jsonFileName+" "+castor2+"; cd -"
-        os.system(command)
-        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+jsonFileNameLumiSummary+" "+castor2+"; cd -"
+        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+jsonFileName+" "+jsonFileNameLumiSummary+" "+castor2+"; cd -"
         os.system(command)
         # Remove TEMP DIR
         os.system("rm -rf /tmp/${USER}/_HADD_TMP_")
@@ -126,8 +132,13 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
 #########################################
 ####################################################################
 if __name__ == '__main__':	
-	prefix = "./2011_10_08/"
-	version = "v1/"
-        aDataSet = "ExpressPhysics/Run2011B-Express-v1/FEVT"
+	#prefix = "./25_08_2011/"
+	prefix = "./2011_11_20/"
+	version = "w_new/"
+# 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
+#	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
+#	aDataSet = "/MinimumBias/Run2011B-MuonTrack-PromptSkim-v1/RAW-RECO"
+  	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
+#	aDataSet = "ExpressPhysics/Run2011B-Express-v1/FEVT"
         castor = "${CASTOR_HOME}/RPCShift/"
         unpackAndMergeFiles(aDataSet,prefix+version,castor)
