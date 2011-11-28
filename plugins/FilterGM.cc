@@ -66,4 +66,9 @@ bool FilterGM::filter(edm::Event&ev, const edm::EventSetup&es)
   ev.getByLabel(InputTag("globalMuons"),muonCollection);
 
   return (muonCollection->size() !=0) ? true : false;
+//   if (muonCollection->size()==0) return false;
+//   reco::TrackCollection::const_iterator im = muonCollection->begin();
+//   if (im->pt() < 50) return false;
+//   if (fabs(im->eta()) < 1.2) return false;
+//  return true;
 }

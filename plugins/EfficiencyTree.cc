@@ -416,7 +416,7 @@ static int nMuons = 0;
   edm::InputTag l1Tag(theConfig.getParameter<edm::InputTag>("l1MuReadout"));
   edm::InputTag l1TagEmu(theConfig.getParameter<edm::InputTag>("l1MuReadoutEmu"));
 
-  L1ObjMaker l1(l1Tag,l1TagEmu,ev);
+  L1ObjMaker l1(l1Tag,ev);
 
   // set L1Others
   std::vector<L1Obj> l1Others=  l1(L1ObjMaker::DT,L1ObjMaker::CSC);
