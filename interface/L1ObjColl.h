@@ -16,6 +16,14 @@ public:
   const std::vector<bool> & getL1ObjsMatching() const { return theL1Matching; }
 
   std::vector<L1Obj> getL1ObjsMatched(double ptMin = 0) const;
+  std::vector<L1Obj> getL1ObjsSelected(
+		  bool requireMatched = true, bool requireNonMatched = false, 
+		  double ptMin = 0., double ptMax = 161.,
+		  int bxMin = 0, int bxMax = 0,                  
+		  double etaMin = -2.5, double etaMax = 2.5,
+		  double phiMin = 0., double phiMax = 7.,
+		  int qMin = 0, int qMax = 7) const;
+  void print() const;
   
 private:
   std::vector<L1Obj> theL1Obj;

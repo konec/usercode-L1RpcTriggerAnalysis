@@ -9,14 +9,13 @@ namespace edm {class Event; }
 
 class L1ObjMaker {
 public:
-  L1ObjMaker(const edm::InputTag &readout, const edm::InputTag &readoutEmu, const edm::Event &ev) : theReadout(readout), theReadoutEmu(readoutEmu), theEv(ev) {}
+  L1ObjMaker(const edm::InputTag &readout, const edm::Event &ev) : theReadout(readout), theEv(ev) {} 
   enum TYPE { NONE, RPCB, RPCF, DT, CSC };
   std::vector<L1Obj> operator()(TYPE t1, TYPE t2=NONE, TYPE t3=NONE, TYPE t4=NONE); 
 private:
   void get(std::vector<L1Obj> & objs, TYPE t);
 private:
   edm::InputTag theReadout;
-  edm::InputTag theReadoutEmu;
   const edm::Event & theEv;
 };
 #endif
