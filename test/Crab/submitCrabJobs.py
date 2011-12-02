@@ -164,6 +164,7 @@ if __name__ == '__main__':
 	#jsonFile = makeLatestJSON(jsonsPath,aDataSet,runRegCfg,runRegPy) # automatically create a JSON for runs not analyzed yet
 	#jsonFile = jsonsPath+"/GoodRuns_175832-178162.json" #In case you want to run with your JSON
 	jsonFile = jsonsPath+"/GoodRuns_178365-180252.json" #In case you want to run with your JSON
+	#jsonFile = jsonsPath+"/GoodRuns_TMP.json" #In case you want to run with your JSON
 	###################
 	castorRpcDir = "/u/"+os.getenv("USER")+"/RPCShift/"
 	###################
