@@ -109,6 +109,9 @@ def prepareCrabCfg(prefix,
     file.close() #Closes the file (write session)
     ######
     ###### If you want to submit all jobs at once uncomment this line...
+#    print "KUKU"
+#    print "ROBI CD DOR: " +prefix+datasetpath
+#    print "KONFIG JEST: " +tmpReadCafCfg
     #os.system("cd "+prefix+datasetpath+"; crab -create -submit -cfg "+tmpReadCafCfg+"; cd -")
     ###### ...and comment out all lines below:
     ######
@@ -144,7 +147,8 @@ def prepareCrabCfg(prefix,
 if __name__ == '__main__':	
 	###################
 	prefix = "./2011_11_20/"
-	version = "w_new/"	
+	version = "w_TMP/"	
+# version = "w_new_19/"	
 # 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
 #  	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
 #	aDataSet = "/MinimumBias/Run2011B-MuonTrack-PromptSkim-v1/RAW-RECO"
