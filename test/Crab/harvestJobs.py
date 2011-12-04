@@ -134,7 +134,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
 if __name__ == '__main__':	
 	#prefix = "./25_08_2011/"
 	prefix = "./2011_11_20/"
-	version = "w_new/"
+	version = "w_TMP/"
 #	version = "mb_new/"
 # 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
 #	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
