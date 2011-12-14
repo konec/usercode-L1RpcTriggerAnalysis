@@ -1,0 +1,23 @@
+[CRAB]
+jobtype = cmssw
+scheduler = glite
+use_server = 1
+
+[CMSSW]
+lumi_mask=178350-180252.json
+total_number_of_lumis = -1
+lumis_per_job = 200
+output_file = TnPPairs_data.root
+datasetpath=/MuOnia/Run2011B-PromptReco-v1/RECO
+pset=TnPPairProducer_JPsi_data.py
+
+[USER]
+return_data = 0
+publish_data=0
+copy_data = 1
+user_remote_dir = 
+storage_element  = srm-cms.cern.ch
+storage_path = /srm/managerv2?SFN=/castor/cern.ch/user/r/rybinska
+
+[GRID]
+rb = CERN
