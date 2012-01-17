@@ -47,11 +47,6 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
   
   for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
 
-//
-// FIXME - UNCOMMENT SELECTED LINES
-//
-
-
     if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
     if (hMuPtVsEta) hMuPtVsEta->Fill(im->innerTrack()->eta(), im->innerTrack()->pt());
     if (im->innerTrack()->pt() < theConfig.getParameter<double>("minPt")) continue;
@@ -59,26 +54,17 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
     if (hMuChi2Tk) hMuChi2Tk->Fill(im->innerTrack()->normalizedChi2());
     if (im->innerTrack()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Tk")) continue;
     if (hMuChi2Gl && im->isGlobalMuon()) hMuChi2Gl->Fill(im->combinedMuon()->normalizedChi2());
-/*
-    if (im->innerTrack()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
-    if (    theConfig.getParameter<bool>("requireOuterTrack")){ 
-	  if(!im->isStandAloneMuon() || !im->outerTrack().isNonnull())continue;
-	  if(im->standAloneMuon()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Sa")) continue;
-    }
-    if ( theConfig.getParameter<bool>("requireGlobalTrack")) { 
-	  if(!im->isGlobalMuon() ||  !im->globalTrack().isNonnull()) continue;  
-	  if(im->combinedMuon()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Mu")) continue;
-    }
-*/
+    if (im->numberOfMatchedStations() <  theConfig.getParameter<int>("minNumberOfMatchedStations")) continue;
+
 //
 // TMP TIGHT SELECTION FOR IVAN
-  if (! im->isGlobalMuon()) continue;
-  if (! (im->globalTrack()->normalizedChi2() < 10)) continue;
-  if (! (im->globalTrack()->hitPattern().numberOfValidMuonHits() > 0)) continue;
-  if (! (im->numberOfMatchedStations() > 1)) continue;
-  if (! (fabs(im->innerTrack()->dxy(reference)) < 0.2)) continue; 
-  if (! (im->track()->hitPattern().numberOfValidPixelHits() > 0)) continue;
-  if (! (im->track()->hitPattern().numberOfValidTrackerHits() > 10)) continue;
+//  if (! im->isGlobalMuon()) continue;
+//  if (! (im->globalTrack()->normalizedChi2() < 10)) continue;
+//  if (! (im->globalTrack()->hitPattern().numberOfValidMuonHits() > 0)) continue;
+//  if (! (im->numberOfMatchedStations() > 1)) continue;
+//  if (! (fabs(im->innerTrack()->dxy(reference)) < 0.2)) continue; 
+//  if (! (im->track()->hitPattern().numberOfValidPixelHits() > 0)) continue;
+//  if (! (im->track()->hitPattern().numberOfValidTrackerHits() > 10)) continue;
 // TMP END OF TIGHT MUON SELECTION FROM IVAN
 
     //remove muons without valid hits in tk and mu system
@@ -100,11 +86,9 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
     if (nCSCHits==0 && hMuHitsRPCvsDT) hMuHitsRPCvsDT->Fill(nDTHits,nRPCHits);
     }
 
-/*
     if (nTrackerHits< theConfig.getParameter<int>("minNumberTrackerHits")) continue;
     if ( nRPCHits < theConfig.getParameter<int>("minNumberRpcHits")) continue;
     if ( nDTHits + nCSCHits < theConfig.getParameter<int>("minNumberDtCscHits")  ) continue;
-*/
 
     if (theMuon) theUnique = false;
     if (!theMuon || (im->track()->pt() > theMuon->track()->pt()) ) theMuon = &(*im);
