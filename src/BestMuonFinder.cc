@@ -51,10 +51,21 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
     if (hMuPtVsEta) hMuPtVsEta->Fill(im->innerTrack()->eta(), im->innerTrack()->pt());
     if (im->innerTrack()->pt() < theConfig.getParameter<double>("minPt")) continue;
     if (fabs(im->innerTrack()->eta()) >  theConfig.getParameter<double>("maxEta")) continue;
+    if (im->innerTrack()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
     if (hMuChi2Tk) hMuChi2Tk->Fill(im->innerTrack()->normalizedChi2());
     if (im->innerTrack()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Tk")) continue;
     if (hMuChi2Gl && im->isGlobalMuon()) hMuChi2Gl->Fill(im->combinedMuon()->normalizedChi2());
+    if (    theConfig.getParameter<bool>("requireOuterTrack")){ 
+        if(!im->isStandAloneMuon() || !im->outerTrack().isNonnull())continue;
+	  if(im->standAloneMuon()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Sa")) continue;
+    }
+    if ( theConfig.getParameter<bool>("requireGlobalTrack")) { 
+	  if(!im->isGlobalMuon() ||  !im->globalTrack().isNonnull()) continue;  
+	  if(im->combinedMuon()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Mu")) continue;
+    }
+
     if (im->numberOfMatchedStations() <  theConfig.getParameter<int>("minNumberOfMatchedStations")) continue;
+    if (! (im->track()->hitPattern().numberOfValidPixelHits() > 0)) continue;
 
 //
 // TMP TIGHT SELECTION FOR IVAN

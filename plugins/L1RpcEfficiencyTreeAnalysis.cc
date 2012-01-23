@@ -89,10 +89,11 @@ void L1RpcEfficiencyTreeAnalysis::beginJob()
   unsigned int lastLumi= 0;
   for (int ev=0; ev<nentries; ev++) {
     chain.GetEntry(ev);
-//    if (event->run < 175971) continue;
+//    if (event->run != 178854) continue;
     if (lastRun != (*event).run) { lastRun = (*event).run; std::cout <<"RUN: " << (*event).run<<std::endl; }
 //    if (lastLumi != (*event).lumi) { lastLumi = (*event).lumi; std::cout <<"lumi: " << (*event).lumi<<std::endl; }
-    anaEmu.debug = false;
+    anaRpcMisc.debug = false;
+//    if ((*event).id==60422922) anaRpcMisc.debug = true;
 
     anaMuonDistribution.run(muon);
     anaRpcVsOth.run(muon,l1RpcColl,l1OtherColl);

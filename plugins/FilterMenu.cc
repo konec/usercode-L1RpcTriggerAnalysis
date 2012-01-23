@@ -42,10 +42,10 @@ bool FilterMenu::beginRun(edm::Run& run, edm::EventSetup const& es)
   bool changed(true);
   if (theHltConfig.init(run,es,"HLT",changed)) {
     if (changed) {
-//      theHltConfig.dump("Streams");
-//      theHltConfig.dump("Datasets");
-        theHltConfig.dump("Triggers");
-//      theHltConfig.dump("PrescaleTable");
+      theHltConfig.dump("Streams");
+      theHltConfig.dump("Datasets");
+      theHltConfig.dump("Triggers");
+      theHltConfig.dump("PrescaleTable");
 //      theHltConfig.dump("ProcessPSet");
     }
   } 
@@ -132,18 +132,22 @@ bool FilterMenu::filterHLT(edm::Event&ev, const edm::EventSetup&es)
   bool hasMuSeed = false;
   for (unsigned int triggerIndex =0; triggerIndex < theHltConfig.size()-1; ++triggerIndex) {   //skip "Final" decision indes
     std::string triggerName = theHltConfig.triggerName(triggerIndex);
-    //unsigned int triggerIndex = theHltConfig.triggerIndex(triggerName);
+    unsigned int triggerIndex = theHltConfig.triggerIndex(triggerName);
     assert(triggerIndex==ev.triggerNames(*triggerResultsHandle).triggerIndex(triggerName));
     bool isAccept = triggerResultsHandle->accept(triggerIndex);
-    if (isAccept) {
+    if (true) {
+//    if (isAccept) {
       bool isMu = ( (triggerName.find("Mu") != std::string::npos) && (triggerName.find("Multi") == std::string::npos) );
 //      std::cout <<triggerName;  if (!isMu) std::cout <<" <---- "; std::cout << std::endl;
       if (isMu)  hasMuSeed = true;
       if (!isMu)  result = true;
-      // std::cout <<triggerName<< " Trigger path status:" << " WasRun=" << triggerResultsHandle_->wasrun(triggerIndex)
-      //        << " Accept=" << triggerResultsHandle_->accept(triggerIndex)
-      //        << " Error =" << triggerResultsHandle_->error(triggerIndex)
-      //        << std::endl;
+       std::cout <<triggerName<< " Trigger path status:" 
+              //<< " WasRun=" << triggerResultsHandle->wasrun(triggerIndex)
+              << " Accept=" << triggerResultsHandle->accept(triggerIndex);
+//              << " Error =" << triggerResultsHandle->error(triggerIndex)
+
+      if (isAccept) std::cout <<" <--";
+      std::cout << std::endl;
     }
   }
   return result;

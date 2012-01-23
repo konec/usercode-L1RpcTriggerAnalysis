@@ -59,8 +59,18 @@ void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjCol
 //
 // timing
 //
-   std::vector<L1Obj> l1RpcsMatched = l1RpcColl->getL1ObjsMatched();
-   for (unsigned int i=0; i<l1RpcsMatched.size(); i++) hRpcMisc_Time->Fill(l1RpcsMatched[i].bx);
+  if (ptMu > 10. && fabs(muon->eta()) < 1.6 ) { 
+    std::vector<L1Obj> l1RpcsMatched = l1RpcColl->getL1ObjsMatched();
+    for (unsigned int i=0; i<l1RpcsMatched.size(); i++) hRpcMisc_Time->Fill(l1RpcsMatched[i].bx);
+//    for (unsigned int i=0; i<l1RpcsMatched.size(); i++) if (l1RpcsMatched[i].bx==-2) debug = true;
+  }
+  if (debug) {
+    std::cout <<"------------"<<std::endl;
+    std::cout <<" Event: "<<(*event).id <<" Lumi: "<<(*event).lumi<< std::endl;
+    std::cout <<"MU__pt:"<<muon->pt()<<" eta: "<<muon->eta()<<" phi: "<<muon->phi()<<std::endl;
+    l1RpcColl->print();
+    
+  }
 }	
 
 
