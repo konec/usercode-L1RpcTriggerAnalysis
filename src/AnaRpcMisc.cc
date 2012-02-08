@@ -23,6 +23,8 @@ AnaRpcMisc::AnaRpcMisc(TObjArray& histos)
   hRpcMisc_OE = new TH2D("hRpcMisc_OS","hRpcMisc_OverEstimated", L1RpcEtaScale::nEtaBins, L1RpcEtaScale::etaBins, 144, 0., 2.*M_PI); histos.Add(hRpcMisc_OE);
   hRpcMisc_EffRun = new TH1D("hRpcMisc_EffRun","Efficiency in run; efficiency; weighted numb. of runs / bin",200,0.,1.); histos.Add(hRpcMisc_EffRun);
   hRpcMisc_Time = new TH1D("hRpcMisc_Time","RPC Trigger timing",5,-2.5,2.5); histos.Add(hRpcMisc_Time);
+  hRpcMisc_TimeAll = new TH1D("hRpcMisc_TimeAll","RPC Trigger timing",5,-2.5,2.5); histos.Add(hRpcMisc_TimeAll);
+  hRpcMisc_TimeDen = new TH1D("hRpcMisc_TimeDen","RPC Trigger timing",5,-2.5,2.5); histos.Add(hRpcMisc_TimeDen);
 }
 
 double AnaRpcMisc::maxPt(const std::vector<L1Obj> & l1Objs) const
@@ -60,8 +62,11 @@ void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjCol
 // timing
 //
   if (ptMu > 10. && fabs(muon->eta()) < 1.6 ) { 
+    std::vector<L1Obj> l1RpcsAll = l1RpcColl->getL1Objs();
     std::vector<L1Obj> l1RpcsMatched = l1RpcColl->getL1ObjsMatched();
+    for (unsigned int i=0; i<5; i++) hRpcMisc_TimeDen->Fill(i-2.);
     for (unsigned int i=0; i<l1RpcsMatched.size(); i++) hRpcMisc_Time->Fill(l1RpcsMatched[i].bx);
+    for (unsigned int i=0; i<l1RpcsAll.size();i++) hRpcMisc_TimeAll->Fill(l1RpcsAll[i].bx);
 //    for (unsigned int i=0; i<l1RpcsMatched.size(); i++) if (l1RpcsMatched[i].bx==-2) debug = true;
   }
   if (debug) {

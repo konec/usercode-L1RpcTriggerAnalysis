@@ -89,23 +89,24 @@ void L1RpcEfficiencyTreeAnalysis::beginJob()
   unsigned int lastLumi= 0;
   for (int ev=0; ev<nentries; ev++) {
     chain.GetEntry(ev);
-//    if (event->run != 178854) continue;
     if (lastRun != (*event).run) { lastRun = (*event).run; std::cout <<"RUN: " << (*event).run<<std::endl; }
+
+//    if (event->run != 178854) continue;
 //    if (lastLumi != (*event).lumi) { lastLumi = (*event).lumi; std::cout <<"lumi: " << (*event).lumi<<std::endl; }
-    anaRpcMisc.debug = false;
+//    anaDet.debug = false;
 //    if ((*event).id==60422922) anaRpcMisc.debug = true;
 
     anaMuonDistribution.run(muon);
     anaRpcVsOth.run(muon,l1RpcColl,l1OtherColl);
     anaEff.run(muon,l1RpcColl,l1OtherColl);
     anaRpcMisc.run(event,muon,l1RpcColl,l1OtherColl);
-//    std::cout <<"----------"<<std::endl;
-    anaEmu.run ( event, muon, l1RpcCollEmu, l1RpcColl);
-//    anaDet.debug = anaEmu.debug; if (anaDet.debug) std::cout <<" Event: "<<(*event).id <<" Lumi: "<<(*event).lumi<< std::endl;
     anaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
-//    anaRpcVsOth.run(muon,l1RpcCollEmu,l1OtherColl);
-//    anaEff.run(muon,l1RpcCollEmu,l1OtherColl);
-//    anaRpcMisc.run(muon,l1RpcCollEmu,l1OtherColl);
+    anaEmu.run ( event, muon, l1RpcCollEmu, l1RpcColl);
+
+//    anaEmu.debug = anaDet.debug;
+//    std::cout <<"----------"<<std::endl;
+//    anaDet.debug = anaEmu.debug; 
+//    if (anaDet.debug) std::cout <<" Event: "<<(*event).id <<" Lumi: "<<(*event).lumi<< std::endl;
   }
   
   TGraph* hGraph_DetEff = anaDet.resume();

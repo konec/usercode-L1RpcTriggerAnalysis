@@ -2,6 +2,7 @@
 #define UserCode_L1RpcTriggerAnalysis_AnaDet_H
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetEfficiencyManager.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/LayerCoincManager.h"
 
 class TGraph;
 class TObjArray;
@@ -27,7 +28,7 @@ public:
 
 private:
   DetEfficiencyManager theDetEfficiencyManager;
-  std::vector< std::bitset<6> > theLayers;
+  LayerCoincManager    theLayerCoincManager;
 };
 
 #endif

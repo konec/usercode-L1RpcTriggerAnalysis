@@ -22,7 +22,7 @@ private:
   double maxPt(const std::vector<L1Obj> & l1Objs) const;
   TH2D *hRpcMisc_UE, *hRpcMisc_OE;
   TH1D *hRpcMisc_EffRun;
-  TH1D *hRpcMisc_Time;
+  TH1D *hRpcMisc_Time, *hRpcMisc_TimeAll, *hRpcMisc_TimeDen;
   typedef std::map< unsigned int, std::pair<unsigned int, unsigned int> > EffRunMap;
   EffRunMap effRunMap;
 };
