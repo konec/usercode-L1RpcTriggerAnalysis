@@ -3,7 +3,13 @@ import FWCore.ParameterSet.Config as cms
 nearbyMuonsInfo = cms.EDProducer("NearbyMuonsInfo",
     # put here a collection of Composite Candidates with ShallowClones to muons
     src = cms.InputTag("tpPairs"), 
-    rawmatcher = cms.InputTag("l1MuTkMatch"), 
+    muonsrc = cms.InputTag("patMuonsWithTrigger"), 
+    triggerResults = cms.InputTag("TriggerResults::HLT"),
+    triggerEvent = cms.InputTag("hltTriggerSummaryAOD::HLT"),
+    sortBy = cms.string("deltaPhi"),
+    dRmax = cms.double(0.1),
+    dPtRelmax = cms.double(10),
+    filename = cms.string("NearByMuonsInfoDebugger.root"),
     # Configuration for the extrapolation at the muon system 
     propM1 = cms.PSet(
         useStation2 = cms.bool(False), 
