@@ -128,13 +128,12 @@ process.l1MuTkMatch.maxDeltaR   = 1
 process.l1MuTkMatch.maxDeltaEta = 0.4      
 process.l1MuTkMatch.writeExtraInfo = cms.bool(True)
 ############################################
-## -8- trackMuonMatch from selectedLayer1TrackCands and l1MuTkMatch muToTkMatch
+## -8- trackMuonMatch from selectedLayer1TrackCands and l1MuTkMatch
 from PhysicsTools.PatAlgos.producersLayer1.genericParticleProducer_cfi import patGenericParticles
 process.trackMuonMatch = patGenericParticles.clone(
     src = cms.InputTag("selectedLayer1TrackCands")
 )
 process.trackMuonMatch.userData.userCands.src += [cms.InputTag("l1MuTkMatch") ]
-process.trackMuonMatch.userData.userCands.src += [cms.InputTag("muToTkMatch") ]
 ############################################
 ## -9- tagProbesJPsi from tagMuons and trackMuonMatch => JPsi
 process.tagProbesJPsi = cms.EDProducer("CandViewShallowCloneCombiner",
