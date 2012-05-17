@@ -88,7 +88,7 @@ bool SynchroSelectorTrack::takeIt(const RPCDetId & det, const edm::Event&ev, con
     double dxy = track.dxy(reference);
     if (fabs(dxy) > theMaxTIP) continue;
 
-    TrajectoryStateOnSurface aTSOS = TrajectoryStateTransform().outerStateOnSurface(track, *globalGeometry, magField.product());
+    TrajectoryStateOnSurface aTSOS = trajectoryStateTransform::outerStateOnSurface(track, *globalGeometry, magField.product());
     if (!checkL1RpcMatching(aTSOS, ev,es) ) continue;
     if (!checkRpcDetMatching(aTSOS,det,ev,es)) continue;
     if (theConfig.getParameter<bool>("checkUniqueRecHitMatching") && !checkUniqueRecHitMatching(aTSOS,det,ev,es)) continue;

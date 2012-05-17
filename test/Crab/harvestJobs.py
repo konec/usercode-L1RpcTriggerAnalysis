@@ -132,14 +132,13 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
 #########################################
 ####################################################################
 if __name__ == '__main__':	
-	#prefix = "./25_08_2011/"
-	prefix = "./2011_11_20/"
-	version = "w_TMP/"
-#	version = "mb_new/"
+	prefix = "./2012_05_17/"
+	version = "mb/"
 # 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
 #	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
 # 	aDataSet = "/MinimumBias/Run2011B-MuonTrack-PromptSkim-v1/RAW-RECO"
-  	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
+#  	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
 #	aDataSet = "ExpressPhysics/Run2011B-Express-v1/FEVT"
+	aDataSet = "/MinimumBias/Run2012A-PromptReco-v1/RECO"
         castor = "${CASTOR_HOME}/RPCShift/"
         unpackAndMergeFiles(aDataSet,prefix+version,castor)

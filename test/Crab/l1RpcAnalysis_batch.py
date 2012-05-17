@@ -68,7 +68,7 @@ process.load("L1TriggerConfig.L1ScalesProducers.L1MuGMTScalesConfig_cff")
 process.load("L1TriggerConfig.RPCTriggerConfig.L1RPCConfig_cff")
 process.load("L1Trigger.RPCTrigger.RPCConeConfig_cff")
 process.load("L1Trigger.RPCTrigger.l1RpcEmulDigis_cfi")
-process.rpcconf.filedir = cms.untracked.string('Paterny/Marcin_Wide/')
+process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/Marcin_Wide/')
 process.rpcconf.PACsPerTower = cms.untracked.int32(1)
 
 #
@@ -91,8 +91,8 @@ process.dqmEnv.subSystemFolder = 'R2DTEST'
 #
 # L1RPCT DQM 
 #
-process.load("DQM.L1TMonitor.L1TRPCTF_cfi")
-process.l1trpctf.rpctfSource =  cms.InputTag("gtDigis")
+#process.load("DQM.L1TMonitor.L1TRPCTF_cfi")
+#process.l1trpctf.rpctfSource =  cms.InputTag("gtDigis")
 
 #
 # RPC DQM (Raw data)
@@ -184,7 +184,7 @@ process.efficiencyTree = cms.EDAnalyzer("L1RpcEfficiencyTreeMaker",
     minNumberOfMatchedStations = cms.int32(1)
   ),
   l1MuReadout = cms.InputTag("gtDigis"),
-  l1RpcEmu    = cms.InputTag("l1RpcEmulDigis"),
+#  l1RpcEmu    = cms.InputTag("l1RpcEmulDigis"),
   matcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.4), maxDeltaPhi = cms.double(0.3))
 )
 
@@ -195,7 +195,7 @@ process.p = cms.Path(
   process.filterGM*
 #  process.gtDigis*
 #  process.filterL1*
-  process.muonRPCDigis*process.l1RpcEmulDigis*
+#  process.muonRPCDigis*process.l1RpcEmulDigis*
 #  process.rpcFEDIntegrity*process.rpcMonitorRaw*
 #  process.l1compare*process.l1demon*
 #  process.l1trpctf*

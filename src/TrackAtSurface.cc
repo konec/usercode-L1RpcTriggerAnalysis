@@ -55,7 +55,7 @@ TrackAtSurface::TrackAtSurface(const reco::Muon* mu,const edm::Event &ev, const 
     double diff = deltaR(mu->track()->eta(), mu->track()->phi(), it->geometricalInnermostState().globalMomentum().eta(), it->geometricalInnermostState().globalMomentum().phi());
     if (diff < minDR) { minDR = diff; theTrajectory = *it; }
   }
-  theState = TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
+  theState = trajectoryStateTransform::outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
 
 }
 

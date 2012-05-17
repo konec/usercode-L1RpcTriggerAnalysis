@@ -76,7 +76,7 @@ bool SynchroSelectorMuon::takeIt(const RPCDetId & det, const edm::Event&ev, cons
   if (hDxy) hDxy->Fill(fabs(theMuon->innerTrack()->dxy(reference)));
   
 
-  TrajectoryStateOnSurface aTSOS = TrajectoryStateTransform().innerStateOnSurface( *(theMuon->outerTrack()), *globalGeometry, magField.product());
+  TrajectoryStateOnSurface aTSOS = trajectoryStateTransform::innerStateOnSurface( *(theMuon->outerTrack()), *globalGeometry, magField.product());
   if (!checkRpcDetMatching(aTSOS,det,ev,es)) return result;
   if (theConfig.getParameter<bool>("checkUniqueRecHitMatching") && !checkUniqueRecHitMatching(aTSOS,det,ev,es)) return result;
 

@@ -92,7 +92,7 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   hMinDeltaRTrajMu->Fill(minDR);
 
   TrajectoryStateOnSurface muTSOS  = muTrajectory.empty() ?
-         TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField)
+         trajectoryStateTransform::outerStateOnSurface(*(mu->track()), *globalGeometry, magField.product())
       :  muTrajectory.closestMeasurement(point).updatedState();
 
 
@@ -128,7 +128,7 @@ TrajectoryStateOnSurface EfficiencyTree::trackAtSurface(const reco::Muon* mu, co
   edm::ESHandle<Propagator> propagator;
 
   const GeomDet * det = globalGeometry->idToDet(rpc);
-  TrajectoryStateOnSurface muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
+  TrajectoryStateOnSurface muTSOS = trajectoryStateTransform::outerStateOnSurface(*(mu->track()), *globalGeometry, &*magField);
   es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong",propagator);
   Plane::PlanePointer surface = Plane::build(det->position(), det->rotation());
   TrajectoryStateOnSurface result =  propagator->propagate(muTSOS, *surface);
@@ -298,7 +298,7 @@ static int nMuons = 0;
 
     // get muon tsos for muon matching to RPC
     TrajectoryStateOnSurface muTSOS;
-    muTSOS = TrajectoryStateTransform().outerStateOnSurface(*(theMuon->track()), *globalGeometry, &*magField);
+    muTSOS = trajectoryStateTransform::outerStateOnSurface(*(theMuon->track()), *globalGeometry, &*magField);
     tsos = muTSOS;
 
     //
@@ -434,7 +434,7 @@ static int nMuons = 0;
     if (muTrack.dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
     if (fabs(muTrack.eta()) >  theConfig.getParameter<double>("maxEta")) continue;
     if (muTrack.pt() < track->pt()) continue;
-    TrajectoryStateOnSurface tTSOS = TrajectoryStateTransform().outerStateOnSurface(muTrack, *globalGeometry, magField.product());
+    TrajectoryStateOnSurface tTSOS = trajectoryStateTransform::outerStateOnSurface(muTrack, *globalGeometry, magField.product());
     TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("dtcscMatcherPSet"));
 
     bool isTrackCompatible = false;

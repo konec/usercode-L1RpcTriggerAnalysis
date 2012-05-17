@@ -146,14 +146,15 @@ def prepareCrabCfg(prefix,
 ################
 if __name__ == '__main__':	
 	###################
-	prefix = "./2011_11_20/"
-	version = "w_TMP/"	
-# version = "w_new_19/"	
+	prefix = "./2012_05_17/"
+	version = "mb/"	
+#     version = "w_new_19/"	
 # 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
 #  	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
 #	aDataSet = "/MinimumBias/Run2011B-MuonTrack-PromptSkim-v1/RAW-RECO"
-   	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
+#   	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
 #  	aDataSet = "/ExpressPhysics/Run2011B-Express-v1/FEVT"
+	aDataSet = "/MinimumBias/Run2012A-PromptReco-v1/RECO"
 	nJobs = 499
 	###################
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
@@ -164,11 +165,13 @@ if __name__ == '__main__':
 	readCafCfg = topPath+"/crab_read_CAFData.cfg"
 	readCafSh  = topPath+"/readCAFData.sh"
 	###################
-	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
+	#jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
+	jsonsPath = "/afs/cern.ch/work/k/konec/Shift/JSON/"
 	#jsonFile = makeLatestJSON(jsonsPath,aDataSet,runRegCfg,runRegPy) # automatically create a JSON for runs not analyzed yet
 	#jsonFile = jsonsPath+"/GoodRuns_175832-178162.json" #In case you want to run with your JSON
-	jsonFile = jsonsPath+"/GoodRuns_178365-180252.json" #In case you want to run with your JSON
+	#jsonFile = jsonsPath+"/GoodRuns_178365-180252.json" #In case you want to run with your JSON
 	#jsonFile = jsonsPath+"/GoodRuns_TMP.json" #In case you want to run with your JSON
+	jsonFile = jsonsPath+"/GoodRuns_190456-193557.json"
 	###################
 	castorRpcDir = "/u/"+os.getenv("USER")+"/RPCShift/"
 	###################

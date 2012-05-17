@@ -80,7 +80,7 @@ bool FilterMenu::filterL1(edm::Event&ev, const edm::EventSetup&es)
     lastRun = ev.run();
     //l1GtUtils.retrieveL1EventSetup(es);
     edm::InputTag tag("l1GtTriggerMenuLite");
-    theL1GtUtils.retrieveL1GtTriggerMenuLite(ev, tag);
+    theL1GtUtils.retrieveL1GtTriggerMenuLite(ev.getRun(), tag);
     bool status = theL1GtUtils.availableL1Configuration(errorCode,l1ConfCode);
     std::cout <<" GOT status: " <<status<<  " errorCode: " << errorCode<<" l1ConfCode: " << l1ConfCode<<std::endl;
     const L1GtTriggerMenuLite* menu = theL1GtUtils.ptrL1GtTriggerMenuLite(errorCode);
