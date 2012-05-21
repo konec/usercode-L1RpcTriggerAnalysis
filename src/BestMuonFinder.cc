@@ -13,6 +13,8 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/Utilities.h"
+#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "TObjArray.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -101,8 +103,22 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
     if ( nRPCHits < theConfig.getParameter<int>("minNumberRpcHits")) continue;
     if ( nDTHits + nCSCHits < theConfig.getParameter<int>("minNumberDtCscHits")  ) continue;
 
-    if (theMuon) theUnique = false;
     if (!theMuon || (im->track()->pt() > theMuon->track()->pt()) ) theMuon = &(*im);
+  }
+
+  //
+  // check if muon is unigue
+  //
+  if (theMuon) {
+    double muonEta = theMuon->innerTrack()->eta();
+    double muonPhi = theMuon->innerTrack()->phi();
+    for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+      if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
+      if (&(*im) == theMuon) continue;
+      if ( fabs(reco::deltaPhi(muonPhi, im->innerTrack()->phi())) > theConfig.getParameter<double>("deltaPhiUnique")) continue; 
+      if ( fabs(muonEta-im->innerTrack()->eta()) > theConfig.getParameter<double>("deltaEtaUnique")) continue;
+      theUnique = false;
+    }
   }
   return true;
 }

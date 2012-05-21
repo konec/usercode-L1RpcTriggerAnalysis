@@ -181,11 +181,13 @@ process.efficiencyTree = cms.EDAnalyzer("L1RpcEfficiencyTreeMaker",
     maxChi2Tk = cms.double(2.),
     minNumberTrackerHits = cms.int32(10),
     minNumberRpcHits = cms.int32(0),
-    minNumberDtCscHits = cms.int32(6),
-    minNumberOfMatchedStations = cms.int32(1)
+    minNumberDtCscHits = cms.int32(1),
+    minNumberOfMatchedStations = cms.int32(2),
+    deltaPhiUnique = cms.double(1.0),
+    deltaEtaUnique = cms.double(0.5)
   ),
   l1MuReadout = cms.InputTag("gtDigis"),
-#  l1RpcEmu    = cms.InputTag("l1RpcEmulDigis"),
+  l1RpcEmu    = cms.InputTag("l1RpcEmulDigis"),
   matcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.4), maxDeltaPhi = cms.double(0.3))
 )
 
@@ -196,7 +198,7 @@ process.p = cms.Path(
   process.filterGM*
 #  process.gtDigis*
 #  process.filterL1*
-#  process.muonRPCDigis*process.l1RpcEmulDigis*
+  process.muonRPCDigis*process.l1RpcEmulDigis*
 #  process.rpcFEDIntegrity*process.rpcMonitorRaw*
 #  process.l1compare*process.l1demon*
 #  process.l1trpctf*
