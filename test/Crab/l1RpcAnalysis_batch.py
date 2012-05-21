@@ -12,7 +12,7 @@ inputCommands=cms.untracked.vstring( 'keep *', 'drop *_hltL1GtObjectMap_*_*')
 )
 
 # apply lumi section mask from JSON file
-import PhysicsTools.PythonAnalysis.LumiList as LumiList
+import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 myLumis = LumiList.LumiList(filename='goodRuns.json').getCMSSWString().split(',')
 process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
