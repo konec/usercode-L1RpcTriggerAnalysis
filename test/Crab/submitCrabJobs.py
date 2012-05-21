@@ -146,7 +146,7 @@ def prepareCrabCfg(prefix,
 ################
 if __name__ == '__main__':	
 	###################
-	prefix = "./2012_05_17/"
+	prefix = "./2012_05_21/"
 	version = "mb/"	
 #     version = "w_new_19/"	
 # 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
