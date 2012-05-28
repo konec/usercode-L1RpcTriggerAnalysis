@@ -14,6 +14,7 @@
 #include <sstream>
 
 const double AnaEff::ptCuts[ AnaEff::nPtCuts] = { 0., 5., 10., 16., 30., 100.};
+std::string reg[5]={"_Bar","_Int","_End","_Qeq0","_Qgt0"};
 
 
 AnaEff::AnaEff(TObjArray& histos)
@@ -24,13 +25,13 @@ AnaEff::AnaEff(TObjArray& histos)
   hEfficRpcPtCut_N = new TH1D("hEfficRpcPtCut_N","hEfficRpcPtCut_N", L1PtScale::nPtBins, L1PtScale::ptBins);  histos.Add(hEfficRpcPtCut_N);
 
   std::string  base("hEff");
-  std::string reg[3]={"_Bar","_Int","_End"};
   std::string opt[2]={"_RpcPtCut","_OthPtCut"};
-  for (unsigned int ir=0; ir<3; ++ir) {
+  for (unsigned int ir=0; ir<5; ++ir) {
     std::string name=base+"_PtDenom"+reg[ir];
     TH1D *h= new TH1D(name.c_str(),name.c_str(), L1PtScale::nPtBins, L1PtScale::ptBins);
     histos.Add(h); hm[name]=h;
     for (unsigned int iopt=0; iopt<2; ++iopt) {
+    if (iopt >0 && ir >2) continue;
     for (unsigned int icut=0; icut<AnaEff::nPtCuts; ++icut) {
       std::stringstream str;
       str << base << opt[iopt] << ptCuts[icut]<<reg[ir];
@@ -81,7 +82,7 @@ void AnaEff::run( const MuonObj *muon, const L1ObjColl *l1RpcColl, const L1ObjCo
   if (etaMu < 0.83) iregion = 0;
   else if (etaMu < 1.24) iregion = 1;
   else iregion = 2;
-  std::string reg[3]={"_Bar","_Int","_End"};
+//  std::string reg[3]={"_Bar","_Int","_End"};
 
   hm["hEff_PtDenom"+reg[iregion]]->Fill(ptMu);
   double epsilon=1.e-5;
@@ -102,6 +103,25 @@ void AnaEff::run( const MuonObj *muon, const L1ObjColl *l1RpcColl, const L1ObjCo
   }
   
 
+//
+// check performance for q=0 and q>0 in 0.7 < |eta| < 1.1
+//
+  if (etaMu > 0.7 && etaMu < 1.1) {
+    for (unsigned int ir=3; ir <=4; ++ir) {
+      hm["hEff_PtDenom"+reg[ir]]->Fill(ptMu);
+      std::vector<L1Obj> l1RpcsQ;
+      if (ir==3) l1RpcsQ = l1RpcColl->getL1ObjsSelected(true, false,0.,161., 0,0, -1.6,1.6, 0.,7., 0,0);
+      if (ir==4) l1RpcsQ = l1RpcColl->getL1ObjsSelected(true, false,0.,161., 0,0, -1.6,1.6, 0.,7., 1,7);
+      double epsilon=1.e-5;
+      for (unsigned int icut=0; icut < AnaEff::nPtCuts; icut++) {
+        double threshold = AnaEff::ptCuts[icut];
+        if (maxPt(l1RpcsQ)+epsilon > threshold) {
+          std::stringstream strPt;  strPt  << "hEff_RpcPtCut"<<  ptCuts[icut]<<reg[ir];
+          hm[strPt.str()]->Fill(ptMu);
+        }
+      }
+    }
+  }
 
 }	
 
