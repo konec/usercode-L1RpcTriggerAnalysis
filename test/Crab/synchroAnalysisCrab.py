@@ -11,7 +11,8 @@ inputCommands=cms.untracked.vstring( 'keep *', 'drop *_hltL1GtObjectMap_*_*')
 )
 
 # apply lumi section mask from JSON file
-import PhysicsTools.PythonAnalysis.LumiList as LumiList
+#import PhysicsTools.PythonAnalysis.LumiList as LumiList
+import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 myLumis = LumiList.LumiList(filename='goodRuns.json').getCMSSWString().split(',')
 process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
@@ -34,7 +35,7 @@ process.load('Configuration.StandardSequences.GeometryExtended_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 #process.load('Configuration.StandardSequences.RawToDigi_cff')
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
-process.load('Configuration.StandardSequences.Reconstruction_cff')
+process.load('Configuration.StandardSequences.Reconstruction_Data_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 
 #process.load("EventFilter.RPCRawToDigi.RPCSQLiteCabling_cfi")
@@ -42,7 +43,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 #process.es_prefer_RPCEMap = cms.ESPrefer("PoolDBESSource","RPCCabling");
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'GR_P_V20::All'
+process.GlobalTag.globaltag = 'GR_R_52_V8::All'
 
 process.load("L1TriggerConfig.L1GtConfigProducers.L1GtConfig_cff")
 process.load("L1TriggerConfig.GMTConfigProducers.L1MuGMTParametersConfig_cff")
@@ -72,7 +73,7 @@ process.options = cms.untracked.PSet(
     )
 
 process.load("DQM.L1TMonitor.L1TRPCTF_cfi")
-process.l1trpctf.rpctfSource =  cms.InputTag("gtDigis")
+process.l1tRpctf.rpctfSource =  cms.InputTag("gtDigis")
 
 process.load("DQM.RPCMonitorClient.RPCFEDIntegrity_cfi")
 process.load("DQM.RPCMonitorClient.RPCMonitorRaw_cfi")
