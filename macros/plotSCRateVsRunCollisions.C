@@ -631,7 +631,7 @@ void plotSCRateVsRunCollisionsByRegion(int ptCode=13,
   }
 
   char text[500];
-  sprintf(text,"Rate for p_{T} code: %d, region: %s",ptCode,regionName.c_str());
+  sprintf(text,"Rate for p_{T} (GeV): %d, region: %s",ptCode,regionName.c_str());
   title=text;
 
   TGraphErrors *grPress = getPressureVsRunGraph(pressureGraphFile.c_str());
@@ -656,7 +656,7 @@ void plotSCRateVsRunCollisionsByRegion(int ptCode=13,
 
   TPad *pad1, *pad2;
   TCanvas *c2 = new TCanvas(Form("Rate_%dmu_PtCode%d_%s_Collisions",nMu,ptCode,regionName.c_str()),
-			    Form("Normalized SC rate vs run : %d mu, p_{T} code %d, %s",
+			    Form("Normalized SC rate vs run : %d mu, p_{T} (GeV) %d, %s",
 				 nMu, ptCode, regionName.c_str()),12,33,1576,500);
   c2->SetLeftMargin(0.06);
   c2->SetRightMargin(0.06);
