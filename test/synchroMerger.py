@@ -7,18 +7,19 @@ process.source = cms.Source("EmptySource")
 
 process.load("DQMServices.Core.DQM_cfg")
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'MC_37Y_V5::All'
+## Define GlobalTag
+#process.GlobalTag.globaltag = 'GR_R_52_V9D::All' # for 52X data reprocessing
+process.GlobalTag.globaltag = 'GR_R_53_V8::All' # for 53X<533 data reprocessing
 
-dataChainFileNames = cms.untracked.vstring()
+def dataChainFileNames():
+  outDataChainFileNames = cms.untracked.vstring()
+  ## Add data
+  path = "/afs/cern.ch/cms/L1/rpc/Shift/Crab/"
+  pathTmp = "/tmp/"+os.getenv("USER")+"/__OUT_TXT__/"
 
-##Add data
-path = "/afs/cern.ch/cms/L1/rpc/Shift/Crab/"
-pathTmp = "/tmp/"+os.getenv("USER")+"/__OUT_TXT__/"
-
-datesToAdd = ["05_08_2011/v1/","13_08_2011/v1/","25_08_2011/v1/"]
-#datesToAdd = ["09_06_2011/v1/","10_06_2011/v1/","19_06_2011/v1/","22_06_2011/v1","27_06_2011/v1","05_07_2011/v1","01_08_2011/v1/"]
-pathTmpCreated = 0
-for date in datesToAdd:
+  datesToAdd = ["2012_08_06/express2012C/","2012_08_16/express2012C/","2012_08_20/express2012C/"]
+  pathTmpCreated = 0
+  for date in datesToAdd:
     for fname in os.listdir(path+date):
         if fname=="ROOT":
                 for fname1 in os.listdir(path+date+"/"+fname):
@@ -31,17 +32,18 @@ for date in datesToAdd:
                         pathTmpCreated = 1
                         os.system("\cp -f "+path+"/"+date+"/"+fname+"/"+fname1+" "+pathTmp)
                         os.system("gzip -d "+pathTmp+"/"+fname1)
-                        dataChainFileNames.append(pathTmp+"/"+fname1[:-3])
-if pathTmpCreated==1:
+                        outDataChainFileNames.append(pathTmp+"/"+fname1[:-3])
+  if pathTmpCreated==1:
     print ""
     print "The following files will be analyzed:"
-    print dataChainFileNames
+    print outDataChainFileNames
     print ""
-else:
+  else:
     print ""
     print "Didn't find out*.txt files to analyze"
     print
     exit()
+  return outDataChainFileNames
 ##########
 
 process.merger =  cms.EDAnalyzer("LinkSynchroMerger",
@@ -51,12 +53,10 @@ process.merger =  cms.EDAnalyzer("LinkSynchroMerger",
     useFirstHitOnly = cms.untracked.bool(True),
     dumpDelays = cms.untracked.bool(True)
   ),
-  preFillLinkSynchroFileNames=dataChainFileNames
- # preFillLinkSynchroFileNames= cms.untracked.vstring(
- #   '/afs/cern.ch/cms/L1/rpc/Shift/Crab/05_08_2011/v1/ROOT/out-170722-172791.txt',
- #   '/afs/cern.ch/cms/L1/rpc/Shift/Crab/13_08_2011/v1/ROOT/out-172798-172999.txt',
- #   '/afs/cern.ch/cms/L1/rpc/Shift/Crab/25_08_2011/v1/ROOT/out-173198-173664.txt'
- # )
+ preFillLinkSynchroFileNames=dataChainFileNames() # for CRAB
+ #preFillLinkSynchroFileNames= cms.untracked.vstring(
+ #   '/afs/cern.ch/work/c/cwiok/Shift/CMSSW_5_3_3/src/UserCode/L1RpcTriggerAnalysis/test/Crab/out-199021.txt' 
+ #) # for testing single files
 )
 
 process.MessageLogger = cms.Service("MessageLogger",
