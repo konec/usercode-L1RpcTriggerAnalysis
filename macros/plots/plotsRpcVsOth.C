@@ -14,6 +14,11 @@
 
 TCanvas* pRpcVsOth_EventsStat()
 {
+  // below 2 lines help when another TFile has been opened in memory
+  // otherwise FindObject fails
+  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  ff->cd();
+
   std::string nc = "cRpcVsOth_EventsStat";
   TCanvas * c = new TCanvas(nc.c_str(),nc.c_str(),1200,400);
   
@@ -27,6 +32,7 @@ TCanvas* pRpcVsOth_EventsStat()
     if (i==2) name="hRpcVsOth_EventsAnyPt_Int";
     if (i==3) name="hRpcVsOth_EventsAnyPt_End";
     h=(TH1D*)gROOT->FindObject(name.c_str());
+    if(!h) return 0;
     h->GetXaxis()->SetTitleOffset(1.3);
     h->GetYaxis()->SetLabelOffset(0.006);
     h->GetYaxis()->SetTitleOffset(1.3);
@@ -38,6 +44,7 @@ TCanvas* pRpcVsOth_EventsStat()
 
 void pRpcVsOth_Events_helper(TH1D* h)
 {
+  if(!h) return;
   for (Int_t ibin=1; ibin <= h->GetNbinsX() ;ibin++) {
     Float_t content = h->GetBinContent(ibin);
     Float_t center  = h->GetBinCenter(ibin);
@@ -52,6 +59,11 @@ void pRpcVsOth_Events_helper(TH1D* h)
 
 TCanvas* pRpcVsOth_Events(const std::string & opt)
 {
+  // below 2 lines help when another TFile has been opened in memory
+  // otherwise FindObject fails
+  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  ff->cd();
+
   std::string nc = "cRpcVsOth_Events"+opt;
   TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),1200,400);
   c->Divide(3,1);
@@ -62,6 +74,7 @@ TCanvas* pRpcVsOth_Events(const std::string & opt)
     TH1D* hN=(TH1D*)gROOT->FindObject( ("hRpcVsOth_Events"+opt+where[i-1]).c_str());
     TH1D* hD=(TH1D*)gROOT->FindObject( ("hRpcVsOth_EventsAnyPt"+where[i-1]).c_str());
     TH1D* h = DivideErr(hN,hD,"h","B");
+    if(!h) return 0;
     h->GetXaxis()->SetTitleOffset(1.3); 
     h->SetMarkerSize(1.6);
     h->SetYTitle("efficiency"); 
@@ -75,6 +88,11 @@ TCanvas* pRpcVsOth_Events(const std::string & opt)
 
 TCanvas* pRpcVsOth_EffCoarse(std::string opt="Rpc")
 {
+  // below 2 lines help when another TFile has been opened in memory
+  // otherwise FindObject fails
+  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  ff->cd();
+
   std::string nc = "cRpcVsOth_EffCoarse"+opt;
   TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),1200,400);
   c->Divide(3,1);
@@ -84,6 +102,7 @@ TCanvas* pRpcVsOth_EffCoarse(std::string opt="Rpc")
     TH1D* h1=(TH1D*)gROOT->FindObject( ("hRpcVsOth_EffCoarse"+opt+where[i-1]).c_str());
     TH1D* h2=(TH1D*)gROOT->FindObject( ("hRpcVsOth_EffCoarseMu"+where[i-1]).c_str());
     TH1D* h =DivideErr(h1,h2,"h","B");
+    if(!h) return 0;
     h->SetYTitle("efficiency");
     h->SetMinimum(0); h->SetMaximum(1.04);
     h->DrawCopy();
@@ -96,6 +115,7 @@ TCanvas* pRpcVsOth_EffCoarse(std::string opt="Rpc")
 
 void pRpcVsOth_QualEvLostBy_helper(TH2D* h) 
 {
+  if(!h) return;
   std::stringstream entr; 
   entr<<"Entries: "<<h->GetEntries();
   TText t; 
@@ -107,30 +127,46 @@ void pRpcVsOth_QualEvLostBy_helper(TH2D* h)
 
 TCanvas* pRpcVsOth_QualEvLostBy( const std::string & opt)
 {
+  // below 2 lines help when another TFile has been opened in memory
+  // otherwise FindObject fails
+  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  ff->cd();
 
-//  gStyle->SetOptStat(10);
+  //  gStyle->SetOptStat(10);
 
   std::string nc = "cRpcVsOth_QualEvLostBy"+opt;
   TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),1200,400);
   c->Divide(3,1);
   TH2D *h;
+  string name;
 
   c->cd(1); 
-  string name = "hRpcVsOth_QualEvLostBy"+opt+"_Bar";
+  name = "hRpcVsOth_QualEvLostBy"+opt+"_Bar";
   h=(TH2D*)gROOT->FindObject( name.c_str());
-  if (!h) {std::cout <<" Cannot find: "<<name<<std::endl; return c;}
+  if (!h) {
+    std::cout <<" Cannot find: "<<name<<std::endl; 
+    return 0;
+  }
   h->SetMarkerSize(1.6); h->SetYTitle("quality DT"); h->DrawCopy("box text");
   pRpcVsOth_QualEvLostBy_helper(h);
 
-  
-
   c->cd(2); 
-  h=(TH2D*)gROOT->FindObject( ("hRpcVsOth_QualEvLostBy"+opt+"_Int").c_str());
+  name = "hRpcVsOth_QualEvLostBy"+opt+"_Int";
+  h=(TH2D*)gROOT->FindObject( name.c_str());
+  if (!h) {
+    std::cout <<" Cannot find: "<<name<<std::endl; 
+    return 0;
+  }
   h->SetMarkerSize(1.6); h->SetYTitle("quality DT/CSC"); h->DrawCopy("box text");
   pRpcVsOth_QualEvLostBy_helper(h);
 
   c->cd(3); 
-  h=(TH2D*)gROOT->FindObject( ("hRpcVsOth_QualEvLostBy"+opt+"_End").c_str());
+  name = "hRpcVsOth_QualEvLostBy"+opt+"_End";
+  h=(TH2D*)gROOT->FindObject( name.c_str());
+  if (!h) {
+    std::cout <<" Cannot find: "<<name<<std::endl; 
+    return 0;
+  }
   h->SetMarkerSize(1.6); h->SetYTitle("quality CSC"); h->DrawCopy("box text");
   pRpcVsOth_QualEvLostBy_helper(h);
 

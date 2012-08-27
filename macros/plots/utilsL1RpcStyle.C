@@ -59,8 +59,8 @@ void utilsL1RpcStyle()
   l1RpcStyle->SetPadRightMargin(0.05);
   l1RpcStyle->SetPadTopMargin(0.095);
   l1RpcStyle->SetPadBottomMargin(0.135);
-  l1RpcStyle->SetPadTickX(1);
-  l1RpcStyle->SetPadTickY(1);
+  l1RpcStyle->SetPadTickX(1);  // draw second axis on the top
+  l1RpcStyle->SetPadTickY(1);  // draw second axis on the right
   
 // to be overwritten by histogram attributes
   l1RpcStyle->SetLabelSize(0.05,"x");

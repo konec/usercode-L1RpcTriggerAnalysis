@@ -437,6 +437,8 @@ void synchro(// a text file with BX histograms for all links
   Float_t xpos, ypos;
   Int_t ioff;
   Float_t rangemin,rangemax;
+
+  Double_t meanX, meanY, rmsX, rmsY;
   // NOTE: Using SetRangeUser(), SetRange() causes ROOT
   // recompute MEAN/RMS using bin center values in the
   // viewable range! In order to get true MEAN/RMS values
@@ -483,6 +485,12 @@ void synchro(// a text file with BX histograms for all links
   h->SetLineStyle(1);
   h->SetMarkerStyle(1);
   h->SetStats(false);
+
+  // get statistics for full range
+  h->GetXaxis()->UnZoom();
+  meanX = h->GetMean();
+  rmsX = h->GetRMS();
+
   h->SetFillColor(4); h->SetFillStyle(3003);
   h->DrawCopy("E1 E0");
   h->DrawCopy("HIST,SAME");
@@ -496,8 +504,8 @@ void synchro(// a text file with BX histograms for all links
   ypos=0.85;
   ioff=0;
 
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+  //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   // run range
   if(geolocation!="") {
@@ -518,12 +526,12 @@ void synchro(// a text file with BX histograms for all links
   // viewable range! In order to get true MEAN/RMS values
   // one has to do GetXaxis()->UnZoom() after drawing the
   // canvas and before calling GetMean(), GetRms().
-  h->GetXaxis()->UnZoom();
-  sprintf(label,"Avg time = %6.4f BX", h->GetMean());
+  //h->GetXaxis()->UnZoom();
+  sprintf(label,"Avg time = %6.4f BX", meanX);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
 
-  sprintf(label,"Rms = %6.4f BX", h->GetRMS());
+  sprintf(label,"Rms = %6.4f BX", rmsX);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
 
@@ -547,8 +555,10 @@ void synchro(// a text file with BX histograms for all links
     
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".png" );
-  c1->Print( outfile + "_" + h->GetName() + ".eps" );
+  c1->Print( outfile + "_" + h->GetName() + ".png", "png" );
+  c1->Print( outfile + "_" + h->GetName() + ".C", "cxx" );
+  c1->Print( outfile + "_" + h->GetName() + ".pdf", "pdf" );
+  c1->Print( outfile + "_" + h->GetName() + ".eps", "eps");
 
   ////////////////////////////////////////////////////////////////
 
@@ -588,7 +598,12 @@ void synchro(// a text file with BX histograms for all links
   h->SetLineStyle(1);
   h->SetMarkerStyle(1);
   h->SetStats(false);
+
+  // get statistics for full range
+  meanX = h->GetMean();
+  rmsY = h->GetRMS();
   h->GetXaxis()->SetRangeUser(-0.11, 0.11);
+
   h->GetXaxis()->SetNdivisions(410);
   h->SetFillColor(4); h->SetFillStyle(3003);
   h->DrawCopy("E1");
@@ -598,8 +613,8 @@ void synchro(// a text file with BX histograms for all links
   // header
   //t = new TLatex(0.3,0.94, "RPC LB Synchronization ");
   //t->SetNDC(true);t->DrawClone();
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+  //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   xpos=0.20;
   ypos=0.85;
@@ -623,8 +638,8 @@ void synchro(// a text file with BX histograms for all links
   // viewable range! In order to get true MEAN/RMS values
   // one has to do GetXaxis()->UnZoom() after drawing the
   // canvas and before calling GetMean(), GetRms().
-  h->GetXaxis()->UnZoom();
-  sprintf(label,"Avg time = %6.4f BX",h->GetMean());
+  // h->GetXaxis()->UnZoom();
+  sprintf(label,"Avg time = %6.4f BX",meanX);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
 
@@ -647,8 +662,10 @@ void synchro(// a text file with BX histograms for all links
   
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".png" );
-  c1->Print( outfile + "_" + h->GetName() + ".eps" );
+  c1->Print( outfile + "_" + h->GetName() + ".png", "png" );
+  c1->Print( outfile + "_" + h->GetName() + ".C", "cxx" );
+  c1->Print( outfile + "_" + h->GetName() + ".pdf", "pdf" );
+  c1->Print( outfile + "_" + h->GetName() + ".eps", "eps");
 
   ////////////////////////////////////////////////////////////////
 
@@ -688,7 +705,13 @@ void synchro(// a text file with BX histograms for all links
   h->SetLineStyle(1);
   h->SetMarkerStyle(1);
   h->SetStats(false);
+
+  // get statistics for full range
+  h->GetXaxis()->UnZoom();
+  meanX = h->GetMean();
+  rmsX = h->GetRMS();
   h->GetXaxis()->SetRangeUser(0.0, 0.451);
+
   h->GetXaxis()->SetNdivisions(410);
   h->SetFillColor(4); h->SetFillStyle(3003);
   h->DrawCopy("E1");
@@ -698,8 +721,8 @@ void synchro(// a text file with BX histograms for all links
   // header
   //t = new TLatex(0.3,0.94, "RPC LB Synchronization ");
   //t->SetNDC(true);t->DrawClone();
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+  //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   // run range
   xpos=0.55;
@@ -723,8 +746,8 @@ void synchro(// a text file with BX histograms for all links
   // viewable range! In order to get true MEAN/RMS values
   // one has to do GetXaxis()->UnZoom() after drawing the
   // canvas and before calling GetMean(), GetRms().
-  h->GetXaxis()->UnZoom();
-  sprintf(label,"Avg spread = %6.4f BX",h->GetMean());
+  // h->GetXaxis()->UnZoom();
+  sprintf(label,"Avg spread = %6.4f BX",meanX);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
 
@@ -748,8 +771,10 @@ void synchro(// a text file with BX histograms for all links
     
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".png" );
-  c1->Print( outfile + "_" + h->GetName() + ".eps" );
+  c1->Print( outfile + "_" + h->GetName() + ".png", "png" );
+  c1->Print( outfile + "_" + h->GetName() + ".C", "cxx" );
+  c1->Print( outfile + "_" + h->GetName() + ".pdf", "pdf" );
+  c1->Print( outfile + "_" + h->GetName() + ".eps", "eps");
 
   ////////////////////////////////////////////////////////////////
 
@@ -796,19 +821,28 @@ void synchro(// a text file with BX histograms for all links
   h2->SetLineStyle(1);
   h2->SetMarkerStyle(1);
   h2->SetStats(false);
+  
+  // get statistics for full range
+  h2->GetXaxis()->UnZoom();
+  h2->GetYaxis()->UnZoom();
+  meanX = h2->GetMean(1);
+  meanY = h2->GetMean(2);
   h2->GetXaxis()->SetRangeUser(-0.11, 0.11);
   h2->GetYaxis()->SetRangeUser(0.0, 0.45);
+
   h2->GetXaxis()->SetNdivisions(410);
   h2->GetYaxis()->SetNdivisions(410);
-  h2->DrawCopy("COLZ");
-  h2->DrawCopy("TEXT0,SAME");
+  h2->Draw("COLZ");
+  h2->Draw("TEXT0,SAME");
   gPad->Update();
+  c1->Modified();
+  c1->Update();
 
   // header
   //t = new TLatex(0.3,0.94, "RPC LB Synchronization ");
   //t->SetNDC(true);t->DrawClone();
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+  //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   //xpos=0.50;
   //ypos=0.40;
@@ -834,13 +868,13 @@ void synchro(// a text file with BX histograms for all links
   // viewable range! In order to get true MEAN/RMS values
   // one has to do GetXaxis()->UnZoom() after drawing the
   // canvas and before calling GetMean(), GetRms().
-  h2->GetXaxis()->UnZoom();
-  h2->GetYaxis()->UnZoom();
-  sprintf(label,"Avg time = %6.4f BX",h2->GetMean(1));
+  // h2->GetXaxis()->UnZoom();
+  // h2->GetYaxis()->UnZoom();
+  sprintf(label,"Avg time = %6.4f BX",meanX);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
 
-  sprintf(label,"Avg spread = %6.4f BX",h2->GetMean(2));
+  sprintf(label,"Avg spread = %6.4f BX",meanY);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
 
@@ -864,8 +898,10 @@ void synchro(// a text file with BX histograms for all links
 
   //h2->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h2->GetName() + ".png" );
-  c1->Print( outfile + "_" + h2->GetName() + ".eps" );
+  c1->Print( outfile + "_" + h2->GetName() + ".png", "png" );
+  c1->Print( outfile + "_" + h2->GetName() + ".C", "cxx" );
+  c1->Print( outfile + "_" + h2->GetName() + ".pdf", "pdf" );
+  c1->Print( outfile + "_" + h2->GetName() + ".eps", "eps");
 
   ////////////////////////////////////////////////////////////////
 
@@ -905,8 +941,8 @@ void synchro(// a text file with BX histograms for all links
     // header
     //t = new TLatex(0.3,0.94, "RPC LB Synchronization ");
     //t->SetNDC(true);t->DrawClone();
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+    //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+    //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
     
     //xpos=0.65;
     //ypos=0.5;
@@ -954,8 +990,10 @@ void synchro(// a text file with BX histograms for all links
     
     //h->Write();
     c1->Write();
-    c1->Print( outfile + "_" + h->GetName() + ".png" );
-    c1->Print( outfile + "_" + h->GetName() + ".eps" );
+    c1->Print( outfile + "_" + h->GetName() + ".png", "png" );
+    c1->Print( outfile + "_" + h->GetName() + ".C", "cxx" );
+    c1->Print( outfile + "_" + h->GetName() + ".pdf", "pdf" );
+    c1->Print( outfile + "_" + h->GetName() + ".eps", "eps");
 
   } // end of threshold loop
 
@@ -999,7 +1037,12 @@ void synchro(// a text file with BX histograms for all links
   p->SetFillStyle(0);
   rangemax=p->GetBinContent(p->GetMaximumBin())+p->GetBinError(p->GetMaximumBin());
   rangemin=p->GetBinContent(p->GetMinimumBin())-p->GetBinError(p->GetMinimumBin());
+  
+  // get statistics for full region
+  p->GetYaxis()->UnZoom();
+  meanY = p->GetMean(2);  
   p->GetYaxis()->SetRangeUser(rangemin-0.4*(rangemax-rangemin), rangemax);
+
   p->GetYaxis()->SetNdivisions(410);
   p->GetXaxis()->SetNdivisions(-12);
   p->GetXaxis()->SetLabelSize(0.06);
@@ -1013,8 +1056,8 @@ void synchro(// a text file with BX histograms for all links
   // header
   //t = new TLatex(0.3,0.94, "RPC LB Synchronization ");
   //t->SetNDC(true);t->DrawClone();
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+  //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   // run range
   xpos=0.55;
@@ -1038,11 +1081,10 @@ void synchro(// a text file with BX histograms for all links
   // viewable range! In order to get true MEAN/RMS values
   // one has to do GetXaxis()->UnZoom() after drawing the
   // canvas and before calling GetMean(), GetRms().
-  p->GetYaxis()->UnZoom();
-  sprintf(label,"Avg time = %6.4f BX",p->GetMean(2));
+  sprintf(label,"Avg time = %6.4f BX",meanY);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
-  l = new TLine(0,p->GetMean(2), 12, p->GetMean(2));
+  l = new TLine(0, meanY, 12, meanY);
   l->SetLineColor(2); l->SetLineStyle(9); l->SetLineWidth(2); l->DrawClone();
 
   // LB count
@@ -1065,8 +1107,10 @@ void synchro(// a text file with BX histograms for all links
     
   //p->Write();
   c1->Write();
-  c1->Print( outfile + "_" + p->GetName() + ".png" );
-  c1->Print( outfile + "_" + p->GetName() + ".eps" );
+  c1->Print( outfile + "_" + p->GetName() + ".png", "png" );
+  c1->Print( outfile + "_" + p->GetName() + ".C", "cxx" );
+  c1->Print( outfile + "_" + p->GetName() + ".pdf", "pdf" );
+  c1->Print( outfile + "_" + p->GetName() + ".eps", "eps");
 
   ////////////////////////////////////////////////////////////////
 
@@ -1111,7 +1155,12 @@ void synchro(// a text file with BX histograms for all links
   h->LabelsOption("h","X");
   rangemax=h->GetBinContent(h->GetMaximumBin())+h->GetBinError(h->GetMaximumBin());
   rangemin=h->GetBinContent(h->GetMinimumBin())-h->GetBinError(h->GetMinimumBin());
+
+  // get statistics for full range
+  h->GetYaxis()->UnZoom();
+  meanY = h->GetMean(2);
   h->GetYaxis()->SetRangeUser(rangemin-0.4*(rangemax-rangemin), rangemax);
+
   //h->SetMinimum( 0.5*h->GetMaximum() );
   //h->SetFillColor(4); h->SetFillStyle(3003);
   h->DrawCopy("E1 P");
@@ -1122,8 +1171,8 @@ void synchro(// a text file with BX histograms for all links
   // header
   //t = new TLatex(0.3,0.94, "RPC LB Synchronization ");
   //t->SetNDC(true);t->DrawClone();
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+  //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   // run range
   xpos=0.55;
@@ -1162,8 +1211,10 @@ void synchro(// a text file with BX histograms for all links
     
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "_" + h->GetName() + ".png" );
-  c1->Print( outfile + "_" + h->GetName() + ".eps" );
+  c1->Print( outfile + "_" + h->GetName() + ".png", "png" );
+  c1->Print( outfile + "_" + h->GetName() + ".C", "cxx" );
+  c1->Print( outfile + "_" + h->GetName() + ".pdf", "pdf" );
+  c1->Print( outfile + "_" + h->GetName() + ".eps", "eps");
 
   ////////////////////////////////////////////////////////////////
 
@@ -1205,7 +1256,12 @@ void synchro(// a text file with BX histograms for all links
   p->SetFillStyle(0);
   rangemax=p->GetBinContent(p->GetMaximumBin())+p->GetBinError(p->GetMaximumBin());
   rangemin=p->GetBinContent(p->GetMinimumBin())-p->GetBinError(p->GetMinimumBin()); 
+
+  // get statistics for full range
+  p->GetYaxis()->UnZoom();
+  meanY = p->GetMean(2);
   p->GetYaxis()->SetRangeUser(rangemin-0.4*(rangemax-rangemin), rangemax);
+
   p->GetYaxis()->SetNdivisions(410);
   p->GetXaxis()->SetNdivisions(-12);
   p->GetXaxis()->SetLabelSize(0.06);
@@ -1219,8 +1275,8 @@ void synchro(// a text file with BX histograms for all links
   // header
   //t = new TLatex(0.3,0.94, "RPC LB Synchronization ");
   //t->SetNDC(true);t->DrawClone();
-  t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
-  t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
+  //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   // run range
   xpos=0.55;
@@ -1244,11 +1300,11 @@ void synchro(// a text file with BX histograms for all links
   // viewable range! In order to get true MEAN/RMS values
   // one has to do GetXaxis()->UnZoom() after drawing the
   // canvas and before calling GetMean(), GetRms().
-  p->GetYaxis()->UnZoom();
-  sprintf(label,"Avg time = %6.4f BX",p->GetMean(2));
+  // p->GetYaxis()->UnZoom();
+  sprintf(label,"Avg time = %6.4f BX",meanY);
   t = new TLatex(xpos, ypos-ioff*legendOffset, label); ioff++;
   t->SetNDC(true);t->SetTextSize(legendFontSize); t->SetTextColor(2); t->DrawClone();
-  l = new TLine(0,p->GetMean(2), 12, p->GetMean(2));
+  l = new TLine(0, meanY, 12, meanY);
   l->SetLineColor(2); l->SetLineStyle(9); l->SetLineWidth(2); l->DrawClone();
 
   // LB count
@@ -1271,8 +1327,10 @@ void synchro(// a text file with BX histograms for all links
     
   //p->Write();
   c1->Write();
-  c1->Print( outfile + "_" + p->GetName() + ".png" );
-  c1->Print( outfile + "_" + p->GetName() + ".eps" );
+  c1->Print( outfile + "_" + p->GetName() + ".png", "png" );
+  c1->Print( outfile + "_" + p->GetName() + ".C", "cxx" );
+  c1->Print( outfile + "_" + p->GetName() + ".pdf", "pdf" );
+  c1->Print( outfile + "_" + p->GetName() + ".eps", "eps");
 
   ////////////////////////////////////////////////////////////////
 
@@ -1369,10 +1427,10 @@ void synchro_history(TString h_name, TString p_name = "",Int_t log=1)
   h1->SetMinimum(5.e-6);
   h1->SetAxisRange(-3.5,3);
 
-  h1->Draw("E1 HIST");
-  h2->Draw("E1 HIST SAME");
-  h3->Draw("E1 HIST SAME");
-  //h4->Draw("same");
+  h1->DrawCopy("E1 HIST");
+  h2->DrawCopy("E1 HIST SAME");
+  h3->DrawCopy("E1 HIST SAME");
+  //h4->DrawCopy("same");
 /* 
   ///////////////////////////////////////////
   // when h3 is plotted alone
@@ -1386,12 +1444,12 @@ void synchro_history(TString h_name, TString p_name = "",Int_t log=1)
   h3->SetMaximum(1.5);
   h3->SetMinimum(5.e-6);
   h3->SetAxisRange(-3.5,3);
-  h3->Draw("E1 HIST");
+  h3->DrawCopy("E1 HIST");
   //////////////////////////////////////////
 */
   gPad->Update();
 
-  TLatex *t = new TLatex(0.17,0.35,"CMS Preliminary 2010 @ 7TeV"); 
+  TLatex *t = new TLatex(0.17,0.35,"CMS Preliminary 2012 @ 8TeV"); 
   t->SetNDC(true);t->SetTextSize(0.035);t->SetTextAngle(90); t->SetTextColor(11); t->DrawClone();
 
   t = new TLatex(0.3,0.94, "RPC Hit Synchronization ");
@@ -1440,8 +1498,10 @@ void synchro_history(TString h_name, TString p_name = "",Int_t log=1)
   //t = new TLatex(0.74,0.84-i*0.05, "138919-139458"); i++;
   //t->SetNDC(true);t->SetTextSize(0.035); t->SetTextColor(1); t->DrawClone();
 
-  c1->Print( p_name + ".png" );
-  c1->Print( p_name + ".eps" );
+  c1->Print( p_name + ".png", "png" );
+  c1->Print( p_name + ".C", "cxx" );
+  c1->Print( p_name + ".pdf", "pdf" );
+  c1->Print( p_name + ".eps", "eps");
 
   //  c1->Print(p_name+".png");
   //c1->Print(p_name+".eps");
@@ -1527,7 +1587,7 @@ void top10(TString datafile,
   gPad->Update();
 
   // header
-  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
   //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   // run range
@@ -1550,8 +1610,11 @@ void top10(TString datafile,
   f.cd("Synchro");
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "occup.png" );
-  c1->Print( outfile + "occup.eps" );
+  c1->Print( outfile + "occup" + ".png", "png" );
+  c1->Print( outfile + "occup" + ".C", "cxx" );
+  c1->Print( outfile + "occup" + ".pdf", "pdf" );
+  c1->Print( outfile + "occup" + ".eps", "eps");
+
   fin.cd();
 
   ////////////////////////////////////////////////////////////////
@@ -1586,7 +1649,7 @@ void top10(TString datafile,
   gPad->Update();
 
   // header
-  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 7TeV");
+  //t = new TLatex(.45,.95,"CMS Preliminary    #sqrt{s} = 8TeV");
   //t->SetNDC(true);t->SetTextSize(0.032); t->DrawClone();
 
   // run range
@@ -1609,8 +1672,11 @@ void top10(TString datafile,
   f.cd("Synchro");
   //h->Write();
   c1->Write();
-  c1->Print( outfile + "spread.png" );
-  c1->Print( outfile + "spread.eps" );
+  c1->Print( outfile + "spread" + ".png", "png" );
+  c1->Print( outfile + "spread" + ".C", "cxx" );
+  c1->Print( outfile + "spread" + ".pdf", "pdf" );
+  c1->Print( outfile + "spread" + ".eps", "eps");
+
   fin.cd();
 
   ////////////////////////////////////////////////////////////////
@@ -1651,6 +1717,7 @@ void drawSynchro(const TString dir="./",
 	  runrange, // "139096-140180, no #mu",// "Data corresponds"
 	  dataset,  // "ExpressPhysics",       // "  to XX nb^{-1}"
 	  "Barrel+Endcap");
+
   /*
   // Excluded LBs from the top 10 BX spread list
   vector<TString> blacklist;

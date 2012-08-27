@@ -9,8 +9,9 @@
 #include "utilsPlotsSaver.C"
 #include "utilsDivideErr.C"
 
-void pDetMeanPrinter(TH1* h)
+void pDet_MeanPrinter(TH1* h)
 {
+  if(!h) return;
   std::stringstream mean;
   mean<<"Mean: "<<h->GetMean();
   TText t;
@@ -20,37 +21,40 @@ void pDetMeanPrinter(TH1* h)
   t.DrawTextNDC(0.95,0.92, mean.str().c_str());
 }
 
-TCanvas* pDetEfficRoll()
+TCanvas* pDet_EfficRoll()
 {
-  TCanvas* c = new TCanvas("cDetEfficRoll","cDetEfficRoll",1200,600);
+  TCanvas* c = new TCanvas("cDet_EfficRoll","cDet_EfficRoll",1200,600);
   TVirtualPad* p; TH1D* h;
   c->Divide(2,1);
 
   p= c->cd(1); p->SetLogy(1);
   h  = (TH1D*)  gROOT->FindObject("hDet_EfficRoll");
-  h->SetXTitle("efficiency"); h->SetYTitle("# det. units");
+  if(!h) return 0;
+  h->SetXTitle("Efficiency"); h->SetYTitle("# det. units");
   h->SetMinimum(0.7);
   h->SetStats(kFALSE);
   h->DrawCopy();
-  pDetMeanPrinter(h);
+  pDet_MeanPrinter(h);
 
   p= c->cd(2); p->SetLogy(1);
   h  = (TH1D*)  gROOT->FindObject("hDet_EfficRollWeighted");
-  h->SetXTitle("efficiency"); h->SetYTitle("# det. units");
+  if(!h) return 0;
+  h->SetXTitle("Efficiency"); h->SetYTitle("# det. units");
   h->SetMinimum(0.7);
   h->SetStats(kFALSE);
   h->DrawCopy();
-  pDetMeanPrinter(h);
+  pDet_MeanPrinter(h);
   return c;
   
 }
-TCanvas* pDetEfficPart()
+TCanvas* pDet_EfficPart()
 {
-  TCanvas* c = new TCanvas("cDetEfficPart","cDetEfficPart",600,600);
+  TCanvas* c = new TCanvas("cDet_EfficPart","cDet_EfficPart",600,600);
   c->SetGrid(0,1);
   TH1D* h[6];
   std::stringstream str;
   TH1D* hBase =  (TH1D*)gROOT->FindObject("hDet_PartHit1");
+  if(!hBase) return 0;
   hBase->SetNameTitle("hDet_Part","hDet_Part");
   hBase->Reset(); hBase->SetMaximum(1.02); hBase->SetMinimum(0.84);
   hBase->DrawCopy();
@@ -63,6 +67,7 @@ TCanvas* pDetEfficPart()
     str.str(""); str << "hDet_PartDet"<<i; 
     TH1D* h2= (TH1D*)gROOT->FindObject( str.str().c_str());
     h[i-1]=DivideErr(h1,h2,(str.str()+"_Eff").c_str(),"B");
+    if(!h[i-1]) return 0;
     h[i-1]->SetMarkerColor(i);
     h[i-1]->SetMarkerStyle(21+i);
     h[i-1]->DrawCopy("same");
@@ -73,10 +78,11 @@ TCanvas* pDetEfficPart()
   return c;
 }
 
-TCanvas* pDetEfficHistory()
+TCanvas* pDet_EfficHistory()
 {
-  TCanvas* c = new TCanvas("cDetEfficHistory","cDetEfficHistory",600,600);
+  TCanvas* c = new TCanvas("cDet_EfficHistory","cDet_EfficHistory",600,600);
   TGraph* gr = (TGraph*)gROOT->FindObject("hGraph_DetEff");
+  if(!gr) return 0;
   gr->SetMarkerStyle(25);
   gr->SetMarkerColor(2);
   gr->SetMaximum(1.1);
@@ -86,47 +92,49 @@ TCanvas* pDetEfficHistory()
   //gr->GetHistogram()->GetXaxis()->SetLabelOffset(1.006);
   gr->GetHistogram()->GetXaxis()->SetNdivisions(-10);
   gr->GetHistogram()->GetXaxis()->SetLabelSize(0.02);
-//  gr->GetHistogram()->GetXaxis()->LabelsOption("V");
+  //  gr->GetHistogram()->GetXaxis()->LabelsOption("V");
   gr->GetHistogram()->GetXaxis()->SetTitle("Det Unit Id (raw)");
-  gr->GetHistogram()->GetYaxis()->SetTitle("efficiency");
+  gr->GetHistogram()->GetYaxis()->SetTitle("Efficiency");
   c->Modified();
   return c; 
 }
 
-TCanvas* pDetCoinc()
+TCanvas* pDet_Coinc()
 {
-  TCanvas* c = new TCanvas("cDetCoinc","cDetCoinc",600,600);
+  TCanvas* c = new TCanvas("cDet_Coinc","cDet_Coinc",600,600);
   TH1D *hn, *hd;
   hd = (TH1D*)gROOT->FindObject("hDet_Muon");
   TLegend* l = new TLegend(0.5, 0.2, 0.94,.4);
   
   hn = (TH1D*)gROOT->FindObject("hDet_CoincDet");
-  TH1D* h =DivideErr(hn, hd,"hDet_ConicDetEff", "B"); 
+  TH1D* h =DivideErr(hn, hd,"hDet_ConicDetEff", "B");
+  if(!h) return 0;
   h->SetLineColor(2);
   h->DrawCopy("h");
   l->AddEntry(h,"detector coincidence");
 
   hn =(TH1D*)gROOT->FindObject("hDet_CoincHit");
   h =DivideErr(hn, hd,"hDet_ConicHitEff", "B"); 
+  if(!h) return 0;
   h->SetLineColor(3);
   h->DrawCopy("same histo");
   l->AddEntry(h,"hit coincidence");
-//  h->Print("all");
+  //  h->Print("all");
 
   hn =(TH1D*)gROOT->FindObject("hEmu_Wide");
   hd =(TH1D*)gROOT->FindObject("hEmu_Muon");
-  h =DivideErr(hn, hd,"hDet_EmuEff", "B"); 
+  h =DivideErr(hn, hd,"hDet_EmuEff", "B");
+  if(!h) return 0;
   h->SetLineColor(4);
   h->DrawCopy("same histo");
   l->AddEntry(h,"wide pattern");
 
   hn =(TH1D*)gROOT->FindObject("hEmu_L1Rpc");
   h =DivideErr(hn, hd,"hDet_L1RpcEff", "B");     
+  if(!h) return 0;
   h->SetLineColor(6);
   h->DrawCopy("same histo");
   l->AddEntry(h,"L1Rpc");
-
-
 
   l->Draw();
 
@@ -141,10 +149,10 @@ TCanvas* pDetCoinc()
 
 void plotsDet()
 {
-  utilsPlotsSaver( pDetEfficRoll() );
-  utilsPlotsSaver( pDetEfficPart() );
-  utilsPlotsSaver( pDetEfficHistory() );  
-  utilsPlotsSaver( pDetCoinc() );
+  utilsPlotsSaver( pDet_EfficRoll() );
+  utilsPlotsSaver( pDet_EfficPart() );
+  utilsPlotsSaver( pDet_EfficHistory() );  
+  utilsPlotsSaver( pDet_Coinc() );
 }
 
 

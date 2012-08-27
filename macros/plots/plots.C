@@ -10,6 +10,13 @@
 #include "plotsRpcVsOth.C"
 #include "plotsDet.C"
 
+// To produce plots run this commsnd:
+//
+// root -l -q -b plots.C
+//
+// NOTE: without -b (batch) option wide plots (>1200 pixels) won't be drawn!
+
+
 void plots()
 {
   //
@@ -36,7 +43,7 @@ void plots()
   //
   // plots
   //
-  // gStyle->SetOptTitle(1);
+  //gStyle->SetOptTitle(0);
 
   plotsMuonDist();
   plotsRpcMisc();

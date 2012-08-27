@@ -7,7 +7,7 @@
 #include "TH1D.h"
 
 TH1D * DivideErr(TH1D * h1, 
-                 TH1D *h2, 
+                 TH1D * h2, 
                  const char * name="DivideErr", 
                  const char * optErr ="")
 {

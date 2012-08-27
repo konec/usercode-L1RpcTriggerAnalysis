@@ -53,11 +53,13 @@ if ! [ -f "${scriptdir}/Style.C" ]; then
 fi
 #
 root.exe -l -q "${string}"
-mkdir -p root eps png
+mkdir -p fig_synchro_root fig_synchro_eps fig_synchro_png fig_synchro_C fig_synchro_pdf 
 ls -lart
-\mv `\ls -1 ${prefix}*.root` root/.
-\mv `\ls -1 ${prefix}*.eps` eps/.
-\mv `\ls -1 ${prefix}*.png` png/.
+\mv `\ls -1 ${prefix}*.root` fig_synchro_root/.
+\mv `\ls -1 ${prefix}*.eps` fig_synchro_eps/.
+\mv `\ls -1 ${prefix}*.png` fig_synchro_png/.
+\mv `\ls -1 ${prefix}*.C` fig_synchro_C/.
+\mv `\ls -1 ${prefix}*.pdf` fig_synchro_pdf/.
 
 cd ${pdir}
 echo Done.
