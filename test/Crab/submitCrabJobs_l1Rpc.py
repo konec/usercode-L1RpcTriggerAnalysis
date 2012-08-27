@@ -7,7 +7,6 @@ import math
 
 from FWCore.PythonUtilities.LumiList import *
 #########################################
-#def makeLatestJSON(jsonsPath,aDataSet,runregCfgFile="runregTemplate.cfg"):
 def makeLatestJSON(jsonsPath,aDataSet,runRegCfg="runregTemplate.cfg",runRegPy="runregparse.py"):
 	##Check last analysed run number
 	maxRun = 0
@@ -69,7 +68,6 @@ def prepareCrabCfg(prefix,
 		   runRegPy,
 		   readCafCfg,
 		   readCafSh):
-    #prepareCrabCfg(fileName, datasetpath, jsonFile, pset, user_remote_dir,nJobs,prefix="./"):
     ### Create jobs' directory
     os.system("mkdir -p "+prefix+"/"+datasetpath)
     ### Set paths
@@ -109,9 +107,6 @@ def prepareCrabCfg(prefix,
     file.close() #Closes the file (write session)
     ######
     ###### If you want to submit all jobs at once uncomment this line...
-#    print "KUKU"
-#    print "ROBI CD DOR: " +prefix+datasetpath
-#    print "KONFIG JEST: " +tmpReadCafCfg
     #os.system("cd "+prefix+datasetpath+"; crab -create -submit -cfg "+tmpReadCafCfg+"; cd -")
     ###### ...and comment out all lines below:
     ######
@@ -146,31 +141,29 @@ def prepareCrabCfg(prefix,
 ################
 if __name__ == '__main__':	
 	###################
-	prefix = "./2012_06_15/"
-	version = "all0_l1Rpc_ex_2012A/"	
+	prefix = "./2012_08_20/"
+	version = "express2012C"
+	aDataSet = "/ExpressPhysics/Run2012C-Express-v1/FEVT" # CMSSW 53X
+#	aDataSet = "/ExpressPhysics/Run2012A-Express-v1/FEVT"
+#	aDataSet = "/MinimumBias/Run2012A-PromptReco-v1/RECO"
 # 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
 #  	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
 #	aDataSet = "/MinimumBias/Run2011B-MuonTrack-PromptSkim-v1/RAW-RECO"
 #   	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
-	aDataSet = "/ExpressPhysics/Run2012A-Express-v1/FEVT"
-#	aDataSet = "/MinimumBias/Run2012A-PromptReco-v1/RECO"
 	nJobs = 499
 	###################
 	topPath = os.getenv("CMSSW_BASE")+"/src/UserCode/L1RpcTriggerAnalysis/test/Crab/"
-#  analysisPy = topPath+"/synchroAnalysis_batch.py"
-	analysisPy = topPath+"/l1RpcAnalysis_batch.py"
+	analysisPy = topPath+"/l1RpcAnalysis.py"
 	runRegCfg  = topPath+"/runregTemplate.cfg"
 	runRegPy   = topPath+"/../runregparse.py"
 	readCafCfg = topPath+"/crab_read_CAFData.cfg"
 	readCafSh  = topPath+"/readCAFData.sh"
 	###################
 	jsonsPath = "/afs/cern.ch/cms/L1/rpc/Shift/JSON/"
-	#jsonsPath = "/afs/cern.ch/work/k/konec/Shift/JSON/"
-	#jsonFile = makeLatestJSON(jsonsPath,aDataSet,runRegCfg,runRegPy) # automatically create a JSON for runs not analyzed yet
-	#jsonFile = jsonsPath+"/GoodRuns_175832-178162.json" #In case you want to run with your JSON
-	#jsonFile = jsonsPath+"/GoodRuns_178365-180252.json" #In case you want to run with your JSON
-	#jsonFile = jsonsPath+"/GoodRuns_TMP.json" #In case you want to run with your JSON
-	jsonFile = jsonsPath+"//GoodRuns_190456_195947.json"
+	jsonFile = jsonsPath+"/GoodRuns_200368-200532_official2012C.json"
+#	jsonFile = jsonsPath+"/GoodRuns_199804-200245_official2012C.json"
+#	jsonFile = jsonsPath+"/GoodRuns_198049-199754_official2012C.json"
+#       jsonFile = makeLatestJSON(jsonsPath,aDataSet,runRegCfg,runRegPy) # automatically create a JSON for runs not analyzed yet
 	###################
 	castorRpcDir = "/u/"+os.getenv("USER")+"/RPCShift/"
 	###################

@@ -63,6 +63,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         sampleName2 = "efficiencyHelper-"+str(minRun)+"-"+str(maxRun)+".root"
         sampleName3 = "synchroAnalysis-"+str(minRun)+"-"+str(maxRun)+".root"
         sampleName4 = "rawMonitor-"+str(minRun)+"-"+str(maxRun)+".root"
+        sampleName5 = "l1demon-"+str(minRun)+"-"+str(maxRun)+".root"
         sampleName6 = "out-"+str(minRun)+"-"+str(maxRun)+".txt"
         print "Doing hadd for ",sampleName
         os.system("cd "+pathCrabResultsTMP+"; hadd /tmp/${USER}/_HADD_TMP_/"+sampleName+" efficiencyTree_*.root")
@@ -72,6 +73,8 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         os.system("cd "+pathCrabResultsTMP+"; hadd /tmp/${USER}/_HADD_TMP_/"+sampleName3+" synchroAnalysis_*.root")
         print "Doing hadd for ",sampleName4
         os.system("cd "+pathCrabResultsTMP+"; hadd /tmp/${USER}/_HADD_TMP_/"+sampleName4+" rawMonitor_*.root ; ls -lart")
+        print "Doing hadd for ",sampleName5
+        os.system("cd "+pathCrabResultsTMP+"; hadd /tmp/${USER}/_HADD_TMP_/"+sampleName5+" l1demon_*.root ; ls -lart")
         print "Preparing out.txt"
         os.system("cd "+pathCrabResultsTMP+"; rm -f /tmp/${USER}/_HADD_TMP_/"+sampleName6+"; cat C*.stdout|grep -i lb|grep -i mean >> /tmp/${USER}/_HADD_TMP_/"+sampleName6)
         ##Copy results to TMP destination
@@ -83,6 +86,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         os.system("cp "+pathTMP+sampleName2+" "+pathTMP+prefix+"/ROOT/")
         os.system("cp "+pathTMP+sampleName3+" "+pathTMP+prefix+"/ROOT/")
         os.system("cp "+pathTMP+sampleName4+" "+pathTMP+prefix+"/ROOT/")
+        os.system("cp "+pathTMP+sampleName5+" "+pathTMP+prefix+"/ROOT/")
         os.system("gzip "+pathTMP+sampleName6+"; cp "+pathTMP+sampleName6+".gz "+pathTMP+prefix+"/ROOT/")
         ##Copy results to final destination
         print "Copying final results to ",prefix,"/ROOT"
@@ -93,6 +97,7 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName2+" "+prefix+"/ROOT/")
         os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName3+" "+prefix+"/ROOT/")
         os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName4+" "+prefix+"/ROOT/")
+        os.system("cp /tmp/${USER}/_HADD_TMP_/"+sampleName5+" "+prefix+"/ROOT/")
         os.system("gzip /tmp/${USER}/_HADD_TMP_/"+sampleName6+"; cp /tmp/${USER}/_HADD_TMP_/"+sampleName6+".gz "+prefix+"/ROOT/")
         ##Remove trash from tmp		    
         os.system("rm -rf /tmp/${USER}/_HADD_TMP_/*.root")
@@ -120,6 +125,9 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
         print "Copying merged data",sampleName4,"to CASTOR path: ",castor2
         command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName4+" "+castor2+"; cd -"
         os.system(command)
+        print "Copying merged data",sampleName5,"to CASTOR path: ",castor2
+        command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName5+" "+castor2+"; cd -"
+        os.system(command)
         print "Copying merged data",sampleName6+".gz","to CASTOR path: ",castor2
         command = "cd "+pathTMP+prefix+"/ROOT/; rfcp "+sampleName6+".gz "+castor2+"; cd -"
         os.system(command)
@@ -132,13 +140,14 @@ def unpackAndMergeFiles(datasetpath,prefix,castor):
 #########################################
 ####################################################################
 if __name__ == '__main__':	
-	prefix = "./2012_05_21/"
-	version = "mb/"
+	prefix = "./2012_08_20/"
+	version = "express2012C"
+	aDataSet = "/ExpressPhysics/Run2012C-Express-v1/FEVT" # CMSSW 53X
+#	aDataSet = "/MinimumBias/Run2012A-PromptReco-v1/RECO"
 # 	aDataSet = "/MinimumBias/Run2011A-PromptReco-v5/RECO"
 #	aDataSet = "/MinimumBias/Run2011A-PromptReco-v6/RECO"
 # 	aDataSet = "/MinimumBias/Run2011B-MuonTrack-PromptSkim-v1/RAW-RECO"
 #  	aDataSet = "/SingleMu/Run2011B-WMu-PromptSkim-v1/RAW-RECO"
 #	aDataSet = "ExpressPhysics/Run2011B-Express-v1/FEVT"
-	aDataSet = "/MinimumBias/Run2012A-PromptReco-v1/RECO"
         castor = "${CASTOR_HOME}/RPCShift/"
         unpackAndMergeFiles(aDataSet,prefix+version,castor)
