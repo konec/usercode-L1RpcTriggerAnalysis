@@ -15,8 +15,7 @@ namespace {
   TH1D  *hEmu_Muon, *hEmu_Wide, *hEmu_L1Rpc;
 }
 
-AnaEmu::AnaEmu(TObjArray& histos)
-  : debug(false)
+void AnaEmu::init(TObjArray& histos)
 {
  hEmu_Muon= new TH1D( "hEmu_Muon", "hEmu_Muon", 64, -1.6, 1.6);  histos.Add( hEmu_Muon);
  hEmu_Wide= new TH1D( "hEmu_Wide", "hEmu_Wide", 64, -1.6, 1.6);  histos.Add( hEmu_Wide);

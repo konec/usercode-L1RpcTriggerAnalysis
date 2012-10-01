@@ -117,8 +117,7 @@ TGraph* AnaDet::resume()
   return hDet_GraphEffic;
 }
 
-AnaDet::AnaDet(TObjArray& histos)
-  : debug(false)
+void AnaDet::init(TObjArray& histos)
 {
   hDet_EfficRoll = new TH1D("hDet_EfficRoll","hDet_EfficRoll",220,-0.05,1.05); histos.Add(hDet_EfficRoll);
   hDet_EfficRollWeighted = new TH1D("hDet_EfficRollWeighted","hDet_EfficRollWeighted",220,-0.05,1.05); histos.Add(hDet_EfficRollWeighted);

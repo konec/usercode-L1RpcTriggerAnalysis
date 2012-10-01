@@ -31,18 +31,22 @@
 using namespace edm;
 using namespace std;
 
+SynchroSelectorMuon::SynchroSelectorMuon(const edm::ParameterSet& cfg) : SynchroSelector(cfg) 
+{ }
+
 SynchroSelectorMuon::SynchroSelectorMuon(const edm::ParameterSet& cfg, TObjArray& histos) 
   : SynchroSelector(cfg)
+{ initHistos(histos); }
+
+void SynchroSelectorMuon::initHistos(TObjArray& histos)
 {
   hDxy   = new TH1F("hDxy_SSMuon","hDxy_SSMuon",100.,0.,1.); histos.Add(hDxy);
-
   SynchroSelector::hPullX = new TH1F("hPullX_Muon","hPullX_Muon",100,-10.,10.); histos.Add(hPullX);
   SynchroSelector::hDistX = new TH1F("hDistX_Muon","hDistX_Muon",100,-100.,100.); histos.Add(hDistX);
 }
 
 bool SynchroSelectorMuon::takeIt(const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es)
 {
-  bool result = false;
 
   math::XYZPoint reference(0.,0.,0.);
   if (theConfig.exists("beamSpot")) {
@@ -65,25 +69,24 @@ bool SynchroSelectorMuon::takeIt(const RPCDetId & det, const edm::Event&ev, cons
    if (!theMuon || (im->track()->pt() > theMuon->track()->pt()) ) theMuon = &(*im);
   }
 
-  if (!theMuon) return result;
+  if (!theMuon) return false;
 
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
   es.get<GlobalTrackingGeometryRecord>().get(globalGeometry);
   edm::ESHandle<MagneticField> magField;
   es.get<IdealMagneticFieldRecord>().get(magField);
 
-
   if (hDxy) hDxy->Fill(fabs(theMuon->innerTrack()->dxy(reference)));
-  
-
   TrajectoryStateOnSurface aTSOS = trajectoryStateTransform::innerStateOnSurface( *(theMuon->outerTrack()), *globalGeometry, magField.product());
-  if (!checkRpcDetMatching(aTSOS,det,ev,es)) return result;
-  if (theConfig.getParameter<bool>("checkUniqueRecHitMatching") && !checkUniqueRecHitMatching(aTSOS,det,ev,es)) return result;
-
-  result = true;
-
-  return result;
+  return checkTraj(aTSOS, det,ev,es);
 }
+
+bool SynchroSelectorMuon::checkTraj(TrajectoryStateOnSurface & aTSOS, const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es)
+{
+  if (!checkRpcDetMatching(aTSOS,det,ev,es)) return false;
+  if (theConfig.getParameter<bool>("checkUniqueRecHitMatching") && !checkUniqueRecHitMatching(aTSOS,det,ev,es)) return false;
+  return true;
+} 
 
 
 

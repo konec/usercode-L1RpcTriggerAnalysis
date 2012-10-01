@@ -16,8 +16,7 @@
 template <class T> T sqr( T t) {return t*t;}
 
 
-AnaRpcMisc::AnaRpcMisc(TObjArray& histos)
-  : debug(false)
+void AnaRpcMisc::init(TObjArray& histos)
 {
   hRpcMisc_UE = new TH2D("hRpcMisc_US","hRpcMisc_UnderEstimated", L1RpcEtaScale::nEtaBins, L1RpcEtaScale::etaBins, 144, 0., 2.*M_PI); histos.Add(hRpcMisc_UE);
   hRpcMisc_OE = new TH2D("hRpcMisc_OS","hRpcMisc_OverEstimated", L1RpcEtaScale::nEtaBins, L1RpcEtaScale::etaBins, 144, 0., 2.*M_PI); histos.Add(hRpcMisc_OE);

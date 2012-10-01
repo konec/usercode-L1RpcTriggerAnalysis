@@ -9,4 +9,6 @@ $ROOTSYS/bin/rootcint -f rootMAnaDict.cc  -c -p \
     UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h \
     UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h \
     UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h \
-    UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h
+    UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h \
+    UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h \
+    UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObjVect.h

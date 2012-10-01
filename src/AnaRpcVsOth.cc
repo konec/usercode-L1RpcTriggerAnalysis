@@ -15,7 +15,7 @@
 
 const double AnaRpcVsOth::binsEff[ AnaRpcVsOth::nBinsEff+1 ] = { 1., 5., 12., 16., 30., 100.,1000.};
 
-AnaRpcVsOth::AnaRpcVsOth(TObjArray& histos)
+void AnaRpcVsOth::init(TObjArray& histos)
 {
   std::string  base("hRpcVsOth_");
   std::string tag[7]={"AnyPt","MinPt","MaxPt","RanPt","OthPt","RpcPt","AlgPt"};

@@ -19,23 +19,11 @@ DEFINE_FWK_MODULE(FilterGM);
 #include "Filter_L1_GM.h"
 DEFINE_FWK_MODULE(Filter_L1_GM);
 
-#include "LinkSynchroAnalysis.h"
-DEFINE_FWK_MODULE(LinkSynchroAnalysis);
+#include "L1RpcTreeMaker.h"
+DEFINE_FWK_MODULE(L1RpcTreeMaker);
 
-#include "LinkSynchroMerger.h"
-DEFINE_FWK_MODULE(LinkSynchroMerger);
-
-#include "L1RpcEfficiencyTreeMaker.h"
-DEFINE_FWK_MODULE(L1RpcEfficiencyTreeMaker);
-
-#include "L1RpcEfficiencyTreeAnalysis.h"
-DEFINE_FWK_MODULE(L1RpcEfficiencyTreeAnalysis);
-
-#include "EfficiencyTree.h"
-DEFINE_FWK_MODULE(EfficiencyTree);
-
-#include "EfficiencyAnalysis.h"
-DEFINE_FWK_MODULE(EfficiencyAnalysis);
+#include "L1RpcTreeAnalysis.h"
+DEFINE_FWK_MODULE(L1RpcTreeAnalysis);
 
 #include "L1RpcMCEfficiency.h"
 DEFINE_FWK_MODULE(L1RpcMCEfficiency);

@@ -13,6 +13,7 @@
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/RPCRecHit/interface/RPCRecHitCollection.h"
+#include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
 #include "DataFormats/DetId/interface/DetIdCollection.h"
 #include "DataFormats/TrackReco/interface/HitPattern.h"
 
@@ -92,7 +93,7 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleHits( const reco::Muo
 */
 //
     TrajectoryStateOnSurface trackAtHit= trackAtSurface.atDetFromClose(rpcDet,hitPosition);
-    if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
+//    if(!trackAtHit.isValid()) std::cout <<" TRAJ NOT VALID! "<< std::endl;
     if (!trackAtHit.isValid()) continue;
     LocalPoint hitPoint = ih->localPosition();
     LocalError hitError = ih->localPositionError();
@@ -128,6 +129,22 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleHits( const reco::Muo
   return detsHitsCompatibleWithMuon;
 }
 
+std::vector<uint32_t> DetHitCompatibleCollector::nDigisCompDets(const std::vector<uint32_t> & detIds, const edm::Event &ev, const edm::EventSetup &es) 
+{
+  std::vector<uint32_t> digisInDets;
+  edm::Handle<RPCDigiCollection> rpcDigis;
+  ev.getByLabel("muonRPCDigis", rpcDigis);
+
+  for (std::vector<uint32_t>::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
+    const RPCDigiCollection::Range range = rpcDigis->get(*it);
+    //unsigned int ndigis = (range.second-range.first);
+    std::map<int, bool> strips;
+    for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) if (id->bx() == 0) strips[id->strip()] = true;
+    digisInDets.push_back( strips.size());
+  }
+  return digisInDets;
+
+}
 std::vector<uint32_t> DetHitCompatibleCollector::compatibleDets( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es, bool deepInside)
 {
   std::vector<uint32_t> detsCrossedByMuon;

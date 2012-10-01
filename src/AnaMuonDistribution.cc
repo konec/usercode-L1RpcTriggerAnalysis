@@ -14,7 +14,7 @@ using namespace std;
   TH1D *hMuonPt, *hMuonEta, *hMuonPhi;
   TH2D *hMuonPtVsEta_Tk, *hMuonPtVsEta_Ma, *hMuonPtVsEta_Gl;
 
-AnaMuonDistribution::AnaMuonDistribution(TObjArray& histos) 
+void AnaMuonDistribution::init(TObjArray& histos) 
 {
   hMuonPt  = new TH1D("hMuonPt","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",L1PtScale::nPtBins,L1PtScale::ptBins);  histos.Add(hMuonPt);
   hMuonEta = new TH1D("hMuonEta","All global muons Eta;Glb.muon #eta;Muons / bin",64, -1.6, 1.6);  histos.Add(hMuonEta);

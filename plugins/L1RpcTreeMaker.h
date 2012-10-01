@@ -1,5 +1,5 @@
-#ifndef L1RpcEfficiencyTreeMaker_H
-#define L1RpcEfficiencyTreeMaker_H
+#ifndef L1RpcTreeMaker_H
+#define L1RpcTreeMaker_H
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -7,10 +7,14 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObjVect.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestMuonFinder.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetHitCompatibleCollector.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsGrabber.h"
+
 
 
 #include <vector>
@@ -25,11 +29,12 @@ class TH1F;
 class TH2F;
 class RPCDetId;
 
-class L1RpcEfficiencyTreeMaker : public edm::EDAnalyzer {
+class L1RpcTreeMaker : public edm::EDAnalyzer {
 public:
-  L1RpcEfficiencyTreeMaker(const edm::ParameterSet& cfg);
-  virtual ~L1RpcEfficiencyTreeMaker();
+  L1RpcTreeMaker(const edm::ParameterSet& cfg);
+  virtual ~L1RpcTreeMaker();
   virtual void beginJob();
+  virtual void beginRun(const edm::Run &ru, const edm::EventSetup &es);
   virtual void analyze(const edm::Event &ev, const edm::EventSetup &es);
   virtual void endJob();
 
@@ -41,7 +46,9 @@ private:
   EventObj* event;
   MuonObj* muon;
   TrackObj* track;
+  std::vector<SynchroCountsObj> counts;
   std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsHitsCompatibleWithMuon, detsSIMU;
+  std::vector<uint32_t> nDigisCompDets;
   L1ObjColl * l1RpcColl;
   L1ObjColl * l1OtherColl;
   L1ObjColl * l1RpcCollEmu;
@@ -51,5 +58,6 @@ private:
   TObjArray      theHelper;
   BestMuonFinder theBestMuonFinder;
   DetHitCompatibleCollector theDetHitCollector;
+  SynchroCountsGrabber theSynchroGrabber;
 };
 #endif

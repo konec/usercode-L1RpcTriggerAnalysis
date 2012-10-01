@@ -17,8 +17,7 @@ const double AnaEff::ptCuts[ AnaEff::nPtCuts] = { 0., 5., 10., 16., 30., 100.};
 std::string reg[5]={"_Bar","_Int","_End","_Qeq0","_Qgt0"};
 
 
-AnaEff::AnaEff(TObjArray& histos)
-  : debug(false)
+void AnaEff::init(TObjArray& histos)
 {
   hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D", L1PtScale::nPtBins, L1PtScale::ptBins); histos.Add(hEfficMuPt_D);
   hEfficRpcNoCut_N = new TH1D("hEfficRpcNoCut_N","hEfficRpcNoCut_N", L1PtScale::nPtBins, L1PtScale::ptBins);  histos.Add(hEfficRpcNoCut_N);

@@ -36,6 +36,8 @@ extern void G__set_cpp_environmentrootMAnaDict();
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObjVect.h"
 #include <algorithm>
 namespace std { }
 using namespace std;
@@ -59,5 +61,9 @@ extern G__linked_taginfo G__rootMAnaDictLN_L1Obj;
 extern G__linked_taginfo G__rootMAnaDictLN_L1ObjColl;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlEL1ObjcOallocatorlEL1ObjgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEL1ObjcOallocatorlEL1ObjgRsPgRcLcLiteratorgR;
+extern G__linked_taginfo G__rootMAnaDictLN_SynchroCountsObj;
+extern G__linked_taginfo G__rootMAnaDictLN_SynchroCountsObjVect;
+extern G__linked_taginfo G__rootMAnaDictLN_vectorlESynchroCountsObjcOallocatorlESynchroCountsObjgRsPgR;
+extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlESynchroCountsObjcOallocatorlESynchroCountsObjgRsPgRcLcLiteratorgR;
 
 /* STUB derived class for protected member access */
