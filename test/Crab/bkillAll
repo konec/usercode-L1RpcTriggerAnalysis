@@ -1,8 +1,0 @@
-#!/bin/csh
-
-set JOBIDS=`bjobs -q $1 |awk '{ print $1}'`
-
-  foreach JOBID (${JOBIDS})	 
-        bkill ${JOBID}
-  end
-
