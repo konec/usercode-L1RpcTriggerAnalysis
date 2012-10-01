@@ -83,7 +83,7 @@ void AnaSynch::endJob()
   RPCLinkSynchroHistoMaker hm(theSynchroStat);
   hm.fill(hSynch_delaySummary, hSynch_delaySpread, hSynch_topOccup, hSynch_topSpread);
 
-  std::ofstream file("delays.txt");
+  std::ofstream file("l1RpcDelays.txt");
   file << theSynchroStat.dumpDelays() << std::endl;
   file.close();
 }
