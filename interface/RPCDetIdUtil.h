@@ -3,6 +3,7 @@
 
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include <iostream>
+#include <cmath>
 
 class RPCDetIdUtil{
 public:

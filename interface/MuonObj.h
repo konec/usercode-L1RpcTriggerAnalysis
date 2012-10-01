@@ -19,6 +19,8 @@ public:
   bool isOuter()   const { return  (theMuonBits>>2)&1 ;}  
   bool isCalo()    const { return  (theMuonBits>>1)&1 ;}  
   bool isMatched() const { return   theMuonBits&1 ;}  
+public:
+  unsigned int nRPCHits, nDTHits, nCSCHits, nTrackerHits, nMatchedStations;
 private:  
   unsigned int theMuonBits; 
 public:

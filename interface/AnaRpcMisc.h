@@ -13,7 +13,8 @@ class TGraph;
 
 class AnaRpcMisc {
 public: 
-  AnaRpcMisc(TObjArray& histos); 
+  AnaRpcMisc() : debug(false) {}
+  void init(TObjArray& histos); 
   void run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl);
   TGraph* resume();
 

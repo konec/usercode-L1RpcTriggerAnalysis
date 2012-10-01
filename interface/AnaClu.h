@@ -1,7 +1,6 @@
-#ifndef UserCode_L1RpcTriggerAnalysis_AnaDet_H
-#define UserCode_L1RpcTriggerAnalysis_AnaDet_H
+#ifndef UserCode_L1RpcTriggerAnalysis_AnaClu_H
+#define UserCode_L1RpcTriggerAnalysis_AnaClu_H
 
-#include "UserCode/L1RpcTriggerAnalysis/interface/DetEfficiencyManager.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/LayerCoincManager.h"
 
 class TGraph;
@@ -15,20 +14,17 @@ class L1Obj;
 #include <string>
 #include <bitset>
 
-class AnaDet {
+class AnaClu {
 public:
-  AnaDet() : debug(false) {}
+  AnaClu() : debug(false) {}
   void init(TObjArray& histos);
   void run( const MuonObj* muon, 
+            const L1ObjColl *l1RpcColl,
             const std::vector<uint32_t> & detsHitsCompatibleWithMuon,
-            const std::vector<uint32_t> & detsCrossedByMuon,
-            const std::vector<uint32_t> & detsCrossedByMuonDeepInside);
-            
-  TGraph* resume();
+            const std::vector<uint32_t> & nDigisCompDets);
   bool debug;
 
 private:
-  DetEfficiencyManager theDetEfficiencyManager;
   LayerCoincManager    theLayerCoincManager;
 };
 

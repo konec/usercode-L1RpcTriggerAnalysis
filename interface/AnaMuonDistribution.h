@@ -7,7 +7,7 @@ class MuonObj;
 
 class AnaMuonDistribution {
 public:
-  AnaMuonDistribution(TObjArray& histos);
+  void init(TObjArray& histos);
   void run(const MuonObj* muon);
 };
 #endif

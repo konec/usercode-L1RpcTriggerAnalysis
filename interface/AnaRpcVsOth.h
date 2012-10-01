@@ -12,7 +12,7 @@ class L1Obj;
 
 class AnaRpcVsOth {
 public: 
-  AnaRpcVsOth(TObjArray& histos); 
+  void init(TObjArray& histos); 
   void run(const MuonObj* muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl);
 private:
   double maxPt(const std::vector<L1Obj> & l1Objs) const; 
