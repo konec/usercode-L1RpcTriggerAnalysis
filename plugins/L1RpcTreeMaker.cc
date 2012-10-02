@@ -56,6 +56,7 @@ void L1RpcTreeMaker::beginJob()
   theTree->Branch("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon);
   theTree->Branch("detsSIMU",&detsSIMU);
   theTree->Branch("nDigisCompDets",&nDigisCompDets);
+  theTree->Branch("clSizeCompDets",&clSizeCompDets);
 
   theTree->Branch("l1RpcColl","L1ObjColl",&l1RpcColl,32000,99);
   theTree->Branch("l1RpcCollEmu","L1ObjColl",&l1RpcCollEmu,32000,99);
@@ -117,6 +118,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   detsHitsCompatibleWithMuon = std::vector<uint32_t>();
   detsSIMU = std::vector<uint32_t>();
   nDigisCompDets = std::vector<uint32_t>();
+  clSizeCompDets = std::vector<uint32_t>();
   l1RpcColl = new L1ObjColl;
   l1OtherColl = new L1ObjColl;
   l1RpcCollEmu = new L1ObjColl;
@@ -145,6 +147,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
     detsCrossedByMuonDeepInside = theDetHitCollector.compatibleDets( theMuon, ev, es, true); 
     if (theConfig.getParameter<bool>("checkDestSIMU")) detsSIMU = theDetHitCollector.compatibleSIMU( theMuon, ev, es);
     nDigisCompDets = theDetHitCollector.nDigisCompDets(detsHitsCompatibleWithMuon, ev, es);
+    clSizeCompDets = theDetHitCollector.clSizeCompDets(detsHitsCompatibleWithMuon, ev, es);
   }
 
   

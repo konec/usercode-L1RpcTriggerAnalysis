@@ -75,6 +75,8 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleHits( const reco::Muo
   typedef RPCRecHitCollection::const_iterator IH;
   for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
 
+    if (ih->BunchX() != 0) continue;
+    if (! ih->isValid() ) continue;
     RPCDetId rpcDet = ih->rpcId();
     GlobalPoint detPosition = rpcGeometry->idToDet(rpcDet)->position();
     GlobalPoint hitPosition = rpcGeometry->idToDet(rpcDet)->toGlobal(ih->localPosition());
@@ -129,22 +131,36 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleHits( const reco::Muo
   return detsHitsCompatibleWithMuon;
 }
 
+std::vector<uint32_t> DetHitCompatibleCollector::clSizeCompDets(const std::vector<uint32_t> & detIds, const edm::Event &ev, const edm::EventSetup &es) 
+{
+  std::vector<uint32_t> cluInDets;
+  edm::Handle<RPCRecHitCollection> recHits;
+  ev.getByLabel("rpcRecHits", recHits);
+  for (std::vector<uint32_t>::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
+    RPCRecHitCollection::range range = recHits->get(*it);
+    if (range.second-range.first) cluInDets.push_back(range.first->clusterSize());
+    for (RPCRecHitCollection::const_iterator ih= range.first; ih != range.second; ++ih) {
+    }
+  }
+  return cluInDets;
+}
+
 std::vector<uint32_t> DetHitCompatibleCollector::nDigisCompDets(const std::vector<uint32_t> & detIds, const edm::Event &ev, const edm::EventSetup &es) 
 {
   std::vector<uint32_t> digisInDets;
   edm::Handle<RPCDigiCollection> rpcDigis;
   ev.getByLabel("muonRPCDigis", rpcDigis);
-
   for (std::vector<uint32_t>::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
     const RPCDigiCollection::Range range = rpcDigis->get(*it);
-    //unsigned int ndigis = (range.second-range.first);
     std::map<int, bool> strips;
+//    for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) id->print() ;
     for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) if (id->bx() == 0) strips[id->strip()] = true;
+    if ( strips.size() == 0 ) std::cout <<"WARNING ***************"<<std::endl;
     digisInDets.push_back( strips.size());
   }
   return digisInDets;
-
 }
+
 std::vector<uint32_t> DetHitCompatibleCollector::compatibleDets( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es, bool deepInside)
 {
   std::vector<uint32_t> detsCrossedByMuon;

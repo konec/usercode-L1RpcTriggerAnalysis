@@ -48,7 +48,7 @@ private:
   TrackObj* track;
   std::vector<SynchroCountsObj> counts;
   std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsHitsCompatibleWithMuon, detsSIMU;
-  std::vector<uint32_t> nDigisCompDets;
+  std::vector<uint32_t> nDigisCompDets, clSizeCompDets;
   L1ObjColl * l1RpcColl;
   L1ObjColl * l1OtherColl;
   L1ObjColl * l1RpcCollEmu;

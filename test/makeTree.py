@@ -10,8 +10,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1) )
 # (there is 255 file limit though).
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
   '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
-  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root'
-))
+  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
+  ),
+#  skipEvents = cms.untracked.uint32(178)
+)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')

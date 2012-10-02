@@ -16,6 +16,7 @@ public:
   std::vector<uint32_t> compatibleDets( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es, bool deepInside);
   std::vector<uint32_t> compatibleSIMU( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es);
   std::vector<uint32_t> nDigisCompDets( const std::vector<uint32_t> & detIds, const edm::Event &ev, const edm::EventSetup &es);
+  std::vector<uint32_t> clSizeCompDets( const std::vector<uint32_t> & detIds, const edm::Event &ev, const edm::EventSetup &es);
   void initHistos( TObjArray & histos);
   
 private:

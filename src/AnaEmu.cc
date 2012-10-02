@@ -42,7 +42,7 @@ void AnaEmu::run( const EventObj* event, const MuonObj* muon,
   if (l1Rpcs.size() > 0) hEmu_L1Rpc->Fill(muon->eta());
   if (l1RpcsEmu.size() > 0) hEmu_Wide->Fill(muon->eta());
   if (l1Rpcs.size() > 0 && l1RpcsEmu.size()==0) {
-     std::cout <<"has no Emu but Rpc, run="<<event->run<<" lumi="<<event->lumi<<std::endl;
+//     std::cout <<"has no Emu but Rpc, run="<<event->run<<" lumi="<<event->lumi<<std::endl;
 //     debug = true;
   }
   if (debug) std::cout <<"MUON: pt="<<muon->pt()<<" eta="<<muon->eta()<<std::endl;

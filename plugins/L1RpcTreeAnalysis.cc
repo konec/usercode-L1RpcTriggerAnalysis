@@ -73,6 +73,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   std::vector<uint32_t> *detsHitsCompatibleWithMuon = 0;
   std::vector<uint32_t> *detsSIMU = 0;
   std::vector<uint32_t> *nDigisCompDets = 0;
+  std::vector<uint32_t> *clSizeCompDets = 0;
 
   EventObj * event = 0;
   MuonObj * muon = 0;
@@ -83,6 +84,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   TBranch *bdetsHitsCompatibleWithMuon = 0;
   TBranch *bdetsSIMU =0;
   TBranch *bnDigisCompDets =0;
+  TBranch *bclSizeCompDets =0;
 
   L1ObjColl* l1RpcColl = 0;
   L1ObjColl* l1OtherColl = 0;
@@ -97,6 +99,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   chain.SetBranchAddress("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon,&bdetsHitsCompatibleWithMuon);
   chain.SetBranchAddress("detsSIMU",&detsSIMU,&bdetsSIMU);
   chain.SetBranchAddress("nDigisCompDets",&nDigisCompDets, &bnDigisCompDets);
+  chain.SetBranchAddress("clSizeCompDets",&clSizeCompDets, &bclSizeCompDets);
 
   chain.SetBranchAddress("l1RpcColl",&l1RpcColl);
   chain.SetBranchAddress("l1OtherColl",&l1OtherColl);
@@ -138,7 +141,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
    theAnaEmu.run ( event, muon, l1RpcCollEmu, l1RpcColl);
    theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
-   theAnaClu.run( muon, l1RpcColl, *detsHitsCompatibleWithMuon, *nDigisCompDets);
+   theAnaClu.run( event, muon, l1RpcColl, *detsHitsCompatibleWithMuon, *nDigisCompDets, *clSizeCompDets);
 
 //   theAnaEmu.debug =theAnaDet.debug;
 //    std::cout <<"----------"<<std::endl;
@@ -153,6 +156,7 @@ void L1RpcTreeAnalysis::endJob()
   std::cout <<"ENDJOB, summaries:"<<std::endl;
   TGraph* hGraph_DetEff =theAnaDet.resume();
   TGraph* hGraph_RunEff =theAnaRpcMisc.resume();
+  TGraph* hGraph_RunClu = theAnaClu.resume();
 
   theAnaSynch.endJob();
 
@@ -161,6 +165,7 @@ void L1RpcTreeAnalysis::endJob()
   theHistos.Write();
   hGraph_DetEff->Write("hGraph_DetEff");
   hGraph_RunEff->Write("hGraph_RunEff");
+  hGraph_RunClu->Write("hGraph_RunClu");
   f.Close();
   std::cout <<"END"<<std::endl;
 }
