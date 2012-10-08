@@ -154,8 +154,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 void L1RpcTreeAnalysis::endJob()
 {
   std::cout <<"ENDJOB, summaries:"<<std::endl;
-  TGraph* hGraph_DetEff =theAnaDet.resume();
-  TGraph* hGraph_RunEff =theAnaRpcMisc.resume();
+  TGraph* hGraph_DetEff = theAnaDet.resume();
+  theAnaRpcMisc.resume(theHistos);
   TGraph* hGraph_RunClu = theAnaClu.resume();
 
   theAnaSynch.endJob();
@@ -164,7 +164,6 @@ void L1RpcTreeAnalysis::endJob()
   TFile f(histoFile.c_str(),"RECREATE");
   theHistos.Write();
   hGraph_DetEff->Write("hGraph_DetEff");
-  hGraph_RunEff->Write("hGraph_RunEff");
   hGraph_RunClu->Write("hGraph_RunClu");
   f.Close();
   std::cout <<"END"<<std::endl;

@@ -138,9 +138,13 @@ std::vector<uint32_t> DetHitCompatibleCollector::clSizeCompDets(const std::vecto
   ev.getByLabel("rpcRecHits", recHits);
   for (std::vector<uint32_t>::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
     RPCRecHitCollection::range range = recHits->get(*it);
-    if (range.second-range.first) cluInDets.push_back(range.first->clusterSize());
-    for (RPCRecHitCollection::const_iterator ih= range.first; ih != range.second; ++ih) {
-    }
+//    std::cout <<"DET: "<<*it << std::endl;
+      for(RPCRecHitCollection::const_iterator ih= range.first; ih != range.second; ++ih) {
+        if (ih->BunchX() == 0) { cluInDets.push_back(ih->clusterSize()); break; }
+      }
+//    for(RPCRecHitCollection::const_iterator ih= range.first; ih != range.second; ++ih)  
+//        std::cout <<" Hit: cluster:"<<ih->clusterSize() << "first strip: "<<ih->firstClusterStrip()<<std::endl; 
+//    if (range.second-range.first) cluInDets.push_back(range.first->clusterSize());
   }
   return cluInDets;
 }
@@ -151,12 +155,14 @@ std::vector<uint32_t> DetHitCompatibleCollector::nDigisCompDets(const std::vecto
   edm::Handle<RPCDigiCollection> rpcDigis;
   ev.getByLabel("muonRPCDigis", rpcDigis);
   for (std::vector<uint32_t>::const_iterator it = detIds.begin(); it != detIds.end(); ++it) {
+//  std::cout <<"DET: "<<*it << std::endl;
     const RPCDigiCollection::Range range = rpcDigis->get(*it);
     std::map<int, bool> strips;
-//    for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) id->print() ;
+//  for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) id->print() ;
     for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) if (id->bx() == 0) strips[id->strip()] = true;
     if ( strips.size() == 0 ) std::cout <<"WARNING ***************"<<std::endl;
     digisInDets.push_back( strips.size());
+//    std::cout <<"SIZE is : "<<strips.size() << std::endl;
   }
   return digisInDets;
 }

@@ -1,7 +1,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaClu.h"
 #include "TObjArray.h"
 #include "TH1D.h"
-#include "TH1F.h"
+#include "TH2D.h"
 #include "TAxis.h"
 #include "TGraphErrors.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDetIdUtil.h"
@@ -12,6 +12,7 @@
 
 namespace { 
   TH1D *hClu_SizeDigi, *hClu_SizeRHit;
+  TH2D *hClu_DigiRHit;
 } 
 
 
@@ -34,6 +35,7 @@ void AnaClu::run(
   for (unsigned int i=0; i< nDigisCompDets.size(); ++i) {
     hClu_SizeRHit->Fill(clSizeCompDets[i]);
     hClu_SizeDigi->Fill(nDigisCompDets[i]);
+    hClu_DigiRHit->Fill(clSizeCompDets[i],nDigisCompDets[i]);
     cluRunMap[event->run].first++;
     cluRunMap[event->run].second += nDigisCompDets[i];
   }
@@ -64,4 +66,5 @@ void AnaClu::init(TObjArray& histos)
 {
  hClu_SizeDigi = new TH1D( "hClu_SizeDigi", "hClu_SizeDigi", 97, -0.5, 96.5);  histos.Add( hClu_SizeDigi);
  hClu_SizeRHit = new TH1D( "hClu_SizeRHit", "hClu_SizeRHit", 97, -0.5, 96.5);  histos.Add( hClu_SizeRHit);
+ hClu_DigiRHit = new TH2D( "hClu_DigiRHit","hClu_DigiRHit", 97, -0.5, 96.5, 97, -0.5, 96.5);  histos.Add(hClu_DigiRHit);
 }

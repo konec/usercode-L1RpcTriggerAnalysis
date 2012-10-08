@@ -16,7 +16,7 @@ public:
   AnaRpcMisc() : debug(false) {}
   void init(TObjArray& histos); 
   void run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl);
-  TGraph* resume();
+  void resume(TObjArray& histos);
 
   bool debug;
 private:
@@ -26,6 +26,8 @@ private:
   TH1D *hRpcMisc_Time, *hRpcMisc_TimeAll, *hRpcMisc_TimeDen;
   typedef std::map< unsigned int, std::pair<unsigned int, unsigned int> > EffRunMap;
   EffRunMap effRunMap;
+  typedef std::map< unsigned int, std::pair<unsigned int, unsigned int> >PurRunMap;
+  PurRunMap purRunMap;
 };
 
 #endif

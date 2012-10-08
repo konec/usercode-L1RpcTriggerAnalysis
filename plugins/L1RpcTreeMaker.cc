@@ -148,6 +148,10 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
     if (theConfig.getParameter<bool>("checkDestSIMU")) detsSIMU = theDetHitCollector.compatibleSIMU( theMuon, ev, es);
     nDigisCompDets = theDetHitCollector.nDigisCompDets(detsHitsCompatibleWithMuon, ev, es);
     clSizeCompDets = theDetHitCollector.clSizeCompDets(detsHitsCompatibleWithMuon, ev, es);
+
+    for (uint32_t i=0; i< nDigisCompDets.size(); i++) {
+      if (clSizeCompDets[i] > nDigisCompDets[i]) std::cout <<" PROBLEM, event: "<<theCounter<<" cl:"<<clSizeCompDets[i]<<" nDigis:"<<nDigisCompDets[i]<<std::endl;
+    }
   }
 
   
