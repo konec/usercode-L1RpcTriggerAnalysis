@@ -1,8 +1,12 @@
+#ifndef plotsDet_C
+#define plotsDet_C
+
 #include "TROOT.h"
 #include "TCanvas.h"
 #include "TH2D.h"
 #include "TText.h"
 #include "TGraphAsymmErrors.h"
+#include "TLegend.h"
 #include <iomanip>
 #include <sstream>
 
@@ -155,4 +159,4 @@ void plotsDet()
   utilsPlotsSaver( pDet_Coinc() );
 }
 
-
+#endif

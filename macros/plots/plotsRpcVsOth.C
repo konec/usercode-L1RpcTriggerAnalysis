@@ -1,3 +1,6 @@
+#ifndef plotsRpcVsOth_C
+#define plotsRpcVsOth_C
+
 #include <iomanip>
 #include <sstream>
 #include "TROOT.h"
@@ -192,3 +195,5 @@ void plotsRpcVsOth()
   utilsPlotsSaver( pRpcVsOth_QualEvLostBy("MinPt") );
   utilsPlotsSaver( pRpcVsOth_QualEvLostBy("MaxPt") );
 }
+
+#endif

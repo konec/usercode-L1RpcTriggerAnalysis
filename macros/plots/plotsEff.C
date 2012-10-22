@@ -1,3 +1,6 @@
+#ifndef plotsEff_C
+#define plotsEff_C
+
 #include "TROOT.h"
 #include "TCanvas.h"
 #include "TStyle.h"
@@ -9,15 +12,15 @@
 #include <vector>
 #include <sstream>
 #include "utilsDivideErr.C"
-#include "utilsPlotsSaver.C"
+#include "utilsPlotsSaver.h"
 
 
 TCanvas* pEff_Effic()
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
   TCanvas* c = new TCanvas("cEff_Effic","L1 RPC relative efficiency",600,600);
 
@@ -55,8 +58,8 @@ TCanvas* pEff_Eta()
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
   std::string nc = "cEff_Eta";
   TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),600,600);
@@ -95,11 +98,11 @@ TCanvas* pEff_Pt(std::string opt)
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
   std::string nc = "cEff_"+opt+"PtCut";
-  TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),1800,600);
+  TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),1400,500);
   c->Divide(3,1);
   std::string where[]={"_Bar","_Int","_End"};
   TLegend* l = new TLegend(0.7, 0.15, 0.94,.52); 
@@ -146,8 +149,8 @@ TCanvas* pEff_RpcPtCut_Q()
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
   std::string nc = "cEff_RpcPtCut_Q";
   TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),1200,600);
@@ -203,3 +206,4 @@ void plotsEff()
  utilsPlotsSaver( pEff_Eta() );
  utilsPlotsSaver( pEff_Effic() );
 }
+#endif

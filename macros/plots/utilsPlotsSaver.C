@@ -1,9 +1,9 @@
-#ifndef utilsPlotsSaver_C
-#define utilsPlotsSaver_C
+#include "utilsPlotsSaver.h"
 
 #include <cstring>
 #include <iostream>
-#include <cmath>
+#include <string>
+#include <iostream>
 #include "TSystem.h"
 #include "TCanvas.h"
 #include "TDirectory.h"
@@ -14,7 +14,7 @@ void utilsPlotsSaver(TCanvas *c)
   if(!c) return; // do nothing
 
   std::string base = c->GetName();
-  std::cout <<" BASE: "<<base<<std::endl;
+  std::cout <<" CANVAS NAME: "<<base<<std::endl;
 
   gSystem->mkdir("./fig_C");
   gSystem->mkdir("./fig_pdf");
@@ -30,10 +30,12 @@ void utilsPlotsSaver(TCanvas *c)
   c->Print( ("fig_C/"+base+".C").c_str(),"cxx");
   //pdf
   c->Print( ("fig_pdf/"+base+".pdf").c_str(),"pdf");
-  //root
-  TDirectory * dir = gDirectory; 
-  TFile fout( ( "fig_root/"+base+".root").c_str(),"RECREATE");
-  fout.cd(); c->Write(); dir->cd(); fout.Close();      
-}
 
-#endif 
+
+  //root
+  TDirectory *dir = gDirectory; 
+  TFile fout( ( "fig_root/"+base+".root").c_str(),"RECREATE");
+  c->Write(); 
+  fout.Close();      
+  dir->cd(); 
+}

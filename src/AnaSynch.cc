@@ -37,7 +37,19 @@ void AnaSynch::init(TObjArray& histos)
 
   hSynch_delaySummary = new TH1F("hSynch_delaySummary","LinkDelaySummary",8,-3.5, 4.5); hSynch_delaySummary->SetStats(111); histos.Add(hSynch_delaySummary);
 
-  hSynch_delaySpread = new TH2F("hSynch_delaySpread","LinkDelaySpread",71,-3.05, 4.05, 31,-0.05,3.05); hSynch_delaySpread->SetStats(0); histos.Add(hSynch_delaySpread);
+  double  widthX=1.0/50 ;                   // bin width of 1/25 BX = 1ns
+  unsigned int  nbinsX=2*(Int_t)(3.0/widthX)+1; // nbins for [-3 BX, +3 BX] range
+  double  widthY=1.0/50 ;                   // bin width of 1/25 BX = 1ns
+  unsigned int nbinsY=(Int_t)(7.0/widthY);     // nbins for [0 BX, 7 BX[ range
+
+  hSynch_delaySpread = new TH2F("hSynch_delaySpread",
+        "Average signal spread vs average signal arrival per Link Board; Avg signal arrival wrt L1A per Link Board [BX]; Avg signal spread per Link Board [BX]; Link Boards / bin",
+        nbinsX, 0.0-(int)(nbinsX/2)*widthX, 0.0+(int)(nbinsX/2)*widthX,
+        nbinsY, 0.0, 0.0+nbinsY*widthY);
+ //        71,-3.05, 4.05, 31,-0.05,3.05); 
+  hSynch_delaySpread->Sumw2();
+  //hSynch_delaySpread->SetStats(0); 
+  histos.Add(hSynch_delaySpread);
 
   hSynch_notComplete[0] = new TH2F("hSynch_notComplete790","FED790: not All Paths hit",36,-0.5,35.5,18,-0.5,17.5); histos.Add(hSynch_notComplete[0]);
   hSynch_notComplete[1] = new TH2F("hSynch_notComplete791","FED791: not All Paths hit",36,-0.5,35.5,18,-0.5,17.5); histos.Add(hSynch_notComplete[1]);

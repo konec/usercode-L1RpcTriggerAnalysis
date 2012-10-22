@@ -1,6 +1,3 @@
-#ifndef utilsL1RpcStyle_C
-#define utilsL1RpcStyle_C
-
 #include "TStyle.h"
 #include <iostream>
 
@@ -11,7 +8,7 @@ void utilsL1RpcStyle()
   std::cout <<"Define l1RpcStyle...";
 
 //set the background color to white
-  l1RpcStyle->SetFillColor(0);
+//  l1RpcStyle->SetFillColor(0);
   l1RpcStyle->SetFrameFillColor(0);
   l1RpcStyle->SetCanvasColor(0);
   l1RpcStyle->SetPadColor(0);
@@ -38,7 +35,7 @@ void utilsL1RpcStyle()
 // options
   l1RpcStyle->SetOptFit();
   l1RpcStyle->SetOptStat(0);
-  l1RpcStyle->SetOptTitle(1);
+  l1RpcStyle->SetOptTitle(0);
   l1RpcStyle->SetMarkerSize(1.0);
   l1RpcStyle->SetPalette(14);
 
@@ -77,5 +74,3 @@ void utilsL1RpcStyle()
 //  l1RpcStyle->SetTitleW(0.78); 
   std::cout <<"..done"<<std::endl;
 }
-
-#endif

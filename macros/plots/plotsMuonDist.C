@@ -8,16 +8,16 @@
 #include "TGaxis.h"
 #include "TFile.h"
 
-#include "utilsPlotsSaver.C"
+#include "utilsPlotsSaver.h"
 
 TCanvas* pMuonDist_1D()
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
-  TCanvas * c = new TCanvas("cMuonDist_1D","Global muons distributions",1800,600);
+  TCanvas * c = new TCanvas("cMuonDist_1D","Global muons distributions",1400,500);
   c->Divide(3,1);
 
   c->cd(1); 
@@ -54,10 +54,10 @@ TCanvas* pMuonDist_PtVsEtaDist()
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
-  TCanvas * c = new TCanvas("cMuonDist_PtVsEtaDist","Global muons pt-eta distributions",1800,600);
+  TCanvas * c = new TCanvas("cMuonDist_PtVsEtaDist","Global muons pt-eta distributions",1400,500);
   c->Divide(3,1);
 
   TVirtualPad* p1 = c->cd(1); p1->SetLogy(1); 

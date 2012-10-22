@@ -4,17 +4,19 @@
 #include "TStyle.h"
 
 #include "utilsL1RpcStyle.C"
-#include "plotsMuonDist.C"
-#include "plotsRpcMisc.C"
-#include "plotsEff.C"
-#include "plotsRpcVsOth.C"
-#include "plotsDet.C"
+//#include "plotsMuonDist.C"
+//#include "plotsRpcMisc.C"
+//#include "plotsEff.C"
+//#include "plotsRpcVsOth.C"
+//#include "plotsDet.C"
+#include "plotsClu.C"
 
 // To produce plots run this commsnd:
 //
 // root -l -q -b plots.C
 //
 // NOTE: without -b (batch) option wide plots (>1200 pixels) won't be drawn!
+.L utilsPlotsSacer.C+
 
 
 void plots()
@@ -36,7 +38,7 @@ void plots()
   //
   // get histos
   //
-  TFile *file = new TFile("efficiencyHistos.root");
+  TFile *file = new TFile("../l1RpcAnalysis.root");
   if (file==NULL) return;
   file->ls();
 
@@ -45,9 +47,10 @@ void plots()
   //
   //gStyle->SetOptTitle(0);
 
-  plotsMuonDist();
-  plotsRpcMisc();
-  plotsEff();
-  plotsRpcVsOth();
-  plotsDet();
+//  plotsMuonDist();
+//  plotsRpcMisc();
+//  plotsEff();
+//  plotsRpcVsOth();
+//  plotsDet();
+    plotsClu();
 }

@@ -36,6 +36,7 @@ void L1RpcTreeAnalysis::beginJob()
   theAnaEmu.init(theHistos);
   theAnaSynch.init(theHistos);
   theAnaClu.init(theHistos);
+  theAnaTimingL1.init(theHistos);
 
 }
 
@@ -142,6 +143,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    theAnaEmu.run ( event, muon, l1RpcCollEmu, l1RpcColl);
    theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
    theAnaClu.run( event, muon, l1RpcColl, *detsHitsCompatibleWithMuon, *nDigisCompDets, *clSizeCompDets);
+   theAnaTimingL1.run(event,muon,l1RpcColl,l1OtherColl);
 
 //   theAnaEmu.debug =theAnaDet.debug;
 //    std::cout <<"----------"<<std::endl;
@@ -157,6 +159,7 @@ void L1RpcTreeAnalysis::endJob()
   TGraph* hGraph_DetEff = theAnaDet.resume();
   theAnaRpcMisc.resume(theHistos);
   TGraph* hGraph_RunClu = theAnaClu.resume();
+  theAnaTimingL1.resume(theHistos);
 
   theAnaSynch.endJob();
 

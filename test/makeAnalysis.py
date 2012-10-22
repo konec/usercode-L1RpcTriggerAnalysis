@@ -10,7 +10,7 @@ process.RPCCabling.connect = 'sqlite_file:RPCEMap3.db'
 
 
 process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
-  treeFileNames = cms.vstring('l1RpcTreeEx.root'),
+  treeFileNames = cms.vstring('l1RpcTree.root'),
   histoFileName = cms.string("l1RpcAnalysis.root"),
   l1Cut = cms.double(15.),
   ptMin = cms.double(8.)

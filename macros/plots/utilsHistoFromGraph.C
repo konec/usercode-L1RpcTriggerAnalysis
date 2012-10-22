@@ -1,6 +1,9 @@
+#include "utilsHistoFromGraph.h"
+
 #include "TROOT.h"
 #include "TFile.h"
 #include "TGraph.h"
+#include "TGaxis.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
 #include "TLatex.h"
@@ -12,18 +15,140 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <utility>
 
 /////////////////////////////////////////////////////////
+TH1D runHistoFromGraph(const TGraph* gr)
+{
+  TH1D result;
+  if (!gr) return result;
+  unsigned int maxRun = 0;
+  unsigned int minRun = 999999999;
+  double xTmp, yTmp;
+  for (int i=0; i<gr->GetN(); ++i) {
+    gr->GetPoint(i,xTmp,yTmp);
+    unsigned int aValue = static_cast<unsigned int>( xTmp+1.e-6);
+    if (aValue < minRun) minRun = aValue;
+    if (aValue > maxRun) maxRun = aValue;
+  } 
+  minRun = minRun/100*100-250;
+  maxRun = maxRun/100*100+250;
+  result = TH1D("hResult","hResult",maxRun-minRun+1, minRun-0.5, maxRun+0.5);
 
+  //
+  // decorations
+  //
+  result.SetXTitle("Run number");
+  result.GetXaxis()->SetLabelSize(0.045);
+  result.GetXaxis()->SetNdivisions(510);
+  result.GetXaxis()->SetLabelOffset(0.006);
+  result.GetYaxis()->SetTitleOffset(0.9);
+  result.GetYaxis()->SetAxisColor(2);
+  result.GetYaxis()->SetLabelColor(2);
+  result.GetYaxis()->SetTitleColor(2);
+  result.SetMarkerStyle(25);
+  result.SetMarkerColor(2);
+
+//
+// set labels
+//
+//  int nBins = (maxRun-minRun+1); int nSep = 1; int last = 2;
+//  while (nBins/nSep > 20) {
+//    if (last==2) last = 5; else last = 2; 
+//    nSep *= last;
+//  }
+//  for (unsigned int i=1; i< maxRun-minRun+1; ++i) {
+//    int run = result.GetXaxis()->GetBinCenter(i);
+//    std::stringstream s;
+//    if (run/nSep*nSep==run) s<<run;
+//    result.GetXaxis()->SetBinLabel(i,s.str().c_str());
+//  }
+//  result.LabelsOption("v");
+
+
+  return result;
+}
+
+/////////////////////////////////////////////////////////
+void fillHistoFromGraph(TH1D &histo, TGraph* graph)
+{
+  if (!graph) return;
+  for (int i=0; i < graph->GetN(); ++i) {
+    double run, value;
+    graph->GetPoint(i,run, value);
+    double valueErr=  graph->GetErrorY(i); // TGraph returns negative error values
+    if(valueErr < 0.0) valueErr = 0.0;      // TGraphErrors returns true errors
+    Int_t bin = histo.FindBin(run);    
+    if (histo.GetBinContent(bin) > 0) continue; // skip already filled bins, should not happen
+    histo.SetBinContent(bin,value);
+    histo.SetBinError(bin,valueErr);
+  }
+}
+
+//
+// a copy of input histo but whith valueas changed to put it in Min,Max scale, Axis provided 
+//
+std::pair<TH1D,TGaxis* > getDatOnRef(const TH1D &histoDat, const TH1D &histoRef)
+{
+  float axisMax = histoRef.GetMaximum();
+  float axisMin = histoRef.GetMinimum();
+
+  double vMax = histoDat.GetMaximum();
+  double vMin = vMax;
+  for(Int_t i=1; i<= histoDat.GetNbinsX();++i) if (histoDat.GetBinContent(i) > 0. && histoDat.GetBinContent(i)<vMin) {
+     vMin=histoDat.GetBinContent(i);
+  }
+  double  dx=vMax-vMin;
+  double min = vMin-0.10*dx;
+  double max = vMax+0.10*dx;
+
+  TH1D hResult(histoDat);
+  hResult.Reset("hGetDatOnRef");
+
+  for(Int_t i=1; i<= histoDat.GetNbinsX();++i){
+    double val = histoDat.GetBinContent(i);
+    double err = histoDat.GetBinError(i); 
+    float valNormalised =  (axisMax - axisMin)/(max - min)*(val - min) + axisMin;
+    float errNormalised =  (axisMax - axisMin)/(max - min)*err;
+    hResult.SetBinContent(i,valNormalised);
+    hResult.SetBinError(i,errNormalised);
+  }
+  hResult.SetLineColor(4);
+  hResult.SetMarkerColor(4);
+  hResult.SetMarkerSize(0.6);
+  hResult.SetMarkerStyle(21);
+  
+  double atValue = histoRef.GetXaxis()->GetXmax();
+  TGaxis* axis=new TGaxis(atValue, axisMin, atValue, axisMax-1.e-5, min, max, 510,"+SLI");
+//  TGaxis* axis = new TGaxis(200000, 1.6, 200000, 3.0, 900, 1000, 510, "+SLI");
+  axis->SetLineColor(hResult.GetLineColor());
+  axis->SetLabelColor(hResult.GetLineColor());
+  axis->SetTitleColor(hResult.GetLineColor());
+  axis->SetLabelSize(histoRef.GetYaxis()->GetLabelSize());
+  axis->SetLabelOffset(histoRef.GetYaxis()->GetLabelOffset());
+  axis->SetLabelFont(histoRef.GetYaxis()->GetLabelFont());
+  axis->SetTitleSize(histoRef.GetYaxis()->GetTitleSize());
+  axis->SetTitleOffset(histoRef.GetYaxis()->GetTitleOffset());
+  axis->SetTitleFont(histoRef.GetYaxis()->GetTitleFont());
+  axis->SetName("My axis");
+
+  return std::make_pair(hResult,axis);
+}
+
+
+
+/////////////////////////////////////////////////////////
 TH1D *getPressVsRunHisto(TH1D *histo){
   
   // create new histogram with same binning (run numbers)
   TH1D *h = (TH1D*)histo->Clone("h");
   h->Reset();
   ////Load pressure graph, and transfer into map
-  TFile file("PressureGraph.root");
-  TGraphErrors *graph = (TGraphErrors*)file.Get("Graph");
-  if(!file.IsOpen() || !graph) return 0;
+//  TFile file("PressureGraph.root");
+//  TGraphErrors *graph = (TGraphErrors*)file.Get("Graph");
+//  if(!file.IsOpen() || !graph) return 0;
+  TGraph* graph = (TGraph*)gROOT->FindObject("gr_Pressure"); 
   Double_t xTmp, yTmp, yErr;
   std::map<int,float> aMap;
   std::map<int,float> aMapErr;
@@ -42,7 +167,7 @@ TH1D *getPressVsRunHisto(TH1D *histo){
     if(yTmp>max) max = yTmp;
     if(yTmp<min) min = yTmp;
   }
-  file.Close();
+  //file.Close();
   // add 10% and round to the nearest multiple of 5 so axis labels look nicer
   //double dx=max-min;
   //min = (int((min-0.10*dx)/5.0))*5.0;
@@ -85,9 +210,10 @@ TH1D *getHumidityVsRunHisto(TH1D *histo){
   TH1D *h = (TH1D*)histo->Clone("h");
   h->Reset();
   ////Load pressure graph, and transfer into map
-  TFile file("HumidityGraph.root");
-  TGraphErrors *graph = (TGraphErrors*)file.Get("Graph");
-  if(!file.IsOpen() || !graph) return 0;
+  //TFile file("HumidityGraph.root");
+  //TGraphErrors *graph = (TGraphErrors*)file.Get("Graph");
+  //if(!file.IsOpen() || !graph) return 0;
+  TGraphErrors *graph = (TGraphErrors*)gROOT->FindObject("gr_Humidity");
   Double_t xTmp, yTmp, yErr;
   std::map<int,float> aMap;
   std::map<int,float> aMapErr;
@@ -106,7 +232,7 @@ TH1D *getHumidityVsRunHisto(TH1D *histo){
     if(yTmp>max) max = yTmp;
     if(yTmp<min) min = yTmp;
   }
-  file.Close();
+  //file.Close();
   // add 10% and round to the nearest multiple of 5 so axis labels look nicer
   //double dx=max-min;
   //min = (int((min-0.10*dx)/5.0))*5.0;
@@ -196,7 +322,51 @@ TH1D *getClusterSizeVsRunHisto(TH1D *histo, const char *fname){
 }
 //////////////////////////////////////////////////////
 
-void printRunsOnPlot(TH1D* histo, TString commentFile="runComments.txt") {
+void printRunsOnPlotLinScale(TH1D* histo) {
+  TString commentFile="runComments.txt";
+  std::map<int, string> runs;
+  std::ifstream comm;
+  comm.open(commentFile,std::ofstream::in);
+  while(comm.good()) {
+    string line;
+    getline(comm, line);
+    // format of each line (>= 8 characters)
+    // NNNNNN Any Run Comment
+    int run=atoi(line.substr(0,6).c_str());
+    if(line.length()<8 || run<100000) continue; // skip bad run numbers
+    runs[run]=line;
+  };
+  comm.close();
+
+  double y,yMin,dy;
+  yMin=histo->GetMinimum();
+  dy=histo->GetMaximum()-histo->GetMinimum();
+  y=yMin+0.1*dy;
+  TLatex aLatex;
+  aLatex.SetTextColor(kBlack);
+  aLatex.SetTextSize(0.03);
+  aLatex.SetTextAlign(12);
+  aLatex.SetTextAngle(90+0);
+
+  TArrow aArrow;
+  aArrow.SetArrowSize(0.01);
+  aArrow.SetFillColor(kBlack);
+  aArrow.SetFillStyle(1001);
+  aArrow.SetLineColor(kBlack);
+  aArrow.SetLineWidth(3);
+		 
+  for(std::map<int,string>::iterator it=runs.begin();it!=runs.end();it++) {
+    std::cout <<"DRAWING AT: " << it->first<<"  y="<<y <<" what: "<<it->second.c_str() << std::endl;
+    double x = it->first;
+    if (x < histo->GetBinCenter(1) ) continue;
+    if (x > histo->GetBinCenter( histo->GetNbinsX()) ) continue;
+    aLatex.DrawLatex(x,y,it->second.c_str());
+    aArrow.DrawArrow(x,y-dy*0.01,x,yMin+0.01*dy);
+  }
+}
+
+void printRunsOnPlot(TH1D* histo) {
+  TString commentFile="runComments.txt";
   std::map<int, string> runs;
   std::ifstream comm;
   comm.open(commentFile,std::ofstream::in);
@@ -261,3 +431,4 @@ void printRunsOnPlot(TH1D* histo, TString commentFile="runComments.txt") {
     }
   }
 }
+//void printRunsOnPlot(TH1D* histo, TString commentFile="runComments.txt") {

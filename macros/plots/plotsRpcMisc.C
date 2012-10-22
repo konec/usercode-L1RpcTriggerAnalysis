@@ -2,16 +2,20 @@
 #include "TCanvas.h"
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TStyle.h"
 #include "TText.h"
 #include "TString.h"
 #include "TGaxis.h"
-#include <iomanip>
+#include "TGraphErrors.h"
+#include "TFile.h"
+#include <iostream>
 #include <sstream>
 #include <cmath>
 #include <map>
-#include "utilsPlotsSaver.C"
-#include "utilsDivideErr.C"
-#include "utilsHistoFromGraph.C"
+#include "utilsPlotsSaver.h"
+#include "utilsHistoFromGraph.h"
+//#include "utilsDivideErr.C"
+
 
 TH1D * getEffVsRunHisto(TGraphErrors *hGraph){
   if(!hGraph) return 0;
@@ -23,7 +27,9 @@ TH1D * getEffVsRunHisto(TGraphErrors *hGraph){
   for(int i=0;i<nPoints;++i){
     hGraph->GetPoint(i,xTmp,yTmp);
     error = hGraph->GetErrorY(i);
-    if(yTmp>1E-5 /* && error/yTmp<0.05 */) nGoodRuns++;
+    if(yTmp>1E-5
+//  && error/yTmp<0.05 
+     ) nGoodRuns++;
   }
   ///
 
@@ -38,7 +44,9 @@ TH1D * getEffVsRunHisto(TGraphErrors *hGraph){
   for(int i=0;i<nPoints;++i){
     hGraph->GetPoint(i,xTmp,yTmp);
     error = hGraph->GetErrorY(i);
-    if(yTmp<1e-5 /* || error/yTmp>0.05 */) continue;
+    if(yTmp<1e-5 
+// || error/yTmp>0.05 
+     ) continue;
     histo->SetBinContent(nGoodRuns+1,yTmp);
     histo->SetBinError(nGoodRuns+1,error);
     histo->GetXaxis()->SetBinLabel(nGoodRuns+1,Form("%d",int(xTmp)));
@@ -65,14 +73,113 @@ void pRpcMiscWrongPT_helper(TH2D* h)
   t.SetTextSize(0.045);
   t.DrawText(2.1,6.3, entr.str().c_str());
 }
+
 /////////////////////////////////////////////////////////
+TCanvas* pRpcMiscPurVsRun(std::string option="")
+{
+  string cName = "cRpcMiscPurVsRun"+option;
+  TCanvas * c = new TCanvas(cName.c_str(),"cRpcMiscPurVsRun",500,500);
+  TGraph* grPur = (TGraph*)gROOT->FindObject("hGraph_RunPur");
+  if(!grPur) return 0;
+  TH1D histoPur = runHistoFromGraph(grPur);
+  histoPur.SetYTitle("good/bad events");
+  histoPur.SetMarkerStyle(25);
+  histoPur.SetMarkerColor(2);
+  histoPur.SetMaximum(99.);
+  histoPur.SetMinimum(0.01);
+  histoPur.GetXaxis()->SetNdivisions(-205);
+  histoPur.GetXaxis()->SetLabelSize(0.045);
+  histoPur.GetYaxis()->SetTitleOffset(1.2);
+//  histoPur.GetYaxis()->SetAxisColor(2);
+//  histoPur.GetYaxis()->SetLabelColor(2);
+//  histoPur.GetYaxis()->SetTitleColor(2);
+  fillHistoFromGraph(histoPur, grPur);
+  histoPur.DrawCopy("E0");
+
+  c->SetTicky(0); // remove axis on the right 
+  c->SetGridy(0);
+  c->SetRightMargin(gPad->GetLeftMargin());
+
+  if (strcmp(option.c_str(),"") != 0) {
+    std::string grName = "gr_"+option;
+    TGraph* gr_Pressure = (TGraph*)gROOT->FindObject(grName.c_str());
+    TH1D hPress(histoPur);
+    hPress.Reset("hTMPKOKO");
+    fillHistoFromGraph(hPress, gr_Pressure);
+    std::pair<TH1D,TGaxis* > out =getDatOnRef( hPress,   histoPur);
+    out.first.DrawCopy("same E0");
+    TGaxis * axis = out.second;
+    if (strcmp(option.c_str(),"Pressure")==0) axis->SetTitle("Pressure  [mbar]");
+    if (strcmp(option.c_str(),"Humidity")==0) axis->SetTitle("Humidity");
+    std::string axName="axPur"+option;
+    axis->SetName(axName.c_str());
+    axis->Draw();
+  }
+
+  return c;
+}
+
+
+//////////////////////////////////////////////////////////
+TCanvas* pRpcMiscEffVsClu()
+{
+  TCanvas * c = new TCanvas("cRpcMiscEffVsClu","cRpcMiscEffVsClu",500,500);
+  TGraph* gr_Eff = (TGraph*)gROOT->FindObject("hGraph_RunEff");
+  TGraph* gr_Clu = (TGraph*)gROOT->FindObject("hGraph_RunClu");
+  if ( gr_Eff->GetN() !=  gr_Clu->GetN()) return c;
+  
+//  TGraphErrors * grEffClu = (TGraphErrors*)gROOT->FindObject("grEffClu");
+//  if (grEffClu) grEffClu->Delete();
+  TGraphErrors * grEffClu = new TGraphErrors;
+  grEffClu->SetName("grEffClu");
+  grEffClu->Set( gr_Eff->GetN());
+  for (Int_t i=0; i < gr_Eff->GetN(); ++i) {
+    double rTMP1, rTMP2, vEff, vClu;
+    gr_Eff->GetPoint(i,rTMP1, vEff);
+    gr_Clu->GetPoint(i,rTMP2, vClu);
+    double vEffErr=  gr_Eff->GetErrorY(i);
+    double vCluErr=  gr_Clu->GetErrorY(i);
+    unsigned int iRun1 = static_cast<unsigned int>( rTMP1+1.e-6);
+    unsigned int iRun2 = static_cast<unsigned int>( rTMP2+1.e-6);
+    if (iRun1 != iRun2) { std::cout <<"RUN1  RUN2, problem, exit"<<std::endl; return c; }
+    
+    grEffClu->SetPoint(i, vClu, vEff);
+    grEffClu->SetPointError(i, vCluErr, vEffErr);
+  }
+  TH1D hdummy("hDummy","hDummy", 20, 2.0, 2.4); 
+  hdummy.SetMinimum(0.85); 
+  hdummy.SetMaximum(0.92); 
+  hdummy.GetXaxis()->SetNdivisions(-204);
+  hdummy.SetXTitle("Cluster size");
+  hdummy.SetYTitle("L1Rpc efficiency");
+  hdummy.GetYaxis()->SetTitleOffset(1.7);
+  hdummy.DrawCopy("axis");
+  grEffClu->SetMarkerStyle(25);
+  grEffClu->SetMarkerColor(2);
+  grEffClu->Draw("same P E0"); // draw errors, disable clipping
+  c->Update();
+/*
+  grEffClu->GetHistogram()->GetXaxis()->SetNdivisions(-5);
+  grEffClu->GetHistogram()->GetXaxis()->SetLabelSize(0.035);
+  if( region!="" ){ // barrel or endcap
+    gr->GetHistogram()->GetYaxis()->SetTitle(Form("%s efficiency",region.Data()));
+  } else { // total
+    gr->GetHistogram()->GetYaxis()->SetTitle("Efficiency");
+  }
+*/
+  c->Modified();
+
+
+  return c;
+}
+//////////////////////////////////////////////////////////
 
 TCanvas* pRpcMiscRunHisto(TString region="")
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
   if(region!="Barrel" && region !="Endcap" && region!="" /* Total */) return 0;
 
@@ -126,7 +233,7 @@ TCanvas* pRpcMiscRunHisto(TString region="")
   gr->SetMarkerStyle(25);
   gr->SetMarkerColor(2);
   gr->SetMaximum(1.0);
-  gr->SetMinimum(0.8);
+  gr->SetMinimum(0.75);
   gr->Draw("Paint E0"); // draw errors, disable clipping
   c->Update();
   gr->GetHistogram()->GetXaxis()->SetNdivisions(-10);
@@ -148,8 +255,8 @@ TCanvas* pRpcMiscEffandPressVsRun(TString region="")
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
-  TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
-  ff->cd();
+  //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
+  //ff->cd();
 
   if(region!="Barrel" && region !="Endcap" && region!="" /* Total */) return 0;
   TCanvas* c;
@@ -357,7 +464,7 @@ TCanvas* pRpcMiscTime()
   h->GetXaxis()->SetNdivisions(106);
   h->SetXTitle("L1Rpc_BX vs CMS_BX"); 
   h->SetYTitle("Fraction of RPC triggers");
-  h->Draw("hist text0");
+  h->DrawCopy("hist text0");
   return c;
 }
 /////////////////////////////////////////////////////////
@@ -395,25 +502,32 @@ TCanvas* pRpcMiscWrongPT()
 
 void plotsRpcMisc()
 {
-  utilsPlotsSaver(pRpcMiscWrongPT());
-
+//  utilsPlotsSaver(pRpcMiscWrongPT());
   
-  gStyle->SetPaintTextFormat(".2E");  // modify text value style
+//  gStyle->SetPaintTextFormat(".2E");  // modify text value style
   utilsPlotsSaver(pRpcMiscTime());    // trigger timing
-  gStyle->SetPaintTextFormat();       // restore default style
+//  gStyle->SetPaintTextFormat();       // restore default style
 
+/*
   
-  int digits=TGaxis::GetMaxDigits();  // store current style
-  TGaxis::SetMaxDigits(4);            // modify style
+//  int digits=TGaxis::GetMaxDigits();  // store current style
+//  TGaxis::SetMaxDigits(4);            // modify style
   utilsPlotsSaver(pRpcMiscRunHisto());// total eff
-  TGaxis::SetMaxDigits(digits);       // restore previous style
+//  TGaxis::SetMaxDigits(digits);       // restore previous style
 
   utilsPlotsSaver(pRpcMiscEffandPressVsRun());        // total eff
+
   //utilsPlotsSaver(pRpcMiscEffandPressVsRun("Barrel"));// barrel eff + press
   //utilsPlotsSaver(pRpcMiscEffandPressVsRun("Endcap"));// endcap eff + press
   //utilsPlotsSaver(pRpcMiscEffandClSizeVsRun("Barrel")); 
   //utilsPlotsSaver(pRpcMiscEffandClSizeVsRun("Endcap")); 
+
   utilsPlotsSaver(pRpcMiscEffandHumidityVsRun());     // total eff + humidity 
+
   //utilsPlotsSaver(pRpcMiscEffandHumidityVsRun("Barrel"));// barrel eff + humidity 
   //utilsPlotsSaver(pRpcMiscEffandHumidityVsRun("Endcap"));// endcap eff + humidity 
+   utilsPlotsSaver(pRpcMiscEffVsClu());
+
+   utilsPlotsSaver(pRpcMiscPurVsRun());
+*/
 }
