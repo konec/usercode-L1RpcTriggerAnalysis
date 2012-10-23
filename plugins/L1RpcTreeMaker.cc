@@ -36,11 +36,14 @@ L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
     theCounter(0),
     theBestMuonFinder(cfg.getParameter<edm::ParameterSet>("bestMuonFinder")),
     theDetHitCollector(cfg.getParameter<edm::ParameterSet>("detHitCollector")),
-    theSynchroGrabber(cfg.getParameter<edm::ParameterSet>("linkSynchroGrabber"))
+    theSynchroGrabber(cfg.getParameter<edm::ParameterSet>("linkSynchroGrabber")),
+    theMenuInspector(edm::ParameterSet())
 { }
 
-void L1RpcTreeMaker::beginRun( const edm::Run &ru, const edm::EventSetup &es)
+void L1RpcTreeMaker::beginRun(const edm::Run &ru, const edm::EventSetup &es)
 {
+  std::cout <<" L1RpcTreeMaker::beginRun CALLED" << std::endl; 
+  theMenuInspector.checkRun(ru,es);
 }
 
 void L1RpcTreeMaker::beginJob()
@@ -146,6 +149,18 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   } else  muon->nRPCHits = muon->nDTHits = muon->nCSCHits = 0;
   muon->nTrackerHits = theMuon->isTrackerMuon() ? (theMuon->innerTrack())->hitPattern().numberOfValidTrackerHits() : 0;
 
+  //
+  // fill algoBits info
+  //
+  static edm::RunNumber_t lastRun = 0;
+  if (ev.run() != lastRun) {
+    lastRun = ev.run();
+    bitsL1->names  = theMenuInspector.namesAlgoL1();
+    bitsHLT->names = theMenuInspector.namesAlgoHLT();
+  }
+  bitsL1->firedAlgos = theMenuInspector.firedAlgosL1(ev,es);
+  bitsHLT->firedAlgos = theMenuInspector.firedAlgosHLT(ev,es);
+  
 
   //
   // hits and detectors compatible with muon track

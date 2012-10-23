@@ -14,6 +14,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestMuonFinder.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetHitCompatibleCollector.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsGrabber.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/FilterMenu.h"
 
 
 
@@ -63,5 +64,6 @@ private:
   BestMuonFinder theBestMuonFinder;
   DetHitCompatibleCollector theDetHitCollector;
   SynchroCountsGrabber theSynchroGrabber;
+  FilterMenu theMenuInspector;
 };
 #endif

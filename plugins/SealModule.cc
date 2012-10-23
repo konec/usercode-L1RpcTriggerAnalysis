@@ -7,7 +7,7 @@ DEFINE_FWK_MODULE(FilterBX);
 #include "FilterOrbit.h"
 DEFINE_FWK_MODULE(FilterOrbit);
 
-#include "FilterMenu.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/FilterMenu.h"
 DEFINE_FWK_MODULE(FilterMenu);
 
 #include "FilterL1.h"

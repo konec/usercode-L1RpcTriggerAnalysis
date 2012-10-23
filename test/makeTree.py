@@ -9,6 +9,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1) )
 # For processing single files insert lines with 'file:/PATH/FILE.root'
 # (there is 255 file limit though).
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
+#  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
   '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
   '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
   ),
@@ -174,7 +175,6 @@ process.l1compare.COMPARE_COLLS = cms.untracked.vuint32(0, 0, 0, 0, 0, 0, 0, 0, 
 
 
 process.p = cms.Path(
-  process.filterMenu*
   process.filterGM*
   process.muonRPCDigis*
   process.rpcMonitorRaw*process.rpcFEDIntegrity*

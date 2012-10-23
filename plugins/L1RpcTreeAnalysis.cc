@@ -142,8 +142,21 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 //   theAnaDet.debug = false;
 //    if ((*event).id==60422922)theAnaRpcMisc.debug = true;
 
-   std::cout <<" Number of bits L1: " <<  bitsL1->names.size()<<"/"<<bitsL1->firedAlgos.size()
-                           <<" HLT: "<< bitsHLT->names.size()<<"/"<<bitsHLT->firedAlgos.size()<<std::endl;
+   static std::vector<std::string>   namesL1;
+   if (bitsL1->names.size() != 0)    namesL1=bitsL1->names;
+   static std::vector<std::string>   namesHLT;
+   if (bitsHLT->names.size() != 0)   namesHLT=bitsHLT->names;
+   const std::vector<unsigned int> & algosL1 = bitsL1->firedAlgos;
+   const std::vector<unsigned int> & algosHLT = bitsHLT->firedAlgos;
+
+/*
+   std::cout <<" Number of bits L1: " <<  bitsL1->names.size()<<"/"<<namesL1.size()<<"/"<<bitsL1->firedAlgos.size()
+                           <<" HLT: "<< bitsHLT->names.size()<<"/"<<namesHLT.size()<<"/"<<bitsHLT->firedAlgos.size()<<std::endl;
+   std::cout <<"----------------------- L1: "<<std::endl;
+   for (std::vector<unsigned int>::const_iterator it=algosL1.begin(); it< algosL1.end(); ++it) std::cout <<"L1 idx: "<<*it<<" "<<namesL1[*it]<< std::endl;
+   std::cout <<"----------------------- HLT: "<<std::endl;
+   for (std::vector<unsigned int>::const_iterator it=algosHLT.begin(); it< algosHLT.end(); ++it) std::cout<<" HLT idx: "<<*it<<" "<<namesHLT[*it]<< std::endl;
+*/
 
    theAnaMuonDistribution.run(muon);
    theAnaRpcVsOth.run(muon,l1RpcColl,l1OtherColl);
