@@ -32,7 +32,7 @@ L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
   : theConfig(cfg), theTree(0), event(0), muon(0), track(0), 
     bitsL1(0), bitsHLT(0),
     counts(0), 
-    l1RpcColl(0) , l1OtherColl(0), l1RpcCollEmu(0),
+    l1RpcColl(0) , l1OtherColl(0), l1RpcCollEmu(0), l1GmtColl(0),
     theCounter(0),
     theBestMuonFinder(cfg.getParameter<edm::ParameterSet>("bestMuonFinder")),
     theDetHitCollector(cfg.getParameter<edm::ParameterSet>("detHitCollector")),
@@ -63,12 +63,11 @@ void L1RpcTreeMaker::beginJob()
   theTree->Branch("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside);
   theTree->Branch("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon);
   theTree->Branch("detsSIMU",&detsSIMU);
-  theTree->Branch("nDigisCompDets",&nDigisCompDets);
-  theTree->Branch("clSizeCompDets",&clSizeCompDets);
 
   theTree->Branch("l1RpcColl","L1ObjColl",&l1RpcColl,32000,99);
   theTree->Branch("l1RpcCollEmu","L1ObjColl",&l1RpcCollEmu,32000,99);
   theTree->Branch("l1OtherColl","L1ObjColl",&l1OtherColl,32000,99);
+  theTree->Branch("l1GmtColl","L1ObjColl",&l1GmtColl,32000,99);
 
   theHelper.SetOwner();
   theBestMuonFinder.initHistos(theHelper);
@@ -123,17 +122,16 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   bitsL1 = new TriggerMenuResultObj();
   bitsHLT = new TriggerMenuResultObj();
 
-//  counts = new SynchroCountsObjVect;
   counts = std::vector<SynchroCountsObj>();
   detsCrossedByMuon = std::vector<uint32_t>();
   detsCrossedByMuonDeepInside = std::vector<uint32_t>();
-  detsHitsCompatibleWithMuon = std::vector<uint32_t>();
+  detsHitsCompatibleWithMuon = std::vector<DetCluDigiObj>();
   detsSIMU = std::vector<uint32_t>();
-  nDigisCompDets = std::vector<uint32_t>();
-  clSizeCompDets = std::vector<uint32_t>();
+
   l1RpcColl = new L1ObjColl;
   l1OtherColl = new L1ObjColl;
   l1RpcCollEmu = new L1ObjColl;
+  l1GmtColl = new L1ObjColl;
 
   //
   // fill muon info
@@ -166,16 +164,24 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   // hits and detectors compatible with muon track
   //
   if ( muon->pt() > 10.) {
-    detsHitsCompatibleWithMuon = theDetHitCollector.compatibleHits( theMuon, ev, es); 
+/*
+    std::vector<DetHitCompatibleCollector::DetCluDigi> dhcm = theDetHitCollector.compatibleHits( theMuon, ev, es); 
+    detsHitsCompatibleWithMuon.clear();
+    for (std::vector<DetHitCompatibleCollector::DetCluDigi>::const_iterator it= dhcm.begin(); it < dhcm.end(); ++it) {
+      DetCluDigiObj obj;
+      obj.det = (*it).first;
+      obj.clusterSize = (*it).second.first;
+      obj.nDigis =  (*it).second.second; 
+      detsHitsCompatibleWithMuon.push_back(obj); 
+    }
+*/
+    detsHitsCompatibleWithMuon = theDetHitCollector.compatibleHits( theMuon, ev, es);
     detsCrossedByMuon = theDetHitCollector.compatibleDets( theMuon, ev, es, false); 
     detsCrossedByMuonDeepInside = theDetHitCollector.compatibleDets( theMuon, ev, es, true); 
     if (theConfig.getParameter<bool>("checkDestSIMU")) detsSIMU = theDetHitCollector.compatibleSIMU( theMuon, ev, es);
-    nDigisCompDets = theDetHitCollector.nDigisCompDets(detsHitsCompatibleWithMuon, ev, es);
-    clSizeCompDets = theDetHitCollector.clSizeCompDets(detsHitsCompatibleWithMuon, ev, es);
-
-    for (uint32_t i=0; i< nDigisCompDets.size(); i++) {
-      if (clSizeCompDets[i] > nDigisCompDets[i]) std::cout <<" PROBLEM, event: "<<theCounter<<" cl:"<<clSizeCompDets[i]<<" nDigis:"<<nDigisCompDets[i]<<std::endl;
-    }
+//    for (uint32_t i=0; i< nDigisCompDets.size(); i++) {
+//      if (clSizeCompDets[i] > nDigisCompDets[i]) std::cout <<" PROBLEM, event: "<<theCounter<<" cl:"<<clSizeCompDets[i]<<" nDigis:"<<nDigisCompDets[i]<<std::endl;
+//    }
   }
 
   
@@ -205,16 +211,22 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   L1ObjMaker l1( theConfig.getParameter<edm::InputTag>("l1MuReadout"), ev);
   TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
-  std::vector<L1Obj> l1Rpcs = l1(L1ObjMaker::RPCB,L1ObjMaker::RPCF);
-  std::vector<L1Obj> l1Others = l1(L1ObjMaker::DT,L1ObjMaker::CSC);
+  std::vector<L1Obj> l1Rpcs = l1(L1Obj::RPCB,L1Obj::RPCF);
+  std::vector<L1Obj> l1Others = l1(L1Obj::DT,L1Obj::CSC);
+  std::vector<L1Obj> l1Gmts =  l1(L1Obj::GMT);
   std::vector<bool> l1RpcsMatching(l1Rpcs.size(), false);
   std::vector<bool> l1OthersMatching(l1Others.size(), false);
+  std::vector<bool> l1GmtsMatching(l1Gmts.size(), false);
   for(unsigned int i=0; i< l1Rpcs.size(); ++i) if (matcher(l1Rpcs[i].eta, l1Rpcs[i].phi, theMuon, ev,es)) l1RpcsMatching[i]=true; 
   for(unsigned int i=0; i< l1Others.size(); ++i) if (matcher(l1Others[i].eta, l1Others[i].phi, theMuon, ev,es)) l1OthersMatching[i]=true; 
+  for(unsigned int i=0; i< l1Gmts.size(); ++i) if (matcher(l1Gmts[i].eta, l1Gmts[i].phi, theMuon, ev,es)) l1GmtsMatching[i]=true; 
   l1RpcColl->set(l1Rpcs);
   l1RpcColl->set(l1RpcsMatching);
   l1OtherColl->set(l1Others);
   l1OtherColl->set(l1OthersMatching);
+  l1GmtColl->set(l1Gmts);
+  l1GmtColl->set(l1GmtsMatching);
+
 
 //  std::cout <<"RPCColl:"<<std::endl; l1RpcColl->print();
 //  std::cout <<"RPCCollEmu:"<<std::endl; l1RpcCollEmu->print();
@@ -232,5 +244,6 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   delete l1RpcColl; l1RpcColl = 0;
   delete l1OtherColl; l1OtherColl = 0;
   delete l1RpcCollEmu; l1RpcCollEmu = 0;
+  delete l1GmtColl; l1GmtColl = 0;
 }
 				

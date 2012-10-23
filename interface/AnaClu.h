@@ -8,6 +8,7 @@ class MuonObj;
 class EventObj;
 class L1ObjColl;
 class L1Obj;
+class DetCluDigiObj;
 #include <vector>
 #include <map>
 #include <string>
@@ -19,9 +20,7 @@ public:
   void init(TObjArray& histos);
   void run( const EventObj* ev, const MuonObj* muon, 
             const L1ObjColl *l1RpcColl,
-            const std::vector<uint32_t> & detsHitsCompatibleWithMuon,
-            const std::vector<uint32_t> & nDigisCompDets, 
-            const std::vector<uint32_t> & clSizeCompDets);
+            const std::vector<DetCluDigiObj> & detsHitsCompatibleWithMuon);
   TGraph* resume();
   bool debug;
 private:

@@ -10,6 +10,8 @@ class TH1D;
 class MuonObj;
 class L1ObjColl;
 class L1Obj;
+class DetCluDigiObj;
+
 #include <vector>
 #include <map>
 #include <string>
@@ -20,7 +22,7 @@ public:
   AnaDet() : debug(false) {}
   void init(TObjArray& histos);
   void run( const MuonObj* muon, 
-            const std::vector<uint32_t> & detsHitsCompatibleWithMuon,
+            const std::vector<DetCluDigiObj> & detsHitsCompatibleWithMuon,
             const std::vector<uint32_t> & detsCrossedByMuon,
             const std::vector<uint32_t> & detsCrossedByMuonDeepInside);
             

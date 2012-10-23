@@ -61,17 +61,22 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleSIMU( const reco::Muo
   return detsSIMU;
 }
 
-std::vector<uint32_t> DetHitCompatibleCollector::compatibleHits( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es)
+std::vector<DetCluDigiObj> DetHitCompatibleCollector::compatibleHits( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es)
 {
-  std::vector<uint32_t> detsHitsCompatibleWithMuon;
+  std::vector<DetCluDigiObj> detsHitsCompatibleWithMuon;
+
   edm::Handle<RPCRecHitCollection> recHits;
   ev.getByLabel("rpcRecHits", recHits);
+
+  edm::Handle<RPCDigiCollection> rpcDigis;
+  ev.getByLabel("muonRPCDigis", rpcDigis);
 
   edm::ESHandle<RPCGeometry> rpcGeometry;
   es.get<MuonGeometryRecord>().get(rpcGeometry);
 
   TrackAtSurface trackAtSurface(muon, ev,es);
 
+  std::map< uint32_t, std::pair<uint32_t,uint32_t> > aMap;
   typedef RPCRecHitCollection::const_iterator IH;
   for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
 
@@ -109,8 +114,18 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleHits( const reco::Muo
     float pullY = distY/ sqrt( trackAtHitError.yy()+hitError.yy());
 
     bool hitCompatible = (fabs(pullX) < 3.5 || fabs(distX) < 10.)  && fabs(pullY) < 3.5 ;
-    if (hitCompatible && (detsHitsCompatibleWithMuon.end() == find(detsHitsCompatibleWithMuon.begin(),detsHitsCompatibleWithMuon.end(),rpcDet.rawId()) ) )
-        detsHitsCompatibleWithMuon.push_back(rpcDet.rawId());
+    if (hitCompatible) {
+      if (aMap.find(rpcDet.rawId()) == aMap.end() ) aMap[rpcDet.rawId()] = std::make_pair(0,0);
+
+      unsigned int clusterSize = ih->clusterSize();
+      if ( aMap[rpcDet.rawId()].first < clusterSize)  aMap[rpcDet.rawId()].first = clusterSize;
+
+      const RPCDigiCollection::Range range = rpcDigis->get( rpcDet.rawId() );
+      std::map<int, bool> strips;
+      for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) if (id->bx() == 0) strips[id->strip()] = true;
+      if ( strips.size() == 0 ) std::cout <<"WARNING ***************"<<std::endl;
+      aMap[rpcDet.rawId()].second = strips.size(); 
+    }
 
     RPCDetIdUtil place(rpcDet);
     if (place.isBarrel()) {
@@ -128,9 +143,18 @@ std::vector<uint32_t> DetHitCompatibleCollector::compatibleHits( const reco::Muo
     hPullY->Fill(pullY);
   }
 
+
+  for ( std::map< uint32_t, std::pair<uint32_t,uint32_t> >::const_iterator it = aMap.begin(); it != aMap.end(); ++it) {
+    DetCluDigiObj obj;
+    obj.det         = (*it).first;
+    obj.clusterSize = (*it).second.first;
+    obj.nDigis      = (*it).second.second;    
+    detsHitsCompatibleWithMuon.push_back(obj); 
+  }
   return detsHitsCompatibleWithMuon;
 }
 
+/*
 std::vector<uint32_t> DetHitCompatibleCollector::clSizeCompDets(const std::vector<uint32_t> & detIds, const edm::Event &ev, const edm::EventSetup &es) 
 {
   std::vector<uint32_t> cluInDets;
@@ -166,6 +190,7 @@ std::vector<uint32_t> DetHitCompatibleCollector::nDigisCompDets(const std::vecto
   }
   return digisInDets;
 }
+*/
 
 std::vector<uint32_t> DetHitCompatibleCollector::compatibleDets( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es, bool deepInside)
 {

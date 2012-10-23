@@ -6,6 +6,7 @@
 #include "TGraphErrors.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDetIdUtil.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
 #include <sstream>
 #include <bitset>
 #include <algorithm>
@@ -19,16 +20,17 @@ namespace {
 
 void AnaDet::run( 
             const MuonObj* muon,
-            const std::vector<uint32_t> & detsHitsCompatibleWithMuon,
+            const std::vector<DetCluDigiObj> & detsHitsCompatibleWithMuon,
             const std::vector<uint32_t> & detsCrossedByMuon,
             const std::vector<uint32_t> & detsCrossedByMuonDeepInside)
 {
   typedef std::vector<uint32_t>::const_iterator IDET;
+  typedef std::vector<DetCluDigiObj>::const_iterator IDCD;
   if( muon->pt() < 10.) return;
 //  if (fabs(muon->eta()) > 1.14 && fabs(muon->eta()) < 1.24) debug = true;
 
   DetEfficiencyManager aManDIS;
-  for( IDET it= detsHitsCompatibleWithMuon.begin(); it < detsHitsCompatibleWithMuon.end(); it++) aManDIS.addDetHit( *it );
+  for( IDCD it= detsHitsCompatibleWithMuon.begin(); it < detsHitsCompatibleWithMuon.end(); it++) aManDIS.addDetHit( it->det );
   for( IDET it= detsCrossedByMuonDeepInside.begin(); it < detsCrossedByMuonDeepInside.end(); it++) aManDIS.addDetMuon( *it );
   const std::vector<DetEfficiency> & detEfficDIS = aManDIS.dets();
 
@@ -53,7 +55,7 @@ void AnaDet::run(
   //
   DetEfficiencyManager aMan;
   if (debug) std::cout <<"detsCrossedByMuon: "<<detsCrossedByMuon.size()<<" detsHitsCompatibleWithMuon: "<<detsHitsCompatibleWithMuon.size()<<std::endl;
-  for( IDET it= detsHitsCompatibleWithMuon.begin(); it < detsHitsCompatibleWithMuon.end(); it++) aMan.addDetHit( *it );
+  for( IDCD it= detsHitsCompatibleWithMuon.begin(); it < detsHitsCompatibleWithMuon.end(); it++) aMan.addDetHit( it->det );
   for( IDET it= detsCrossedByMuon.begin(); it < detsCrossedByMuon.end(); it++) aMan.addDetMuon( *it );
   const std::vector<DetEfficiency> & detEffic= aMan.dets();
   //

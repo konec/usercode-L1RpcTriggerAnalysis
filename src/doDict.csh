@@ -12,4 +12,6 @@ $ROOTSYS/bin/rootcint -f rootMAnaDict.cc  -c -p \
     UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h \
     UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h \
     UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObjVect.h \
+    UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h \
+    UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObjVect.h \
     UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h

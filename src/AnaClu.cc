@@ -7,6 +7,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDetIdUtil.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
 #include <sstream>
 #include <algorithm>
 
@@ -20,24 +21,16 @@ void AnaClu::run(
             const EventObj* event,
             const MuonObj* muon,
             const L1ObjColl *l1RpcColl,
-            const std::vector<uint32_t> & detsHitsCompatibleWithMuon,
-            const std::vector<uint32_t> & nDigisCompDets,
-            const std::vector<uint32_t> & clSizeCompDets)
+            const std::vector<DetCluDigiObj> & detsHitsCompatibleWithMuon)
 {
   if (cluRunMap.find(event->run) == cluRunMap.end()) cluRunMap[event->run] = std::make_pair(0,0);
-  if (   detsHitsCompatibleWithMuon.size() != nDigisCompDets.size()
-      || detsHitsCompatibleWithMuon.size() != clSizeCompDets.size() ) {
-   std::cout <<" PROBLME, ROZMIARY" << std::endl;
-   return;
-  } 
-
   
-  for (unsigned int i=0; i< nDigisCompDets.size(); ++i) {
-    hClu_SizeRHit->Fill(clSizeCompDets[i]);
-    hClu_SizeDigi->Fill(nDigisCompDets[i]);
-    hClu_DigiRHit->Fill(clSizeCompDets[i],nDigisCompDets[i]);
+  for (unsigned int i=0; i< detsHitsCompatibleWithMuon.size(); ++i) {
+    hClu_SizeRHit->Fill(detsHitsCompatibleWithMuon[i].clusterSize);
+    hClu_SizeDigi->Fill(detsHitsCompatibleWithMuon[i].nDigis);
+    hClu_DigiRHit->Fill( detsHitsCompatibleWithMuon[i].clusterSize, detsHitsCompatibleWithMuon[i].nDigis);
     cluRunMap[event->run].first++;
-    cluRunMap[event->run].second += nDigisCompDets[i];
+    cluRunMap[event->run].second +=  detsHitsCompatibleWithMuon[i].nDigis;
   }
 }
 

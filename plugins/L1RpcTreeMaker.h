@@ -11,6 +11,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObjVect.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestMuonFinder.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetHitCompatibleCollector.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsGrabber.h"
@@ -52,16 +53,18 @@ private:
   TriggerMenuResultObj *bitsHLT;
   
   std::vector<SynchroCountsObj> counts;
-  std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsHitsCompatibleWithMuon, detsSIMU;
-  std::vector<uint32_t> nDigisCompDets, clSizeCompDets;
+  std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsSIMU;
+  std::vector<DetCluDigiObj> detsHitsCompatibleWithMuon;
   L1ObjColl * l1RpcColl;
   L1ObjColl * l1OtherColl;
   L1ObjColl * l1RpcCollEmu;
+  L1ObjColl * l1GmtColl;
 
   unsigned int theCounter;
 								    
   TObjArray      theHelper;
   BestMuonFinder theBestMuonFinder;
+  
   DetHitCompatibleCollector theDetHitCollector;
   SynchroCountsGrabber theSynchroGrabber;
   FilterMenu theMenuInspector;

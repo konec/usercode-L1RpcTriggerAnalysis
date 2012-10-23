@@ -20,6 +20,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
@@ -72,10 +73,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   std::vector<SynchroCountsObj> *counts= 0;
   std::vector<uint32_t> *detsCrossedByMuon = 0;
   std::vector<uint32_t> *detsCrossedByMuonDeepInside = 0;
-  std::vector<uint32_t> *detsHitsCompatibleWithMuon = 0;
+  std::vector<DetCluDigiObj> *detsHitsCompatibleWithMuon = 0;
   std::vector<uint32_t> *detsSIMU = 0;
-  std::vector<uint32_t> *nDigisCompDets = 0;
-  std::vector<uint32_t> *clSizeCompDets = 0;
 
   EventObj * event = 0;
   MuonObj * muon = 0;
@@ -88,12 +87,11 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   TBranch *bdetsCrossedByMuonDeepInside =0;
   TBranch *bdetsHitsCompatibleWithMuon = 0;
   TBranch *bdetsSIMU =0;
-  TBranch *bnDigisCompDets =0;
-  TBranch *bclSizeCompDets =0;
 
   L1ObjColl* l1RpcColl = 0;
   L1ObjColl* l1OtherColl = 0;
   L1ObjColl* l1RpcCollEmu = 0;
+  L1ObjColl* l1GmtColl = 0;
 
   chain.SetBranchAddress("event",&event);
   chain.SetBranchAddress("muon",&muon);
@@ -106,12 +104,11 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   chain.SetBranchAddress("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside,&bdetsCrossedByMuonDeepInside);
   chain.SetBranchAddress("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon,&bdetsHitsCompatibleWithMuon);
   chain.SetBranchAddress("detsSIMU",&detsSIMU,&bdetsSIMU);
-  chain.SetBranchAddress("nDigisCompDets",&nDigisCompDets, &bnDigisCompDets);
-  chain.SetBranchAddress("clSizeCompDets",&clSizeCompDets, &bclSizeCompDets);
 
   chain.SetBranchAddress("l1RpcColl",&l1RpcColl);
   chain.SetBranchAddress("l1OtherColl",&l1OtherColl);
   chain.SetBranchAddress("l1RpcCollEmu",&l1RpcCollEmu);
+  chain.SetBranchAddress("l1GmtColl",&l1GmtColl);
 
 
   //
@@ -165,9 +162,15 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
    theAnaEmu.run ( event, muon, l1RpcCollEmu, l1RpcColl);
    theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
-   theAnaClu.run( event, muon, l1RpcColl, *detsHitsCompatibleWithMuon, *nDigisCompDets, *clSizeCompDets);
+   theAnaClu.run( event, muon, l1RpcColl, *detsHitsCompatibleWithMuon);
    theAnaTimingL1.run(event,muon,l1RpcColl,l1OtherColl);
 
+/*
+   std::cout <<"----------------"<<std::endl;
+   std::cout <<"GmtColl:"<<std::endl; l1GmtColl->print(); 
+   std::cout <<"RpcColl:"<<std::endl; l1RpcColl->print(); 
+   std::cout <<"OtherColl:"<<std::endl; l1OtherColl->print(); 
+*/
 //   theAnaEmu.debug =theAnaDet.debug;
 //    std::cout <<"----------"<<std::endl;
 //   theAnaDet.debug =theAnaEmu.debug; 
