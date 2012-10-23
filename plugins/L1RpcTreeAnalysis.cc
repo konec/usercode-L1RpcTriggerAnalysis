@@ -20,6 +20,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
 
@@ -79,6 +80,9 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   EventObj * event = 0;
   MuonObj * muon = 0;
 
+  TriggerMenuResultObj *bitsL1  = 0;
+  TriggerMenuResultObj *bitsHLT = 0;
+
   TBranch *bcounts=0;
   TBranch *bdetsCrossedByMuon =0;
   TBranch *bdetsCrossedByMuonDeepInside =0;
@@ -94,6 +98,9 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   chain.SetBranchAddress("event",&event);
   chain.SetBranchAddress("muon",&muon);
 
+  chain.SetBranchAddress("bitsL1",&bitsL1);
+  chain.SetBranchAddress("bitsHLT",&bitsHLT);
+  
   chain.SetBranchAddress("counts",&counts,&bcounts);
   chain.SetBranchAddress("detsCrossedByMuon",&detsCrossedByMuon,&bdetsCrossedByMuon);
   chain.SetBranchAddress("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside,&bdetsCrossedByMuonDeepInside);
@@ -108,7 +115,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 
 
   //
-  // number of efents
+  // number of events
   //
   Int_t nentries = (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
@@ -134,6 +141,9 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 //    if (lastLumi != (*event).lumi) { lastLumi = (*event).lumi; std::cout <<"lumi: " << (*event).lumi<<std::endl; }
 //   theAnaDet.debug = false;
 //    if ((*event).id==60422922)theAnaRpcMisc.debug = true;
+
+   std::cout <<" Number of bits L1: " <<  bitsL1->names.size()<<"/"<<bitsL1->firedAlgos.size()
+                           <<" HLT: "<< bitsHLT->names.size()<<"/"<<bitsHLT->firedAlgos.size()<<std::endl;
 
    theAnaMuonDistribution.run(muon);
    theAnaRpcVsOth.run(muon,l1RpcColl,l1OtherColl);

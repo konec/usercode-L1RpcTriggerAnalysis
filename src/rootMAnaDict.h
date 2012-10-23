@@ -38,6 +38,7 @@ extern void G__set_cpp_environmentrootMAnaDict();
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObjVect.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 #include <algorithm>
 namespace std { }
 using namespace std;
@@ -49,6 +50,7 @@ extern G__linked_taginfo G__rootMAnaDictLN_TClass;
 extern G__linked_taginfo G__rootMAnaDictLN_TBuffer;
 extern G__linked_taginfo G__rootMAnaDictLN_TMemberInspector;
 extern G__linked_taginfo G__rootMAnaDictLN_TObject;
+extern G__linked_taginfo G__rootMAnaDictLN_vectorlEunsignedsPintcOallocatorlEunsignedsPintgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlEboolcOallocatorlEboolgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlEROOTcLcLTSchemaHelpercOallocatorlEROOTcLcLTSchemaHelpergRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEROOTcLcLTSchemaHelpercOallocatorlEROOTcLcLTSchemaHelpergRsPgRcLcLiteratorgR;
@@ -65,5 +67,8 @@ extern G__linked_taginfo G__rootMAnaDictLN_SynchroCountsObj;
 extern G__linked_taginfo G__rootMAnaDictLN_SynchroCountsObjVect;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlESynchroCountsObjcOallocatorlESynchroCountsObjgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlESynchroCountsObjcOallocatorlESynchroCountsObjgRsPgRcLcLiteratorgR;
+extern G__linked_taginfo G__rootMAnaDictLN_TriggerMenuResultObj;
+extern G__linked_taginfo G__rootMAnaDictLN_vectorlEstringcOallocatorlEstringgRsPgR;
+extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEstringcOallocatorlEstringgRsPgRcLcLiteratorgR;
 
 /* STUB derived class for protected member access */

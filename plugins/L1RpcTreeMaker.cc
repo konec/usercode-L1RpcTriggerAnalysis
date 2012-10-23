@@ -20,7 +20,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackToL1ObjMatcher.h"
 #include "DataFormats/RPCDigi/interface/RPCRawSynchro.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
-
+#include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -29,7 +29,9 @@ template <class T> T sqr( T t) {return t*t;}
 
 
 L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
-  : theConfig(cfg), theTree(0), event(0), muon(0), track(0), counts(0), 
+  : theConfig(cfg), theTree(0), event(0), muon(0), track(0), 
+    bitsL1(0), bitsHLT(0),
+    counts(0), 
     l1RpcColl(0) , l1OtherColl(0), l1RpcCollEmu(0),
     theCounter(0),
     theBestMuonFinder(cfg.getParameter<edm::ParameterSet>("bestMuonFinder")),
@@ -49,6 +51,9 @@ void L1RpcTreeMaker::beginJob()
   theTree->Branch("event","EventObj",&event,32000,99);
   theTree->Branch("muon","MuonObj",&muon,32000,99);
   theTree->Branch("track", "TrackObj",&track,32000,99);
+
+  theTree->Branch("bitsL1" ,"TriggerMenuResultObj",&bitsL1 ,32000,99);
+  theTree->Branch("bitsHLT","TriggerMenuResultObj",&bitsHLT,32000,99);
 
   theTree->Branch("counts",&counts);
   theTree->Branch("detsCrossedByMuon",&detsCrossedByMuon);
@@ -111,6 +116,10 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   muon = new MuonObj();
   track = new TrackObj();
+
+  bitsL1 = new TriggerMenuResultObj();
+  bitsHLT = new TriggerMenuResultObj();
+
 //  counts = new SynchroCountsObjVect;
   counts = std::vector<SynchroCountsObj>();
   detsCrossedByMuon = std::vector<uint32_t>();
@@ -203,6 +212,8 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   delete event; event = 0;
   delete muon;  muon = 0;
   delete track; track = 0;
+  delete bitsL1;  bitsL1= 0;
+  delete bitsHLT;  bitsHLT= 0;
   delete l1RpcColl; l1RpcColl = 0;
   delete l1OtherColl; l1OtherColl = 0;
   delete l1RpcCollEmu; l1RpcCollEmu = 0;

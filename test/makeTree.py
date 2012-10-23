@@ -174,6 +174,7 @@ process.l1compare.COMPARE_COLLS = cms.untracked.vuint32(0, 0, 0, 0, 0, 0, 0, 0, 
 
 
 process.p = cms.Path(
+  process.filterMenu*
   process.filterGM*
   process.muonRPCDigis*
   process.rpcMonitorRaw*process.rpcFEDIntegrity*

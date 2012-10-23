@@ -28,6 +28,7 @@ class TFile;
 class TH1F;
 class TH2F;
 class RPCDetId;
+class TriggerMenuResultObj;
 
 class L1RpcTreeMaker : public edm::EDAnalyzer {
 public:
@@ -46,6 +47,9 @@ private:
   EventObj* event;
   MuonObj* muon;
   TrackObj* track;
+  TriggerMenuResultObj *bitsL1;
+  TriggerMenuResultObj *bitsHLT;
+  
   std::vector<SynchroCountsObj> counts;
   std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsHitsCompatibleWithMuon, detsSIMU;
   std::vector<uint32_t> nDigisCompDets, clSizeCompDets;
