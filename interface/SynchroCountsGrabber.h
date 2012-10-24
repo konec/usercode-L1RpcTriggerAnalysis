@@ -18,6 +18,7 @@ class TObjArray;
 class SynchroCountsGrabber {
 public:
    SynchroCountsGrabber(const edm::ParameterSet& cfg);
+   ~SynchroCountsGrabber();
    RPCRawSynchro::ProdItem counts(const edm::Event &ev, const edm::EventSetup &es);
    void setMuon(const reco::Muon *aMuon) { theMuon = aMuon; }
    void initHistos(TObjArray & histos) {theSelector.initHistos(histos); }
@@ -26,5 +27,6 @@ private:
   RPCReadOutMapping * theCabling;
   const reco::Muon * theMuon;
   SynchroSelectorMuon theSelector;
+  bool theNoSynchroWarning;
 };
 #endif

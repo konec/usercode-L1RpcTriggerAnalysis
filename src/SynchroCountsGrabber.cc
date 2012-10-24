@@ -28,8 +28,14 @@
 
 
 SynchroCountsGrabber::SynchroCountsGrabber(const edm::ParameterSet& cfg)
- : theCabling(0), theSelector(cfg.getParameter<edm::ParameterSet>("synchroSelectorMuon")) 
+ : theCabling(0), theSelector(cfg.getParameter<edm::ParameterSet>("synchroSelectorMuon")), theNoSynchroWarning(false)
 {}
+
+SynchroCountsGrabber::~SynchroCountsGrabber()
+{
+if (theNoSynchroWarning) std::cout <<" **** SynchroCountsGrabber      **** WARNING - NoSynchroWarning was set!" << std::endl;
+
+}
 
 RPCRawSynchro::ProdItem SynchroCountsGrabber::counts(const edm::Event &ev, const edm::EventSetup &es)
 {
@@ -45,6 +51,10 @@ RPCRawSynchro::ProdItem SynchroCountsGrabber::counts(const edm::Event &ev, const
 
   edm::Handle<RPCRawSynchro::ProdItem> synchroCounts;
   ev.getByType(synchroCounts);
+  if (!synchroCounts.isValid()) {
+    theNoSynchroWarning = true;
+    return result;
+  }
 
   TrackAtSurface trackAtSurface(theMuon, ev,es);
   edm::ESHandle<RPCGeometry> rpcGeometry;

@@ -13,6 +13,7 @@ class TH1F;
 class DetHitCompatibleCollector {
 public:
   DetHitCompatibleCollector(const edm::ParameterSet& cfg);
+  ~ DetHitCompatibleCollector();
 
 //  typedef std::pair< uint32_t, std::pair<unsigned int, unsigned int> > DetCluDigi;
   std::vector<DetCluDigiObj> compatibleHits( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es);
@@ -27,5 +28,6 @@ private:
   TH1F *hPullY_B[6], *hPullY_E[3], *hDistY_B[6], *hDistY_E[3] , *hPullY;
   TH1F *hPropToDetDeltaR;
 
+  bool theNoDigiWarning;
 };
 #endif

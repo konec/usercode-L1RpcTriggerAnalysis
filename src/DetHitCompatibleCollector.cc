@@ -44,7 +44,12 @@
 
 
 DetHitCompatibleCollector::DetHitCompatibleCollector(const edm::ParameterSet& cfg) 
+  : theNoDigiWarning(false)
+{ }
+
+DetHitCompatibleCollector::~ DetHitCompatibleCollector()
 {
+  if (theNoDigiWarning) std::cout <<" **** DetHitCompatibleCollector **** WARNING - NoDigiWarning was set!" << std::endl;
 }
 
 std::vector<uint32_t> DetHitCompatibleCollector::compatibleSIMU( const reco::Muon* muon, const edm::Event &ev, const edm::EventSetup &es)
@@ -120,11 +125,13 @@ std::vector<DetCluDigiObj> DetHitCompatibleCollector::compatibleHits( const reco
       unsigned int clusterSize = ih->clusterSize();
       if ( aMap[rpcDet.rawId()].first < clusterSize)  aMap[rpcDet.rawId()].first = clusterSize;
 
-      const RPCDigiCollection::Range range = rpcDigis->get( rpcDet.rawId() );
-      std::map<int, bool> strips;
-      for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) if (id->bx() == 0) strips[id->strip()] = true;
-      if ( strips.size() == 0 ) std::cout <<"WARNING ***************"<<std::endl;
-      aMap[rpcDet.rawId()].second = strips.size(); 
+      if (rpcDigis.isValid()) {
+        const RPCDigiCollection::Range range = rpcDigis->get( rpcDet.rawId() );
+        std::map<int, bool> strips;
+        for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) if (id->bx() == 0) strips[id->strip()] = true;
+        if ( strips.size() == 0 ) std::cout <<"WARNING ***************"<<std::endl;
+        aMap[rpcDet.rawId()].second = strips.size(); 
+      } else theNoDigiWarning = true;
     }
 
     RPCDetIdUtil place(rpcDet);

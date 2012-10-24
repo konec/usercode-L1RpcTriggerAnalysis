@@ -20,10 +20,12 @@ vector<L1Obj> L1ObjMakerRpcEmu::operator()()
 
   edm::Handle<std::vector<L1MuRegionalCand> > candB;
   theEv.getByLabel(theL1RpcDigis.label(), "RPCb", candB);
-  allRpcCand.insert(allRpcCand.end(), candB->begin(), candB->end());
-
   edm::Handle<std::vector<L1MuRegionalCand> > candF;
   theEv.getByLabel(theL1RpcDigis.label(), "RPCf", candF);
+
+  if (!candB.isValid() && !candF.isValid() ) return result;
+
+  allRpcCand.insert(allRpcCand.end(), candB->begin(), candB->end());
   allRpcCand.insert(allRpcCand.end(), candF->begin(), candF->end());
 
   for (RegCand::const_iterator it=allRpcCand.begin(); it != allRpcCand.end(); it++) {

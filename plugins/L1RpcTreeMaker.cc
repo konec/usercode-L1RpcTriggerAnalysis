@@ -93,8 +93,6 @@ L1RpcTreeMaker::~L1RpcTreeMaker()
 
 void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
 {
-
-
   //
   // check reference muon
   //
@@ -164,24 +162,10 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   // hits and detectors compatible with muon track
   //
   if ( muon->pt() > 10.) {
-/*
-    std::vector<DetHitCompatibleCollector::DetCluDigi> dhcm = theDetHitCollector.compatibleHits( theMuon, ev, es); 
-    detsHitsCompatibleWithMuon.clear();
-    for (std::vector<DetHitCompatibleCollector::DetCluDigi>::const_iterator it= dhcm.begin(); it < dhcm.end(); ++it) {
-      DetCluDigiObj obj;
-      obj.det = (*it).first;
-      obj.clusterSize = (*it).second.first;
-      obj.nDigis =  (*it).second.second; 
-      detsHitsCompatibleWithMuon.push_back(obj); 
-    }
-*/
     detsHitsCompatibleWithMuon = theDetHitCollector.compatibleHits( theMuon, ev, es);
     detsCrossedByMuon = theDetHitCollector.compatibleDets( theMuon, ev, es, false); 
     detsCrossedByMuonDeepInside = theDetHitCollector.compatibleDets( theMuon, ev, es, true); 
     if (theConfig.getParameter<bool>("checkDestSIMU")) detsSIMU = theDetHitCollector.compatibleSIMU( theMuon, ev, es);
-//    for (uint32_t i=0; i< nDigisCompDets.size(); i++) {
-//      if (clSizeCompDets[i] > nDigisCompDets[i]) std::cout <<" PROBLEM, event: "<<theCounter<<" cl:"<<clSizeCompDets[i]<<" nDigis:"<<nDigisCompDets[i]<<std::endl;
-//    }
   }
 
   
@@ -196,7 +180,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // fill L1 RPCemu
   //
-  if (theConfig.exists("l1RpcEmu") ) {
+  if (theConfig.exists("l1RpcEmu")) {
     TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
     L1ObjMakerRpcEmu l1RpcsFromEmu( theConfig.getParameter<edm::InputTag>("l1RpcEmu"), ev);
     std::vector<L1Obj> l1RpcsEmu = l1RpcsFromEmu();
