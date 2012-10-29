@@ -212,8 +212,19 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   l1GmtColl->set(l1GmtsMatching);
 
 
-//  std::cout <<"RPCColl:"<<std::endl; l1RpcColl->print();
-//  std::cout <<"RPCCollEmu:"<<std::endl; l1RpcCollEmu->print();
+  std::cout <<"----"<<std::endl;
+  std::cout <<"RPCColl:   "<<std::endl; l1RpcColl->print();
+  std::cout <<"RPCCollEmu:"<<std::endl; l1RpcCollEmu->print();
+  std::cout <<"GmtColl:   "<<std::endl; l1GmtColl->print();
+  std::cout <<"GmtCollEmu:"<<std::endl;
+/*
+  L1ObjMaker l1Bis( theConfig.getParameter<edm::InputTag>("mkGtDigis"), ev);
+  std::vector<L1Obj> l1GmtsEmu =  l1Bis(L1Obj::GMT);
+  for (unsigned int i=0; i<l1GmtsEmu.size(); ++i) {
+    std::cout <<"("<<i<<")";l1GmtsEmu[i].print();
+    std::cout <<std::endl; 
+  }
+*/
 
   //
   // fill ntuple + cleanup

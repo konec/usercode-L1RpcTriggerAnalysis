@@ -39,7 +39,7 @@ void L1RpcTreeAnalysis::beginJob()
   theAnaSynch.init(theHistos);
   theAnaClu.init(theHistos);
   theAnaTimingL1.init(theHistos);
-
+  theAnaMenu.init(theHistos);
 }
 
 void L1RpcTreeAnalysis::beginRun(const edm::Run& ru, const edm::EventSetup& es)
@@ -145,6 +145,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    if (bitsHLT->names.size() != 0)   namesHLT=bitsHLT->names;
    const std::vector<unsigned int> & algosL1 = bitsL1->firedAlgos;
    const std::vector<unsigned int> & algosHLT = bitsHLT->firedAlgos;
+   bool goodMenu = theAnaMenu.filter(event, muon, namesL1, algosL1, namesHLT, algosHLT);
+   if (!goodMenu) continue;
 
 /*
    std::cout <<" Number of bits L1: " <<  bitsL1->names.size()<<"/"<<namesL1.size()<<"/"<<bitsL1->firedAlgos.size()
@@ -163,7 +165,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    theAnaEmu.run ( event, muon, l1RpcCollEmu, l1RpcColl);
    theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
    theAnaClu.run( event, muon, l1RpcColl, *detsHitsCompatibleWithMuon);
-   theAnaTimingL1.run(event,muon,l1RpcColl,l1OtherColl);
+   theAnaTimingL1.run(event,muon, l1RpcColl, l1OtherColl, l1GmtColl);
 
 /*
    std::cout <<"----------------"<<std::endl;
@@ -186,6 +188,7 @@ void L1RpcTreeAnalysis::endJob()
   theAnaRpcMisc.resume(theHistos);
   TGraph* hGraph_RunClu = theAnaClu.resume();
   theAnaTimingL1.resume(theHistos);
+  theAnaMenu.resume(theHistos);
 
   theAnaSynch.endJob();
 

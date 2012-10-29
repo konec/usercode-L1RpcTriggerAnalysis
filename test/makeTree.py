@@ -3,14 +3,14 @@ process = cms.Process("Analysis")
 import os
 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 10) )
 #
 # For CRAB jobs leave fileNames vector empty.
 # For processing single files insert lines with 'file:/PATH/FILE.root'
 # (there is 255 file limit though).
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
-  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
-#  '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
+#  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
+  '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
 #  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
   ),
   skipEvents = cms.untracked.uint32(0)
@@ -69,10 +69,15 @@ process.MessageLogger = cms.Service("MessageLogger",
 # rpc emulator 
 #
 process.load("L1TriggerConfig.RPCTriggerConfig.L1RPCConfig_cff")
+process.load("L1TriggerConfig.RPCTriggerConfig.RPCBxOrConfig_cff")
 process.load("L1Trigger.RPCTrigger.RPCConeConfig_cff")
 process.load("L1Trigger.RPCTrigger.l1RpcEmulDigis_cfi")
-process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/Marcin_Wide/')
-process.rpcconf.PACsPerTower = cms.untracked.int32(1)
+#process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/Marcin_Wide/')
+#process.rpcconf.PACsPerTower = cms.untracked.int32(1)
+process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/D_20110921_fixedCones_new36__all_12/')
+process.rpcconf.PACsPerTower = cms.untracked.int32(12)
+process.l1RPCBxOrConfig.lastBX = cms.int32(0)
+process.l1RPCBxOrConfig.firstBX = cms.int32(0) 
 
 
 #
@@ -82,9 +87,22 @@ process.rpcconf.PACsPerTower = cms.untracked.int32(1)
 #process.load("RecoMuon.MuonIdentification.refitMuons_cfi")
 process.load("TrackingTools.TrackRefitter.globalMuonTrajectories_cff")
 
+#
+# gmtDEcision
+#
+from L1Trigger.Configuration.SimL1Emulator_cff import *
+import L1Trigger.GlobalTrigger.gtDigis_cfi
+process.mkGtDigis = L1Trigger.GlobalTrigger.gtDigis_cfi.gtDigis.clone(
+    GmtInputTag                 = cms.InputTag( 'unpackGtDigis' ),
+    GctInputTag                 = cms.InputTag( 'unpackGctDigis' ),
+    CastorInputTag              = cms.InputTag( 'unpackCastorDigis' ),
+    TechnicalTriggersInputTags  = cms.VInputTag()
+)
+
+
 
 #
-# a few filters to apply
+# a few filters to applemkGtDigis
 #
 #process.filterBX = cms.EDFilter("FilterBX", beamBX = cms.vuint32(1,100) )
 process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
@@ -108,6 +126,7 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
   treeFileName = cms.string("l1RpcTree.root"),
   detHitCollector = cms.PSet(),
   checkDestSIMU = cms.bool(False),
+
   bestMuonFinder = cms.PSet(
     muonColl = cms.string("muons"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
@@ -125,6 +144,7 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
     deltaPhiUnique = cms.double(1.0),
     deltaEtaUnique = cms.double(0.5)
   ),
+
   linkSynchroGrabber = cms.PSet(
     writeHistograms = cms.untracked.bool(True),
     linkMonitorPSet = cms.PSet(
@@ -145,7 +165,6 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
   matcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.4), maxDeltaPhi = cms.double(0.3))
 )
 
-# print process.dumpPython()
 #
 # needed by DQM
 #
@@ -168,20 +187,25 @@ process.load("DQM.RPCMonitorClient.RPCFEDIntegrity_cfi")
 #
 # DQM DATA-EMU comparsion
 #
-process.load("L1Trigger.HardwareValidation.L1HardwareValidation_cff")
-process.l1compare.RPCsourceData = cms.InputTag("gtDigis") 
+import EventFilter.L1GlobalTriggerRawToDigi.l1GtUnpack_cfi
+process.l1GtUnpackForL1Compare = EventFilter.L1GlobalTriggerRawToDigi.l1GtUnpack_cfi.l1GtUnpack.clone( DaqGtInputTag = cms.InputTag('rawDataCollector'))
+process.load("L1Trigger.HardwareValidation.L1Comparator_cfi")
+process.l1compare.RPCsourceData = cms.InputTag("l1GtUnpackForL1Compare") 
 process.l1compare.RPCsourceEmul = cms.InputTag("l1RpcEmulDigis") 
 process.l1compare.COMPARE_COLLS = cms.untracked.vuint32(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)
+
+#print process.dumpPython();
 
 
 process.p = cms.Path(
   process.filterGM*
-#  process.muonRPCDigis*
-#  process.rpcMonitorRaw*process.rpcFEDIntegrity*
-#  process.l1tRpctf*
-#  process.l1RpcEmulDigis* 
-#  process.gtDigis*process.l1compare*  #FIXME-why without gtDigis it does not work???   
-#  process.l1demon*
+  process.muonRPCDigis*
+  process.rpcMonitorRaw*process.rpcFEDIntegrity*
+  process.l1tRpctf*
+  process.l1RpcEmulDigis* 
+#  process.mkGtDigis*
+  process.l1GtUnpackForL1Compare*process.l1compare*
+  process.l1demon*
   process.globalMuons*process.l1RpcTree
 )
 

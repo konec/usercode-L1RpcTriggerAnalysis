@@ -15,7 +15,7 @@ class AnaTimingL1 {
 public:
   AnaTimingL1() : debug(false) {}
   void init(TObjArray& histos);
-  void run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl);
+  void run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl,  const L1ObjColl *l1GmtColl);
   void resume(TObjArray& histos);
   bool debug;
 

@@ -4,6 +4,15 @@
 ClassImp(L1Obj)
 ClassImp(L1ObjColl)
 
+std::vector<L1Obj> L1ObjColl::typeSelector(const  std::vector<L1Obj> & col,  
+ TYPE t1, TYPE t2, TYPE t3, TYPE t4)
+{
+  std::vector<L1Obj> result;
+  for (std::vector<L1Obj>::const_iterator it= col.begin(); it != col.end(); ++it) {
+    if ( it->type == t1 || it->type == t2 || it->type == t3 ||it->type == t4 ) result.push_back(*it); 
+  }
+  return result; 
+}
 
 std::vector<L1Obj> L1ObjColl::getL1ObjsMatched(double ptMin) const 
 {

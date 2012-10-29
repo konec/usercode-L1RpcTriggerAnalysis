@@ -13,6 +13,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaSynch.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaClu.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaTimingL1.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/AnaMenu.h"
 
 #include "TObjArray.h"
 
@@ -41,6 +42,7 @@ private:
   AnaSynch            theAnaSynch;
   AnaClu              theAnaClu;
   AnaTimingL1         theAnaTimingL1;
+  AnaMenu             theAnaMenu;
 
 
 }; 

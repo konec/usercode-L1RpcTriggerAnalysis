@@ -10,6 +10,7 @@ public:
   L1ObjColl() {}
   virtual ~L1ObjColl(){}
 
+  typedef L1Obj::TYPE TYPE;
   void set(const std::vector<L1Obj> & obj) { theL1Obj = obj; }
   void set(const std::vector<bool> & comp) { theL1Matching = comp; }
   const std::vector<L1Obj> & getL1Objs() const { return theL1Obj; }
@@ -24,6 +25,9 @@ public:
 		  double phiMin = 0., double phiMax = 7.,
 		  int qMin = 0, int qMax = 7) const;
   void print() const;
+
+  static  std::vector<L1Obj> typeSelector(const  std::vector<L1Obj> & col,  TYPE t1=L1Obj::NONE, TYPE t2=L1Obj::NONE, TYPE t3=L1Obj::NONE, TYPE t4=L1Obj::NONE);
+   
   
 private:
   std::vector<L1Obj> theL1Obj;
