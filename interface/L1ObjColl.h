@@ -13,6 +13,7 @@ public:
   typedef L1Obj::TYPE TYPE;
   void set(const std::vector<L1Obj> & obj) { theL1Obj = obj; }
   void set(const std::vector<bool> & comp) { theL1Matching = comp; }
+  void set(const std::vector<double> & dr) { theDeltaR = dr; }
   const std::vector<L1Obj> & getL1Objs() const { return theL1Obj; }
   const std::vector<bool> & getL1ObjsMatching() const { return theL1Matching; }
 
@@ -32,6 +33,7 @@ public:
 private:
   std::vector<L1Obj> theL1Obj;
   std::vector<bool> theL1Matching;
+  std::vector<double> theDeltaR;
 
 public:
 ClassDef(L1ObjColl,1)

@@ -41,7 +41,7 @@ vector<L1Obj> L1ObjMakerRpcEmu::operator()()
     obj.pt  = RPCConst::ptFromIpt(it.pt_packed());
     obj.q   = it.quality();
     obj.bx  = it.bx();
-    obj.type = (icand < candB->size()) ? L1Obj::RPCB : L1Obj::RPCF;
+    obj.type = (icand < candB->size()) ? L1Obj::RPCb : L1Obj::RPCf;
     result.push_back(obj);
   }
 

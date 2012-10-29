@@ -16,6 +16,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetHitCompatibleCollector.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsGrabber.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/FilterMenu.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjMaker.h"
 
 
 
@@ -55,10 +56,7 @@ private:
   std::vector<SynchroCountsObj> counts;
   std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsSIMU;
   std::vector<DetCluDigiObj> detsHitsCompatibleWithMuon;
-  L1ObjColl * l1RpcColl;
-  L1ObjColl * l1OtherColl;
-  L1ObjColl * l1RpcCollEmu;
-  L1ObjColl * l1GmtColl;
+  L1ObjColl * l1ObjColl;
 
   unsigned int theCounter;
 								    
@@ -67,6 +65,7 @@ private:
   
   DetHitCompatibleCollector theDetHitCollector;
   SynchroCountsGrabber theSynchroGrabber;
+  L1ObjMaker theL1ObjMaker;
   FilterMenu theMenuInspector;
 };
 #endif

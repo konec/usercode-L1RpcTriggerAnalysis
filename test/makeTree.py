@@ -110,6 +110,7 @@ process.load("DQM.RPCMonitorClient.RPCMonitorRaw_cfi")
 process.rpcMonitorRaw.writeHistograms = cms.untracked.bool(False)
 
 process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
+
   histoFileName = cms.string("l1RpcHelper.root"),
   treeFileName = cms.string("l1RpcTree.root"),
   detHitCollector = cms.PSet(),
@@ -148,8 +149,15 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
       checkUniqueRecHitMatching = cms.bool(True)
     ),
   ),
-  l1MuReadout = cms.InputTag("gtDigis"),
-  l1RpcEmu    = cms.InputTag("l1RpcEmulDigis"),
+  
+  l1ObjMaker = cms.PSet(
+    l1RpcSource       = cms.InputTag("gtDigis"),
+    l1CscSource       = cms.InputTag("gtDigis"),
+    l1DtSource        = cms.InputTag("gtDigis"),
+    l1GmtSource       = cms.InputTag("gtDigis"),
+    l1RpcEmuSource    = cms.InputTag("l1RpcEmulDigis"),
+    l1GmtEmuSource    = cms.InputTag("mkGmtDigis"),
+  ),
   matcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.4), maxDeltaPhi = cms.double(0.3))
 )
 

@@ -3,17 +3,23 @@
 
 #include <vector>
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
-#include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/Provenance/interface/RunID.h"
+#include "DataFormats/Provenance/interface/EventID.h"
+
 
 namespace edm {class Event; }
 
 class L1ObjMaker {
 public:
-  L1ObjMaker(const edm::InputTag &readout, const edm::Event &ev) : theReadout(readout), theEv(ev) {} 
-  typedef L1Obj::TYPE TYPE;
-  std::vector<L1Obj> operator()(TYPE t1, TYPE t2=L1Obj::NONE, TYPE t3=L1Obj::NONE, TYPE t4=L1Obj::NONE); 
+  L1ObjMaker(const  edm::ParameterSet & cfg); 
+  const std::vector<L1Obj> & operator()(const edm::Event &ev) { run(ev); return theL1Objs; }
+  
 private:
-  void get(std::vector<L1Obj> & objs, TYPE t);
+  void run(const edm::Event &ev);
+  void getGMTReadout(const edm::Event &ev,  std::vector<L1Obj> & result, const edm::InputTag &readout, L1Obj::TYPE t);
+  void getRpcRegional(const edm::Event &ev,  std::vector<L1Obj> & result, const edm::InputTag &l1RpcDigis);
+
 private:
   template <class T> L1Obj makeL1Obj( T& t, L1Obj::TYPE type) {
     L1Obj obj;
@@ -25,7 +31,13 @@ private:
     obj.type = type;
     return obj;
   }
-  edm::InputTag theReadout;
-  const edm::Event & theEv;
+private:
+  edm::ParameterSet   theConfig;
+  std::vector<L1Obj>  theL1Objs;
+  edm::EventNumber_t lastEvent;
+  edm::RunNumber_t   lastRun;
+
+  bool skipRpcEmu, skipGmtEmu, skipRpc, skipDt, skipCsc;
+
 };
 #endif

@@ -5,7 +5,7 @@
 
 struct L1Obj : public TObject {
 
-  enum TYPE { NONE, RPCB, RPCF, DT, CSC, GMT };
+  enum TYPE { NONE, RPCb, RPCf, DT, CSC, GMT, RPCb_emu, RPCf_emu, GMT_emu };
 
   float pt, eta, phi;
   int   bx, q;
@@ -16,12 +16,16 @@ struct L1Obj : public TObject {
   void print() const {
     std::cout<<"L1Obj: ";
     switch (type) {
-      case RPCB: { std::cout <<"RPCB"; break; }
-      case RPCF: { std::cout <<"RPCF"; break; }
-      case DT:   { std::cout <<"DT  "; break; }
-      case CSC:  { std::cout <<"CSC "; break; }
-      case GMT:  { std::cout <<"GMT "; break; }
-      default: std::cout <<"NONE";
+      case RPCb:     { std::cout <<"RPCb    "; break; }
+      case RPCf:     { std::cout <<"RPCf    "; break; }
+      case DT:       { std::cout <<"DT      "; break; }
+      case CSC:      { std::cout <<"CSC     "; break; }
+      case GMT:      { std::cout <<"GMT     "; break; }
+      case RPCb_emu: { std::cout <<"RPCb_emu"; break; }
+      case RPCf_emu: { std::cout <<"RPCf_emu"; break; }
+      case GMT_emu:  { std::cout <<"GMT_emu "; break; }
+      case NONE   :  { std::cout <<"NONE    "; break; }
+      default: std::cout <<"Unknown";
     };
     std::cout <<" pt: "<<pt<<", eta: "<<eta<<", phi: "<<phi<<", q: "<<q<<", bx: "<<bx;
   }
