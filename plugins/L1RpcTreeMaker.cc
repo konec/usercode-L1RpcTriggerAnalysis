@@ -25,6 +25,11 @@
 #include "TFile.h"
 #include "TTree.h"
 
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTCand.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
+
 template <class T> T sqr( T t) {return t*t;}
 
 
@@ -217,14 +222,16 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   std::cout <<"RPCCollEmu:"<<std::endl; l1RpcCollEmu->print();
   std::cout <<"GmtColl:   "<<std::endl; l1GmtColl->print();
   std::cout <<"GmtCollEmu:"<<std::endl;
-/*
-  L1ObjMaker l1Bis( theConfig.getParameter<edm::InputTag>("mkGtDigis"), ev);
+
+// edm::Handle<L1MuGMTReadoutCollection> pCollection;
+// ev.getByLabel(l1MuReadout,pCollection);
+//  std::cout <<"IS COLLECTION VALID: "<< pCollection->isValid() << std::endl;
+  L1ObjMaker l1Bis( edm::InputTag("mkGmtDigis"), ev);
   std::vector<L1Obj> l1GmtsEmu =  l1Bis(L1Obj::GMT);
   for (unsigned int i=0; i<l1GmtsEmu.size(); ++i) {
     std::cout <<"("<<i<<")";l1GmtsEmu[i].print();
     std::cout <<std::endl; 
   }
-*/
 
   //
   // fill ntuple + cleanup

@@ -25,19 +25,23 @@ vector<L1Obj> L1ObjMakerRpcEmu::operator()()
 
   if (!candB.isValid() && !candF.isValid() ) return result;
 
+  
   allRpcCand.insert(allRpcCand.end(), candB->begin(), candB->end());
   allRpcCand.insert(allRpcCand.end(), candF->begin(), candF->end());
 
-  for (RegCand::const_iterator it=allRpcCand.begin(); it != allRpcCand.end(); it++) {
-    if (it->empty()) continue;
+  for (unsigned int icand = 0; icand < allRpcCand.size(); ++icand) {
+    const L1MuRegionalCand & it = allRpcCand[icand];
+//  for (RegCand::const_iterator it=allRpcCand.begin(); it != allRpcCand.end(); it++) {
+    if (it.empty()) continue;
     L1Obj obj;
-    int tower = it->eta_packed();
+    int tower = it.eta_packed();
     if (tower > 16) tower = - ( (~tower & 63) + 1);
     obj.eta = RPCConst::etaFromTowerNum(tower);
-    obj.phi = 2*M_PI*(it->phi_packed())/144;
-    obj.pt  = RPCConst::ptFromIpt(it->pt_packed());
-    obj.q   = it->quality();
-    obj.bx  = it->bx();
+    obj.phi = 2*M_PI*(it.phi_packed())/144;
+    obj.pt  = RPCConst::ptFromIpt(it.pt_packed());
+    obj.q   = it.quality();
+    obj.bx  = it.bx();
+    obj.type = (icand < candB->size()) ? L1Obj::RPCB : L1Obj::RPCF;
     result.push_back(obj);
   }
 
