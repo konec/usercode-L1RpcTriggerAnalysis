@@ -185,7 +185,6 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   }
   l1ObjColl->set( matching );
   l1ObjColl->set( deltaR );
-  
 
   //
   // fill ntuple + cleanup

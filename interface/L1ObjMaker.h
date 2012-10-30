@@ -17,8 +17,8 @@ public:
   
 private:
   void run(const edm::Event &ev);
-  void getGMTReadout(const edm::Event &ev,  std::vector<L1Obj> & result, const edm::InputTag &readout, L1Obj::TYPE t);
-  void getRpcRegional(const edm::Event &ev,  std::vector<L1Obj> & result, const edm::InputTag &l1RpcDigis);
+  bool getGMTReadout(const edm::Event &ev,  std::vector<L1Obj> & result, const edm::InputTag &readout, L1Obj::TYPE t);
+  bool getRpcRegional(const edm::Event &ev,  std::vector<L1Obj> & result, const edm::InputTag &l1RpcDigis);
 
 private:
   template <class T> L1Obj makeL1Obj( T& t, L1Obj::TYPE type) {
@@ -36,8 +36,6 @@ private:
   std::vector<L1Obj>  theL1Objs;
   edm::EventNumber_t lastEvent;
   edm::RunNumber_t   lastRun;
-
-  bool skipRpcEmu, skipGmtEmu, skipRpc, skipDt, skipCsc;
 
 };
 #endif

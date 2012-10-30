@@ -18,8 +18,7 @@ using namespace std;
 
 L1ObjMaker::L1ObjMaker(const  edm::ParameterSet & cfg) 
   :  theConfig(cfg), 
-     lastEvent(0),lastRun(0),
-     skipRpcEmu(false), skipGmtEmu(false), skipRpc(false), skipDt(false), skipCsc(false)
+     lastEvent(0),lastRun(0)
 {}
 
 void L1ObjMaker::run(const edm::Event &ev)
@@ -32,21 +31,22 @@ void L1ObjMaker::run(const edm::Event &ev)
   if (theConfig.exists("l1RpcSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcSource"),    L1Obj::RPCb); 
   if (theConfig.exists("l1RpcSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcSource"),    L1Obj::RPCf); 
   if (theConfig.exists("l1CscSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1CscSource"),    L1Obj::CSC); 
-  if (theConfig.exists("l1DtSource"))      getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1DtSource"),     L1Obj::DT); 
+  if (theConfig.exists("l1DtSource") )     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1DtSource"),     L1Obj::DT); 
   if (theConfig.exists("l1GmtSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1GmtSource"),    L1Obj::GMT); 
-  if (theConfig.exists("l1RpcEmuSource")) getRpcRegional( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcEmuSource")); 
+  if (theConfig.exists("l1RpcEmuSource"))  getRpcRegional(ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcEmuSource")); 
   if (theConfig.exists("l1GmtEmuSource"))  getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1GmtEmuSource"), L1Obj::GMT_emu); 
 
   
 }
 
-void L1ObjMaker::getGMTReadout(const edm::Event &ev, vector<L1Obj> &result, const edm::InputTag &readout, L1Obj::TYPE type)
+bool L1ObjMaker::getGMTReadout(const edm::Event &ev, vector<L1Obj> &result, const edm::InputTag &readout, L1Obj::TYPE type)
 {
   edm::Handle<L1MuGMTReadoutCollection> pCollection;
   ev.getByLabel(readout,pCollection);
+  if (!pCollection.isValid()) return false;
 
   L1MuGMTReadoutCollection const* gmtrc = pCollection.product();
-  if (!gmtrc) return;
+  if (!gmtrc) return false;
 
   vector<L1MuGMTReadoutRecord> gmt_records = gmtrc->getRecords();
   vector<L1MuGMTReadoutRecord>::const_iterator RRItr;
@@ -76,9 +76,10 @@ void L1ObjMaker::getGMTReadout(const edm::Event &ev, vector<L1Obj> &result, cons
     }
 
   }
+  return true;
 }
 
-void  L1ObjMaker:: getRpcRegional(const edm::Event &ev, std::vector<L1Obj> & result, const edm::InputTag &l1RpcDigis)
+bool L1ObjMaker:: getRpcRegional(const edm::Event &ev, std::vector<L1Obj> & result, const edm::InputTag &l1RpcDigis)
 {
   typedef std::vector<L1MuRegionalCand> RegCand;
   RegCand allRpcCand;
@@ -88,7 +89,7 @@ void  L1ObjMaker:: getRpcRegional(const edm::Event &ev, std::vector<L1Obj> & res
   edm::Handle<std::vector<L1MuRegionalCand> > candF;
   ev.getByLabel(l1RpcDigis.label(), "RPCf", candF);
 
-  if (!candB.isValid() && !candF.isValid() ) return ;
+  if (!candB.isValid() && !candF.isValid() ) return false;
 
   allRpcCand.insert(allRpcCand.end(), candB->begin(), candB->end());
   allRpcCand.insert(allRpcCand.end(), candF->begin(), candF->end());
@@ -107,6 +108,7 @@ void  L1ObjMaker:: getRpcRegional(const edm::Event &ev, std::vector<L1Obj> & res
     obj.type = (icand < candB->size()) ? L1Obj::RPCb_emu : L1Obj::RPCf_emu;
     result.push_back(obj);
   }
+  return true;
 }
 
 
