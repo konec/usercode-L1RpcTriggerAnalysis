@@ -28,7 +28,11 @@
 
 
 SynchroCountsGrabber::SynchroCountsGrabber(const edm::ParameterSet& cfg)
- : theCabling(0), theSelector(cfg.getParameter<edm::ParameterSet>("synchroSelectorMuon")), theNoSynchroWarning(false)
+ : theCabling(0), 
+   theSelector(cfg.getParameter<edm::ParameterSet>("synchroSelector")), 
+   deltaR_MuonToDetUnit_cutoff(cfg.getParameter<double>("deltaR_MuonToDetUnit_cutoff")), 
+   checkInside(cfg.getParameter<bool>("checkInside")),
+   theNoSynchroWarning(false)
 {}
 
 SynchroCountsGrabber::~SynchroCountsGrabber()
@@ -70,11 +74,11 @@ RPCRawSynchro::ProdItem SynchroCountsGrabber::counts(const edm::Event &ev, const
       RPCDetId rpcDet(im->first);
       const GeomDet *geomDet = rpcGeometry->idToDet(rpcDet);
       GlobalPoint detPosition = geomDet->position();
-      if (deltaR(theMuon->eta(), theMuon->phi(), detPosition.eta(), detPosition.phi()) > 0.5) continue;
+      if (deltaR(theMuon->eta(), theMuon->phi(), detPosition.eta(), detPosition.phi()) > deltaR_MuonToDetUnit_cutoff) continue;
       TrajectoryStateOnSurface stateAtDet = trackAtSurface.atDetFromClose(rpcDet,detPosition);
 
       if (!stateAtDet.isValid()) continue;
-      if (! (geomDet->surface().bounds().inside(stateAtDet.localPosition()))) continue;
+      if (checkInside && !(geomDet->surface().bounds().inside(stateAtDet.localPosition()))) continue;
       if (!theSelector.checkTraj(stateAtDet, rpcDet, ev, es)) continue;
       result.push_back(*it);
     }

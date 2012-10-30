@@ -60,7 +60,7 @@ void L1ObjColl::print() const
 {
   for (unsigned int i=0; i<theL1Obj.size(); ++i) {
     std::cout <<"("<<i<<")";theL1Obj[i].print();
-    if (theL1Matching.size()>i) std::cout<<" matched: "<<theL1Matching[i];
+    if (theL1Matching.size()>i) std::cout<<" matched: "<<theL1Matching[i]<<" deltaR: "<<theDeltaR[i];
     std::cout <<std::endl; 
   }
 }

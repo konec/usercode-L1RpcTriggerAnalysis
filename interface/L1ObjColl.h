@@ -14,9 +14,23 @@ public:
   void set(const std::vector<L1Obj> & obj) { theL1Obj = obj; }
   void set(const std::vector<bool> & comp) { theL1Matching = comp; }
   void set(const std::vector<double> & dr) { theDeltaR = dr; }
+
   const std::vector<L1Obj> & getL1Objs() const { return theL1Obj; }
   const std::vector<bool> & getL1ObjsMatching() const { return theL1Matching; }
+  const std::vector<double> & getL1ObjDeltaR() const { return theDeltaR; }
 
+/*
+  L1ObjColl selectByType( TYPE t1=L1Obj::NONE, TYPE t2=L1Obj::NONE, TYPE t3=L1Obj::NONE, TYPE t4=L1Obj::NONE);
+  L1ObjColl selectByPtMin( double ptMin = 0.);
+  L1ObjColl selectByEta( double etaMin = -2.5, double etaMax = 2.5);
+  L1ObjColl selectByBx(  int bxMin = 0, int bxMax = 0);
+  L1ObjColl selectByQuality( int qMin = 0, int qMax = 7);
+  L1ObjColl operator+(const L1ObjColl& , const L1ObjColl&) const;
+*/
+
+  void print() const;
+
+//tmp
   std::vector<L1Obj> getL1ObjsMatched(double ptMin = 0) const;
   std::vector<L1Obj> getL1ObjsSelected(
 		  bool requireMatched = true, bool requireNonMatched = false, 
@@ -25,8 +39,6 @@ public:
 		  double etaMin = -2.5, double etaMax = 2.5,
 		  double phiMin = 0., double phiMax = 7.,
 		  int qMin = 0, int qMax = 7) const;
-  void print() const;
-
   static  std::vector<L1Obj> typeSelector(const  std::vector<L1Obj> & col,  TYPE t1=L1Obj::NONE, TYPE t2=L1Obj::NONE, TYPE t3=L1Obj::NONE, TYPE t4=L1Obj::NONE);
    
   

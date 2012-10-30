@@ -16,7 +16,6 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestMuonFinder.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetHitCompatibleCollector.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjMaker.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjMakerRpcEmu.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackToL1ObjMatcher.h"
 #include "DataFormats/RPCDigi/interface/RPCRawSynchro.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
@@ -25,13 +24,7 @@
 #include "TFile.h"
 #include "TTree.h"
 
-//#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
-//#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTCand.h"
-//#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"
-//#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
-
 template <class T> T sqr( T t) {return t*t;}
-
 
 L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
   : theConfig(cfg), theTree(0), event(0), muon(0), track(0), 
@@ -182,9 +175,9 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   std::vector<L1Obj> l1Obj = theL1ObjMaker(ev);
   l1ObjColl->set( l1Obj);
-  TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
   std::vector<bool> matching(l1Obj.size(), false);
   std::vector<double> deltaR(l1Obj.size(), 0.);
+  TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
   for(unsigned int i=0; i< l1Obj.size(); ++i) {
     if (matcher(l1Obj[i].eta, l1Obj[i].phi, theMuon, ev,es)) matching[i]=true;
     TrackToL1ObjMatcher::LastResult result = matcher.lastResult();
@@ -193,59 +186,6 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   l1ObjColl->set( matching );
   l1ObjColl->set( deltaR );
   
-
-/*
-  //
-  // fill L1 RPCemu
-  //
-  if (theConfig.exists("l1RpcEmu")) {
-    TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
-    L1ObjMakerRpcEmu l1RpcsFromEmu( theConfig.getParameter<edm::InputTag>("l1RpcEmu"), ev);
-    std::vector<L1Obj> l1RpcsEmu = l1RpcsFromEmu();
-    std::vector<bool> l1RpcsEmuMatching(l1RpcsEmu.size(), false);
-    for(unsigned int i=0; i< l1RpcsEmu.size(); ++i) if (matcher(l1RpcsEmu[i].eta, l1RpcsEmu[i].phi, theMuon, ev,es)) l1RpcsEmuMatching[i]=true; 
-    l1RpcCollEmu->set(l1RpcsEmu);
-    l1RpcCollEmu->set(l1RpcsEmuMatching);
-  }
-
-  //
-  // fill L1 objects (Rpc,Oth)
-  //
-  L1ObjMaker l1( theConfig.getParameter<edm::InputTag>("l1MuReadout"), ev);
-  TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
-  std::vector<L1Obj> l1Rpcs = l1(L1Obj::RPCB,L1Obj::RPCF);
-  std::vector<L1Obj> l1Others = l1(L1Obj::DT,L1Obj::CSC);
-  std::vector<L1Obj> l1Gmts =  l1(L1Obj::GMT);
-  std::vector<bool> l1RpcsMatching(l1Rpcs.size(), false);
-  std::vector<bool> l1OthersMatching(l1Others.size(), false);
-  std::vector<bool> l1GmtsMatching(l1Gmts.size(), false);
-  for(unsigned int i=0; i< l1Rpcs.size(); ++i) if (matcher(l1Rpcs[i].eta, l1Rpcs[i].phi, theMuon, ev,es)) l1RpcsMatching[i]=true; 
-  for(unsigned int i=0; i< l1Others.size(); ++i) if (matcher(l1Others[i].eta, l1Others[i].phi, theMuon, ev,es)) l1OthersMatching[i]=true; 
-  for(unsigned int i=0; i< l1Gmts.size(); ++i) if (matcher(l1Gmts[i].eta, l1Gmts[i].phi, theMuon, ev,es)) l1GmtsMatching[i]=true; 
-  l1RpcColl->set(l1Rpcs);
-  l1RpcColl->set(l1RpcsMatching);
-  l1OtherColl->set(l1Others);
-  l1OtherColl->set(l1OthersMatching);
-  l1GmtColl->set(l1Gmts);
-  l1GmtColl->set(l1GmtsMatching);
-
-
-  std::cout <<"----"<<std::endl;
-  std::cout <<"RPCColl:   "<<std::endl; l1RpcColl->print();
-  std::cout <<"RPCCollEmu:"<<std::endl; l1RpcCollEmu->print();
-  std::cout <<"GmtColl:   "<<std::endl; l1GmtColl->print();
-  std::cout <<"GmtCollEmu:"<<std::endl;
-
-// edm::Handle<L1MuGMTReadoutCollection> pCollection;
-// ev.getByLabel(l1MuReadout,pCollection);
-//  std::cout <<"IS COLLECTION VALID: "<< pCollection->isValid() << std::endl;
-  L1ObjMaker l1Bis( edm::InputTag("mkGmtDigis"), ev);
-  std::vector<L1Obj> l1GmtsEmu =  l1Bis(L1Obj::GMT);
-  for (unsigned int i=0; i<l1GmtsEmu.size(); ++i) {
-    std::cout <<"("<<i<<")";l1GmtsEmu[i].print();
-    std::cout <<std::endl; 
-  }
-*/
 
   //
   // fill ntuple + cleanup
@@ -258,11 +198,5 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   delete bitsL1;  bitsL1= 0;
   delete bitsHLT;  bitsHLT= 0;
   delete l1ObjColl; l1ObjColl = 0;
-/*
-  delete l1RpcColl; l1RpcColl = 0;
-  delete l1OtherColl; l1OtherColl = 0;
-  delete l1RpcCollEmu; l1RpcCollEmu = 0;
-  delete l1GmtColl; l1GmtColl = 0;
-*/
 }
 				

@@ -60,12 +60,15 @@ bool SynchroSelector::checkRpcDetMatching( const TrajectoryStateOnSurface & tsos
                      <<" isInside: "<< globalGeometry->idToDet(det)->surface().bounds().inside( trackAtRPC.localPosition())
                      << std::endl;
 */
-  float scale = 0.; 
+  float propQuality = 0.; 
   if (     trackAtRPC.localError().positionError().xx() > 2500 || trackAtRPC.localError().positionError().yy() > 2500) return false;
-  else if (trackAtRPC.localError().positionError().xx() > 1000 || trackAtRPC.localError().positionError().yy() > 1000)  scale = 0;
-  else if (trackAtRPC.localError().positionError().xx() > 500  || trackAtRPC.localError().positionError().yy() > 500)   scale = 1;
-  else if (trackAtRPC.localError().positionError().xx() > 100  || trackAtRPC.localError().positionError().yy() > 100)   scale = 2;
-  else scale = 3.;
+  else if (trackAtRPC.localError().positionError().xx() > 1000 || trackAtRPC.localError().positionError().yy() > 1000)  propQuality = 0;
+  else if (trackAtRPC.localError().positionError().xx() > 500  || trackAtRPC.localError().positionError().yy() > 500)   propQuality = 1;
+  else if (trackAtRPC.localError().positionError().xx() > 100  || trackAtRPC.localError().positionError().yy() > 100)   propQuality = 2;
+  else propQuality = 3.;
+
+  if (propQuality < theConfig.getParameter<int>("checkRpcDetMatching_minPropagationQuality") ) return false;
+  double scale = theConfig.getParameter<bool>("checkRpcDetMatching_matchingScaleAuto") ? propQuality : theConfig.getParameter<double>("checkRpcDetMatching_matchingScaleValue") ;
    
   bool inside = globalGeometry->idToDet(det)->surface().bounds().inside( trackAtRPC.localPosition(), trackAtRPC.localError().positionError(), scale);
   //std::cout<<"In:"<<inside <<" detector r:" << detPos.perp()<<" phi:"<<detPos.phi()<<" z:"<<detPos.z() 
@@ -97,7 +100,8 @@ bool SynchroSelector::checkUniqueRecHitMatching( const TrajectoryStateOnSurface 
     float distX = hitPoint.x()-trackAtRPCPoint.x();
     float pullX = distX/ sqrt( trackAtRPCError.xx()+hitError.xx()); 
 
-    if (fabs(pullX) < 2. && fabs(distX) < 5.) {
+    if (    fabs(pullX) < theConfig.getParameter<double>("checkUniqueRecHitMatching_maxPull") 
+         && fabs(distX) < theConfig.getParameter<double>("checkUniqueRecHitMatching_maxDist") ) {
       matched = true;
     } else {
       unique = false;

@@ -29,13 +29,13 @@ void L1ObjMaker::run(const edm::Event &ev)
   lastRun = ev.run();
   theL1Objs.clear();
 
-  if (theConfig.exists("l1RpcSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcSource"), L1Obj::RPCb); 
-  if (theConfig.exists("l1RpcSource"))     getGMTReadout( ev,  theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcSource"), L1Obj::RPCf); 
+  if (theConfig.exists("l1RpcSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcSource"),    L1Obj::RPCb); 
+  if (theConfig.exists("l1RpcSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcSource"),    L1Obj::RPCf); 
   if (theConfig.exists("l1CscSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1CscSource"),    L1Obj::CSC); 
   if (theConfig.exists("l1DtSource"))      getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1DtSource"),     L1Obj::DT); 
   if (theConfig.exists("l1GmtSource"))     getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1GmtSource"),    L1Obj::GMT); 
+  if (theConfig.exists("l1RpcEmuSource")) getRpcRegional( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1RpcEmuSource")); 
   if (theConfig.exists("l1GmtEmuSource"))  getGMTReadout( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1GmtEmuSource"), L1Obj::GMT_emu); 
-  if (theConfig.exists("l1RpcEmuSource")) getRpcRegional( ev, theL1Objs, theConfig.getParameter<edm::InputTag>("l1GmtEmuSource")); 
 
   
 }

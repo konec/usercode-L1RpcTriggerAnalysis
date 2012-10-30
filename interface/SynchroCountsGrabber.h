@@ -27,6 +27,7 @@ private:
   RPCReadOutMapping * theCabling;
   const reco::Muon * theMuon;
   SynchroSelectorMuon theSelector;
+  bool deltaR_MuonToDetUnit_cutoff, checkInside;
   bool theNoSynchroWarning;
 };
 #endif

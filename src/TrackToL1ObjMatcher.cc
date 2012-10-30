@@ -58,6 +58,11 @@ bool TrackToL1ObjMatcher::compare(float l1Eta, float l1Phi, float stateEta, floa
 bool TrackToL1ObjMatcher::operator()(float l1ObjEta, float l1ObjPhi, const TrajectoryStateOnSurface & tsos,  const edm::Event&ev, const edm::EventSetup& es) const
 {
   theLastResult = dummy;
+  TrajectoryStateOnSurface state = TrackAtSurface(tsos,ev,es).atStation2(l1ObjEta);
+  if (!state.isValid()) return false;
+  return compare(l1ObjEta, l1ObjPhi, state.globalPosition().eta(), state.globalPosition().phi());
+
+/*
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
   es.get<GlobalTrackingGeometryRecord>().get(globalGeometry);
   edm::ESHandle<MagneticField> magField;
@@ -76,4 +81,5 @@ bool TrackToL1ObjMatcher::operator()(float l1ObjEta, float l1ObjPhi, const Traje
   TrajectoryStateOnSurface state =  propagator->propagate(tsos, *rpc);
   if (!state.isValid()) return false;
   return compare( l1ObjEta, l1ObjPhi, state.globalPosition().eta(), state.globalPosition().phi());
+*/
 }

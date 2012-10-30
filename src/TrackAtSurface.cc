@@ -36,6 +36,11 @@
 
 
 
+
+TrackAtSurface::TrackAtSurface(const TrajectoryStateOnSurface &state, const edm::Event &ev, const edm::EventSetup &es)
+ : theState(state), theEv(ev), theEs(es)
+{ }
+
 TrackAtSurface::TrackAtSurface(const reco::Muon* mu,const edm::Event &ev, const edm::EventSetup &es)
   : theEv(ev), theEs(es)
 {

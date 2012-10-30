@@ -84,7 +84,7 @@ bool SynchroSelectorMuon::takeIt(const RPCDetId & det, const edm::Event&ev, cons
 bool SynchroSelectorMuon::checkTraj(TrajectoryStateOnSurface & aTSOS, const RPCDetId & det, const edm::Event&ev, const edm::EventSetup& es)
 {
   if (!checkRpcDetMatching(aTSOS,det,ev,es)) return false;
-  if (theConfig.getParameter<bool>("checkUniqueRecHitMatching") && !checkUniqueRecHitMatching(aTSOS,det,ev,es)) return false;
+  if (!checkUniqueRecHitMatching(aTSOS,det,ev,es)) return false;
   return true;
 } 
 

@@ -3,7 +3,7 @@ process = cms.Process("Analysis")
 import os
 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1) )
 #
 # For CRAB jobs leave fileNames vector empty.
 # For processing single files insert lines with 'file:/PATH/FILE.root'
@@ -11,7 +11,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 100) )
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
 #  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
   '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
-#  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
+  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
   ),
   skipEvents = cms.untracked.uint32(0)
 )
@@ -72,25 +72,62 @@ process.l1RPCBxOrConfig.lastBX = cms.int32(0)
 process.l1RPCBxOrConfig.firstBX = cms.int32(0) 
 
 #
+# Gt,Gmt unpacker (not in reco)
+#
+process.load("EventFilter.L1GlobalTriggerRawToDigi.l1GtUnpack_cfi")
+process.l1GtUnpack.DaqGtInputTag = cms.InputTag('rawDataCollector')
+
+#
 # re-emulate GMT with changed RPC from Emulator 
 #
 import L1Trigger.GlobalMuonTrigger.gmtDigis_cfi
-process.mkGmtDigis = L1Trigger.GlobalMuonTrigger.gmtDigis_cfi.gmtDigis.clone()
-process.mkGmtDigis.DTCandidates = cms.InputTag('gtDigis','DT')
-process.mkGmtDigis.CSCCandidates = cms.InputTag('gtDigis','CSC')
-process.mkGmtDigis.RPCbCandidates = cms.InputTag('l1RpcEmulDigis','RPCb')
-process.mkGmtDigis.RPCfCandidates = cms.InputTag('l1RpcEmulDigis','RPCf')
-process.mkGmtDigis.MipIsoData = 'gctDigis'
+process.l1GmtEmulDigis = L1Trigger.GlobalMuonTrigger.gmtDigis_cfi.gmtDigis.clone()
+process.l1GmtEmulDigis.DTCandidates = cms.InputTag('l1GtUnpack','DT')
+process.l1GmtEmulDigis.CSCCandidates = cms.InputTag('l1GtUnpack','CSC')
+process.l1GmtEmulDigis.RPCbCandidates = cms.InputTag('l1RpcEmulDigis','RPCb')
+process.l1GmtEmulDigis.RPCfCandidates = cms.InputTag('l1RpcEmulDigis','RPCf')
+process.l1GmtEmulDigis.MipIsoData = 'gctDigis'
 
 #
 # refit Muon
 #
-#process.load("RecoMuon.GlobalTrackingTools.GlobalTrackQuality_cfi")
-#process.load("RecoMuon.MuonIdentification.refitMuons_cfi")
 process.load("TrackingTools.TrackRefitter.globalMuonTrajectories_cff")
 
 #
-# a few filters to applemkGtDigis
+# RPC Raw data monitoring
+#
+process.load("DQM.RPCMonitorClient.RPCMonitorRaw_cfi")
+process.rpcMonitorRaw.writeHistograms = cms.untracked.bool(False)
+
+#
+# needed by DQM
+#
+process.load("DQMServices.Core.DQM_cfg")
+process.load("DQM.L1TMonitor.L1TDEMON_cfi")
+process.l1demon.disableROOToutput = cms.untracked.bool(False)
+process.l1demon.HistFile = cms.untracked.string('l1RpcDqm.root')
+
+#
+# L1RPCT DQM 
+#
+process.load("DQM.L1TMonitor.L1TRPCTF_cfi")
+process.l1tRpctf.rpctfSource =  cms.InputTag("gtDigis")
+
+#
+# DQM of RPCFedIntegrity
+#
+process.load("DQM.RPCMonitorClient.RPCFEDIntegrity_cfi")
+
+#
+# DQM DATA-EMU comparsion
+#
+process.load("L1Trigger.HardwareValidation.L1Comparator_cfi")
+process.l1compare.RPCsourceData = cms.InputTag("l1GtUnpack") 
+process.l1compare.RPCsourceEmul = cms.InputTag("l1RpcEmulDigis") 
+process.l1compare.COMPARE_COLLS = cms.untracked.vuint32(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)
+
+#
+# some filters
 #
 #process.filterBX = cms.EDFilter("FilterBX", beamBX = cms.vuint32(1,100) )
 process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
@@ -103,12 +140,10 @@ process.filterMenu = cms.EDFilter("FilterMenu")
 process.filterL1 = cms.EDFilter("FilterL1", l1MuReadout = cms.InputTag("gtDigis"))
 process.filterGM = cms.EDFilter("FilterGM")
 
-#
-# RPC Raw data monitoring
-#
-process.load("DQM.RPCMonitorClient.RPCMonitorRaw_cfi")
-process.rpcMonitorRaw.writeHistograms = cms.untracked.bool(False)
 
+#
+# Tree Maker
+#
 process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
 
   histoFileName = cms.string("l1RpcHelper.root"),
@@ -136,18 +171,19 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
 
   linkSynchroGrabber = cms.PSet(
     writeHistograms = cms.untracked.bool(True),
+    deltaR_MuonToDetUnit_cutoff = cms.double(0.5), 
+    checkInside = cms.bool(True),
     linkMonitorPSet = cms.PSet(
       useFirstHitOnly = cms.untracked.bool(True),
       dumpDelays = cms.untracked.bool(True) # set to True for LB delay plots
     ),
-    synchroSelectorMuon = cms.PSet(
-      muonColl= cms.string("muons"),
-      minPt = cms.double(5.),
-      maxTIP = cms.double(0.02),
-      maxEta = cms.double(1.6),
-      beamSpot = cms.InputTag("offlineBeamSpot"),
-      checkUniqueRecHitMatching = cms.bool(True)
-    ),
+    synchroSelector = cms.PSet(
+      checkRpcDetMatching_minPropagationQuality = cms.int32(0), 
+      checkRpcDetMatching_matchingScaleValue = cms.double(3),
+      checkRpcDetMatching_matchingScaleAuto  = cms.bool(True), 
+      checkUniqueRecHitMatching_maxPull = cms.double(2.),
+      checkUniqueRecHitMatching_maxDist = cms.double(5.)
+    ) 
   ),
   
   l1ObjMaker = cms.PSet(
@@ -156,62 +192,20 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
     l1DtSource        = cms.InputTag("gtDigis"),
     l1GmtSource       = cms.InputTag("gtDigis"),
     l1RpcEmuSource    = cms.InputTag("l1RpcEmulDigis"),
-    l1GmtEmuSource    = cms.InputTag("mkGmtDigis"),
+    l1GmtEmuSource    = cms.InputTag("l1GmtEmulDigis") 
   ),
   matcherPSet =  cms.PSet( maxDeltaEta = cms.double(0.4), maxDeltaPhi = cms.double(0.3))
 )
-
-#
-# needed by DQM
-#
-process.load("DQMServices.Core.DQM_cfg")
-process.load("DQM.L1TMonitor.L1TDEMON_cfi")
-process.l1demon.disableROOToutput = cms.untracked.bool(False)
-process.l1demon.HistFile = cms.untracked.string('l1RpcDqm.root')
-
-#
-# L1RPCT DQM 
-#
-process.load("DQM.L1TMonitor.L1TRPCTF_cfi")
-process.l1tRpctf.rpctfSource =  cms.InputTag("gtDigis")
-
-#
-# DQM of RPCFedIntegrity
-#
-process.load("DQM.RPCMonitorClient.RPCFEDIntegrity_cfi")
-
-#
-# DQM DATA-EMU comparsion
-#
-import EventFilter.L1GlobalTriggerRawToDigi.l1GtUnpack_cfi
-process.l1GtUnpackForL1Compare = EventFilter.L1GlobalTriggerRawToDigi.l1GtUnpack_cfi.l1GtUnpack.clone()
-process.l1GtUnpackForL1Compare.DaqGtInputTag = cms.InputTag('rawDataCollector')
-process.load("L1Trigger.HardwareValidation.L1Comparator_cfi")
-process.l1compare.RPCsourceData = cms.InputTag("l1GtUnpackForL1Compare") 
-process.l1compare.RPCsourceEmul = cms.InputTag("l1RpcEmulDigis") 
-process.l1compare.COMPARE_COLLS = cms.untracked.vuint32(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)
-
 #print process.dumpPython();
-
-process.out= cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string('efficiencySkim.root'),
-    outputCommands = cms.untracked.vstring("keep *"),
-)
-
-
 
 process.p = cms.Path(
   process.filterGM*
-  process.muonRPCDigis*
+  process.muonRPCDigis*         #needed by RPC synchronisation and l1RpcEmulDigis
+  process.l1GtUnpack*           #needed by l1Compare and GmtEmulDigis
   process.rpcMonitorRaw*process.rpcFEDIntegrity*
-  process.l1tRpctf*
-  process.l1RpcEmulDigis* 
-  process.l1GtUnpackForL1Compare*process.l1compare*
-  process.gtDigis*
-  process.mkGmtDigis*
+  process.l1tRpctf*process.l1compare*
   process.l1demon*
+  process.l1RpcEmulDigis* 
+  process.l1GmtEmulDigis*
   process.globalMuons*process.l1RpcTree
 )
-process.end = cms.EndPath(process.out)
-process.schedule = cms.Schedule( process.p, process.end)
-
