@@ -11,7 +11,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1) )
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
 #  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
   '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
-#  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
+  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
   ),
   skipEvents = cms.untracked.uint32(0)
 )
@@ -162,8 +162,8 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
     maxChi2Mu = cms.double(2.),
     maxChi2Tk = cms.double(2.),
     minNumberTrackerHits = cms.int32(10),
-    minNumberRpcHits = cms.int32(1),
-    minNumberDtCscHits = cms.int32(1),
+    minNumberRpcHits = cms.int32(0),
+    minNumberDtCscHits = cms.int32(0),
     minNumberOfMatchedStations = cms.int32(1),
     deltaPhiUnique = cms.double(1.0),
     deltaEtaUnique = cms.double(0.5)

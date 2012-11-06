@@ -33,7 +33,7 @@ double AnaRpcMisc::maxPt(const std::vector<L1Obj> & l1Objs) const
   return result; 
 }
 
-void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl)
+void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjColl *l1Coll)
 {
   if (effRunMap.find(event->run) == effRunMap.end()) effRunMap[event->run] = std::make_pair(0,0);
   if (purRunMap.find(event->run) == purRunMap.end()) purRunMap[event->run] = std::make_pair(0,0);
@@ -42,7 +42,8 @@ void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjCol
   double ptMu  = muon->pt();   
   if (!muon->isGlobal()) return;
 
-  std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsSelected();
+  L1ObjColl l1RpcColl = l1Coll->l1RpcColl();
+  std::vector<L1Obj> l1Rpcs = l1RpcColl.selectByMatched().selectByBx().getL1Objs();
 
     if (ptMu > 50. && l1Rpcs.size()==1 && l1Rpcs[0].pt < 8.) { 
 //     debug = true;
@@ -68,8 +69,8 @@ void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjCol
 // timing
 //
   if (ptMu > 10. && fabs(muon->eta()) < 1.6 ) { 
-    std::vector<L1Obj> l1RpcsAll = l1RpcColl->getL1Objs();
-    std::vector<L1Obj> l1RpcsMatched = l1RpcColl->getL1ObjsMatched();
+    std::vector<L1Obj> l1RpcsAll = l1RpcColl.getL1Objs();
+    std::vector<L1Obj> l1RpcsMatched = l1RpcColl.selectByMatched().getL1Objs();
     for (unsigned int i=0; i<5; i++) hRpcMisc_TimeDen->Fill(i-2.);
     for (unsigned int i=0; i<l1RpcsMatched.size(); i++) hRpcMisc_Time->Fill(l1RpcsMatched[i].bx);
     for (unsigned int i=0; i<l1RpcsAll.size();i++) hRpcMisc_TimeAll->Fill(l1RpcsAll[i].bx);
@@ -79,7 +80,7 @@ void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjCol
     std::cout <<"------------"<<std::endl;
     std::cout <<" Event: "<<(*event).id <<" Lumi: "<<(*event).lumi<< std::endl;
     std::cout <<"MU__pt:"<<muon->pt()<<" eta: "<<muon->eta()<<" phi: "<<muon->phi()<<std::endl;
-    l1RpcColl->print();
+    std::cout << l1RpcColl << std::endl;
     
   }
 }	

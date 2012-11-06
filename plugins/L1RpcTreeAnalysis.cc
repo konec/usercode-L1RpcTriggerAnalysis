@@ -25,6 +25,10 @@
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
 
+L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
+  : theConfig(cfg),
+    theAnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") )
+{ }
 
 void L1RpcTreeAnalysis::beginJob()
 {
@@ -88,10 +92,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   TBranch *bdetsHitsCompatibleWithMuon = 0;
   TBranch *bdetsSIMU =0;
 
-  L1ObjColl* l1RpcColl = 0;
-  L1ObjColl* l1OtherColl = 0;
-  L1ObjColl* l1RpcCollEmu = 0;
-  L1ObjColl* l1GmtColl = 0;
+  L1ObjColl* l1ObjColl = 0;
 
   chain.SetBranchAddress("event",&event);
   chain.SetBranchAddress("muon",&muon);
@@ -105,10 +106,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   chain.SetBranchAddress("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon,&bdetsHitsCompatibleWithMuon);
   chain.SetBranchAddress("detsSIMU",&detsSIMU,&bdetsSIMU);
 
-  chain.SetBranchAddress("l1RpcColl",&l1RpcColl);
-  chain.SetBranchAddress("l1OtherColl",&l1OtherColl);
-  chain.SetBranchAddress("l1RpcCollEmu",&l1RpcCollEmu);
-  chain.SetBranchAddress("l1GmtColl",&l1GmtColl);
+  chain.SetBranchAddress("l1ObjColl",&l1ObjColl);
 
 
   //
@@ -132,47 +130,27 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
                 <<" done:"  << std::setw(6)<< std::setiosflags(std::ios::fixed) << std::setprecision(2) << ev*100./nentries<<"%"<<std::endl; 
     }
 
-//    if (ev > 10) break;
+//    if (ev > 100) break;
 
 //    if (event->run != 178854) continue;
 //    if (lastLumi != (*event).lumi) { lastLumi = (*event).lumi; std::cout <<"lumi: " << (*event).lumi<<std::endl; }
 //   theAnaDet.debug = false;
 //    if ((*event).id==60422922)theAnaRpcMisc.debug = true;
 
-   static std::vector<std::string>   namesL1;
-   if (bitsL1->names.size() != 0)    namesL1=bitsL1->names;
-   static std::vector<std::string>   namesHLT;
-   if (bitsHLT->names.size() != 0)   namesHLT=bitsHLT->names;
-   const std::vector<unsigned int> & algosL1 = bitsL1->firedAlgos;
-   const std::vector<unsigned int> & algosHLT = bitsHLT->firedAlgos;
-   bool goodMenu = theAnaMenu.filter(event, muon, namesL1, algosL1, namesHLT, algosHLT);
-   if (!goodMenu) continue;
+   // ANALYSE AND FILTER KINEMCTICS 
+   if (!theAnaMuonDistribution.filter(muon)) continue;
+   // ANALYSE AND FILTER TRIGGER MENU
+   if (!theAnaMenu.filter(event, muon, bitsL1, bitsHLT)) continue;
 
-/*
-   std::cout <<" Number of bits L1: " <<  bitsL1->names.size()<<"/"<<namesL1.size()<<"/"<<bitsL1->firedAlgos.size()
-                           <<" HLT: "<< bitsHLT->names.size()<<"/"<<namesHLT.size()<<"/"<<bitsHLT->firedAlgos.size()<<std::endl;
-   std::cout <<"----------------------- L1: "<<std::endl;
-   for (std::vector<unsigned int>::const_iterator it=algosL1.begin(); it< algosL1.end(); ++it) std::cout <<"L1 idx: "<<*it<<" "<<namesL1[*it]<< std::endl;
-   std::cout <<"----------------------- HLT: "<<std::endl;
-   for (std::vector<unsigned int>::const_iterator it=algosHLT.begin(); it< algosHLT.end(); ++it) std::cout<<" HLT idx: "<<*it<<" "<<namesHLT[*it]<< std::endl;
-*/
-
-   theAnaMuonDistribution.run(muon);
-   theAnaRpcVsOth.run(muon,l1RpcColl,l1OtherColl);
-   theAnaEff.run(muon,l1RpcColl,l1OtherColl);
-   theAnaRpcMisc.run(event,muon,l1RpcColl,l1OtherColl);
+   theAnaRpcVsOth.run(muon,l1ObjColl);
+   theAnaEff.run(muon, l1ObjColl);
+   theAnaRpcMisc.run(event,muon,l1ObjColl);
    theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
-   theAnaEmu.run ( event, muon, l1RpcCollEmu, l1RpcColl);
+   theAnaEmu.run ( event, muon, l1ObjColl);
    theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
-   theAnaClu.run( event, muon, l1RpcColl, *detsHitsCompatibleWithMuon);
-   theAnaTimingL1.run(event,muon, l1RpcColl, l1OtherColl, l1GmtColl);
+   theAnaClu.run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
+   theAnaTimingL1.run(event,muon, l1ObjColl);
 
-/*
-   std::cout <<"----------------"<<std::endl;
-   std::cout <<"GmtColl:"<<std::endl; l1GmtColl->print(); 
-   std::cout <<"RpcColl:"<<std::endl; l1RpcColl->print(); 
-   std::cout <<"OtherColl:"<<std::endl; l1OtherColl->print(); 
-*/
 //   theAnaEmu.debug =theAnaDet.debug;
 //    std::cout <<"----------"<<std::endl;
 //   theAnaDet.debug =theAnaEmu.debug; 

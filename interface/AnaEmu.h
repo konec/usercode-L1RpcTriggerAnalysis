@@ -16,8 +16,7 @@ public:
   AnaEmu() : debug(false) {}
   void init(TObjArray& histos);
   void run( const EventObj* event, const MuonObj* muon,
-            const L1ObjColl *l1RpcCollEmu,
-            const L1ObjColl *l1RpcColl);
+            const L1ObjColl *l1Coll);
   bool debug;
 
 private:

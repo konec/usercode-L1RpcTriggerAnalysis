@@ -33,6 +33,8 @@ private:
 
   TH1D *hMuChi2Tk, *hMuChi2Gl, *hMuNHitsTk ;
   TH2D *hMuPtVsEta, *hMuHitsRPCvsCSC, *hMuHitsRPCvsDT; 
+  TH1D *hMuonPt_BMF, *hMuonEta_BMF, *hMuonPhi_BMF;
+
 
 };
 #endif

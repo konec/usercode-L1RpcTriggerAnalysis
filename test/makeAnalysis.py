@@ -10,10 +10,14 @@ process.RPCCabling.connect = 'sqlite_file:RPCEMap3.db'
 
 
 process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
-  treeFileNames = cms.vstring('l1RpcTree_EX.root'),
+  treeFileNames = cms.vstring('l1RpcTree.root'),
   histoFileName = cms.string("l1RpcAnalysis.root"),
-  l1Cut = cms.double(15.),
-  ptMin = cms.double(8.)
+  anaMuonDistribution = cms.PSet (
+    ptMin = cms.double(0.),
+    minNumberOfMatchedStations = cms.uint32(1),
+    minNumberRpcHits = cms.uint32(0),
+    minNumberDtCscHits = cms.uint32(0),
+  ),
 )
 
 process.p = cms.Path(process.l1RpcAnalysis)

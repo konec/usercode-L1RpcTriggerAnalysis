@@ -22,7 +22,7 @@ namespace edm { class Event; class EventSetup; }
 
 class L1RpcTreeAnalysis : public edm::EDAnalyzer {
 public:
-  L1RpcTreeAnalysis(const edm::ParameterSet & cfg) : theConfig(cfg) {}
+  L1RpcTreeAnalysis(const edm::ParameterSet & cfg);
   virtual ~L1RpcTreeAnalysis(){}
   virtual void beginJob();
   virtual void beginRun(const edm::Run&,  const edm::EventSetup& es);
@@ -30,8 +30,8 @@ public:
   virtual void endJob();
 
 private:
-  edm::ParameterSet theConfig;
   TObjArray theHistos;
+  edm::ParameterSet theConfig;
 
   AnaMuonDistribution theAnaMuonDistribution;
   AnaRpcVsOth         theAnaRpcVsOth;

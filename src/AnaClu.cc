@@ -20,7 +20,7 @@ namespace {
 void AnaClu::run( 
             const EventObj* event,
             const MuonObj* muon,
-            const L1ObjColl *l1RpcColl,
+            const L1ObjColl *l1Coll,
             const std::vector<DetCluDigiObj> & detsHitsCompatibleWithMuon)
 {
   if (cluRunMap.find(event->run) == cluRunMap.end()) cluRunMap[event->run] = std::make_pair(0,0);

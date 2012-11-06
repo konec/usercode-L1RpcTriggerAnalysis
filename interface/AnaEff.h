@@ -16,7 +16,7 @@ class AnaEff {
 public: 
   AnaEff() : debug(false) {}
   void init(TObjArray& histos); 
-  void run(const MuonObj* muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl);
+  void run(const MuonObj* muon, const L1ObjColl *l1Coll);
 
   bool debug;
 

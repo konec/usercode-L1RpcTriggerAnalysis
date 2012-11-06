@@ -22,15 +22,14 @@ void AnaEmu::init(TObjArray& histos)
  hEmu_L1Rpc= new TH1D( "hEmu_L1Rpc", "hEmu_L1Rpc", 64, -1.6, 1.6);  histos.Add( hEmu_L1Rpc);
 }
 
-void AnaEmu::run( const EventObj* event, const MuonObj* muon,
-            const L1ObjColl *l1RpcCollEmu,
-            const L1ObjColl *l1RpcColl)
+void AnaEmu::run( const EventObj* event, const MuonObj* muon, const L1ObjColl *l1Coll)
 {
   if( muon->pt() < 10.) return;
   hEmu_Muon->Fill(muon->eta());
-  std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsSelected();
-  //std::vector<L1Obj> l1RpcsEmu = l1RpcCollEmu->getL1ObjsMatched();
-  std::vector<L1Obj> l1RpcsEmu = l1RpcCollEmu->getL1ObjsMatched();
+  L1ObjColl l1RpcColl = l1Coll->l1RpcColl();
+  std::vector<L1Obj> l1Rpcs = l1RpcColl.selectByMatched().selectByBx().getL1Objs();
+  L1ObjColl l1RpcCollEmu =  l1Coll->l1RpcCollEmu();
+  std::vector<L1Obj> l1RpcsEmu = l1RpcCollEmu.selectByMatched().selectByBx().getL1Objs();
 /*
   if (l1RpcsEmu.size()!=0 && l1Rpcs.size()==0 && muon->eta()>-0.25 && muon->eta() < -0.2) {
     std::cout<<"--------------"<<std::endl;
@@ -46,8 +45,8 @@ void AnaEmu::run( const EventObj* event, const MuonObj* muon,
 //     debug = true;
   }
   if (debug) std::cout <<"MUON: pt="<<muon->pt()<<" eta="<<muon->eta()<<std::endl;
-  if (debug) {std::cout <<" L1 EMU: "<<std::endl; l1RpcCollEmu->print();}
-  if (debug) {std::cout <<" L1 RPC: "<<std::endl; l1RpcColl->print();}
+  if (debug) {std::cout <<" L1 EMU: "<<std::endl << l1RpcCollEmu;}
+  if (debug) {std::cout <<" L1 RPC: "<<std::endl << l1RpcColl;}
 }
 
 

@@ -4,10 +4,15 @@
 
 class TObjArray;
 class MuonObj;
+namespace edm {class ParameterSet;}
 
 class AnaMuonDistribution {
 public:
+  AnaMuonDistribution (const edm::ParameterSet&);
   void init(TObjArray& histos);
-  void run(const MuonObj* muon);
+  bool filter(const MuonObj* muon);
+private:
+  double ptMin;
+  unsigned int  minNumberOfMatchedStations, minNumberRpcHits, minNumberDtCscHits;
 };
 #endif

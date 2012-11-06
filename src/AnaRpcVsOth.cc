@@ -55,15 +55,15 @@ double AnaRpcVsOth::maxPt(const std::vector<L1Obj> & l1Objs) const
   return result; 
 }
 
-void AnaRpcVsOth::run( const MuonObj *muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl)
+void AnaRpcVsOth::run( const MuonObj *muon, const L1ObjColl *l1Coll)
 {
+  
   double etaMu = fabs(muon->eta());
   double ptMu  = muon->pt();   
   if (!muon->isGlobal()) return;
 
-  //std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsSelected(true, false, 0., 161., 0,0, -1.6, 1.6,  -1.,7., -1,7 );
-  std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsSelected();
-  std::vector<L1Obj> l1Oths = l1OtherColl->getL1ObjsSelected();
+  std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByMatched().selectByBx(0,0).getL1Objs();
+  std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByMatched().selectByBx(0,0).selectByEta(-1.61,1.61).getL1Objs();
 
   unsigned int iregion;
   if (etaMu < 0.83) iregion = 0;

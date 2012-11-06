@@ -24,7 +24,8 @@
 BestMuonFinder::BestMuonFinder(const edm::ParameterSet& cfg)
   : lastEvent(0), lastRun(0), theConfig(cfg), theUnique(true), theMuon(0),
     hMuChi2Tk(0), hMuChi2Gl(0), hMuNHitsTk(0), 
-    hMuPtVsEta(0), hMuHitsRPCvsCSC(0), hMuHitsRPCvsDT(0)
+    hMuPtVsEta(0), hMuHitsRPCvsCSC(0), hMuHitsRPCvsDT(0),
+    hMuonPt_BMF(0),hMuonEta_BMF (0),hMuonPhi_BMF(0)
 {}
 
 bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
@@ -50,6 +51,9 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
   for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
 
     if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
+    if (hMuonPt_BMF)   hMuonPt_BMF->Fill( im->innerTrack()->pt());
+    if (hMuonEta_BMF) hMuonEta_BMF->Fill( im->innerTrack()->eta());
+    if (hMuonPhi_BMF) hMuonPhi_BMF->Fill( im->innerTrack()->phi());
     if (hMuPtVsEta) hMuPtVsEta->Fill(im->innerTrack()->eta(), im->innerTrack()->pt());
     if (im->innerTrack()->pt() < theConfig.getParameter<double>("minPt")) continue;
     if (fabs(im->innerTrack()->eta()) >  theConfig.getParameter<double>("maxEta")) continue;
@@ -132,4 +136,8 @@ void BestMuonFinder::initHistos( TObjArray & histos)
   hMuHitsRPCvsCSC = new TH2D("hMuHitsRPCvsCSC","hMuHitsRPCvsCSC", 40,0.,40., 6,0.,6.); histos.Add(hMuHitsRPCvsCSC);
   hMuHitsRPCvsDT  = new TH2D("hMuHitsRPCvsDT","hMuHitsRPCvsDT", 30,0.,60., 6,0.,6.); histos.Add(hMuHitsRPCvsDT);
 //  hMuHitsCSCvsEta = new TH2D("hMuHitsCSCvsEta","hMuHitsCSCvsEta",17, 0.8,2.5, 40,0.,40); histos.Add(hMuHitsCSCvsEta);
+  hMuonPt_BMF  = new TH1D("hMuonPt_BMF","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",L1PtScale::nPtBins,L1PtScale::ptBins);  histos.Add(hMuonPt_BMF);
+  hMuonEta_BMF = new TH1D("hMuonEta_BMF","All global muons Eta;Glb.muon #eta;Muons / bin",96, -2.4, 2.4);  histos.Add(hMuonEta_BMF);
+  hMuonPhi_BMF = new TH1D("hMuonPhi_BMF","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi_BMF);
+
 }

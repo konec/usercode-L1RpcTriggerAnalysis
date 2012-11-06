@@ -58,7 +58,7 @@ double AnaEff::maxPt(const std::vector<L1Obj> & l1Objs) const
   return result; 
 }
 
-void AnaEff::run( const MuonObj *muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl)
+void AnaEff::run( const MuonObj *muon, const L1ObjColl *l1Coll)
 {
   double etaMu = fabs(muon->eta());
   double ptMu  = muon->pt();   
@@ -67,10 +67,8 @@ void AnaEff::run( const MuonObj *muon, const L1ObjColl *l1RpcColl, const L1ObjCo
 //  if (ptMu < 6.) return;
 //  if (ptMu > 7.) return;
 
-  //std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsSelected(true, false, 0., 161., 0,0, -1.6, 1.6,  -1.,7., -1,7 );
-  std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsSelected();
-  //std::vector<L1Obj> l1Oths = l1OtherColl->getL1ObjsSelected();
-  std::vector<L1Obj> l1Oths = l1OtherColl->getL1ObjsSelected();
+  std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByBx().selectByMatched().getL1ObjsSelected();
+  std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByBx().selectByMatched().selectByEta().getL1ObjsSelected();
 
 
   hEfficMuPt_D->Fill(ptMu); 
@@ -109,8 +107,9 @@ void AnaEff::run( const MuonObj *muon, const L1ObjColl *l1RpcColl, const L1ObjCo
     for (unsigned int ir=3; ir <=4; ++ir) {
       hm["hEff_PtDenom"+reg[ir]]->Fill(ptMu);
       std::vector<L1Obj> l1RpcsQ;
-      if (ir==3) l1RpcsQ = l1RpcColl->getL1ObjsSelected(true, false,0.,161., 0,0, -1.6,1.6, 0.,7., 0,0);
-      if (ir==4) l1RpcsQ = l1RpcColl->getL1ObjsSelected(true, false,0.,161., 0,0, -1.6,1.6, 0.,7., 1,7);
+      L1ObjColl l1RpcCollQ = l1Coll->l1RpcColl().selectByMatched().selectByBx();
+      if (ir==3) l1RpcsQ = l1RpcCollQ.selectByQuality(0,0).getL1Objs();
+      if (ir==4) l1RpcsQ = l1RpcCollQ.selectByQuality(1,7).getL1Objs();
       double epsilon=1.e-5;
       for (unsigned int icut=0; icut < AnaEff::nPtCuts; icut++) {
         double threshold = AnaEff::ptCuts[icut];

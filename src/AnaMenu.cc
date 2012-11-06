@@ -5,19 +5,28 @@
 #include "TGraphErrors.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/Utilities.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 #include <sstream>
 #include <iostream>
+#include <cmath>
 
 namespace { 
+ TH1D *hMuonPt_MEN, *hMuonEta_MEN, *hMuonPhi_MEN;
 } 
 
 
 bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
-                  const  std::vector<std::string> & namesL1,
-                  const std::vector<unsigned int> & algosL1,
-                  const std::vector<std::string> &  namesHLT,
-                  const std::vector<unsigned int> & algosHLT)
+                      const TriggerMenuResultObj *bitsL1,
+                      const TriggerMenuResultObj *bitsHLT)
+
 {
+  if (bitsL1->names.size() != 0)    namesL1=bitsL1->names;
+  if (bitsHLT->names.size() != 0)   namesHLT=bitsHLT->names;
+  const std::vector<unsigned int> & algosL1 = bitsL1->firedAlgos;
+  const std::vector<unsigned int> & algosHLT = bitsHLT->firedAlgos;
+
+
   typedef std::vector<unsigned int>::const_iterator CIT;
 
 //  static int count = 0;
@@ -43,10 +52,13 @@ bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
   }
 //  if (hasNoHLTMu) std::cout <<" HAS NO HLT MUON!" << std::endl;
 
-  if (hasNoL1Mu && hasNoHLTMu) {
-//  if (hasNoL1Mu ) {
+  //if (hasNoL1Mu && hasNoHLTMu) {
+  if (!hasNoL1Mu && !hasNoHLTMu) {
     for (CIT it=algosL1.begin();  it != algosL1.end();  ++it)  theAlgosL1[ namesL1[*it] ]++; 
     for (CIT it=algosHLT.begin(); it != algosHLT.end(); ++it) theAlgosHLT[ namesHLT[*it] ]++;
+    if (hMuonPt_MEN)  hMuonPt_MEN->Fill(muon->pt());
+    if (hMuonEta_MEN) hMuonEta_MEN->Fill(muon->eta());
+    if (hMuonPhi_MEN) hMuonPhi_MEN->Fill(muon->phi());
     return true;
   }
 
@@ -65,23 +77,21 @@ void AnaMenu::resume(TObjArray& histos)
     ibin++;
     hMenuAlgosL1->GetXaxis()->SetBinLabel(ibin, (*it).first.c_str());
     hMenuAlgosL1->SetBinContent(ibin, (*it).second);
-    std::cout <<" BIN "<<ibin<<" LABEL: "<<(*it).first.c_str()<<" ENTRIES:"<<(*it).second<<std::endl;
+//    std::cout <<" BIN "<<ibin<<" LABEL: "<<(*it).first.c_str()<<" ENTRIES:"<<(*it).second<<std::endl;
   }
   ibin = 0;
   for (CIM it=theAlgosHLT.begin(); it != theAlgosHLT.end(); ++it) {
     ibin++;
     hMenuAlgosHLT->GetXaxis()->SetBinLabel(ibin, (*it).first.c_str());
     hMenuAlgosHLT->SetBinContent(ibin, (*it).second);
-    std::cout <<" BIN "<<ibin<<" LABEL: "<<(*it).first.c_str()<<" ENTRIES:"<<(*it).second<<std::endl;
+//    std::cout <<" BIN "<<ibin<<" LABEL: "<<(*it).first.c_str()<<" ENTRIES:"<<(*it).second<<std::endl;
   }
 }
 
 
 void AnaMenu::init(TObjArray& histos)
 {
-/*
- hClu_SizeDigi = new TH1D( "hClu_SizeDigi", "hClu_SizeDigi", 97, -0.5, 96.5);  histos.Add( hClu_SizeDigi);
- hClu_SizeRHit = new TH1D( "hClu_SizeRHit", "hClu_SizeRHit", 97, -0.5, 96.5);  histos.Add( hClu_SizeRHit);
- hClu_DigiRHit = new TH2D( "hClu_DigiRHit","hClu_DigiRHit", 97, -0.5, 96.5, 97, -0.5, 96.5);  histos.Add(hClu_DigiRHit);
-*/
+  hMuonPt_MEN  = new TH1D("hMuonPt_MEN","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",L1PtScale::nPtBins,L1PtScale::ptBins); histos.Add(hMuonPt_MEN);
+  hMuonEta_MEN = new TH1D("hMuonEta_MEN","All global muons Eta;Glb.muon #eta;Muons / bin",96, -2.4, 2.4);  histos.Add(hMuonEta_MEN);
+  hMuonPhi_MEN = new TH1D("hMuonPhi_MEN","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi_MEN);
 }

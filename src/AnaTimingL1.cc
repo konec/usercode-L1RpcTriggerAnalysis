@@ -50,17 +50,16 @@ void  AnaTimingL1::resume(TObjArray& histos)
 
 }
 
-void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1RpcColl, const L1ObjColl *l1OtherColl, const L1ObjColl *l1GmtColl)
+void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1Coll)
 {
   double ptMu  = muon->pt();
   if (ptMu < 5) return;
   if (!muon->isGlobal()) return;
 
-  std::vector<L1Obj> l1Rpcs = l1RpcColl->getL1ObjsMatched();
-  std::vector<L1Obj> l1Oths = l1OtherColl->getL1ObjsMatched();  
-  std::vector<L1Obj> l1Cscs = L1ObjColl::typeSelector(l1Oths, L1Obj::CSC);
-  std::vector<L1Obj> l1Dts  = L1ObjColl::typeSelector(l1Oths, L1Obj::DT);
-  std::vector<L1Obj> l1Gmts = l1GmtColl->getL1ObjsMatched();  
+  std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByMatched().getL1Objs();
+  std::vector<L1Obj> l1Cscs = l1Coll->selectByType(L1Obj::CSC).selectByMatched().getL1Objs();
+  std::vector<L1Obj> l1Dts  = l1Coll->selectByType(L1Obj::DT).selectByMatched().getL1Objs();
+  std::vector<L1Obj> l1Gmts = l1Coll->selectByType(L1Obj::GMT).selectByMatched().getL1Objs();
 
   int bxRpc = 999;
   int bxDt = 999;
@@ -96,9 +95,7 @@ void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl 
   if (gmt) {
     if (bxGmtpo==0 || bxGmtpre==0)  {hTimingL1_Gmt->Fill(0); hTimingL1_Prof->Fill(ptMu,0);}
     else {
-      l1GmtColl->print();
-      l1OtherColl->print();
-      l1RpcColl->print();
+      std::cout <<*l1Coll<<std::endl;
       if (bxGmtpo > 0 && bxGmtpo<999)   {hTimingL1_Gmt->Fill(bxGmtpo);  hTimingL1_Prof->Fill(ptMu,bxGmtpo);}
       if (bxGmtpre< 0 && bxGmtpre>-999) {hTimingL1_Gmt->Fill(bxGmtpre); hTimingL1_Prof->Fill(ptMu, bxGmtpre);}
     }
