@@ -7,22 +7,20 @@ class L1ObjColl;
 class L1Obj;
 class EventObj;
 
-#include <vector>
-#include <map>
-
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 class AnaTimingL1 {
+
 public:
-  AnaTimingL1() : debug(false) {}
+  AnaTimingL1(const edm::ParameterSet& cfg) : debug(false), theConfig(cfg) {}
   void init(TObjArray& histos);
   void run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1Coll);
   void resume(TObjArray& histos);
+
   bool debug;
 
 private:
-//  double maxPt(const std::vector<L1Obj> & l1Objs) const;
-//  typedef std::map< unsigned int, std::pair<unsigned int, unsigned int> > EffRunMap;
-//  EffRunMap effRunMap;
+  edm::ParameterSet theConfig;
 
 };
 #endif

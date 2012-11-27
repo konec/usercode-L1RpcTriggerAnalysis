@@ -64,12 +64,13 @@ process.load("L1TriggerConfig.RPCTriggerConfig.L1RPCConfig_cff")
 process.load("L1TriggerConfig.RPCTriggerConfig.RPCBxOrConfig_cff")
 process.load("L1Trigger.RPCTrigger.RPCConeConfig_cff")
 process.load("L1Trigger.RPCTrigger.l1RpcEmulDigis_cfi")
-#process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/Marcin_Wide/')
-#process.rpcconf.PACsPerTower = cms.untracked.int32(1)
 process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/D_20110921_fixedCones_new36__all_12/')
 process.rpcconf.PACsPerTower = cms.untracked.int32(12)
-process.l1RPCBxOrConfig.lastBX = cms.int32(0)
 process.l1RPCBxOrConfig.firstBX = cms.int32(0) 
+process.l1RPCBxOrConfig.lastBX = cms.int32(1)
+
+# #process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/Marcin_Wide/')
+# #process.rpcconf.PACsPerTower = cms.untracked.int32(1)
 
 #
 # Gt,Gmt unpacker (not in reco)

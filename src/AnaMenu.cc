@@ -52,8 +52,8 @@ bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
   }
 //  if (hasNoHLTMu) std::cout <<" HAS NO HLT MUON!" << std::endl;
 
-  //if (hasNoL1Mu && hasNoHLTMu) {
-  if (!hasNoL1Mu && !hasNoHLTMu) {
+  if (hasNoL1Mu && hasNoHLTMu) {
+  //if (!hasNoL1Mu && !hasNoHLTMu) {
     for (CIT it=algosL1.begin();  it != algosL1.end();  ++it)  theAlgosL1[ namesL1[*it] ]++; 
     for (CIT it=algosHLT.begin(); it != algosHLT.end(); ++it) theAlgosHLT[ namesHLT[*it] ]++;
     if (hMuonPt_MEN)  hMuonPt_MEN->Fill(muon->pt());

@@ -27,7 +27,8 @@
 
 L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   : theConfig(cfg),
-    theAnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") )
+    theAnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") ),
+    theAnaTimingL1 (cfg.getParameter<edm::ParameterSet>("anaTimingL1") )
 { }
 
 void L1RpcTreeAnalysis::beginJob()
@@ -134,13 +135,12 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 
 //    if (event->run != 178854) continue;
 //    if (lastLumi != (*event).lumi) { lastLumi = (*event).lumi; std::cout <<"lumi: " << (*event).lumi<<std::endl; }
-//   theAnaDet.debug = false;
 //    if ((*event).id==60422922)theAnaRpcMisc.debug = true;
 
    // ANALYSE AND FILTER KINEMCTICS 
-   if (!theAnaMuonDistribution.filter(muon)) continue;
+   if ( !theAnaMuonDistribution.filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
    // ANALYSE AND FILTER TRIGGER MENU
-   if (!theAnaMenu.filter(event, muon, bitsL1, bitsHLT)) continue;
+   if ( !theAnaMenu.filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("fillterByAnaMenu") ) continue;
 
    theAnaRpcVsOth.run(muon,l1ObjColl);
    theAnaEff.run(muon, l1ObjColl);

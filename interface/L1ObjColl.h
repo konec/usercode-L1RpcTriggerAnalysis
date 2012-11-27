@@ -31,6 +31,7 @@ public:
   }
 
   L1ObjColl selectByType( TYPE t1) const;
+  L1ObjColl selectByPt( double ptMin = 0., double ptMax = 161.) const;
   L1ObjColl selectByPtMin( double ptMin = 0.) const;
   L1ObjColl selectByEta( double etaMin = -1.61, double etaMax = 1.61) const;
   L1ObjColl selectByBx(  int bxMin = 0, int bxMax = 0) const;
@@ -51,7 +52,6 @@ public:
 		  double phiMin = 0., double phiMax = 7.,
 		  int qMin = 0, int qMax = 7) const;
   static  std::vector<L1Obj> typeSelector(const  std::vector<L1Obj> & col,  TYPE t1=L1Obj::NONE, TYPE t2=L1Obj::NONE, TYPE t3=L1Obj::NONE, TYPE t4=L1Obj::NONE);
-   
   
 private:
   std::vector<L1Obj> theL1Obj;

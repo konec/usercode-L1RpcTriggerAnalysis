@@ -12,6 +12,13 @@ L1ObjColl L1ObjColl::selectByType( TYPE t) const
   return result;
 }
 
+L1ObjColl L1ObjColl::selectByPt( double ptMin, double ptMax) const
+{
+  L1ObjColl result;
+  const double epsilon = 1.e-9;
+  for (unsigned int i=0; i<theL1Obj.size(); i++) if ( theL1Obj[i].pt > (ptMin-epsilon) && theL1Obj[i].pt < (ptMax+epsilon) ) result.push_back( theL1Obj[i], theL1Matching[i], theDeltaR[i]);
+  return result;
+}
 L1ObjColl L1ObjColl::selectByPtMin( double ptMin) const
 {
   L1ObjColl result;
@@ -82,7 +89,6 @@ std::vector<L1Obj> L1ObjColl::typeSelector(const  std::vector<L1Obj> & col,
   }
   return result; 
 }
-
 std::vector<L1Obj> L1ObjColl::getL1ObjsMatched(double ptMin) const 
 {
   std::vector<L1Obj> result;
