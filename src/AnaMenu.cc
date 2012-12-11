@@ -16,53 +16,54 @@ namespace {
 } 
 
 
+void  AnaMenu::updateMenu(const std::vector<std::string> & menuL1, const std::vector<std::string> & menuHLT)
+{
+  if (menuL1.size() != 0) theMenuL1 = menuL1;
+  if (menuHLT.size() != 0) theMenuHLT = menuHLT;
+}
+
 bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
                       const TriggerMenuResultObj *bitsL1,
                       const TriggerMenuResultObj *bitsHLT)
 
 {
-  if (bitsL1->names.size() != 0)    namesL1=bitsL1->names;
-  if (bitsHLT->names.size() != 0)   namesHLT=bitsHLT->names;
   const std::vector<unsigned int> & algosL1 = bitsL1->firedAlgos;
   const std::vector<unsigned int> & algosHLT = bitsHLT->firedAlgos;
 
-
   typedef std::vector<unsigned int>::const_iterator CIT;
 
-//  static int count = 0;
-//  std::cout <<"----------"<<std::endl;
-  bool hasNoL1Mu= false;
+
+  bool okL1 = false;
+  std::vector<std::string> acceptL1_Names = theConfig.getParameter<std::vector<std::string> >("acceptL1_Names");
   for (CIT it=algosL1.begin(); it != algosL1.end(); ++it) {
-    std::string nameAlgo = namesL1[*it];
-//    std::cout <<nameAlgo << std::endl;
+    std::string nameAlgo = theMenuL1[*it];
     if (theAlgosL1.find(nameAlgo) == theAlgosL1.end()) theAlgosL1[nameAlgo]=0;    
     bool isMu = ( nameAlgo.find("Mu") != std::string::npos);
-    if (!isMu) hasNoL1Mu = true;
+    if (theConfig.getParameter<bool>("acceptL1_OtherThanMu") && !isMu ) okL1 = true;
+    if (theConfig.getParameter<bool>("acceptL1_Mu") &&  isMu) okL1 = true;
+    for ( std::vector<std::string>::const_iterator is=acceptL1_Names.begin(); is != acceptL1_Names.end(); ++is) if (nameAlgo==(*is)) okL1 = true;
   }
-// if (hasNoL1Mu) std::cout <<" HAS NO L1 MUON!: " <<++count<< std::endl;
 
-  bool hasNoHLTMu= false;
+  bool okHLT = false;
   for (CIT it=algosHLT.begin(); it != algosHLT.end(); ++it) {
-    std::string nameAlgo = namesHLT[*it];
-//    std::cout <<nameAlgo << std::endl;
+    std::string nameAlgo = theMenuHLT[*it];
     if (theAlgosHLT.find(nameAlgo) == theAlgosHLT.end()) theAlgosHLT[nameAlgo]=0;    
-    if (nameAlgo.find("Physic") != std::string::npos) continue;
-    bool isMu = ( (nameAlgo.find("Mu") != std::string::npos) && (nameAlgo.find("Multi") == std::string::npos) );
-    if (!isMu) hasNoHLTMu = true;
+    bool isMu = (  ((nameAlgo.find("Mu") != std::string::npos) && (nameAlgo.find("Multi") == std::string::npos)) || (nameAlgo.find("muon") != std::string::npos) );
+    if (theConfig.getParameter<bool>("acceptHLT_Mu") && isMu) okHLT = true; 
+    if (theConfig.getParameter<bool>("acceptHLT_Physics") && (nameAlgo.find("Physics") != std::string::npos) ) okHLT = true;
+    if (theConfig.getParameter<bool>("acceptHLT_OtherThanMuAndPhysics") && !isMu && (nameAlgo.find("Physics") == std::string::npos) ) okHLT = true;
+    if (theConfig.getParameter<bool>("acceptHLT_ZeroBias") && (nameAlgo.find("ZeroBias") != std::string::npos) ) okHLT = true;
   }
-//  if (hasNoHLTMu) std::cout <<" HAS NO HLT MUON!" << std::endl;
 
-  if (hasNoL1Mu && hasNoHLTMu) {
-  //if (!hasNoL1Mu && !hasNoHLTMu) {
-    for (CIT it=algosL1.begin();  it != algosL1.end();  ++it)  theAlgosL1[ namesL1[*it] ]++; 
-    for (CIT it=algosHLT.begin(); it != algosHLT.end(); ++it) theAlgosHLT[ namesHLT[*it] ]++;
+  if (okL1  && okHLT) {
+    for (CIT it=algosL1.begin();  it != algosL1.end();  ++it)  theAlgosL1[ theMenuL1[*it] ]++; 
+    for (CIT it=algosHLT.begin(); it != algosHLT.end(); ++it) theAlgosHLT[ theMenuHLT[*it] ]++;
     if (hMuonPt_MEN)  hMuonPt_MEN->Fill(muon->pt());
     if (hMuonEta_MEN) hMuonEta_MEN->Fill(muon->eta());
     if (hMuonPhi_MEN) hMuonPhi_MEN->Fill(muon->phi());
-    return true;
-  }
+    return true; 
+  } else return  false;
 
-  return  false;
 }
 
 void AnaMenu::resume(TObjArray& histos)

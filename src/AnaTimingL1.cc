@@ -16,10 +16,8 @@
 
 template <class T> T sqr( T t) {return t*t;}
 namespace {
-  TH1D *hTimingL1_Rpc, *hTimingL1_RpcEmu, *hTimingL1_Dt, *hTimingL1_Csc;
-  TH1D *hTimingL1_Gmt, *hTimingL1_GmtEmu, *hTimingL1_GmtAll; 
-  TH2D *hTimingL1_RpcVsDt, *hTimingL1_RpcVsCsc;
-  TH1D *hTimingL1_EtaDt, *hTimingL1_EtaCsc;
+  TH1D *hTimingL1_Rpc, *hTimingL1_Dt, *hTimingL1_Csc, *hTimingL1_Gmt, *hTimingL1_GmtAll; 
+  TH2D *hTimingL1_RpcVsDtOpen, *hTimingL1_RpcVsCscOpen, *hTimingL1_RpcVsDtTight, *hTimingL1_RpcVsCscTight;
   TProfile *hTimingL1_Prof;
   TH1D *hTimingL1_RMS;
   TH1D *hTimingL1_DR_Dt, *hTimingL1_DR_Rpc, *hTimingL1_DR_Csc, *hTimingL1_DR_Gmt;
@@ -34,17 +32,15 @@ namespace {
 void AnaTimingL1::init(TObjArray& histos)
 {
   hTimingL1_Rpc = new TH1D("hTimingL1_Rpc","hTimingL1_Rpc", 5,-2.5,2.5);   hTimingL1_Rpc->Sumw2(); histos.Add(hTimingL1_Rpc);
-  hTimingL1_RpcEmu = new TH1D("hTimingL1_RpcEmu","hTimingL1_RpcEmu", 5,-2.5,2.5);   hTimingL1_RpcEmu->Sumw2(); histos.Add(hTimingL1_RpcEmu);
   hTimingL1_Dt  = new TH1D("hTimingL1_Dt","hTimingL1_Dt",   5,-2.5,2.5);   hTimingL1_Dt->Sumw2();  histos.Add(hTimingL1_Dt);
   hTimingL1_Csc = new TH1D("hTimingL1_Csc","hTimingL1_Csc", 5,-2.5,2.5);   hTimingL1_Csc->Sumw2(); histos.Add(hTimingL1_Csc);
   hTimingL1_Gmt = new TH1D("hTimingL1_Gmt","hTimingL1_Gmt", 5,-2.5,2.5);   hTimingL1_Gmt->Sumw2(); histos.Add(hTimingL1_Gmt);
-  hTimingL1_GmtEmu = new TH1D("hTimingL1_GmtEmu","hTimingL1_GmtEmu", 5,-2.5,2.5);   hTimingL1_GmtEmu->Sumw2(); histos.Add(hTimingL1_GmtEmu);
-
   hTimingL1_GmtAll = new TH1D("hTimingL1_GmtAll","hTimingL1_GmtAll", 5,-2.5,2.5);   hTimingL1_GmtAll->Sumw2(); histos.Add(hTimingL1_GmtAll);
-  hTimingL1_RpcVsDt  = new TH2D("hTimingL1_RpcVsDt", "hTimingL1_RpcVsDt", 5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsDt);
-  hTimingL1_RpcVsCsc = new TH2D("hTimingL1_RpcVsCsc","hTimingL1_RpcVsCsc",5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsCsc);
-  hTimingL1_EtaDt  = new TH1D("hTimingL1_EtaDt","hTimingL1_EtaDt",50,-2.5,2.5); histos.Add(hTimingL1_EtaDt);
-  hTimingL1_EtaCsc = new TH1D("hTimingL1_EtaCsc","hTimingL1_EtaCsc",50,-2.5,2.5); histos.Add(hTimingL1_EtaCsc);
+
+  hTimingL1_RpcVsDtOpen  = new TH2D("hTimingL1_RpcVsDtOpen", "hTimingL1_RpcVsDtOpen", 5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsDtOpen);
+  hTimingL1_RpcVsCscOpen = new TH2D("hTimingL1_RpcVsCscOpen","hTimingL1_RpcVsCscOpen",5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsCscOpen);
+  hTimingL1_RpcVsDtTight  = new TH2D("hTimingL1_RpcVsDtTight", "hTimingL1_RpcVsDtTight", 5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsDtTight);
+  hTimingL1_RpcVsCscTight = new TH2D("hTimingL1_RpcVsCscTight","hTimingL1_RpcVsCscTight",5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsCscTight);
 
   hTimingL1_DR_Dt  = new TH1D("hTimingL1_DR_Dt", "hTimingL1_DR_Dt", 80,0.,0.8);histos.Add(hTimingL1_DR_Dt); 
   hTimingL1_DR_Rpc = new TH1D("hTimingL1_DR_Rpc","hTimingL1_DR_Rpc",80,0.,0.8);histos.Add(hTimingL1_DR_Rpc); 
@@ -97,8 +93,10 @@ void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl 
 {
   if (!muon->isGlobal()) return;
 
-//  if (l1Coll->l1RpcColl().selectByBx(1,1).getL1Objs().size()>0) std::cout <<"-----------HAS RPC IN BX 1: "<<std::endl<<*l1Coll<<std::endl;
 
+  //
+  // main 1D histos, BX vs DR and BX vs PT 
+  //
   for (std::vector<std::string>::const_iterator is = tags.begin(); is !=  tags.end(); is++) {
     L1ObjColl coll;
     if ( *is == "Rpc"    ) coll = l1Coll->l1RpcColl();  
@@ -128,20 +126,6 @@ void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl 
     } 
   }
 
-
-  std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByMatched().getL1Objs();
-  std::vector<L1Obj> l1Cscs = l1Coll->selectByType(L1Obj::CSC).selectByMatched().getL1Objs();
-  std::vector<L1Obj> l1Dts  = l1Coll->selectByType(L1Obj::DT).selectByMatched().getL1Objs();
-  std::vector<L1Obj> l1Gmts = l1Coll->selectByType(L1Obj::GMT).selectByMatched().getL1Objs();
-  std::vector<L1Obj> l1RpcEmus = l1Coll->l1RpcCollEmu().selectByMatched().getL1Objs();
-  std::vector<L1Obj> l1GmtEmus = l1Coll->selectByType(L1Obj::GMT_emu).selectByMatched().getL1Objs();
-
-  int bxRpc = 999;
-  int bxDt = 999;
-  int bxCsc = 999;
-  bool rpc, dt,csc, gmt; 
-  rpc=dt=csc=gmt=false; 
-
   //
   // DR histos
   //
@@ -154,54 +138,78 @@ void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl 
   for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Dt->Fill(deltaR[i]);
   deltaR = l1Coll->selectByType(L1Obj::GMT).getL1ObjDeltaR();
   for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Gmt->Fill(deltaR[i]);
+
+
+  //
+  // tight correlation histograms;
+  //
+  if (muon->pt() >= theConfig.getParameter<double>("muptCutForCorrTight") ) {
+    double cutl1DR = theConfig.getParameter<double>("l1DRCutForCorrTight");
+    double cutl1pt = theConfig.getParameter<double>("l1ptCutForCorrTight");
+    std::vector<L1Obj> l1Cscs = l1Coll->selectByType(L1Obj::CSC).selectByDeltaR(cutl1DR).selectByPtMin(cutl1pt).getL1Objs();
+    std::vector<L1Obj> l1Dts  = l1Coll->selectByType(L1Obj::DT ).selectByDeltaR(cutl1DR).selectByPtMin(cutl1pt).getL1Objs();
+    std::vector<L1Obj> l1RpcEmus =        l1Coll->l1RpcCollEmu().selectByDeltaR(cutl1DR).selectByPtMin(cutl1pt).getL1Objs();
+    for (unsigned int ir=0; ir < l1RpcEmus.size(); ir++) {
+      for (unsigned int io=0; io < l1Dts.size(); io++) hTimingL1_RpcVsDtTight->Fill( l1RpcEmus[ir].bx, l1Dts[io].bx);
+      for (unsigned int io=0; io < l1Cscs.size(); io++) hTimingL1_RpcVsCscTight->Fill( l1RpcEmus[ir].bx, l1Cscs[io].bx); 
+    }
+  }
+
+  //
+  // open/loose correlation histograms
+  //
+  {
+    std::vector<L1Obj> l1Cscs = l1Coll->selectByType(L1Obj::CSC).getL1Objs();
+    std::vector<L1Obj> l1Dts  = l1Coll->selectByType(L1Obj::DT).getL1Objs();
+    std::vector<L1Obj> l1RpcEmus = l1Coll->l1RpcCollEmu().getL1Objs();
+    for (unsigned int ir=0; ir < l1RpcEmus.size(); ir++) {
+      for (unsigned int io=0; io < l1Dts.size(); io++) hTimingL1_RpcVsDtOpen->Fill( l1RpcEmus[ir].bx, l1Dts[io].bx);
+      for (unsigned int io=0; io < l1Cscs.size(); io++) hTimingL1_RpcVsCscOpen->Fill( l1RpcEmus[ir].bx, l1Cscs[io].bx); 
+    }
+  }
     
 
-  for (unsigned int i=0; i< l1Rpcs.size(); i++) {
-    if (1+l1Rpcs[i].bx < bxRpc) { 
-      rpc=true; 
-      bxRpc = l1Rpcs[i].bx+1;
+  //
+  // first candidate arrival histos (from data only)
+  //
+  {
+    double ptMin = theConfig.getParameter<double>("l1ptCutForDR");
+    double drMax = theConfig.getParameter<double>("l1DRCutForpT"); 
+    std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByPtMin(ptMin).selectByDeltaR(drMax).getL1Objs();
+    std::vector<L1Obj> l1Cscs = l1Coll->selectByType(L1Obj::CSC).selectByPtMin(ptMin).selectByDeltaR(drMax).getL1Objs();
+    std::vector<L1Obj> l1Dts  = l1Coll->selectByType(L1Obj::DT).selectByPtMin(ptMin).selectByDeltaR(drMax).getL1Objs();
+    std::vector<L1Obj> l1Gmts = l1Coll->selectByType(L1Obj::GMT).selectByPtMin(ptMin).selectByDeltaR(drMax).getL1Objs();
+
+    int bxRpc = 999;
+    int bxDt = 999;
+    int bxCsc = 999;
+    bool rpc, dt,csc, gmt; 
+    rpc=dt=csc=gmt=false; 
+
+    for (unsigned int i=0; i< l1Rpcs.size(); i++) { if (1+l1Rpcs[i].bx < bxRpc) { rpc=true; bxRpc = l1Rpcs[i].bx+1; } }
+    for (unsigned int i=0; i< l1Dts.size(); i++)  { if (l1Dts[i].bx < bxDt) { bxDt = l1Dts[i].bx; dt = true; } }
+    for (unsigned int i=0; i< l1Cscs.size(); i++) { if (l1Cscs[i].bx < bxCsc) { bxCsc = l1Cscs[i].bx; csc = true; } }
+
+    if (rpc) hTimingL1_Rpc->Fill(bxRpc);
+    if (dt)  hTimingL1_Dt->Fill(bxDt);
+    if (csc) hTimingL1_Csc->Fill(bxCsc);
+  
+    int bxGmtpre = -999;
+    int bxGmtpo  = 999;
+    double ptMu  = muon->pt();
+    for (unsigned int i=0; i< l1Gmts.size(); i++) {
+      gmt = true;
+      hTimingL1_GmtAll->Fill(l1Gmts[i].bx);
+      if ( (l1Gmts[i].bx >= 0) && (l1Gmts[i].bx < bxGmtpo)  )bxGmtpo = l1Gmts[i].bx; 
+      if ( (l1Gmts[i].bx <= 0) && (l1Gmts[i].bx > bxGmtpre) )bxGmtpre = l1Gmts[i].bx; 
+    }
+    if (gmt) {
+      if (bxGmtpo==0 || bxGmtpre==0)  {hTimingL1_Gmt->Fill(0); hTimingL1_Prof->Fill(ptMu,0);}
+      else {
+        if (bxGmtpo > 0 && bxGmtpo<999)   {hTimingL1_Gmt->Fill(bxGmtpo);  hTimingL1_Prof->Fill(ptMu,bxGmtpo);}
+        if (bxGmtpre< 0 && bxGmtpre>-999) {hTimingL1_Gmt->Fill(bxGmtpre); hTimingL1_Prof->Fill(ptMu, bxGmtpre);}
+      }
     }
   }
 
-  for (unsigned int i=0; i< l1Dts.size(); i++) {
-    if (l1Dts[i].bx < bxDt) { bxDt = l1Dts[i].bx; dt = true; }
-    hTimingL1_EtaDt->Fill(l1Dts[i].eta); 
-  }
-
-  for (unsigned int i=0; i< l1Cscs.size(); i++) {
-    if (l1Cscs[i].bx < bxCsc) { bxCsc = l1Cscs[i].bx; csc = true; }
-    hTimingL1_EtaCsc->Fill(l1Cscs[i].eta); 
-  }
-  
-  int bxGmtpre = -999;
-  int bxGmtpo  = 999;
-  double ptMu  = muon->pt();
-  for (unsigned int i=0; i< l1Gmts.size(); i++) {
-    gmt = true;
-    hTimingL1_GmtAll->Fill(l1Gmts[i].bx);
-    if ( (l1Gmts[i].bx >= 0) && (l1Gmts[i].bx < bxGmtpo)  )bxGmtpo = l1Gmts[i].bx; 
-    if ( (l1Gmts[i].bx <= 0) && (l1Gmts[i].bx > bxGmtpre) )bxGmtpre = l1Gmts[i].bx; 
-  }
-  if (gmt) {
-    if (bxGmtpo==0 || bxGmtpre==0)  {hTimingL1_Gmt->Fill(0); hTimingL1_Prof->Fill(ptMu,0);}
-    else {
-//      std::cout <<*l1Coll<<std::endl;
-      if (bxGmtpo > 0 && bxGmtpo<999)   {hTimingL1_Gmt->Fill(bxGmtpo);  hTimingL1_Prof->Fill(ptMu,bxGmtpo);}
-      if (bxGmtpre< 0 && bxGmtpre>-999) {hTimingL1_Gmt->Fill(bxGmtpre); hTimingL1_Prof->Fill(ptMu, bxGmtpre);}
-    }
-  }
-
-
-  if (rpc) hTimingL1_Rpc->Fill(bxRpc);
-  if (rpc && bxRpc==2) std::cout << *l1Coll << std::endl;
-  if (dt)  hTimingL1_Dt->Fill(bxDt);
-  if (csc) hTimingL1_Csc->Fill(bxCsc);
-
-  int bxRpcEmu = 999;
-  for (unsigned int i=0; i< l1RpcEmus.size(); i++) {
-    if (l1RpcEmus[i].bx < bxRpcEmu) bxRpcEmu = l1RpcEmus[i].bx;
-  }
-  if ( dt && rpc)  hTimingL1_RpcVsDt->Fill(bxRpcEmu, bxDt);
-  if (csc && rpc) hTimingL1_RpcVsCsc->Fill(bxRpcEmu, bxCsc);
-  
 }

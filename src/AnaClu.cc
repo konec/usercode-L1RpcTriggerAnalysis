@@ -38,14 +38,19 @@ TGraph* AnaClu::resume()
 {
   TGraphErrors * hGraphRun = new TGraphErrors();
    unsigned int nPoints = 0;
-  for( CluRunMap::const_iterator im = cluRunMap.begin(); im != cluRunMap.end(); ++im) if (im->second.first != 0) ++nPoints;
-  hGraphRun->Set(nPoints);
+//  for( CluRunMap::const_iterator im = cluRunMap.begin(); im != cluRunMap.end(); ++im) if (im->second.first != 0) ++nPoints;
+//  hGraphRun->Set(nPoints);
+  hGraphRun->Set(cluRunMap.size());
 
   unsigned int iPoint=0;
   for( CluRunMap::const_iterator im = cluRunMap.begin(); im != cluRunMap.end(); ++im) {
-    if (im->second.first==0 ) continue;
-    double clu = static_cast<double>(im->second.second) / im->second.first;
-    double cluErr = sqrt( static_cast<double>(im->second.second)) / im->second.first;
+//    if (im->second.first==0 ) continue;
+    double clu=0.;
+    double cluErr=0.;
+    if (im->second.first !=0 ) {
+      clu = static_cast<double>(im->second.second) / im->second.first;
+      cluErr = sqrt( static_cast<double>(im->second.second)) / im->second.first;
+    }
     std::cout <<" RUN: "<<im->first <<" Cluster: "<< clu <<std::endl;
     hGraphRun->SetPoint(iPoint, im->first, clu);
     hGraphRun->SetPointError(iPoint, 0., cluErr);

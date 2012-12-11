@@ -12,7 +12,7 @@ public:
   void init(TObjArray& histos);
   bool filter(const MuonObj* muon);
 private:
-  double ptMin;
+  double ptMin, etaMax;
   unsigned int  minNumberOfMatchedStations, minNumberRpcHits, minNumberDtCscHits;
 };
 #endif

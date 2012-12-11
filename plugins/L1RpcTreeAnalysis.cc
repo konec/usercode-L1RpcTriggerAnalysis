@@ -28,7 +28,8 @@
 L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   : theConfig(cfg),
     theAnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") ),
-    theAnaTimingL1 (cfg.getParameter<edm::ParameterSet>("anaTimingL1") )
+    theAnaTimingL1 (cfg.getParameter<edm::ParameterSet>("anaTimingL1") ),
+    theAnaMenu(cfg.getParameter<edm::ParameterSet>("anaMenu") )
 { }
 
 void L1RpcTreeAnalysis::beginJob()
@@ -117,39 +118,45 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   std::cout <<" ENTRIES: " << nentries << std::endl;
 
 
+  std::vector<unsigned int> skipRuns = theConfig.getParameter<std::vector<unsigned int> >("skipRuns");
   //
   // main loop
   //
   unsigned int lastRun = 0;
   for (int ev=0; ev<nentries; ev++) {
     chain.GetEntry(ev);
+    theAnaMenu.updateMenu(bitsL1->names, bitsHLT->names);
 
+    bool skip = ( find( skipRuns.begin(), skipRuns.end(), (*event).run) !=  skipRuns.end());
     if (lastRun != (*event).run) { 
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
-                <<" done:"  << std::setw(6)<< std::setiosflags(std::ios::fixed) << std::setprecision(2) << ev*100./nentries<<"%"<<std::endl; 
+                <<" done:"  << std::setw(6)<< std::setiosflags(std::ios::fixed) << std::setprecision(2) << ev*100./nentries<<"%";
+      if (skip) std::cout <<"---SKIP";
+      std::cout<<std::endl; 
     }
+    if (skip) continue; 
 
-//    if (ev > 100) break;
-
+//    if (ev != 417157) continue;
 //    if (event->run != 178854) continue;
+//    std::cout <<"event: "<<ev<<" CMSSW ev: "<<(*event).id << std::endl;
 //    if (lastLumi != (*event).lumi) { lastLumi = (*event).lumi; std::cout <<"lumi: " << (*event).lumi<<std::endl; }
 //    if ((*event).id==60422922)theAnaRpcMisc.debug = true;
 
    // ANALYSE AND FILTER KINEMCTICS 
    if ( !theAnaMuonDistribution.filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
    // ANALYSE AND FILTER TRIGGER MENU
-   if ( !theAnaMenu.filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("fillterByAnaMenu") ) continue;
+//   if ( !theAnaMenu.filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("fillterByAnaMenu") ) continue;
 
-   theAnaRpcVsOth.run(muon,l1ObjColl);
+//   theAnaRpcVsOth.run(muon,l1ObjColl);
    theAnaEff.run(muon, l1ObjColl);
    theAnaRpcMisc.run(event,muon,l1ObjColl);
-   theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
-   theAnaEmu.run ( event, muon, l1ObjColl);
-   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
+//   theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
+//   theAnaEmu.run ( event, muon, l1ObjColl);
+//   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
    theAnaClu.run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
-   theAnaTimingL1.run(event,muon, l1ObjColl);
+//   theAnaTimingL1.run(event,muon, l1ObjColl);
 
 //   theAnaEmu.debug =theAnaDet.debug;
 //    std::cout <<"----------"<<std::endl;

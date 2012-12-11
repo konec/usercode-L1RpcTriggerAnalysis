@@ -61,8 +61,8 @@ void AnaRpcMisc::run(const EventObj* event,  const MuonObj *muon, const L1ObjCol
     if (l1Rpcs.size() > 0 && l1Rpcs[0].pt >= 16) effRunMap[event->run].first++; 
     }
     if (l1Rpcs.size() > 0 && fabs(muon->eta()) < 1.6) {
-      if (ptMu > 20. && l1Rpcs[0].pt >= 16) purRunMap[event->run].first++;
-      if (ptMu < 10. && l1Rpcs[0].pt >= 16) purRunMap[event->run].second++;
+      if (ptMu > 10. && l1Rpcs[0].pt >= 10) purRunMap[event->run].first++;
+      if (ptMu < 7.  && l1Rpcs[0].pt >= 10) purRunMap[event->run].second++;
     }
 
 //
@@ -93,15 +93,19 @@ void AnaRpcMisc::resume(TObjArray& histos)
   hGraphRun->SetName("hGraph_RunEff"); 
   histos.Add(hGraphRun);
   unsigned int nPoints = 0;
-  for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) if (im->second.first != 0) ++nPoints;
+//  for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) if (im->second.first != 0) ++nPoints;
+  nPoints = effRunMap.size();
   hGraphRun->Set(nPoints);
   unsigned int iPoint=0;
   for( EffRunMap::const_iterator im = effRunMap.begin(); im != effRunMap.end(); ++im) {
     float eff = 0.;
-    if (im->second.first==0 ) continue;
-    if (im->second.second != 0) eff = float(im->second.first)/float(im->second.second);
-    float effM1 = float(im->second.first-1)/float(im->second.second);
-    float effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second;
+    float effErr = 1.;
+//    if (im->second.first==0 ) continue;
+    if (im->second.second != 0) {
+      eff = float(im->second.first)/float(im->second.second);
+    float effM1 = (im->second.first > 0)? float(im->second.first-1)/float(im->second.second) : 0.;
+          effErr = sqrt( (1-effM1)*std::max((int) im->second.first,1))/im->second.second;
+    }
     std::cout <<" RUN: "<<im->first
               <<" Effic: "<< eff <<" ("<<im->second.first<<"/"<<im->second.second<<")"<<std::endl;
     hRpcMisc_EffRun->Fill(eff, 1./sqr(effErr));
@@ -115,12 +119,16 @@ void AnaRpcMisc::resume(TObjArray& histos)
   histos.Add(hGraphPur);
   iPoint = 0;
   for( PurRunMap::const_iterator im = purRunMap.begin(); im != purRunMap.end(); ++im) { 
-    if (im->second.second == 0) continue;
+//    if (im->second.second == 0) continue;
     hGraphPur->Set(++iPoint);
-    double second = double(im->second.second);
-    double pur = double(im->second.first)/second;
-    double firstE = im->second.first==0 ? 1. : double(im->second.first);
-    double purErr = firstE/second*sqrt(1./firstE+ 1./second); 
+    double pur=0.;
+    double purErr=0.;;
+    if (im->second.second != 0) {
+      double second = double(im->second.second);
+      pur = double(im->second.first)/second;
+      double firstE = im->second.first==0 ? 1. : double(im->second.first);
+      purErr = firstE/second*sqrt(1./firstE+ 1./second); 
+    }
     std::cout<<" RUN: " <<  im->first <<" Good: "<<im->second.first<<" Bad: "<< im->second.second << std::endl;
     hGraphPur->SetPoint(iPoint-1, im->first, pur);
     hGraphPur->SetPointError(iPoint-1, 0., purErr);
