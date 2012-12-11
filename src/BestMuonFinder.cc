@@ -137,7 +137,7 @@ void BestMuonFinder::initHistos( TObjArray & histos)
   hMuHitsRPCvsDT  = new TH2D("hMuHitsRPCvsDT","hMuHitsRPCvsDT", 30,0.,60., 6,0.,6.); histos.Add(hMuHitsRPCvsDT);
 //  hMuHitsCSCvsEta = new TH2D("hMuHitsCSCvsEta","hMuHitsCSCvsEta",17, 0.8,2.5, 40,0.,40); histos.Add(hMuHitsCSCvsEta);
   hMuonPt_BMF  = new TH1D("hMuonPt_BMF","All global muons Pt;Glb.muon p_{T} [GeV];Muons / bin",L1PtScale::nPtBins,L1PtScale::ptBins);  histos.Add(hMuonPt_BMF);
-  hMuonEta_BMF = new TH1D("hMuonEta_BMF","All global muons Eta;Glb.muon #eta;Muons / bin",96, -2.4, 2.4);  histos.Add(hMuonEta_BMF);
+  hMuonEta_BMF = new TH1D("hMuonEta_BMF","All global muons Eta;Glb.muon #eta;Muons / bin",84, -2.1, 2.1);  histos.Add(hMuonEta_BMF);
   hMuonPhi_BMF = new TH1D("hMuonPhi_BMF","All global muons Phi;Glb.muon #phi [rad];Muons / bin",90,-M_PI,M_PI);  histos.Add(hMuonPhi_BMF);
 
 }
