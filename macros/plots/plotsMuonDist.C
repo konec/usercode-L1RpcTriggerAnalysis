@@ -7,48 +7,136 @@
 #include "TH2D.h"
 #include "TGaxis.h"
 #include "TFile.h"
+#include "TLegend.h"
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 #include "utilsPlotsSaver.h"
+#include "utilsObjArray.h"
 
-TCanvas* pMuonDist_1D()
+
+TCanvas* pMuonDist_1D( bool useHelper)
 {
   // below 2 lines help when another TFile has been opened in memory
   // otherwise FindObject fails
   //TFile *ff = (TFile*)(gROOT->GetListOfFiles()->First());
   //ff->cd();
 
+
+//
+// upload histos from "helper file" (optional).
+//
+  TH1D *hMuonPt_BMF, *hMuonEta_BMF, *hMuonPhi_BMF;
+  hMuonPt_BMF = hMuonEta_BMF = hMuonPhi_BMF = 0;
+  if (useHelper) {
+    TDirectory *dBefore = gDirectory;
+    TFile file_BMF("../l1RpcHelper.root");
+    hMuonPt_BMF =  (TH1D*) file_BMF.Get("hMuonPt_BMF")->Clone("hMuonPt_BMF_C");  hMuonPt_BMF->SetDirectory(0);
+    hMuonEta_BMF = (TH1D*) file_BMF.Get("hMuonEta_BMF")->Clone("hMuonEta_BMF_C"); hMuonEta_BMF->SetDirectory(0);
+    hMuonPhi_BMF = (TH1D*) file_BMF.Get("hMuonPhi_BMF")->Clone("hMuonPhi_BMF_C"); hMuonPhi_BMF->SetDirectory(0);
+
+//    hMuonPt_BMF  = new TH1D(* (TH1D*) file_BMF.Get("hMuonPt_BMF"));   hMuonPt_BMF->SetDirectory(0);
+//    hMuonEta_BMF = new TH1D(* (TH1D*) file_BMF.Get("hMuonEta_BMF")); hMuonEta_BMF->SetDirectory(0);
+//    hMuonPhi_BMF = new TH1D(* (TH1D*) file_BMF.Get("hMuonPhi_BMF")); hMuonPhi_BMF->SetDirectory(0);
+
+//    g_L1RpcGlobalTObjects.Add( file_BMF.Get("hMuonPt_BMF")->Clone("hMuonPt_BMF_C") );
+//    g_L1RpcGlobalTObjects.Add( file_BMF.Get("hMuonEta_BMF")->Clone("hMuonEta_BMF_C") );
+//    g_L1RpcGlobalTObjects.Add( file_BMF.Get("hMuonPhi_BMF")->Clone("hMuonPhi_BMF_C") );
+    file_BMF.Close();
+    dBefore->cd();
+  }
+
   TCanvas * c = new TCanvas("cMuonDist_1D","Global muons distributions",1400,500);
   c->Divide(3,1);
 
-  c->cd(1); 
-  gPad->SetYstat(0.5);
-  TH1D* hMuonPt=(TH1D*)gROOT->FindObject("hMuonPt"); 
-  if(!hMuonPt) return 0;
-  hMuonPt->SetXTitle("Glb.muon p_{T} [GeV/c]");
-  hMuonPt->DrawCopy();
+//
+// p1
+//
+  TVirtualPad * p1 = c->cd(1); p1->SetLogy(1); p1->SetLogx(1);
+  TH1D* hMuonPt_DIS = (TH1D*) gROOT->FindObject("hMuonPt_DIS"); 
+  if(hMuonPt_BMF)  hMuonPt_DIS->SetMaximum( hMuonPt_BMF->GetMaximum() * 250); 
+  hMuonPt_DIS->SetXTitle("Glb.muon p_{T} [GeV/c]");
+  hMuonPt_DIS->SetLineColor(2);
+  hMuonPt_DIS->GetXaxis()->SetRange(3,33);
+  hMuonPt_DIS->DrawCopy();
 
-  c->cd(2); 
-  TH1D* hMuonEta=(TH1D*)gROOT->FindObject("hMuonEta");
-  if(!hMuonEta) return 0;
-  hMuonEta->SetMinimum(0.);
-  hMuonEta->SetXTitle("Glb.muon #eta");
-  hMuonEta->DrawCopy();
+  TLegend l(0.3, 0.65, 0.93,.88);
+  int nev;
+  std::stringstream str; 
 
+  if (hMuonPt_BMF) {
+    nev= hMuonPt_BMF->GetEntries();
+    str.str(""); str<<"all muons (ev: "<<std::setprecision(2) << scientific << (double) nev<<")"; 
+    hMuonPt_BMF->SetLineColor(8);
+    hMuonPt_BMF->DrawCopy("same");
+    l.AddEntry(hMuonPt_BMF, str.str().c_str());
+  }
+
+  nev= hMuonPt_DIS->GetEntries();
+  str.str(""); str<<"kinematic sel. (ev: "<< std::setprecision(2) << scientific << (double)nev<<")";
+  l.AddEntry(hMuonPt_DIS, str.str().c_str() );
+
+  TH1D* hMuonPt_MEN=(TH1D*)gROOT->FindObject("hMuonPt_MEN");
+  if (hMuonPt_MEN) {
+    hMuonPt_MEN->SetLineColor(4);
+    hMuonPt_MEN->DrawCopy("same");
+    nev= hMuonPt_MEN->GetEntries();
+    str.str(""); str<<"trigger sel. (ev: "<< setprecision(3) << scientific  << (double) nev<<")";
+    l.AddEntry(hMuonPt_MEN, str.str().c_str());
+  }
+
+  l.DrawClone("same");
+
+
+//
+// p2
+//
+  TVirtualPad * p2 = c->cd(2); p2->SetLogy(1);
+  TH1D* hMuonEta_DIS=(TH1D*)gROOT->FindObject("hMuonEta_DIS");
+  if(hMuonEta_BMF) hMuonEta_DIS->SetMaximum( hMuonEta_BMF->GetMaximum()); 
+  TH1D* hMuonEta_MEN=(TH1D*)gROOT->FindObject("hMuonEta_MEN");
+//  if(hMuonEta_MEN) hMuonEta_DIS->SetMinimum( max(1, (int)hMuonEta_MEN->GetMinimum()));
+  hMuonEta_DIS->SetMinimum(1.e3);
+  hMuonEta_DIS->SetLineColor(2);
+  hMuonEta_DIS->SetXTitle("Glb.muon #eta");
+  hMuonEta_DIS->DrawCopy();
+  if (hMuonEta_BMF) {
+   hMuonEta_BMF->SetLineColor(8);
+   hMuonEta_BMF->DrawCopy("same");
+  }
+  if (hMuonEta_MEN) {
+   hMuonEta_MEN->SetLineColor(4);
+   hMuonEta_MEN->DrawCopy("same");
+  }
+
+
+//
+// p3
+//
   c->cd(3); 
-  TH1D* hMuonPhi=(TH1D*)gROOT->FindObject("hMuonPhi");
-  if(!hMuonPhi) return 0;
-  hMuonPhi->SetMinimum(0.);
-  hMuonPhi->SetXTitle("Glb.muon #phi [rad]");
-  TH1D *hcpy = (TH1D*)hMuonPhi->DrawCopy();
-  // for phi distribution move statistics box down
-  gPad->Update();
-  TPaveStats *st = (TPaveStats*)hcpy->FindObject("stats");
-  double y1=st->GetY1NDC(), y2=st->GetY2NDC();
-  st->SetY1NDC(y1-0.4);
-  st->SetY2NDC(y2-0.4);
-  
+  TH1D* hMuonPhi_DIS=(TH1D*)gROOT->FindObject("hMuonPhi_DIS");
+  hMuonPhi_DIS->Scale(1./hMuonPhi_DIS->Integral());
+  hMuonPhi_DIS->SetMinimum(0.);
+  hMuonPhi_DIS->SetXTitle("Glb.muon #phi [rad]");
+  hMuonPhi_DIS->SetYTitle("arbitrary units");
+  hMuonPhi_DIS->SetLineColor(2);
+  hMuonPhi_DIS->DrawCopy();
+  if (hMuonPhi_BMF) {
+   hMuonPhi_BMF->Scale(1./hMuonPhi_BMF->Integral());
+   hMuonPhi_BMF->SetLineColor(8);
+   hMuonPhi_BMF->DrawCopy("same");
+  }
+  TH1D* hMuonPhi_MEN=(TH1D*)gROOT->FindObject("hMuonPhi_MEN");
+  if (hMuonPhi_MEN) {
+   hMuonPhi_MEN->Scale(1./hMuonPhi_MEN->Integral());
+   hMuonPhi_MEN->SetLineColor(4);
+   hMuonPhi_MEN->DrawCopy("same");
+  }
+
   return c;
 }
+
 
 TCanvas* pMuonDist_PtVsEtaDist()
 {
@@ -88,22 +176,13 @@ TCanvas* pMuonDist_PtVsEtaDist()
 
 void plotsMuonDist()
 {
-  // store current gStyle options
-  int stat=gStyle->GetOptStat();
-  float x=gStyle->GetTitleX();
   int digits=TGaxis::GetMaxDigits(); // for TAxis labels
-
   // make and save plots
-  gStyle->SetOptStat(1);
-  gStyle->SetTitleX(0.28);
-  TGaxis::SetMaxDigits(4); // global option
-  utilsPlotsSaver( pMuonDist_1D() );
-  gStyle->SetTitleX(0.);
-  utilsPlotsSaver( pMuonDist_PtVsEtaDist() );
+  TGaxis::SetMaxDigits(3); // global option
+  utilsPlotsSaver( pMuonDist_1D(true) );
+//  utilsPlotsSaver( pMuonDist_PtVsEtaDist() );
 
   // restore previous gStyle settings
-  gStyle->SetOptStat(stat);
-  gStyle->SetTitleX(x);
   TGaxis::SetMaxDigits(digits);
 
 }

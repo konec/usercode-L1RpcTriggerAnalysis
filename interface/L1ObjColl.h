@@ -3,6 +3,7 @@
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include <vector>
+#include <cmath>
 
 class L1ObjColl : public TObject {
 
@@ -39,6 +40,17 @@ public:
   L1ObjColl selectByMatched() const;
   L1ObjColl selectByDeltaR( double deltaRMax) const;
   L1ObjColl operator+(const L1ObjColl &o) const;
+  operator bool() const {return !theL1Obj.empty(); } 
+  bool operator!() const {return theL1Obj.empty(); }
+
+  inline bool isMatching_DRBx(double deltaR, int bx) const {
+    for (unsigned int i=0; i< theL1Obj.size(); i++) if ( (bx ==  theL1Obj[i].bx) && ( theDeltaR[i] < deltaR) ) return true;
+    return false;
+  }
+  inline bool isMatching_PtminPtmaxBx(double ptMin, double ptMax, int bx ) const {
+    for (unsigned int i=0; i< theL1Obj.size(); i++) if ( (theL1Obj[i].pt >= ptMin && theL1Obj[i].pt < ptMax) && (bx ==  theL1Obj[i].bx) ) return true;
+    return false;
+  }
 
   friend ostream & operator<< (ostream &out, const L1ObjColl&s);
 

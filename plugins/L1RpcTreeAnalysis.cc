@@ -16,6 +16,7 @@
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/EventObjBXExtra.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
@@ -23,13 +24,15 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 
+
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
 
 L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   : theConfig(cfg),
     theAnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") ),
     theAnaTimingL1 (cfg.getParameter<edm::ParameterSet>("anaTimingL1") ),
-    theAnaMenu(cfg.getParameter<edm::ParameterSet>("anaMenu") )
+    theAnaMenu(cfg.getParameter<edm::ParameterSet>("anaMenu") ),
+    theAnaEvent(cfg.getParameter<edm::ParameterSet>("anaEvent") )
 { }
 
 void L1RpcTreeAnalysis::beginJob()
@@ -45,6 +48,7 @@ void L1RpcTreeAnalysis::beginJob()
   theAnaSynch.init(theHistos);
   theAnaClu.init(theHistos);
   theAnaTimingL1.init(theHistos);
+  theAnaEvent.init(theHistos);
   theAnaMenu.init(theHistos);
 }
 
@@ -118,7 +122,6 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   std::cout <<" ENTRIES: " << nentries << std::endl;
 
 
-  std::vector<unsigned int> skipRuns = theConfig.getParameter<std::vector<unsigned int> >("skipRuns");
   //
   // main loop
   //
@@ -127,42 +130,34 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
     chain.GetEntry(ev);
     theAnaMenu.updateMenu(bitsL1->names, bitsHLT->names);
 
-    bool skip = ( find( skipRuns.begin(), skipRuns.end(), (*event).run) !=  skipRuns.end());
     if (lastRun != (*event).run) { 
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
                 <<" done:"  << std::setw(6)<< std::setiosflags(std::ios::fixed) << std::setprecision(2) << ev*100./nentries<<"%";
-      if (skip) std::cout <<"---SKIP";
       std::cout<<std::endl; 
     }
-    if (skip) continue; 
 
-//    if (ev != 417157) continue;
-//    if (event->run != 178854) continue;
-//    std::cout <<"event: "<<ev<<" CMSSW ev: "<<(*event).id << std::endl;
-//    if (lastLumi != (*event).lumi) { lastLumi = (*event).lumi; std::cout <<"lumi: " << (*event).lumi<<std::endl; }
-//    if ((*event).id==60422922)theAnaRpcMisc.debug = true;
 
+   // EVENT NUMBER, BX structure etc.
+   EventObjBXExtra eventBx(*event);
+   if ( !theAnaEvent.filter(&eventBx) && theConfig.getParameter<bool>("filterByAnaEvent") ) continue;
    // ANALYSE AND FILTER KINEMCTICS 
    if ( !theAnaMuonDistribution.filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
    // ANALYSE AND FILTER TRIGGER MENU
-//   if ( !theAnaMenu.filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("fillterByAnaMenu") ) continue;
+   if ( !theAnaMenu.filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("filterByAnaMenu") ) continue;
 
+/*
 //   theAnaRpcVsOth.run(muon,l1ObjColl);
-   theAnaEff.run(muon, l1ObjColl);
-   theAnaRpcMisc.run(event,muon,l1ObjColl);
+//   theAnaEff.run(muon, l1ObjColl);
+//   theAnaRpcMisc.run(event,muon,l1ObjColl);
 //   theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
 //   theAnaEmu.run ( event, muon, l1ObjColl);
 //   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
-   theAnaClu.run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
-//   theAnaTimingL1.run(event,muon, l1ObjColl);
+//   theAnaClu.run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
+*/
+   theAnaTimingL1.run( &eventBx, muon, l1ObjColl);
 
-//   theAnaEmu.debug =theAnaDet.debug;
-//    std::cout <<"----------"<<std::endl;
-//   theAnaDet.debug =theAnaEmu.debug; 
-//    if (anaDet.debug) std::cout <<" Event: "<<(*event).id <<" Lumi: "<<(*event).lumi<< std::endl;
-  
   }
 }
 
@@ -174,6 +169,7 @@ void L1RpcTreeAnalysis::endJob()
   TGraph* hGraph_RunClu = theAnaClu.resume();
   theAnaTimingL1.resume(theHistos);
   theAnaMenu.resume(theHistos);
+  theAnaEvent.resume(theHistos);
 
   theAnaSynch.endJob();
 

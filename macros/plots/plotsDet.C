@@ -63,7 +63,7 @@ TCanvas* pDet_EfficPart()
   hBase->Reset(); hBase->SetMaximum(1.02); hBase->SetMinimum(0.84);
   hBase->DrawCopy();
 
-  TLegend* leg = new TLegend(0.75, 0.7, 0.93,.9);
+  TLegend leg(0.75, 0.7, 0.93,.9);
 
   for (unsigned int i=1; i<=6; i++) {
     str.str(""); str << "hDet_PartHit"<<i; 
@@ -76,9 +76,9 @@ TCanvas* pDet_EfficPart()
     h[i-1]->SetMarkerStyle(21+i);
     h[i-1]->DrawCopy("same");
     str.str(""); str << "Disk/Layer "<<i;
-    leg->AddEntry(h[i-1], str.str().c_str());
+    leg.AddEntry(h[i-1], str.str().c_str());
   }
-  leg->Draw();
+  leg.DrawClone();
   return c;
 }
 
@@ -108,21 +108,21 @@ TCanvas* pDet_Coinc()
   TCanvas* c = new TCanvas("cDet_Coinc","cDet_Coinc",600,600);
   TH1D *hn, *hd;
   hd = (TH1D*)gROOT->FindObject("hDet_Muon");
-  TLegend* l = new TLegend(0.5, 0.2, 0.94,.4);
+  TLegend l(0.5, 0.2, 0.94,.4);
   
   hn = (TH1D*)gROOT->FindObject("hDet_CoincDet");
   TH1D* h =DivideErr(hn, hd,"hDet_ConicDetEff", "B");
   if(!h) return 0;
   h->SetLineColor(2);
   h->DrawCopy("h");
-  l->AddEntry(h,"detector coincidence");
+  l.AddEntry(h,"detector coincidence");
 
   hn =(TH1D*)gROOT->FindObject("hDet_CoincHit");
   h =DivideErr(hn, hd,"hDet_ConicHitEff", "B"); 
   if(!h) return 0;
   h->SetLineColor(3);
   h->DrawCopy("same histo");
-  l->AddEntry(h,"hit coincidence");
+  l.AddEntry(h,"hit coincidence");
   //  h->Print("all");
 
   hn =(TH1D*)gROOT->FindObject("hEmu_Wide");
@@ -131,16 +131,16 @@ TCanvas* pDet_Coinc()
   if(!h) return 0;
   h->SetLineColor(4);
   h->DrawCopy("same histo");
-  l->AddEntry(h,"wide pattern");
+  l.AddEntry(h,"wide pattern");
 
   hn =(TH1D*)gROOT->FindObject("hEmu_L1Rpc");
   h =DivideErr(hn, hd,"hDet_L1RpcEff", "B");     
   if(!h) return 0;
   h->SetLineColor(6);
   h->DrawCopy("same histo");
-  l->AddEntry(h,"L1Rpc");
+  l.AddEntry(h,"L1Rpc");
 
-  l->Draw();
+  l.DrawClone();
 
 /*
   TGraphAsymmErrors* gr1 = new TGraphAsymmErrors();

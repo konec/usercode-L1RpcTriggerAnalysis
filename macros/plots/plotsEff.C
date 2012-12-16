@@ -45,10 +45,10 @@ TCanvas* pEff_Effic()
   h2->SetMarkerStyle(25);
   h2->SetMarkerColor(4);
 
-  TLegend* l = new TLegend(0.6, 0.29, 0.93,.42); 
-  l->AddEntry(h2,"no p_{T} cut");
-  l->AddEntry(h1,"p_{T}^{L1Rpc} #geq 16 GeV/c");
-  l->Draw();
+  TLegend l(0.6, 0.29, 0.93,.42); 
+  l.AddEntry(h2,"no p_{T} cut");
+  l.AddEntry(h1,"p_{T}^{L1Rpc} #geq 16 GeV/c");
+  l.DrawClone();
   h2->DrawCopy("same");
 
   return c;
@@ -63,7 +63,7 @@ TCanvas* pEff_Eta()
 
   std::string nc = "cEff_Eta";
   TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),600,600);
-  TLegend* l = new TLegend(0.7, 0.15, 0.94,.32);
+  TLegend l(0.7, 0.15, 0.94,.32);
   const int color[6] = {kBlack, kRed, kGreen, kBlue, kMagenta, kTeal};
   for (int icut=0; icut <=4; icut++) {
     std::stringstream ptCut;
@@ -88,9 +88,9 @@ TCanvas* pEff_Eta()
     h->SetMarkerColor(color[icut]);
     if (icut==0)h->DrawCopy();else h->DrawCopy("same");
     std::string nameCut = ptCut.str()+" GeV/c"; if (icut==0) nameCut = "no p_{T} cut";
-    l->AddEntry(h,nameCut.c_str());
+    l.AddEntry(h,nameCut.c_str());
   }
-  l->Draw();
+  l.DrawClone();
   return c;
 }
 
@@ -105,7 +105,7 @@ TCanvas* pEff_Pt(std::string opt)
   TCanvas* c = new TCanvas(nc.c_str(),nc.c_str(),1400,500);
   c->Divide(3,1);
   std::string where[]={"_Bar","_Int","_End"};
-  TLegend* l = new TLegend(0.7, 0.15, 0.94,.52); 
+  TLegend l(0.7, 0.15, 0.94,.52); 
   const int color[6] = {kBlack, kRed, kGreen, kBlue, kMagenta, kTeal};
   for (int i=1; i<=3; ++i) {
     TVirtualPad * p = c->cd(i); p->SetLogx(1);  p->SetGrid(0,1);
@@ -138,9 +138,9 @@ TCanvas* pEff_Pt(std::string opt)
       h->SetMarkerColor(color[icut]);
       if (icut==0)h->DrawCopy();else h->DrawCopy("same");
       std::string nameCut = ptCut.str()+" GeV/c"; if (icut==0) nameCut = "no p_{T} cut";
-      if (i==1) l->AddEntry(h,nameCut.c_str());
+      if (i==1) l.AddEntry(h,nameCut.c_str());
     }
-    l->Draw();
+    l.DrawClone();
   }
   return c;
 }
@@ -158,9 +158,7 @@ TCanvas* pEff_RpcPtCut_Q()
   std::string what[]={"_Qeq0","_Qgt0"};
   const int color[6] = {kBlack, kRed, kGreen, kBlue, kMagenta, kTeal};
   for (int i=1; i<=2; ++i) {
-    TLegend* l;
-    if (i==1) l = new TLegend(0.68, 0.51, 0.92,.88);
-    if (i==2) l = new TLegend(0.68, 0.15, 0.92,.52);
+    TLegend l = (i==1) ? TLegend(0.68, 0.51, 0.92,.88) : TLegend(0.68, 0.15, 0.92,.52);
     TVirtualPad * p = c->cd(i); p->SetLogx(1);  p->SetGrid(0,1);
     TH1D* hD=(TH1D*)gROOT->FindObject( ("hEff_PtDenom"+what[i-1]).c_str());
     if (!hD) {
@@ -191,9 +189,9 @@ TCanvas* pEff_RpcPtCut_Q()
       h->SetMarkerColor(color[icut]);
       if (icut==0)h->DrawCopy();else h->DrawCopy("same");
       std::string nameCut = ptCut.str()+" GeV/c"; if (icut==0) nameCut = "no p_{T} cut";
-      l->AddEntry(h,nameCut.c_str());
+      l.AddEntry(h,nameCut.c_str());
     }
-    l->Draw();
+    l.DrawClone();
   }
   return c;
 }

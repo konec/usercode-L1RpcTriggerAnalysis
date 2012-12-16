@@ -14,6 +14,8 @@
 #include <map>
 #include "utilsPlotsSaver.h"
 #include "utilsHistoFromGraph.h"
+#include "utilsObjArray.h"
+
 //#include "utilsDivideErr.C"
 
 
@@ -74,6 +76,46 @@ void pRpcMiscWrongPT_helper(TH2D* h)
   t.DrawText(2.1,6.3, entr.str().c_str());
 }
 
+
+TCanvas* pRpcMiscEffVsRun(std::string option="")
+{
+  string cName = "cRpcMiscEffVsRun"+option;
+  TCanvas * c = new TCanvas(cName.c_str(),"cRpcMiscEffVsRun",1000,500);
+  TGraph* grEff = (TGraph*)gROOT->FindObject("hGraph_RunEff");
+  if(!grEff) return 0;
+  TH1D histoEff = runHistoFromGraph(grEff);
+  histoEff.SetYTitle("L1Rpc efficiency");
+  histoEff.SetMaximum(0.95);
+  histoEff.SetMinimum(0.75);
+  fillHistoFromGraph(histoEff, grEff);
+  histoEff.DrawCopy("E0");
+
+  c->SetTicky(0); // remove axis on the right 
+  c->SetGridy(0);
+  c->SetRightMargin(gPad->GetLeftMargin());
+
+  if (strcmp(option.c_str(),"") != 0) {
+    std::string grName = "gr_"+option;
+//    TGraph* graph = (TGraph*)gROOT->FindObject(grName.c_str());
+    TGraph* graph = (TGraph*) g_L1RpcGlobalTObjects.FindObject(grName.c_str());
+    TH1D hPress(histoEff);
+    hPress.Reset("hTMPKOKO");
+    fillHistoFromGraph(hPress, graph);
+    std::pair<TH1D,TGaxis* > out =getDatOnRef( hPress,   histoEff);
+    out.first.DrawCopy("same E0");
+    TGaxis * axis = out.second;
+    if (strcmp(option.c_str(),"Pressure")==0) axis->SetTitle("Pressure  [mbar]");
+    if (strcmp(option.c_str(),"Humidity")==0) axis->SetTitle("Humidity");
+    std::string axName="axEff"+option;
+    axis->SetName(axName.c_str());
+    axis->Draw();
+  }
+
+  printRunsOnPlotLinScale(&histoEff);
+
+  return c;
+  
+}
 /////////////////////////////////////////////////////////
 TCanvas* pRpcMiscPurVsRun(std::string option="")
 {
@@ -85,8 +127,9 @@ TCanvas* pRpcMiscPurVsRun(std::string option="")
   histoPur.SetYTitle("good/bad events");
   histoPur.SetMarkerStyle(25);
   histoPur.SetMarkerColor(2);
-  histoPur.SetMaximum(99.);
-  histoPur.SetMinimum(0.01);
+  histoPur.SetMaximum(400);
+//  histoPur.SetMaximum(0.8);
+  histoPur.SetMinimum(0.1);
   histoPur.GetXaxis()->SetNdivisions(-205);
   histoPur.GetXaxis()->SetLabelSize(0.045);
   histoPur.GetYaxis()->SetTitleOffset(1.2);
@@ -119,13 +162,13 @@ TCanvas* pRpcMiscPurVsRun(std::string option="")
   return c;
 }
 
-
 //////////////////////////////////////////////////////////
 TCanvas* pRpcMiscEffVsClu()
 {
   TCanvas * c = new TCanvas("cRpcMiscEffVsClu","cRpcMiscEffVsClu",500,500);
   TGraph* gr_Eff = (TGraph*)gROOT->FindObject("hGraph_RunEff");
   TGraph* gr_Clu = (TGraph*)gROOT->FindObject("hGraph_RunClu");
+  std::cout <<"HERE "<<gr_Eff->GetN()<<" "<<gr_Clu->GetN()<<std::endl;
   if ( gr_Eff->GetN() !=  gr_Clu->GetN()) return c;
   
 //  TGraphErrors * grEffClu = (TGraphErrors*)gROOT->FindObject("grEffClu");
@@ -147,8 +190,8 @@ TCanvas* pRpcMiscEffVsClu()
     grEffClu->SetPointError(i, vCluErr, vEffErr);
   }
   TH1D hdummy("hDummy","hDummy", 20, 2.0, 2.4); 
-  hdummy.SetMinimum(0.85); 
-  hdummy.SetMaximum(0.92); 
+  hdummy.SetMinimum(0.74); 
+  hdummy.SetMaximum(0.95); 
   hdummy.GetXaxis()->SetNdivisions(-204);
   hdummy.SetXTitle("Cluster size");
   hdummy.SetYTitle("L1Rpc efficiency");
@@ -165,6 +208,57 @@ TCanvas* pRpcMiscEffVsClu()
     gr->GetHistogram()->GetYaxis()->SetTitle(Form("%s efficiency",region.Data()));
   } else { // total
     gr->GetHistogram()->GetYaxis()->SetTitle("Efficiency");
+  }
+*/
+  c->Modified();
+
+
+  return c;
+}
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+TCanvas* pRpcMiscPurVsClu()
+{
+  TCanvas * c = new TCanvas("cRpcMiscPurVsClu","cRpcMiscPurVsClu",500,500);
+  TGraph* gr_Pur = (TGraph*)gROOT->FindObject("hGraph_RunPur");
+  TGraph* gr_Clu = (TGraph*)gROOT->FindObject("hGraph_RunClu");
+  if ( gr_Pur->GetN() !=  gr_Clu->GetN()) return c;
+  
+  TGraphErrors * grPurClu = new TGraphErrors;
+  grPurClu->SetName("grPurClu");
+  grPurClu->Set( gr_Pur->GetN());
+  for (Int_t i=0; i < gr_Pur->GetN(); ++i) {
+    double rTMP1, rTMP2, vPur, vClu;
+    gr_Pur->GetPoint(i,rTMP1, vPur);
+    gr_Clu->GetPoint(i,rTMP2, vClu);
+    double vPurErr=  gr_Pur->GetErrorY(i);
+    double vCluErr=  gr_Clu->GetErrorY(i);
+    unsigned int iRun1 = static_cast<unsigned int>( rTMP1+1.e-6);
+    unsigned int iRun2 = static_cast<unsigned int>( rTMP2+1.e-6);
+    if (iRun1 != iRun2) { std::cout <<"RUN1  RUN2, problem, exit"<<std::endl; return c; }
+    
+    grPurClu->SetPoint(i, vClu, vPur);
+    grPurClu->SetPointError(i, vCluErr, vPurErr);
+  }
+  TH1D hdummy("hDummy","hDummy", 20, 2.0, 2.6); 
+  hdummy.SetMinimum(0.5); 
+  hdummy.SetMaximum(400); 
+  hdummy.GetXaxis()->SetNdivisions(-204);
+  hdummy.SetXTitle("Cluster size");
+  hdummy.SetYTitle("L1Rpc Purity");
+  hdummy.GetYaxis()->SetTitleOffset(1.7);
+  hdummy.DrawCopy("axis");
+  grPurClu->SetMarkerStyle(25);
+  grPurClu->SetMarkerColor(2);
+  grPurClu->Draw("same P E0"); // draw errors, disable clipping
+  c->Update();
+/*
+  grPurClu->GetHistogram()->GetXaxis()->SetNdivisions(-5);
+  grPurClu->GetHistogram()->GetXaxis()->SetLabelSize(0.035);
+  if( region!="" ){ // barrel or endcap
+    gr->GetHistogram()->GetYaxis()->SetTitle(Form("%s Puriciency",region.Data()));
+  } else { // total
+    gr->GetHistogram()->GetYaxis()->SetTitle("Puriciency");
   }
 */
   c->Modified();
@@ -505,29 +599,33 @@ void plotsRpcMisc()
 //  utilsPlotsSaver(pRpcMiscWrongPT());
   
 //  gStyle->SetPaintTextFormat(".2E");  // modify text value style
-  utilsPlotsSaver(pRpcMiscTime());    // trigger timing
+//  utilsPlotsSaver(pRpcMiscTime());    // trigger timing
 //  gStyle->SetPaintTextFormat();       // restore default style
 
-/*
   
 //  int digits=TGaxis::GetMaxDigits();  // store current style
 //  TGaxis::SetMaxDigits(4);            // modify style
-  utilsPlotsSaver(pRpcMiscRunHisto());// total eff
+//  utilsPlotsSaver(pRpcMiscRunHisto());// total eff
 //  TGaxis::SetMaxDigits(digits);       // restore previous style
 
-  utilsPlotsSaver(pRpcMiscEffandPressVsRun());        // total eff
+//  utilsPlotsSaver(pRpcMiscEffandPressVsRun());        // total eff
 
   //utilsPlotsSaver(pRpcMiscEffandPressVsRun("Barrel"));// barrel eff + press
   //utilsPlotsSaver(pRpcMiscEffandPressVsRun("Endcap"));// endcap eff + press
   //utilsPlotsSaver(pRpcMiscEffandClSizeVsRun("Barrel")); 
   //utilsPlotsSaver(pRpcMiscEffandClSizeVsRun("Endcap")); 
 
-  utilsPlotsSaver(pRpcMiscEffandHumidityVsRun());     // total eff + humidity 
+//  utilsPlotsSaver(pRpcMiscEffandHumidityVsRun());     // total eff + humidity 
 
   //utilsPlotsSaver(pRpcMiscEffandHumidityVsRun("Barrel"));// barrel eff + humidity 
   //utilsPlotsSaver(pRpcMiscEffandHumidityVsRun("Endcap"));// endcap eff + humidity 
-   utilsPlotsSaver(pRpcMiscEffVsClu());
-
-   utilsPlotsSaver(pRpcMiscPurVsRun());
+/*
 */
+   utilsPlotsSaver(pRpcMiscEffVsClu());
+   utilsPlotsSaver(pRpcMiscPurVsRun());
+   utilsPlotsSaver(pRpcMiscPurVsClu());
+
+   utilsPlotsSaver(pRpcMiscEffVsRun("Pressure"));
+   utilsPlotsSaver(pRpcMiscEffVsRun("Humidity"));
+//   utilsPlotsSaver(pRpcMiscEffVsRun());
 }

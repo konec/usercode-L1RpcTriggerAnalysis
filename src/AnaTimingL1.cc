@@ -6,6 +6,7 @@
 #include "TGraphErrors.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/EventObjBXExtra.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
@@ -22,11 +23,19 @@ namespace {
   TH1D *hTimingL1_RMS;
   TH1D *hTimingL1_DR_Dt, *hTimingL1_DR_Rpc, *hTimingL1_DR_Csc, *hTimingL1_DR_Gmt;
 
-  std::map<std::string, TH1D* > hmap;
+//  std::map<std::string, TH1D* > hmap;
+
   std::vector<double> drs = {9999, 0.5, 0.3, 0.2, 0.1, 0.06};
   std::vector<std::string> tags = {"Rpc","Dt","Csc","Gmt","RpcEmu","GmtEmu"};
   const unsigned int nptBins = 7;
   double ptBins[nptBins+1]={0.1, 5., 7., 12.,16., 20., 25.,161.};
+  const unsigned int nptCuts = 3;
+  double ptCuts[nptCuts+1]={0., 6., 16.};
+
+  TH1D* hL1ptBxForDR[6][nptBins][nptCuts]={ { {0} } };
+  TH1D* hL1ptBxForDR_noBXm2[6][nptBins][nptCuts]={ { {0} } };
+  TH1D* hL1ptBxForDR_noBXp2[6][nptBins][nptCuts]={ { {0} } };
+  TH1D* hL1DRForPt[6][6] = {{0}};
 }
 
 void AnaTimingL1::init(TObjArray& histos)
@@ -56,23 +65,40 @@ void AnaTimingL1::init(TObjArray& histos)
   // 1D timing histos
   //
   for (std::vector<std::string>::const_iterator is = tags.begin(); is !=  tags.end(); is++) {
+    unsigned int itag = is-tags.begin();
 
     //
     // different DR
     //
     for (std::vector<double>::const_iterator id = drs.begin(); id != drs.end(); id++) {
+      unsigned int idr = id-drs.begin();
       std::stringstream str;
       str << "hTimingL1_"<<*is<<"_DR"<<*id;
-      TH1D *h = new TH1D(str.str().c_str(), str.str().c_str(), 5,-2.5,2.5); h->Sumw2(); histos.Add(h); hmap[str.str()] = h;
+      TH1D *h = new TH1D(str.str().c_str(), str.str().c_str(), 5,-2.5,2.5); h->Sumw2(); histos.Add(h); 
+      hL1DRForPt[itag][idr] = h;
     }
 
     //
     // different L1Candpt
     //
-    for (unsigned int ipt = 0; ipt < nptBins; ipt++) {
-      std::stringstream str;
-      str << "hTimingL1_"<<*is<<"_PT"<<ptBins[ipt];
-      TH1D *h = new TH1D(str.str().c_str(), str.str().c_str(), 5,-2.5,2.5); h->Sumw2(); histos.Add(h); hmap[str.str()] = h;
+    for (unsigned int iptL1 = 0; iptL1 < nptBins; iptL1++) {
+      for (unsigned int iptMu = 0; iptMu < nptCuts; iptMu++) {
+        std::stringstream str;
+        str << "hTimingL1_"<<*is<<"_L1PT"<<ptBins[iptL1]<<"_MuPT"<<ptCuts[iptMu];
+        TH1D *h = new TH1D(str.str().c_str(), str.str().c_str(), 5,-2.5,2.5); h->Sumw2(); histos.Add(h); 
+        hL1ptBxForDR[itag][iptL1][iptMu]=h;
+          //noBXm2
+        {
+          std::string name = str.str()+"_noBXm2";
+          TH1D *h = new TH1D(name.c_str(), name.c_str(), 5,-2.5,2.5); h->Sumw2(); histos.Add(h); 
+          hL1ptBxForDR_noBXm2[itag][iptL1][iptMu]=h;
+        }
+        {
+          std::string name = str.str()+"_noBXp2";
+          TH1D *h = new TH1D(name.c_str(), name.c_str(), 5,-2.5,2.5); h->Sumw2(); histos.Add(h); 
+          hL1ptBxForDR_noBXp2[itag][iptL1][iptMu]=h;
+        }
+      }
     }
   }
   histos.Add( new TH1D("hPrefire","hPrefire",nptBins, ptBins) );
@@ -89,69 +115,83 @@ void  AnaTimingL1::resume(TObjArray& histos)
 
 }
 
-void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl *l1Coll)
+void  AnaTimingL1::run(const EventObj* ev_noBx, const MuonObj* muon, const L1ObjColl *l1Coll)
 {
   if (!muon->isGlobal()) return;
+  const EventObjBXExtra *ev = dynamic_cast<const EventObjBXExtra*>(ev_noBx);
+  if (!ev) return;
 
 
   //
   // main 1D histos, BX vs DR and BX vs PT 
   //
-  for (std::vector<std::string>::const_iterator is = tags.begin(); is !=  tags.end(); is++) {
+//  for (std::vector<std::string>::const_iterator is = tags.begin(); is !=  tags.end(); is++) {
+  for (unsigned int itag=0; itag < tags.size(); itag++) {
     L1ObjColl coll;
-    if ( *is == "Rpc"    ) coll = l1Coll->l1RpcColl();  
-    if ( *is == "RpcEmu" ) coll = l1Coll->l1RpcCollEmu();  
-    if ( *is == "Dt"     ) coll = l1Coll->selectByType(L1Obj::DT);
-    if ( *is == "Csc"    ) coll = l1Coll->selectByType(L1Obj::CSC);
-    if ( *is == "Gmt"    ) coll = l1Coll->selectByType(L1Obj::GMT);
-    if ( *is == "GmtEmu" ) coll = l1Coll->selectByType(L1Obj::GMT_emu);
+    if ( tags[itag] == "Rpc"    ) coll = l1Coll->l1RpcColl();  
+    if ( tags[itag] == "RpcEmu" ) coll = l1Coll->l1RpcCollEmu();  
+    if ( tags[itag] == "Dt"     ) coll = l1Coll->selectByType(L1Obj::DT);
+    if ( tags[itag] == "Csc"    ) coll = l1Coll->selectByType(L1Obj::CSC);
+    if ( tags[itag] == "Gmt"    ) coll = l1Coll->selectByType(L1Obj::GMT); //.selectByQuality(4,7);
+    if ( tags[itag] == "GmtEmu" ) coll = l1Coll->selectByType(L1Obj::GMT_emu); //.selectByQuality(4,7);
+    if (!coll) continue;
 
     
     // timing for different DR
-    for (std::vector<double>::const_iterator idr = drs.begin(); idr != drs.end(); idr++) {
-      std::stringstream name; name<<"hTimingL1_"<<*is<<"_DR"<<*idr;
-      for (int ibx=-2; ibx <=2; ibx++) {
-        L1ObjColl scoll = coll.selectByDeltaR(*idr).selectByBx(ibx,ibx).selectByPtMin(theConfig.getParameter<double>("l1ptCutForDR"));
-        if(scoll.getL1Objs().size() >0) hmap[name.str()]->Fill(ibx);
+    static double l1ptCutForDR = theConfig.getParameter<double>("l1ptCutForDR");
+    L1ObjColl collPt = coll.selectByPtMin(l1ptCutForDR);
+    if (collPt) {
+      for (std::vector<double>::const_iterator idr = drs.begin(); idr != drs.end(); idr++) {
+        for (int ibx=-2; ibx <=2; ibx++) {
+          if (collPt.isMatching_DRBx(*idr,ibx)) hL1DRForPt[itag][idr-drs.begin()]->Fill(ibx);
+        }
       }
     }
     
+    static double l1DRCutForpT = theConfig.getParameter<double>("l1DRCutForpT");
+    L1ObjColl collDR = coll.selectByDeltaR( l1DRCutForpT);
+    if (collDR) { 
     // timing for different L1pt
-    for (unsigned int ipt=0; ipt < nptBins; ipt++) {
-      std::stringstream name; name<<"hTimingL1_"<<*is<<"_PT"<<ptBins[ipt];
-      for (int ibx=-2; ibx <=2; ibx++) {
-        L1ObjColl scoll = coll.selectByDeltaR(theConfig.getParameter<double>("l1DRCutForpT")).selectByBx(ibx,ibx).selectByPt(ptBins[ipt],ptBins[ipt+1]);
-        if(scoll.getL1Objs().size() >0) hmap[name.str()]->Fill(ibx);
-      }
-    } 
-  }
+      for (unsigned int iptL1=0; iptL1 < nptBins; iptL1++) {
+        for (int ibx=-2; ibx <=2; ibx++) {
+          if (!collDR.isMatching_PtminPtmaxBx(ptBins[iptL1], ptBins[iptL1+1],ibx)) continue; 
+          for (unsigned int iptMu=0; iptMu < nptCuts; iptMu++) {
+            if (muon->pt() < ptCuts[iptMu]) continue;
+            hL1ptBxForDR[itag][iptL1][iptMu]->Fill(ibx); 
+            if (!ev->hasValidBX_Minus2) hL1ptBxForDR_noBXm2[itag][iptL1][iptMu]->Fill(ibx);
+            if (!ev->hasValidBX_Plus2)  hL1ptBxForDR_noBXp2[itag][iptL1][iptMu]->Fill(ibx);
+          }
+        }
+      } 
+    }
 
-  //
-  // DR histos
-  //
-  std::vector<double> deltaR;
-  deltaR = l1Coll->l1RpcColl().getL1ObjDeltaR();
-  for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Rpc->Fill(deltaR[i]);
-  deltaR = l1Coll->selectByType(L1Obj::CSC).getL1ObjDeltaR();
-  for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Csc->Fill(deltaR[i]);
-  deltaR = l1Coll->selectByType(L1Obj::DT).getL1ObjDeltaR();
-  for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Dt->Fill(deltaR[i]);
-  deltaR = l1Coll->selectByType(L1Obj::GMT).getL1ObjDeltaR();
-  for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Gmt->Fill(deltaR[i]);
+    //
+    // DR histos
+    //
+    const std::vector<double> & deltaR = coll.getL1ObjDeltaR();
+    if (tags[itag]=="Rpc") for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Rpc->Fill(deltaR[i]);
+    if (tags[itag]=="Dt" ) for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Dt->Fill(deltaR[i]);
+    if (tags[itag]=="Csc") for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Csc->Fill(deltaR[i]);
+    if (tags[itag]=="Gmt") for (unsigned int i=0; i< deltaR.size(); ++i) hTimingL1_DR_Gmt->Fill(deltaR[i]);
+  }
 
 
   //
   // tight correlation histograms;
   //
-  if (muon->pt() >= theConfig.getParameter<double>("muptCutForCorrTight") ) {
-    double cutl1DR = theConfig.getParameter<double>("l1DRCutForCorrTight");
-    double cutl1pt = theConfig.getParameter<double>("l1ptCutForCorrTight");
-    std::vector<L1Obj> l1Cscs = l1Coll->selectByType(L1Obj::CSC).selectByDeltaR(cutl1DR).selectByPtMin(cutl1pt).getL1Objs();
-    std::vector<L1Obj> l1Dts  = l1Coll->selectByType(L1Obj::DT ).selectByDeltaR(cutl1DR).selectByPtMin(cutl1pt).getL1Objs();
-    std::vector<L1Obj> l1RpcEmus =        l1Coll->l1RpcCollEmu().selectByDeltaR(cutl1DR).selectByPtMin(cutl1pt).getL1Objs();
-    for (unsigned int ir=0; ir < l1RpcEmus.size(); ir++) {
-      for (unsigned int io=0; io < l1Dts.size(); io++) hTimingL1_RpcVsDtTight->Fill( l1RpcEmus[ir].bx, l1Dts[io].bx);
-      for (unsigned int io=0; io < l1Cscs.size(); io++) hTimingL1_RpcVsCscTight->Fill( l1RpcEmus[ir].bx, l1Cscs[io].bx); 
+  static double muptCutForCorrTight = theConfig.getParameter<double>("muptCutForCorrTight");
+  static double l1DRCutForCorrTight = theConfig.getParameter<double>("l1DRCutForCorrTight");
+  static double l1ptCutForCorrTight = theConfig.getParameter<double>("l1ptCutForCorrTight");
+  if (muon->pt() >= muptCutForCorrTight) {
+    L1ObjColl collTight = l1Coll->selectByPtMin(l1ptCutForCorrTight).selectByDeltaR(l1DRCutForCorrTight);
+    if (collTight) { 
+      std::vector<L1Obj> l1Cscs = collTight.selectByType(L1Obj::CSC).getL1Objs();
+      std::vector<L1Obj> l1Dts  = collTight.selectByType(L1Obj::DT ).getL1Objs();
+      std::vector<L1Obj> l1RpcEmus = collTight.l1RpcCollEmu().getL1Objs();
+      for (unsigned int ir=0; ir < l1RpcEmus.size(); ir++) {
+        for (unsigned int io=0; io < l1Dts.size(); io++) hTimingL1_RpcVsDtTight->Fill( l1RpcEmus[ir].bx, l1Dts[io].bx);
+        for (unsigned int io=0; io < l1Cscs.size(); io++) hTimingL1_RpcVsCscTight->Fill( l1RpcEmus[ir].bx, l1Cscs[io].bx); 
+      }
     }
   }
 
@@ -173,8 +213,8 @@ void  AnaTimingL1::run(const EventObj* ev, const MuonObj* muon, const L1ObjColl 
   // first candidate arrival histos (from data only)
   //
   {
-    double ptMin = theConfig.getParameter<double>("l1ptCutForDR");
-    double drMax = theConfig.getParameter<double>("l1DRCutForpT"); 
+    static double ptMin = theConfig.getParameter<double>("l1ptCutForDR");
+    static double drMax = theConfig.getParameter<double>("l1DRCutForpT"); 
     std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByPtMin(ptMin).selectByDeltaR(drMax).getL1Objs();
     std::vector<L1Obj> l1Cscs = l1Coll->selectByType(L1Obj::CSC).selectByPtMin(ptMin).selectByDeltaR(drMax).getL1Objs();
     std::vector<L1Obj> l1Dts  = l1Coll->selectByType(L1Obj::DT).selectByPtMin(ptMin).selectByDeltaR(drMax).getL1Objs();

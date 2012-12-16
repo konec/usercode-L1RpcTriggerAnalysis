@@ -34,7 +34,7 @@ bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
 
 
   bool okL1 = false;
-  std::vector<std::string> acceptL1_Names = theConfig.getParameter<std::vector<std::string> >("acceptL1_Names");
+  std::vector<std::string> acceptL1_Names = theConfig.exists("acceptL1_Names") ?  theConfig.getParameter<std::vector<std::string> >("acceptL1_Names") : std::vector<std::string>();
   for (CIT it=algosL1.begin(); it != algosL1.end(); ++it) {
     std::string nameAlgo = theMenuL1[*it];
     if (theAlgosL1.find(nameAlgo) == theAlgosL1.end()) theAlgosL1[nameAlgo]=0;    
@@ -48,10 +48,16 @@ bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
   for (CIT it=algosHLT.begin(); it != algosHLT.end(); ++it) {
     std::string nameAlgo = theMenuHLT[*it];
     if (theAlgosHLT.find(nameAlgo) == theAlgosHLT.end()) theAlgosHLT[nameAlgo]=0;    
-    bool isMu = (  ((nameAlgo.find("Mu") != std::string::npos) && (nameAlgo.find("Multi") == std::string::npos)) || (nameAlgo.find("muon") != std::string::npos) );
+    bool isMu = (    (    (nameAlgo.find("Mu") != std::string::npos   ) 
+                       && (nameAlgo.find("Multi") == std::string::npos) ) 
+                  || (     nameAlgo.find("muon") != std::string::npos   )  );
+    if ( theConfig.getParameter<bool>("acceptHLT_OtherThanMuPhysicsAlCa") 
+         && !isMu 
+         && (nameAlgo.find("Physics") == std::string::npos) 
+         && (nameAlgo.find("AlCa") == std::string::npos) ) okHLT = true;
     if (theConfig.getParameter<bool>("acceptHLT_Mu") && isMu) okHLT = true; 
-    if (theConfig.getParameter<bool>("acceptHLT_Physics") && (nameAlgo.find("Physics") != std::string::npos) ) okHLT = true;
-    if (theConfig.getParameter<bool>("acceptHLT_OtherThanMuAndPhysics") && !isMu && (nameAlgo.find("Physics") == std::string::npos) ) okHLT = true;
+    if (theConfig.getParameter<bool>("acceptHLT_L1")       && (nameAlgo.find("HLT_L1")   != std::string::npos) ) okHLT = true;
+    if (theConfig.getParameter<bool>("acceptHLT_Physics")  && (nameAlgo.find("Physics")  != std::string::npos) ) okHLT = true;
     if (theConfig.getParameter<bool>("acceptHLT_ZeroBias") && (nameAlgo.find("ZeroBias") != std::string::npos) ) okHLT = true;
   }
 
