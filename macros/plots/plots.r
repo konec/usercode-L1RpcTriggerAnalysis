@@ -32,6 +32,8 @@
   gROOT->LoadMacro("plotsClu.C+");
   gROOT->LoadMacro("plotsSynch.C+");
   gROOT->LoadMacro("plotsTimingL1.C+");
+  gROOT->LoadMacro("plotsMenu.C+");
+  gROOT->LoadMacro("plotsEvent.C+");
 
   if (std::string(gStyle->GetName()) != "L1RpcStyle" ) {
     if (0==gROOT->GetListOfStyles()->FindObject("L1RpcStyle")) utilsL1RpcStyle();
@@ -63,23 +65,28 @@
   //
   // plots
   //
-  //  plotsMuonDist();
-  //  plotsEff();
-  //  plotsRpcVsOth();
-  //  plotsDet();
-  //  plotsClu();
-  plotsRpcMisc();
-  //plotsSynch();
-  plotsTimingL1();
+//  plotsMuonDist();
+//  plotsMenu();
+//  plotsEvent();
 
+//   plotsEff();
+//    plotsRpcVsOth();
+//    plotsDet();
+//    plotsClu();
+//    plotsRpcMisc();
+//    plotsSynch();
+  plotsTimingL1();
 
 
 
   //
   // cleanup
   //
-  file.Close();
+  g_L1RpcGlobalTObjects.Delete();
+//  file.Close();
+   
 
+  gROOT->ProcessLine(".U plotsMenu_C.so");
   gROOT->ProcessLine(".U plotsTimingL1_C.so");
   gROOT->ProcessLine(".U plotsSynch_C.so");
   gROOT->ProcessLine(".U plotsClu_C.so");
@@ -92,5 +99,6 @@
   gROOT->ProcessLine(".U utilsHistoFromGraph_C.so");
   gROOT->ProcessLine(".U utilsObjArray_C.so");
   gROOT->ProcessLine(".U utilsPlotsSaver_C.so");
+
   std::cout <<"----------------->END"<<std::endl;
 }
