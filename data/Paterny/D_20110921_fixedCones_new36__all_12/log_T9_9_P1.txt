@@ -1,0 +1,171 @@
+orType: 0
+PatternManager: Building from file: input.txt; towers: 9...9; PACs: 1...1
+ Warning: Found A and B
+A: 1 B: 1 records:5418
+Starting selection for: P 9 1
+Or type: Classic
+PtCode 31, choosing from 5418
+  Sorting
+  Sorted
+ Added pattern with eff 0.079922
+  -> 32 0 16 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0795447
+  -> 33 1 17 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0778469
+  -> 35 3 19 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0759605
+  -> 34 2 18 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0752059
+  -> 37 5 21 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0738226
+  -> 36 4 20 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0679746
+  -> 38 6 22 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0669685
+  -> 39 7 23 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0486072
+  -> 40 7 23 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.047664
+  -> 39 6 22 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0459033
+  -> 38 5 21 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0434509
+  -> 36 3 19 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0424448
+  -> 35 2 18 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0408099
+  -> 34 1 17 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0399296
+  -> 37 4 20 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.0387349
+  -> 33 0 16 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.00415015
+  -> 36 3 20 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ Added pattern with eff 0.00402439
+  -> 39 6 23 99 99 99,0_0 0_0 0_0 0_0 0_0 0_0 0_0 0_0 0
+ ptCode: 31 eff: 0.952965 pats: 18
+PtCode 30, choosing from 5400
+  Sorting
+  Sorted
+ ptCode: 30 eff: 0.952762 pats: 3
+PtCode 29, choosing from 5397
+  Sorting
+  Sorted
+ ptCode: 29 eff: 0.953929 pats: 4
+PtCode 28, choosing from 5393
+  Sorting
+  Sorted
+ ptCode: 28 eff: 0.951829 pats: 3
+PtCode 27, choosing from 5390
+  Sorting
+  Sorted
+ ptCode: 27 eff: 0.951344 pats: 4
+PtCode 26, choosing from 5386
+  Sorting
+  Sorted
+ ptCode: 26 eff: 0.954324 pats: 5
+PtCode 25, choosing from 5381
+  Sorting
+  Sorted
+ ptCode: 25 eff: 0.950774 pats: 4
+PtCode 24, choosing from 5377
+  Sorting
+  Sorted
+ ptCode: 24 eff: 0.956224 pats: 7
+PtCode 23, choosing from 5370
+  Sorting
+  Sorted
+ ptCode: 23 eff: 0.951772 pats: 4
+PtCode 22, choosing from 5366
+  Sorting
+  Sorted
+ ptCode: 22 eff: 0.954692 pats: 3
+PtCode 21, choosing from 5363
+  Sorting
+  Sorted
+ ptCode: 21 eff: 0.962851 pats: 3
+PtCode 20, choosing from 5360
+  Sorting
+  Sorted
+ ptCode: 20 eff: 0.950325 pats: 6
+PtCode 19, choosing from 5354
+  Sorting
+  Sorted
+ ptCode: 19 eff: 0.952363 pats: 13
+PtCode 18, choosing from 5341
+  Sorting
+  Sorted
+ ptCode: 18 eff: 0.951812 pats: 19
+PtCode 17, choosing from 5322
+  Sorting
+  Sorted
+ ptCode: 17 eff: 0.950222 pats: 15
+PtCode 16, choosing from 5307
+  Sorting
+  Sorted
+ ptCode: 16 eff: 0.951285 pats: 24
+PtCode 15, choosing from 5283
+  Sorting
+  Sorted
+ ptCode: 15 eff: 0.90322 pats: 2
+PtCode 14, choosing from 5281
+  Sorting
+  Sorted
+ ptCode: 14 eff: 0.903246 pats: 12
+PtCode 13, choosing from 5203
+  Sorting
+  Sorted
+ ptCode: 13 eff: 0.905524 pats: 14
+PtCode 12, choosing from 5123
+  Sorting
+  Sorted
+ ptCode: 12 eff: 0.900019 pats: 16
+PtCode 11, choosing from 5016
+  Sorting
+  Sorted
+ ptCode: 11 eff: 0.900081 pats: 17
+PtCode 10, choosing from 4882
+  Sorting
+  Sorted
+ ptCode: 10 eff: 0.901542 pats: 30
+PtCode 9, choosing from 4648
+  Sorting
+  Sorted
+ ptCode: 9 eff: 0.900335 pats: 61
+PtCode 8, choosing from 4168
+  Sorting
+  Sorted
+ ptCode: 8 eff: 0.900981 pats: 40
+PtCode 7, choosing from 3090
+  Sorting
+  Sorted
+ ptCode: 7 eff: 0.900579 pats: 35
+PtCode 6, choosing from 2109
+  Sorting
+  Sorted
+ ptCode: 6 eff: 0.903954 pats: 19
+PtCode 5, choosing from 1671
+  Sorting
+  Sorted
+ ptCode: 5 eff: 0.901754 pats: 1
+PtCode 4, choosing from 1667
+  Sorting
+  Sorted
+ ptCode: 4 eff: 1 pats: 1
+PtCode 3, choosing from 1665
+  Sorting
+  Sorted
+ ptCode: 3 eff: nan pats: 0
+PtCode 2, choosing from 1665
+  Sorting
+  Sorted
+ ptCode: 2 eff: nan pats: 0
+PtCode 1, choosing from 1665
+  Sorting
+  Sorted
+ ptCode: 1 eff: nan pats: 0
+ Total: 383
+TMFGRP max refgroup -1
+ m_patMap footprint: 
+P 9 1 1665 ls9: 1458 ls3: 956 ls1: 8
+Saving to file: out.txt
