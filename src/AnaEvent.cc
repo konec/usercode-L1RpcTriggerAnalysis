@@ -63,9 +63,9 @@ bool AnaEvent::filter(EventObj* ev)
   bool validBXp2 = ( ev->bx+2<=3563   && theValidBX[ev->bx+2] );
 
   //control histograms
-  hEvent_BX->Fill(ev->bx);
 
   if (theUseValidBX_ONLY && !theValidBX[ev->bx]) return false; 
+  hEvent_BX->Fill(ev->bx);
   if (theUseValidBX_NoBxMinus2_ONLY && validBXm2) return false;
   if (theUseValidBX_NoBxPlus2_ONLY  && validBXp2) return false; 
 

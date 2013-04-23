@@ -22,6 +22,8 @@ TCanvas* pEventBx()
   TVirtualPad * pad = c->cd(1);
   pad->SetLogy();
   TH1D* h = (TH1D*)gROOT->FindObject("hEvent_BX_val");
+  //TH1D* h = (TH1D*)gROOT->FindObject("hEvent_BX");
+  //h->GetXaxis()->SetRange(1,300);
   if (h) {
     h->SetMinimum(0.5);
      h->DrawCopy();

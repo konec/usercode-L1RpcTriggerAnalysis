@@ -34,18 +34,26 @@ bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
 
 
   bool okL1 = false;
+  
+  if (debug) std::cout <<"--------------------------------------------------------------"<<std::endl;
+  if (debug) std::cout << "================== L1 names: "<< std::endl;
   std::vector<std::string> acceptL1_Names = theConfig.exists("acceptL1_Names") ?  theConfig.getParameter<std::vector<std::string> >("acceptL1_Names") : std::vector<std::string>();
   for (CIT it=algosL1.begin(); it != algosL1.end(); ++it) {
+    bool aokL1 = false;
     std::string nameAlgo = theMenuL1[*it];
     if (theAlgosL1.find(nameAlgo) == theAlgosL1.end()) theAlgosL1[nameAlgo]=0;    
     bool isMu = ( nameAlgo.find("Mu") != std::string::npos);
-    if (theConfig.getParameter<bool>("acceptL1_OtherThanMu") && !isMu ) okL1 = true;
-    if (theConfig.getParameter<bool>("acceptL1_Mu") &&  isMu) okL1 = true;
-    for ( std::vector<std::string>::const_iterator is=acceptL1_Names.begin(); is != acceptL1_Names.end(); ++is) if (nameAlgo==(*is)) okL1 = true;
+    if (theConfig.getParameter<bool>("acceptL1_OtherThanMu") && !isMu ) aokL1 = true;
+    if (theConfig.getParameter<bool>("acceptL1_Mu") &&  isMu) aokL1 = true;
+    for ( std::vector<std::string>::const_iterator is=acceptL1_Names.begin(); is != acceptL1_Names.end(); ++is) if (nameAlgo==(*is)) aokL1 = true;
+    if (debug) {std::cout <<nameAlgo; if (aokL1) std::cout <<" <--"; std::cout << std::endl; }
+    if (aokL1) okL1=true;
   }
 
   bool okHLT = false;
+  if (debug) std::cout << "================== L1 names: "<< std::endl;
   for (CIT it=algosHLT.begin(); it != algosHLT.end(); ++it) {
+    bool aokHLT = false;
     std::string nameAlgo = theMenuHLT[*it];
     if (theAlgosHLT.find(nameAlgo) == theAlgosHLT.end()) theAlgosHLT[nameAlgo]=0;    
     bool isMu = (    (    (nameAlgo.find("Mu") != std::string::npos   ) 
@@ -54,11 +62,13 @@ bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
     if ( theConfig.getParameter<bool>("acceptHLT_OtherThanMuPhysicsAlCa") 
          && !isMu 
          && (nameAlgo.find("Physics") == std::string::npos) 
-         && (nameAlgo.find("AlCa") == std::string::npos) ) okHLT = true;
-    if (theConfig.getParameter<bool>("acceptHLT_Mu") && isMu) okHLT = true; 
-    if (theConfig.getParameter<bool>("acceptHLT_L1")       && (nameAlgo.find("HLT_L1")   != std::string::npos) ) okHLT = true;
-    if (theConfig.getParameter<bool>("acceptHLT_Physics")  && (nameAlgo.find("Physics")  != std::string::npos) ) okHLT = true;
-    if (theConfig.getParameter<bool>("acceptHLT_ZeroBias") && (nameAlgo.find("ZeroBias") != std::string::npos) ) okHLT = true;
+         && (nameAlgo.find("AlCa") == std::string::npos) ) aokHLT = true;
+    if (theConfig.getParameter<bool>("acceptHLT_Mu") && isMu) aokHLT = true; 
+    if (theConfig.getParameter<bool>("acceptHLT_L1")       && (nameAlgo.find("HLT_L1")   != std::string::npos) ) aokHLT = true;
+    if (theConfig.getParameter<bool>("acceptHLT_Physics")  && (nameAlgo.find("Physics")  != std::string::npos) ) aokHLT = true;
+    if (theConfig.getParameter<bool>("acceptHLT_ZeroBias") && (nameAlgo.find("ZeroBias") != std::string::npos) ) aokHLT = true;
+    if (debug) {std::cout <<nameAlgo; if (aokHLT) std::cout <<" <--"; std::cout << std::endl; }
+    if (aokHLT) okHLT=true;
   }
 
   if (okL1  && okHLT) {

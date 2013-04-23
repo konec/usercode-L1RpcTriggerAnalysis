@@ -3,14 +3,14 @@ process = cms.Process("Analysis")
 import os
 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 10) )
 #
 # For CRAB jobs leave fileNames vector empty.
 # For processing single files insert lines with 'file:/PATH/FILE.root'
 # (there is 255 file limit though).
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
 #  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
-#  '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
+  '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
 #  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
   ),
   skipEvents = cms.untracked.uint32(0)
@@ -60,14 +60,14 @@ process.MessageLogger = cms.Service("MessageLogger",
 #
 # rpc emulator 
 #
-process.load("L1TriggerConfig.RPCTriggerConfig.L1RPCConfig_cff")
+#process.load("L1TriggerConfig.RPCTriggerConfig.L1RPCConfig_cff")
 process.load("L1TriggerConfig.RPCTriggerConfig.RPCBxOrConfig_cff")
 process.load("L1Trigger.RPCTrigger.RPCConeConfig_cff")
 process.load("L1Trigger.RPCTrigger.l1RpcEmulDigis_cfi")
 #process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/Marcin_Wide/')
 #process.rpcconf.PACsPerTower = cms.untracked.int32(1)
-process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/D_20110921_fixedCones_new36__all_12/')
-process.rpcconf.PACsPerTower = cms.untracked.int32(12)
+#process.rpcconf.filedir = cms.untracked.string('UserCode/L1RpcTriggerAnalysis/data/Paterny/D_20110921_fixedCones_new36__all_12/')
+#process.rpcconf.PACsPerTower = cms.untracked.int32(12)
 process.l1RPCBxOrConfig.lastBX = cms.int32(0)
 process.l1RPCBxOrConfig.firstBX = cms.int32(0) 
 

@@ -138,6 +138,25 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
       std::cout<<std::endl; 
     }
 
+/*   
+   if (     event->id == 597978012 
+        ||  event->id == 14791798  
+        ||  event->id == 436261807 
+        ||  event->id == 873776280  
+        ||  event->id == 960307389 
+        ||  event->id == 150097556 
+        ||  event->id == 42062946 
+        ||  event->id == 1064121551 
+        ||  event->id == 1499489591 
+        ||  event->id == 60161631
+        ||  event->id == 624624695
+        ||  event->id == 727298833
+        ||  event->id == 835600542
+        ||  event->id == 216373776
+        ||  event->id == 1107585611
+        ||  event->id == 197907027
+      ) theAnaMenu.debug = true; else theAnaMenu.debug = false;
+*/
 
    // EVENT NUMBER, BX structure etc.
    EventObjBXExtra eventBx(*event);
@@ -147,15 +166,13 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    // ANALYSE AND FILTER TRIGGER MENU
    if ( !theAnaMenu.filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("filterByAnaMenu") ) continue;
 
-/*
 //   theAnaRpcVsOth.run(muon,l1ObjColl);
 //   theAnaEff.run(muon, l1ObjColl);
 //   theAnaRpcMisc.run(event,muon,l1ObjColl);
 //   theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
 //   theAnaEmu.run ( event, muon, l1ObjColl);
-//   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
+   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
 //   theAnaClu.run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
-*/
    theAnaTimingL1.run( &eventBx, muon, l1ObjColl);
 
   }

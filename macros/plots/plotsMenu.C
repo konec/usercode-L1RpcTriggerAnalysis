@@ -28,7 +28,7 @@ TCanvas* pMenu(std::string what)
   h->SetFillStyle(3003);
   h->LabelsOption("v");
   h->GetYaxis()->SetLabelOffset(0.005);
-//  h->GetXaxis()->SetRange(400,500);
+//  h->GetXaxis()->SetRange(550,680);
   h->DrawCopy();
   return c;
 }

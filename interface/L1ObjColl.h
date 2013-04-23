@@ -2,6 +2,7 @@
 #define L1ObjColl_H
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include <vector>
 #include <cmath>
 
@@ -43,14 +44,36 @@ public:
   operator bool() const {return !theL1Obj.empty(); } 
   bool operator!() const {return theL1Obj.empty(); }
 
-  inline bool isMatching_DRBx(double deltaR, int bx) const {
-    for (unsigned int i=0; i< theL1Obj.size(); i++) if ( (bx ==  theL1Obj[i].bx) && ( theDeltaR[i] < deltaR) ) return true;
+  inline bool isMatching_DRBx_At(double deltaR, int bx, double ptMin, double eta, double phi) const {
+    for (unsigned int i=0; i< theL1Obj.size(); i++) if ( (bx ==  theL1Obj[i].bx) && ( reco::deltaR(theL1Obj[i].eta, theL1Obj[i].phi, eta, phi) < deltaR) && (theL1Obj[i].pt >= ptMin) ) return true;
     return false;
   }
-  inline bool isMatching_PtminPtmaxBx(double ptMin, double ptMax, int bx ) const {
-    for (unsigned int i=0; i< theL1Obj.size(); i++) if ( (theL1Obj[i].pt >= ptMin && theL1Obj[i].pt < ptMax) && (bx ==  theL1Obj[i].bx) ) return true;
+  inline bool isMatching_DRBx(double deltaR, int bx, double ptMin = 0.) const {
+    for (unsigned int i=0; i< theL1Obj.size(); i++) if ( (bx ==  theL1Obj[i].bx) && ( theDeltaR[i] < deltaR) && (theL1Obj[i].pt >= ptMin) ) return true;
     return false;
   }
+
+  inline bool isMatching_PtminPtmaxBx(double ptMin, double ptMax, int bx, bool firstBXonly) const {
+    bool firstBX = true; 
+    bool result = false;
+    for (unsigned int i=0; i< theL1Obj.size(); i++) {
+      if (theL1Obj[i].bx < bx && theL1Obj[i].pt >= ptMin) firstBX = false;
+      if ( (theL1Obj[i].pt >= ptMin && theL1Obj[i].pt < ptMax) && (bx == theL1Obj[i].bx) ) result = true;
+    }
+    return firstBXonly ? (result && firstBX) : result;
+  }
+
+/*
+  inline bool isMatching_PtminPtmaxBx(double ptMin, double ptMax, int bx, bool firstBXonly) const {
+    bool firstBX = true; 
+    bool result = false;
+    for (unsigned int i=0; i< theL1Obj.size(); i++) {
+      if (theL1Obj[i].bx < bx) firstBX = false;
+      if ( (theL1Obj[i].pt >= ptMin && theL1Obj[i].pt < ptMax) && (bx == theL1Obj[i].bx) ) result = true;
+    }
+    return firstBXonly ? (result && firstBX) : result;
+  }
+*/
 
   friend ostream & operator<< (ostream &out, const L1ObjColl&s);
 
