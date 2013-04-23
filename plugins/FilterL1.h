@@ -13,7 +13,8 @@ public:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 private:
   virtual void endJob() {} 
-  unsigned int theCounter;
+  unsigned int theCounter, theAllCounter;
   edm::InputTag l1MuReadout; 
+  double  thePtCut;
 };
 #endif

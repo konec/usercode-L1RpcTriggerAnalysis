@@ -53,19 +53,25 @@ using namespace edm;
 using namespace std;
 
 FilterGM::FilterGM(const edm::ParameterSet& cfg)
-{ 
-}
+  :  theCounter(0), theAllCounter(0)
+{ }
 
 FilterGM::~FilterGM()
 { 
+  std::cout <<"FilterGM, passes: "<<theCounter<<" of "<< theAllCounter << std::endl;
 }
 
 bool FilterGM::filter(edm::Event&ev, const edm::EventSetup&es)
 {
+  theAllCounter++;
   edm::Handle<reco::TrackCollection> muonCollection;
   ev.getByLabel(InputTag("globalMuons"),muonCollection);
 
-  return (muonCollection->size() !=0) ? true : false;
+  bool hasMuon = (muonCollection->size() !=0) ? true : false;
+  if (hasMuon) theCounter++;
+  return hasMuon;
+
+//  return (muonCollection->size() !=0) ? true : false;
 //   if (muonCollection->size()==0) return false;
 //   reco::TrackCollection::const_iterator im = muonCollection->begin();
 //   if (im->pt() < 50) return false;

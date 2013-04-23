@@ -3,15 +3,16 @@ process = cms.Process("Analysis")
 import os
 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1) )
 #
 # For CRAB jobs leave fileNames vector empty.
 # For processing single files insert lines with 'file:/PATH/FILE.root'
 # (there is 255 file limit though).
 process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring( 
-#  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
-  '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
+  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
+#  '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
 #  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
+#  '/store/2012D_Commissioning_RECO/10A9B52B-2840-E211-BD6D-BCAEC518FF8D.root',
   ),
   skipEvents = cms.untracked.uint32(0)
 )
@@ -29,7 +30,9 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 #
 # set proper GlobalTag
 #
-process.GlobalTag.globaltag = 'FT_R_53_V10::All' #rereco
+#process.GlobalTag.globaltag = 'FT_R_53_V10::All' #rereco 2012ABC
+#process.GlobalTag.globaltag = 'FT_R_53_V18::All' #rereco 2012ABC
+process.GlobalTag.globaltag = 'FT_R_53_V21::All' #rereco 2012D
 
 #
 # message logger
@@ -138,8 +141,11 @@ process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
   maxd0 = cms.double(2)	
 )
 process.filterMenu = cms.EDFilter("FilterMenu")
-process.filterL1 = cms.EDFilter("FilterL1", l1MuReadout = cms.InputTag("gtDigis"))
 process.filterGM = cms.EDFilter("FilterGM")
+process.filterL1 = cms.EDFilter("FilterL1", 
+  l1MuReadout = cms.InputTag("gtDigis"), 
+  ptCut=cms.double(15.99)
+)
 
 
 #
@@ -151,6 +157,7 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
   treeFileName = cms.string("l1RpcTree.root"),
   detHitCollector = cms.PSet(),
   checkDestSIMU = cms.bool(False),
+  onlyBestMuEvents = cms.bool(False),
 
   bestMuonFinder = cms.PSet(
     muonColl = cms.string("muons"),
@@ -200,13 +207,14 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
 #print process.dumpPython();
 
 process.p = cms.Path(
-  process.filterGM*
-  process.muonRPCDigis*         #needed by RPC synchronisation and l1RpcEmulDigis
+  process.filterL1*
+#  process.filterGM*
+#  process.muonRPCDigis*         #needed by RPC synchronisation and l1RpcEmulDigis
   process.l1GtUnpack*           #needed by l1Compare and GmtEmulDigis
-  process.rpcMonitorRaw*process.rpcFEDIntegrity*
-  process.l1tRpctf*process.l1compare*
-  process.l1demon*
-  process.l1RpcEmulDigis* 
-  process.l1GmtEmulDigis*
+#  process.rpcMonitorRaw*process.rpcFEDIntegrity*
+#  process.l1tRpctf*process.l1compare*
+#  process.l1demon*
+#  process.l1RpcEmulDigis* 
+#  process.l1GmtEmulDigis*
   process.globalMuons*process.l1RpcTree
 )

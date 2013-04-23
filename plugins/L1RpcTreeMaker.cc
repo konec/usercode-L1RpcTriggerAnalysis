@@ -93,7 +93,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   // check reference muon
   //
   const reco::Muon * theMuon = theBestMuonFinder.result(ev,es);
-  if (!theMuon || !theBestMuonFinder.isUnique(ev,es) ) return;
+  if (theConfig.getParameter<bool>("onlyBestMuEvents") && (!theMuon || !theBestMuonFinder.isUnique(ev,es)) ) return;
   theCounter++;
 
   //
@@ -127,16 +127,18 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // fill muon info
   //
-  muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi(), theMuon->track()->charge());
-  muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
-  muon->nMatchedStations = theMuon->numberOfMatchedStations();
-  if (theMuon->isGlobalMuon()) {
-    const reco::HitPattern& hp = (theMuon->combinedMuon())->hitPattern();
-    muon->nRPCHits = hp.numberOfValidMuonRPCHits();
-    muon->nDTHits  = hp.numberOfValidMuonDTHits();
-    muon->nCSCHits = hp.numberOfValidMuonCSCHits();
-  } else  muon->nRPCHits = muon->nDTHits = muon->nCSCHits = 0;
-  muon->nTrackerHits = theMuon->isTrackerMuon() ? (theMuon->innerTrack())->hitPattern().numberOfValidTrackerHits() : 0;
+  if (theMuon) {
+    muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi(), theMuon->track()->charge());
+    muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
+    muon->nMatchedStations = theMuon->numberOfMatchedStations();
+    if (theMuon->isGlobalMuon()) {
+      const reco::HitPattern& hp = (theMuon->combinedMuon())->hitPattern();
+      muon->nRPCHits = hp.numberOfValidMuonRPCHits();
+      muon->nDTHits  = hp.numberOfValidMuonDTHits();
+      muon->nCSCHits = hp.numberOfValidMuonCSCHits();
+    } else  muon->nRPCHits = muon->nDTHits = muon->nCSCHits = 0;
+    muon->nTrackerHits = theMuon->isTrackerMuon() ? (theMuon->innerTrack())->hitPattern().numberOfValidTrackerHits() : 0;
+  }
 
   //
   // fill algoBits info
@@ -154,7 +156,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // hits and detectors compatible with muon track
   //
-  if ( muon->pt() > 10.) {
+  if (theMuon &&  muon->pt() > 10.) {
     detsHitsCompatibleWithMuon = theDetHitCollector.compatibleHits( theMuon, ev, es);
     detsCrossedByMuon = theDetHitCollector.compatibleDets( theMuon, ev, es, false); 
     detsCrossedByMuonDeepInside = theDetHitCollector.compatibleDets( theMuon, ev, es, true); 
@@ -165,9 +167,11 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // fill LinkSynchroAnalysis data
   //
-  theSynchroGrabber.setMuon(theMuon);
-  RPCRawSynchro::ProdItem rawCounts  = theSynchroGrabber.counts(ev,es);
-  counts = ConverterRPCRawSynchroSynchroCountsObj::toSynchroObj(rawCounts);
+  if (theMuon) {
+    theSynchroGrabber.setMuon(theMuon);
+    RPCRawSynchro::ProdItem rawCounts  = theSynchroGrabber.counts(ev,es);
+    counts = ConverterRPCRawSynchroSynchroCountsObj::toSynchroObj(rawCounts);
+  }
   
 
   //
@@ -178,10 +182,12 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   std::vector<bool> matching(l1Obj.size(), false);
   std::vector<double> deltaR(l1Obj.size(), 0.);
   TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
-  for(unsigned int i=0; i< l1Obj.size(); ++i) {
-    if (matcher(l1Obj[i].eta, l1Obj[i].phi, theMuon, ev,es)) matching[i]=true;
-    TrackToL1ObjMatcher::LastResult result = matcher.lastResult();
-    deltaR[i] = sqrt( sqr(result.deltaEta) + sqr(result.deltaPhi) );
+  if (theMuon){
+    for(unsigned int i=0; i< l1Obj.size(); ++i) {
+      if (matcher(l1Obj[i].eta, l1Obj[i].phi, theMuon, ev,es)) matching[i]=true;
+      TrackToL1ObjMatcher::LastResult result = matcher.lastResult();
+      deltaR[i] = sqrt( sqr(result.deltaEta) + sqr(result.deltaPhi) );
+    }
   }
   l1ObjColl->set( matching );
   l1ObjColl->set( deltaR );

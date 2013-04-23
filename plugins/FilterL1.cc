@@ -28,18 +28,19 @@ using namespace edm;
 using namespace std;
 
 FilterL1::FilterL1(const edm::ParameterSet& cfg)
-  : theCounter(0),l1MuReadout(cfg.getParameter<edm::InputTag>("l1MuReadout"))
+  : theCounter(0), theAllCounter(0), l1MuReadout(cfg.getParameter<edm::InputTag>("l1MuReadout")), thePtCut(cfg.getParameter<double>("ptCut"))
 { }
 
 FilterL1::~FilterL1()
 {
-  std::cout <<"FilterL1, counter is: "<<theCounter<< std::endl;
+  std::cout <<"FilterL1, passed: "<<theCounter<<" of "<< theAllCounter << std::endl;
 }
 
 bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
 {
 
   bool goodEvent = false;
+  theAllCounter++;
       
   edm::Handle<L1MuGMTReadoutCollection> pCollection;
   ev.getByLabel(l1MuReadout,pCollection);
@@ -63,7 +64,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
     Cands = RRItr->getCSCCands();
     for(ITC it = Cands.begin() ; it != Cands.end() ; ++it ) {
       if (it->empty()) continue;
-      if (fabs(it->etaValue()) < 1.6) CSC = true;
+      if (fabs(it->etaValue()) < 1.6 && it->ptValue() >= thePtCut ) CSC = true;
       str <<"HAS  CSC cand "
           <<" pt: "<<it->ptValue()
           <<" eta: "<<it->etaValue()
@@ -75,7 +76,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
     Cands = RRItr->getDTBXCands();
     for(ITC it = Cands.begin() ; it != Cands.end() ; ++it ) {
       if (it->empty()) continue;
-      DT= true;
+      if (it->ptValue() >= thePtCut) DT= true;
       str <<"HAS   DT cand "
           <<" pt: "<<it->ptValue()
           <<" eta: "<<it->etaValue()
@@ -87,7 +88,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
     Cands = RRItr->getBrlRPCCands();
     for(ITC it = Cands.begin() ; it != Cands.end() ; ++it ) {
       if (it->empty()) continue;
-      brlRPC = true;
+      if (it->ptValue() >= thePtCut) brlRPC = true;
       str <<"HAS RPCB cand "
           <<" pt: "<<it->ptValue()
           <<" eta: "<<it->etaValue()
@@ -99,7 +100,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
     Cands = RRItr->getFwdRPCCands();
     for(ITC it = Cands.begin() ; it != Cands.end() ; ++it ) {
       if (it->empty()) continue;
-      fwdRPC = true;
+      if (it->ptValue() >= thePtCut) fwdRPC = true;
       str <<"HAS RPCF cand "
           <<" pt: "<<it->ptValue()
           <<" eta: "<<it->etaValue()

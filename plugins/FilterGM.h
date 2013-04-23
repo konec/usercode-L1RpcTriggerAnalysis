@@ -13,5 +13,6 @@ public:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 private:
   virtual void endJob() {} 
+  unsigned int theCounter, theAllCounter;
 };
 #endif
