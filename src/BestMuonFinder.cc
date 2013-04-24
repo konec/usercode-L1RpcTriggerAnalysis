@@ -22,7 +22,7 @@
 //TH2D* hMuHitsCSCvsEta;
 
 BestMuonFinder::BestMuonFinder(const edm::ParameterSet& cfg)
-  : lastEvent(0), lastRun(0), theConfig(cfg), theUnique(true), theMuon(0),
+  : lastEvent(0), lastRun(0), theConfig(cfg), theUnique(true), theAllMuons(0), theMuon(0),
     hMuChi2Tk(0), hMuChi2Gl(0), hMuNHitsTk(0), 
     hMuPtVsEta(0), hMuHitsRPCvsCSC(0), hMuHitsRPCvsDT(0),
     hMuonPt_BMF(0),hMuonEta_BMF (0),hMuonPhi_BMF(0)
@@ -47,8 +47,30 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
   //get Muon
   edm::Handle<reco::MuonCollection> muons;
   ev.getByLabel( theConfig.getParameter<std::string>("muonColl"), muons);
+  theAllMuons = muons->size();
   
   for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+
+/*
+if (ev.id().event() == 352597514) {
+    std::cout << "HERE Muon: matched stations:"<<im->numberOfMatchedStations() <<std::endl;
+    if (im->isGlobalMuon()) {
+       std::cout <<"  GlobalMuon: "
+                 <<" pt="<<im->combinedMuon()->pt()
+                 <<" eta="<<im->combinedMuon()->eta()
+                 <<" phi="<<im->combinedMuon()->phi()
+                 <<" chi2: "<<im->combinedMuon()->normalizedChi2()<<std::endl;
+     }
+    if (im->isTrackerMuon() && im->innerTrack().isNonnull()) { 
+      std::cout <<" TrackerMuon: " 
+                <<" pt="<<im->innerTrack()->pt()
+                <<" eta="<<im->innerTrack()->eta()
+                <<" phi="<<im->innerTrack()->phi()
+              << std::endl;
+    }
+    if (im->isStandAloneMuon())  std::cout <<" StandaloneMuon"<<std::endl;
+}
+*/
 
     if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
     if (hMuonPt_BMF)   hMuonPt_BMF->Fill( im->innerTrack()->pt());

@@ -93,7 +93,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   // check reference muon
   //
   const reco::Muon * theMuon = theBestMuonFinder.result(ev,es);
-  if (theConfig.getParameter<bool>("onlyBestMuEvents") && (!theMuon || !theBestMuonFinder.isUnique(ev,es)) ) return;
+  if (theConfig.getParameter<bool>("onlyBestMuEvents") && (!theMuon) ) return;
   theCounter++;
 
   //
@@ -127,6 +127,8 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // fill muon info
   //
+  muon->isUnique = theBestMuonFinder.isUnique(ev,es);
+  muon->nAllMuons = theBestMuonFinder.numberOfAllMuons(ev,es);
   if (theMuon) {
     muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi(), theMuon->track()->charge());
     muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
@@ -180,7 +182,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   std::vector<L1Obj> l1Obj = theL1ObjMaker(ev);
   l1ObjColl->set( l1Obj);
   std::vector<bool> matching(l1Obj.size(), false);
-  std::vector<double> deltaR(l1Obj.size(), 0.);
+  std::vector<double> deltaR(l1Obj.size(), 999.);
   TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
   if (theMuon){
     for(unsigned int i=0; i< l1Obj.size(); ++i) {
@@ -191,8 +193,8 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   }
   l1ObjColl->set( matching );
   l1ObjColl->set( deltaR );
-  std::cout <<"----------"<<std::endl;
-  std::cout <<*l1ObjColl << std::endl;
+//  std::cout <<"----------"<<std::endl;
+//  std::cout <<*l1ObjColl << std::endl;
 
   //
   // fill ntuple + cleanup

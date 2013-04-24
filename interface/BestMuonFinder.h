@@ -18,6 +18,7 @@ public:
   BestMuonFinder( const edm::ParameterSet& cfg);
   const reco::Muon* result( const edm::Event &ev, const edm::EventSetup &es) { run(ev,es); return theMuon; }
   bool isUnique( const edm::Event &ev, const edm::EventSetup &es) { run(ev,es); return theUnique;}
+  unsigned int numberOfAllMuons( const edm::Event &ev, const edm::EventSetup &es) { run(ev,es); return theAllMuons; }
   void initHistos( TObjArray & histos);
 
 private:
@@ -29,6 +30,7 @@ private:
   edm::ParameterSet  theConfig;
 
   bool theUnique;
+  unsigned int theAllMuons;
   const reco::Muon* theMuon;
 
   TH1D *hMuChi2Tk, *hMuChi2Gl, *hMuNHitsTk ;

@@ -22,7 +22,8 @@ AnaMuonDistribution::AnaMuonDistribution(const edm::ParameterSet& cfg)
     etaMax (cfg.getParameter<double>("etaMax") ),
     minNumberOfMatchedStations( cfg.getParameter<unsigned int>("minNumberOfMatchedStations") ),
     minNumberRpcHits( cfg.getParameter<uint>("minNumberRpcHits") ),
-    minNumberDtCscHits( cfg.getParameter<unsigned int>("minNumberDtCscHits") ) 
+    minNumberDtCscHits( cfg.getParameter<unsigned int>("minNumberDtCscHits") ), 
+    requireUnique (cfg.getParameter<bool>("requireUnique"))
 { }
 
 void AnaMuonDistribution::init(TObjArray& histos) 
@@ -39,7 +40,10 @@ void AnaMuonDistribution::init(TObjArray& histos)
 
 bool AnaMuonDistribution::filter(const MuonObj *muon)
 {
+//  std::cout << *muon << std::endl;
+  if (requireUnique && !muon->isUnique) return false;
   if (muon->pt() < ptMin) return false;
+  if (muon->pt() < 0.001) return false; // no muon case with ptMin set to 0.
   if (fabs(muon->eta()) > etaMax) return false;
   if (muon->nMatchedStations < minNumberOfMatchedStations) return false;
   if (muon->nRPCHits < minNumberRpcHits) return false;

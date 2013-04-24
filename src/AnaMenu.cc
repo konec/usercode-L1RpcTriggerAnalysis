@@ -35,6 +35,7 @@ bool AnaMenu::filter( const EventObj* ev, const MuonObj* muon,
 
   bool okL1 = false;
   
+//  debug = true;
   if (debug) std::cout <<"--------------------------------------------------------------"<<std::endl;
   if (debug) std::cout << "================== L1 names: "<< std::endl;
   std::vector<std::string> acceptL1_Names = theConfig.exists("acceptL1_Names") ?  theConfig.getParameter<std::vector<std::string> >("acceptL1_Names") : std::vector<std::string>();

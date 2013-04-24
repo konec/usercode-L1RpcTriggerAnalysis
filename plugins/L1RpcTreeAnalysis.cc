@@ -131,6 +131,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
     theAnaMenu.updateMenu(bitsL1->names, bitsHLT->names);
 
     if (lastRun != (*event).run) { 
+//    if (true) {
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
@@ -171,7 +172,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 //   theAnaRpcMisc.run(event,muon,l1ObjColl);
 //   theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
 //   theAnaEmu.run ( event, muon, l1ObjColl);
-   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
+//   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
 //   theAnaClu.run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
    theAnaTimingL1.run( &eventBx, muon, l1ObjColl);
 

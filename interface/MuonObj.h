@@ -1,11 +1,14 @@
 #ifndef MuonObj_H
 #define MuonObj_H
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
+#include <ostream>
 
 class MuonObj : public TrackObj {
 public:
-  MuonObj():TrackObj(),theMuonBits(0) {}
-    MuonObj(float pt, float eta, float phi, float charge) : TrackObj(pt,eta,phi,charge), theMuonBits(0) {}
+    MuonObj(float pt=0., float eta=0., float phi=0., float charge=0.) 
+      : TrackObj(pt,eta,phi,charge), 
+        nRPCHits(0), nDTHits(0), nCSCHits(0), nTrackerHits(0), nMatchedStations(0),
+        isUnique(true), nAllMuons(0), theMuonBits(0) {}
   virtual ~MuonObj(){}
   void setBits(bool isGlobal, bool isTracker, bool isOuter, bool isCalo, bool isMatched) {
      if (isGlobal)  theMuonBits = 1 << 4;
@@ -21,9 +24,12 @@ public:
   bool isMatched() const { return   theMuonBits&1 ;}  
 public:
   unsigned int nRPCHits, nDTHits, nCSCHits, nTrackerHits, nMatchedStations;
+  bool         isUnique;
+  unsigned int nAllMuons;
 private:  
   unsigned int theMuonBits; 
+  friend ostream & operator<< (ostream &out, const MuonObj &o);
 public:
-ClassDef(MuonObj,1)
+ClassDef(MuonObj,2)
 };
 #endif

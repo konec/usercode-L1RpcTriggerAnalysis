@@ -4,6 +4,7 @@ if ( ! ( $?ROOTSYS ) ) eval `scram runtime -csh`
 
 $ROOTSYS/bin/rootcint -f rootMAnaDict.cc  -c -p \
     -I../../../  \
+    -I${CMSSW_RELEASE_BASE}/src/  \
     -I`scram tool info clhep | grep ^INCLUDE | sed 's/INCLUDE=//'` \
     UserCode/L1RpcTriggerAnalysis/interface/EventObj.h \
     UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h \
