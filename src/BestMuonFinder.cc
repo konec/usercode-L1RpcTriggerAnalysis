@@ -37,6 +37,7 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
   theMuon = 0;
   theUnique = true;
 
+
   //getBeamSpot
   math::XYZPoint reference(0.,0.,0.);
   edm::InputTag beamSpot =  theConfig.getParameter<edm::InputTag>("beamSpot");
@@ -71,29 +72,30 @@ if (ev.id().event() == 352597514) {
     if (im->isStandAloneMuon())  std::cout <<" StandaloneMuon"<<std::endl;
 }
 */
+    if (im->bestTrack()->eta() >  theConfig.getParameter<double>("maxEta")) continue;
+    if (im->bestTrack()->pt() < theConfig.getParameter<double>("minPt")) continue;
+    if (im->bestTrack()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
 
-    if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
-    if (hMuonPt_BMF)   hMuonPt_BMF->Fill( im->innerTrack()->pt());
-    if (hMuonEta_BMF) hMuonEta_BMF->Fill( im->innerTrack()->eta());
-    if (hMuonPhi_BMF) hMuonPhi_BMF->Fill( im->innerTrack()->phi());
-    if (hMuPtVsEta) hMuPtVsEta->Fill(im->innerTrack()->eta(), im->innerTrack()->pt());
-    if (im->innerTrack()->pt() < theConfig.getParameter<double>("minPt")) continue;
-    if (fabs(im->innerTrack()->eta()) >  theConfig.getParameter<double>("maxEta")) continue;
-    if (im->innerTrack()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
-    if (hMuChi2Tk) hMuChi2Tk->Fill(im->innerTrack()->normalizedChi2());
-    if (im->innerTrack()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Tk")) continue;
-    if (hMuChi2Gl && im->isGlobalMuon()) hMuChi2Gl->Fill(im->combinedMuon()->normalizedChi2());
+    if (    theConfig.getParameter<bool>("requireInnerTrack")) {
+      if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
+      if (im->innerTrack()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Tk")) continue;
+      if (hMuonPt_BMF)   hMuonPt_BMF->Fill( im->innerTrack()->pt());
+      if (hMuonEta_BMF) hMuonEta_BMF->Fill( im->innerTrack()->eta());
+      if (hMuonPhi_BMF) hMuonPhi_BMF->Fill( im->innerTrack()->phi());
+      if (hMuChi2Tk) hMuChi2Tk->Fill(im->innerTrack()->normalizedChi2());
+      if (hMuPtVsEta) hMuPtVsEta->Fill(im->innerTrack()->eta(), im->innerTrack()->pt());
+    }
     if (    theConfig.getParameter<bool>("requireOuterTrack")){ 
-        if(!im->isStandAloneMuon() || !im->outerTrack().isNonnull())continue;
-	  if(im->standAloneMuon()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Sa")) continue;
+       if(!im->isStandAloneMuon() || !im->outerTrack().isNonnull())continue;
+	 if(im->standAloneMuon()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Sa")) continue;
     }
     if ( theConfig.getParameter<bool>("requireGlobalTrack")) { 
 	  if(!im->isGlobalMuon() ||  !im->globalTrack().isNonnull()) continue;  
 	  if(im->combinedMuon()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Mu")) continue;
     }
 
+    if (hMuChi2Gl && im->isGlobalMuon()) hMuChi2Gl->Fill(im->combinedMuon()->normalizedChi2());
     if (im->numberOfMatchedStations() <  theConfig.getParameter<int>("minNumberOfMatchedStations")) continue;
-    if (! (im->track()->hitPattern().numberOfValidPixelHits() > 0)) continue;
 
 //
 // TMP TIGHT SELECTION FOR IVAN
@@ -129,20 +131,19 @@ if (ev.id().event() == 352597514) {
     if ( nRPCHits < theConfig.getParameter<int>("minNumberRpcHits")) continue;
     if ( nDTHits + nCSCHits < theConfig.getParameter<int>("minNumberDtCscHits")  ) continue;
 
-    if (!theMuon || (im->track()->pt() > theMuon->track()->pt()) ) theMuon = &(*im);
+    if (!theMuon || (im->bestTrack()->pt() > theMuon->bestTrack()->pt()) ) theMuon = &(*im);
   }
 
   //
   // check if muon is unigue
   //
   if (theMuon) {
-    double muonEta = theMuon->innerTrack()->eta();
-    double muonPhi = theMuon->innerTrack()->phi();
+    double muonEta = theMuon->bestTrack()->eta();
+    double muonPhi = theMuon->bestTrack()->phi();
     for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-      if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
       if (&(*im) == theMuon) continue;
-      if ( fabs(reco::deltaPhi(muonPhi, im->innerTrack()->phi())) > theConfig.getParameter<double>("deltaPhiUnique")) continue; 
-      if ( fabs(muonEta-im->innerTrack()->eta()) > theConfig.getParameter<double>("deltaEtaUnique")) continue;
+      if ( fabs(reco::deltaPhi(muonPhi, im->bestTrack()->phi())) > theConfig.getParameter<double>("deltaPhiUnique")) continue; 
+      if ( fabs(muonEta-im->bestTrack()->eta()) > theConfig.getParameter<double>("deltaEtaUnique")) continue;
       theUnique = false;
     }
   }

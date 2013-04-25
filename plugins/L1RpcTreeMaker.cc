@@ -130,7 +130,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   muon->isUnique = theBestMuonFinder.isUnique(ev,es);
   muon->nAllMuons = theBestMuonFinder.numberOfAllMuons(ev,es);
   if (theMuon) {
-    muon->setKine(theMuon->track()->pt(), theMuon->track()->eta(), theMuon->track()->phi(), theMuon->track()->charge());
+    muon->setKine(theMuon->bestTrack()->pt(), theMuon->bestTrack()->eta(), theMuon->bestTrack()->phi(), theMuon->bestTrack()->charge());
     muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
     muon->nMatchedStations = theMuon->numberOfMatchedStations();
     if (theMuon->isGlobalMuon()) {
@@ -158,7 +158,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // hits and detectors compatible with muon track
   //
-  if (theMuon &&  muon->pt() > 10.) {
+  if (theMuon &&  muon->pt() > 10. && theMuon->isGlobalMuon()) {
     detsHitsCompatibleWithMuon = theDetHitCollector.compatibleHits( theMuon, ev, es);
     detsCrossedByMuon = theDetHitCollector.compatibleDets( theMuon, ev, es, false); 
     detsCrossedByMuonDeepInside = theDetHitCollector.compatibleDets( theMuon, ev, es, true); 
@@ -169,7 +169,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // fill LinkSynchroAnalysis data
   //
-  if (theMuon) {
+  if (theMuon && theMuon->isGlobalMuon()) {
     theSynchroGrabber.setMuon(theMuon);
     RPCRawSynchro::ProdItem rawCounts  = theSynchroGrabber.counts(ev,es);
     counts = ConverterRPCRawSynchroSynchroCountsObj::toSynchroObj(rawCounts);
@@ -184,7 +184,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   std::vector<bool> matching(l1Obj.size(), false);
   std::vector<double> deltaR(l1Obj.size(), 999.);
   TrackToL1ObjMatcher matcher(theConfig.getParameter<edm::ParameterSet>("matcherPSet"));
-  if (theMuon){
+  if (theMuon && theMuon->isGlobalMuon()){
     for(unsigned int i=0; i< l1Obj.size(); ++i) {
       if (matcher(l1Obj[i].eta, l1Obj[i].phi, theMuon, ev,es)) matching[i]=true;
       TrackToL1ObjMatcher::LastResult result = matcher.lastResult();

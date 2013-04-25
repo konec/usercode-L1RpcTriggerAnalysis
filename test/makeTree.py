@@ -144,7 +144,7 @@ process.filterMenu = cms.EDFilter("FilterMenu")
 process.filterGM = cms.EDFilter("FilterGM")
 process.filterL1 = cms.EDFilter("FilterL1", 
   l1MuReadout = cms.InputTag("gtDigis"), 
-  ptCut=cms.double(15.99)
+  ptCut=cms.double(5.99)
 )
 
 
@@ -162,14 +162,15 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
   bestMuonFinder = cms.PSet(
     muonColl = cms.string("muons"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
+    requireInnerTrack = cms.bool(False),
     requireOuterTrack = cms.bool(False),  
-    requireGlobalTrack = cms.bool(True),  
+    requireGlobalTrack = cms.bool(False),  
     minPt = cms.double(2.),
-    maxTIP = cms.double(0.2),
+    maxTIP = cms.double(200.),
     maxEta = cms.double(2.1),
     maxChi2Mu = cms.double(2.),
     maxChi2Tk = cms.double(2.),
-    minNumberTrackerHits = cms.int32(8),
+    minNumberTrackerHits = cms.int32(0),
     minNumberRpcHits = cms.int32(0),
     minNumberDtCscHits = cms.int32(0),
     minNumberOfMatchedStations = cms.int32(0),
@@ -208,13 +209,13 @@ process.l1RpcTree = cms.EDAnalyzer("L1RpcTreeMaker",
 
 process.p = cms.Path(
   process.filterL1*
-#  process.filterGM*
-#  process.muonRPCDigis*         #needed by RPC synchronisation and l1RpcEmulDigis
+  process.filterGM*
+  process.muonRPCDigis*         #needed by RPC synchronisation and l1RpcEmulDigis
   process.l1GtUnpack*           #needed by l1Compare and GmtEmulDigis
-#  process.rpcMonitorRaw*process.rpcFEDIntegrity*
-#  process.l1tRpctf*process.l1compare*
-#  process.l1demon*
-#  process.l1RpcEmulDigis* 
-#  process.l1GmtEmulDigis*
+  process.rpcMonitorRaw*process.rpcFEDIntegrity*
+  process.l1tRpctf*process.l1compare*
+  process.l1demon*
+  process.l1RpcEmulDigis* 
+  process.l1GmtEmulDigis*
   process.globalMuons*process.l1RpcTree
 )
