@@ -147,6 +147,7 @@ void  AnaTimingL1::resume(TObjArray& histos)
 
 void  AnaTimingL1::run(const EventObj* ev_noBx, const MuonObj* muon, const L1ObjColl *l1Coll)
 {
+  std::cout<<*l1Coll<<std::endl;
   const EventObjBXExtra *ev = dynamic_cast<const EventObjBXExtra*>(ev_noBx);
   if (!ev) return;
 
@@ -178,13 +179,12 @@ void  AnaTimingL1::run(const EventObj* ev_noBx, const MuonObj* muon, const L1Obj
               else if (muon->isGlobal() && matchingMu) hTimingL1_RpcVsDt_MuOK->Fill(ibxRPC, ibxDTCSC);
               else                                     hTimingL1_RpcVsDt_MuBad->Fill(ibxRPC, ibxDTCSC);
               if (noRPCBX0) hTimingL1_RpcVsDt_noRPCBX0->Fill(ibxRPC, ibxDTCSC);
-/*
-              if (noRPCBX0 && !matchingMu && !muon->isGlobal() && ibxDTCSC==0 && ibxRPC==2) {
+
+              if (noRPCBX0 && ibxDTCSC==0 && ibxRPC==2) {
                 std::cout << *ev << std::endl;
                       std::cout<<*l1Coll<<std::endl;
                       std::cout <<*muon<<std::endl;
               }
-*/
             }
             if (collCSC.isMatching_DRBx_At(0.3, ibxDTCSC, 0., eta,phi) ) {
               if (ibxDTCSC==0 && noRPCBX0) hTimingL1_RpcVsCsc_noRPCBX0->Fill(0.,0.);

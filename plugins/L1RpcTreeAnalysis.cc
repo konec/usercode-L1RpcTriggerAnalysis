@@ -130,8 +130,10 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
     chain.GetEntry(ev);
     theAnaMenu.updateMenu(bitsL1->names, bitsHLT->names);
 
-    if (lastRun != (*event).run) { 
+//    if (lastRun != (*event).run) { 
 //    if (true) {
+      if (! ((*event).run==204601 && (*event).id ==109463402)) {
+      continue;
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev

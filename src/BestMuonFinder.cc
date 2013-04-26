@@ -74,10 +74,11 @@ if (ev.id().event() == 352597514) {
 */
     if (im->bestTrack()->eta() >  theConfig.getParameter<double>("maxEta")) continue;
     if (im->bestTrack()->pt() < theConfig.getParameter<double>("minPt")) continue;
-    if (im->bestTrack()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
+    if (im->numberOfMatchedStations() <  theConfig.getParameter<int>("minNumberOfMatchedStations")) continue;
 
     if (    theConfig.getParameter<bool>("requireInnerTrack")) {
       if (!im->isTrackerMuon() || !im->innerTrack().isNonnull()) continue;
+      if (im->innerTrack()->dxy(reference) >  theConfig.getParameter<double>("maxTIP")) continue;
       if (im->innerTrack()->normalizedChi2() >  theConfig.getParameter<double>("maxChi2Tk")) continue;
       if (hMuonPt_BMF)   hMuonPt_BMF->Fill( im->innerTrack()->pt());
       if (hMuonEta_BMF) hMuonEta_BMF->Fill( im->innerTrack()->eta());
@@ -95,7 +96,6 @@ if (ev.id().event() == 352597514) {
     }
 
     if (hMuChi2Gl && im->isGlobalMuon()) hMuChi2Gl->Fill(im->combinedMuon()->normalizedChi2());
-    if (im->numberOfMatchedStations() <  theConfig.getParameter<int>("minNumberOfMatchedStations")) continue;
 
 //
 // TMP TIGHT SELECTION FOR IVAN
