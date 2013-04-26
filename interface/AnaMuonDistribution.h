@@ -14,6 +14,6 @@ public:
 private:
   double ptMin, etaMax;
   unsigned int  minNumberOfMatchedStations, minNumberRpcHits, minNumberDtCscHits;
-  bool requireUnique;
+  bool requireAnyMuon, requireUnique, requireOnlyOne, requireGlobal, requireInner, requireOuter;
 };
 #endif

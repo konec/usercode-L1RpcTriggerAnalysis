@@ -23,7 +23,12 @@ AnaMuonDistribution::AnaMuonDistribution(const edm::ParameterSet& cfg)
     minNumberOfMatchedStations( cfg.getParameter<unsigned int>("minNumberOfMatchedStations") ),
     minNumberRpcHits( cfg.getParameter<uint>("minNumberRpcHits") ),
     minNumberDtCscHits( cfg.getParameter<unsigned int>("minNumberDtCscHits") ), 
-    requireUnique (cfg.getParameter<bool>("requireUnique"))
+    requireAnyMuon(cfg.getParameter<bool>("requireAnyMuon")),
+    requireUnique(cfg.getParameter<bool>("requireUnique")),
+    requireOnlyOne(cfg.getParameter<bool>("requireOnlyOne")),
+    requireGlobal(cfg.getParameter<bool>("requireGlobal")),
+    requireInner(cfg.getParameter<bool>("requireInner")),
+    requireOuter(cfg.getParameter<bool>("requireOuter"))
 { }
 
 void AnaMuonDistribution::init(TObjArray& histos) 
@@ -41,9 +46,13 @@ void AnaMuonDistribution::init(TObjArray& histos)
 bool AnaMuonDistribution::filter(const MuonObj *muon)
 {
 //  std::cout << *muon << std::endl;
-  if (requireUnique && !muon->isUnique) return false;
+  if (requireAnyMuon && (muon->nAllMuons==0)) return false;
+  if (requireOnlyOne && (!muon->nAllMuons==1)) return false;
+  if (requireUnique  && !muon->isUnique) return false;
+  if (requireGlobal  && !muon->isGlobal()) return false;
+  if (requireInner   && !muon->isTracker()) return false;
+  if (requireOuter   && !muon->isOuter()) return false;
   if (muon->pt() < ptMin) return false;
-  if (muon->pt() < 0.001) return false; // no muon case with ptMin set to 0.
   if (fabs(muon->eta()) > etaMax) return false;
   if (muon->nMatchedStations < minNumberOfMatchedStations) return false;
   if (muon->nRPCHits < minNumberRpcHits) return false;
