@@ -113,20 +113,29 @@ if (ev.id().event() == 352597514) {
     int nRPCHits =0;
     int nDTHits =0;
     int nCSCHits =0;
-    if(im->isTrackerMuon()) {
-      const reco::HitPattern& hp = (im->innerTrack())->hitPattern();
-      nTrackerHits = hp.numberOfValidTrackerHits();
-      if (hMuNHitsTk) hMuNHitsTk->Fill(fabs(nTrackerHits)+1.e-3);
-    }
-    if(im->isGlobalMuon()){
+
+    if (im->isGlobalMuon()) {
       const reco::HitPattern& hp = (im->combinedMuon())->hitPattern();
+      nTrackerHits = hp.numberOfValidTrackerHits();
       nRPCHits = hp.numberOfValidMuonRPCHits();
       nDTHits = hp.numberOfValidMuonDTHits();
       nCSCHits = hp.numberOfValidMuonCSCHits();
-    if (nDTHits==0 && hMuHitsRPCvsCSC) hMuHitsRPCvsCSC->Fill(nCSCHits,nRPCHits);
-    if (nCSCHits==0 && hMuHitsRPCvsDT) hMuHitsRPCvsDT->Fill(nDTHits,nRPCHits);
+      if (hMuNHitsTk) hMuNHitsTk->Fill(fabs(nTrackerHits)+1.e-3);
+      if (nDTHits==0 && hMuHitsRPCvsCSC) hMuHitsRPCvsCSC->Fill(nCSCHits,nRPCHits);
+      if (nCSCHits==0 && hMuHitsRPCvsDT) hMuHitsRPCvsDT->Fill(nDTHits,nRPCHits);
+    } else {
+      if(im->isTrackerMuon()) {
+        const reco::HitPattern& hp = (im->innerTrack())->hitPattern();
+        nTrackerHits = hp.numberOfValidTrackerHits();
+      }
+      if (im->isStandAloneMuon()) {
+        const reco::HitPattern& hp = (im->standAloneMuon())->hitPattern();
+        nRPCHits = hp.numberOfValidMuonRPCHits();
+        nDTHits = hp.numberOfValidMuonDTHits();
+        nCSCHits = hp.numberOfValidMuonCSCHits();
+      }
     }
-
+    
     if (nTrackerHits< theConfig.getParameter<int>("minNumberTrackerHits")) continue;
     if ( nRPCHits < theConfig.getParameter<int>("minNumberRpcHits")) continue;
     if ( nDTHits + nCSCHits < theConfig.getParameter<int>("minNumberDtCscHits")  ) continue;

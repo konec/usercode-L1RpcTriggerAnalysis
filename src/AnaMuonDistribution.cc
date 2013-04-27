@@ -45,7 +45,7 @@ void AnaMuonDistribution::init(TObjArray& histos)
 
 bool AnaMuonDistribution::filter(const MuonObj *muon)
 {
-  std::cout << *muon << std::endl;
+//  std::cout << *muon << std::endl;
   if (requireAnyMuon && (muon->nAllMuons==0)) return false;
   if (requireOnlyOne && (!muon->nAllMuons==1)) return false;
   if (requireUnique  && !muon->isUnique) return false;

@@ -10,13 +10,7 @@ process.RPCCabling.connect = 'sqlite_file:RPCEMap3.db'
 
 
 process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
-#  treeFileNames = cms.vstring("l1RpcTree_Ex_C.root", "l1RpcTree_Ex_D.root"),
-#  treeFileNames = cms.vstring("l1RpcTree_Ex_D.root"),
-#  treeFileNames = cms.vstring("l1RpcTree_SM_C.root"),
-#  treeFileNames = cms.vstring("l1RpcTree.root"),
-#  treeFileNames = cms.vstring("l1RpcTree_CO9.root"),
-#  treeFileNames = cms.vstring("l1RpcTree_CO9.root"),
-  treeFileNames = cms.vstring("l1RpcTree.root"),
+  treeFileNames = cms.vstring("l1RpcTree_CO9.root"),
   histoFileName = cms.string("l1RpcAnalysis.root"),
   filterByAnaMuonDistribution = cms.bool(False),
   filterByAnaMenu = cms.bool(True),
@@ -44,6 +38,7 @@ process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
 #     acceptHLT_Physics                = cms.bool(False),
 #     acceptHLT_Mu                     = cms.bool(False),
 
+
       acceptL1_OtherThanMu             = cms.bool(False),
       acceptL1_Mu                      = cms.bool(True),
       acceptL1_Names                   = cms.vstring("L1_ZeroBias"),
@@ -53,6 +48,8 @@ process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
       acceptHLT_Physics                = cms.bool(False),
       acceptHLT_Mu                     = cms.bool(False),
 
+
+
 #     acceptL1_OtherThanMu             = cms.bool(True),
 #     acceptL1_Mu                      = cms.bool(True),
 #     acceptL1_Names                   = cms.vstring("L1_ZeroBias","L1_SingleMu16"),
@@ -61,6 +58,7 @@ process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
 #     acceptHLT_ZeroBias               = cms.bool(True), 
 #     acceptHLT_Physics                = cms.bool(True),
 #     acceptHLT_Mu                     = cms.bool(True),
+
 
 #   acceptL1_OtherThanMu             = cms.bool(True),
 #   acceptL1_Mu                      = cms.bool(False),
@@ -72,7 +70,7 @@ process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
 #   acceptHLT_Mu                     = cms.bool(False),
   ),
   anaTimingL1 = cms.PSet(
-    l1ptCutForDR = cms.double(15.99),
+    l1ptCutForDR = cms.double(5.99),
     l1DRCutForpT = cms.double(0.3),
     l1DRCutForCorrTight = cms.double(0.3),
     l1ptCutForCorrTight = cms.double(15.99),
