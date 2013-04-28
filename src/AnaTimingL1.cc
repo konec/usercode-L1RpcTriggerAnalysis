@@ -23,6 +23,7 @@ namespace {
        *hTimingL1_RpcVsCsc_MuOK , *hTimingL1_RpcVsCsc_MuBad, *hTimingL1_RpcVsCsc_NoMu, 
        *hTimingL1_RpcVsDt_noRPCBX0, *hTimingL1_RpcVsCsc_noRPCBX0;
   TH1D *hTimingL1_Rpc2Dt0;
+  TH2D *hTimingL1_HitsRpc0Dt0, *hTimingL1_HitsRpc2Dt0;
 //  TProfile *hTimingL1_Prof;
 //  TH1D *hTimingL1_RMS;
   TH1D *hTimingL1_DR_Dt, *hTimingL1_DR_Rpc, *hTimingL1_DR_Csc, *hTimingL1_DR_Gmt;
@@ -74,13 +75,16 @@ void AnaTimingL1::init(TObjArray& histos)
   hTimingL1_RpcVsDt_noRPCBX0 = new TH2D("hTimingL1_RpcVsDt_noRPCBX0","hTimingL1_RpcVsDt_noRPCBX0",5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsDt_noRPCBX0);
   hTimingL1_RpcVsCsc_noRPCBX0 = new TH2D("hTimingL1_RpcVsCsc_noRPCBX0","hTimingL1_RpcVsCsc_noRPCBX0",5,-2.5,2.5, 5,-2.5,2.5); histos.Add(hTimingL1_RpcVsCsc_noRPCBX0);
   hTimingL1_Rpc2Dt0 = new TH1D("hTimingL1_Rpc2Dt0","hTimingL1_Rpc2Dt0",7, 0.5,7.5); histos.Add( hTimingL1_Rpc2Dt0);
-  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(1,"GLB+match");
+  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(1,"GLB+prop");
   hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(2,"GLB");
   hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(3,"TK");
-  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(4,"STD");
-  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(5,"Other");
-  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(6,"NoMu");
-  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(7,"unknown");
+  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(4,"STA+dir");
+  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(5,"STA");
+  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(6,"Other");
+  hTimingL1_Rpc2Dt0->GetXaxis()->SetBinLabel(7,"NoMu");
+
+  hTimingL1_HitsRpc0Dt0 = new TH2D("hTimingL1_HitsRpc0Dt0","hTimingL1_HitsRpc0Dt0",7,0.,7.,10,0.,30.); histos.Add( hTimingL1_HitsRpc0Dt0); 
+  hTimingL1_HitsRpc2Dt0 = new TH2D("hTimingL1_HitsRpc2Dt0","hTimingL1_HitsRpc2Dt0",7,0.,7.,10,0.,30.); histos.Add( hTimingL1_HitsRpc2Dt0);
 
   
 
@@ -162,7 +166,7 @@ void  AnaTimingL1::run(const EventObj* ev_noBx, const MuonObj* muon, const L1Obj
   const EventObjBXExtra *ev = dynamic_cast<const EventObjBXExtra*>(ev_noBx);
   if (!ev) return;
 //  if (ev->hasValidBX_Minus2)return;
-  if (ev->hasValidBX_Plus2)return;
+//  if (ev->hasValidBX_Plus2)return;
 
 
   bool dbg = false;
@@ -173,41 +177,52 @@ void  AnaTimingL1::run(const EventObj* ev_noBx, const MuonObj* muon, const L1Obj
   // additional check for DT prefireing
   //
   {
-    L1ObjColl collGMT = l1Coll->selectByType(L1Obj::GMT).selectByQuality(4,7).selectByPtMin(l1ptCutForDR).selectByBx(0,0);
+    L1ObjColl collGMT = l1Coll->selectByType(L1Obj::GMT).selectByQuality(4,7).
+                                selectByPtMin(l1ptCutForDR).selectByBx(0,0);
     L1ObjColl collDT  = l1Coll->selectByType(L1Obj::DT);
     L1ObjColl collCSC = l1Coll->selectByType(L1Obj::CSC);
     L1ObjColl collRPC = l1Coll->l1RpcCollEmu();
   
     if (collGMT) {
-      bool matchingMu = collGMT.isMatching_DRBx(0.3, 0, l1ptCutForDR);
+      bool matchingProp = collGMT.isMatching_DRBx(0.3, 0, l1ptCutForDR);
+      bool matchingDir  = (muon->pt() > 0.) ? 
+                          collGMT.isMatching_DRBx_At(0.5, 0, 0., muon->eta(), muon->phi()): false;
       double eta = collGMT.getL1Objs()[0].eta;
       double phi = collGMT.getL1Objs()[0].phi;
       bool noRPCBX0   = !collRPC.isMatching_DRBx_At(0.3, 0, 0., eta,phi); 
-      if (noRPCBX0 && collDT.isMatching_DRBx_At(0.3, 0, 0., eta,phi)) hTimingL1_RpcVsDt_noRPCBX0->Fill(0.,0.);
+      if (noRPCBX0 && collDT.isMatching_DRBx_At(0.2, 0, 0., eta,phi)) {
+        hTimingL1_RpcVsDt_noRPCBX0->Fill(0.,0.);
+        if (!muon->isGlobal() && !muon->isTracker() && muon->isOuter())
+            hTimingL1_HitsRpc0Dt0->Fill(muon->nRPCHits, muon->nDTHits);
+      }
       for (int ibxRPC=-2; ibxRPC <=2; ibxRPC++) {
-        if (collRPC.isMatching_DRBx_At(0.3, ibxRPC, 0., eta,phi) ) {
+        if (collRPC.isMatching_DRBx_At(0.2, ibxRPC, 0., eta,phi) ) {
           for (int ibxDTCSC=-2; ibxDTCSC <=2; ibxDTCSC++) {
-            if (collDT.isMatching_DRBx_At(0.3, ibxDTCSC, 0., eta,phi) ) {
-              if (muon->nAllMuons==0)                  hTimingL1_RpcVsDt_NoMu->Fill(ibxRPC, ibxDTCSC);
-              else if (muon->isGlobal() && matchingMu) hTimingL1_RpcVsDt_MuOK->Fill(ibxRPC, ibxDTCSC);
-              else                                     hTimingL1_RpcVsDt_MuBad->Fill(ibxRPC, ibxDTCSC);
+            if (collDT.isMatching_DRBx_At(0.2, ibxDTCSC, 0., eta,phi) ) {
+              if (muon->nAllMuons==0)                    hTimingL1_RpcVsDt_NoMu->Fill(ibxRPC, ibxDTCSC);
+              else if (muon->isGlobal() && matchingProp) hTimingL1_RpcVsDt_MuOK->Fill(ibxRPC, ibxDTCSC);
+              else                                       hTimingL1_RpcVsDt_MuBad->Fill(ibxRPC, ibxDTCSC);
               if (noRPCBX0) hTimingL1_RpcVsDt_noRPCBX0->Fill(ibxRPC, ibxDTCSC);
               if (noRPCBX0 && ibxDTCSC==0 && ibxRPC==2) {
-                if      (muon->isGlobal() && matchingMu) hTimingL1_Rpc2Dt0->Fill(1.);
-                else if (muon->isGlobal())               hTimingL1_Rpc2Dt0->Fill(2.);
-                else if (muon->isTracker())              hTimingL1_Rpc2Dt0->Fill(3.);
-                else if (muon->isOuter())                hTimingL1_Rpc2Dt0->Fill(4.);
-                else if (muon->nAllMuons>0)              hTimingL1_Rpc2Dt0->Fill(5.);
-                else if (muon->nAllMuons==0)             hTimingL1_Rpc2Dt0->Fill(6.);
-                else                                     hTimingL1_Rpc2Dt0->Fill(7.); //WTF
+//std::cout << *ev << std::endl << *muon << std::endl << *l1Coll << std::endl;
+                if      (muon->isGlobal() && matchingProp) hTimingL1_Rpc2Dt0->Fill(1.);
+                else if (muon->isGlobal())                 hTimingL1_Rpc2Dt0->Fill(2.);
+                else if (muon->isTracker())                hTimingL1_Rpc2Dt0->Fill(3.);
+                else if (muon->isOuter() && matchingDir) { 
+                  hTimingL1_Rpc2Dt0->Fill(4.);
+                  hTimingL1_HitsRpc2Dt0->Fill(muon->nRPCHits, muon->nDTHits);
+                }
+                else if (muon->isOuter())                  hTimingL1_Rpc2Dt0->Fill(5.);
+                else if (muon->nAllMuons>0)                hTimingL1_Rpc2Dt0->Fill(6.);
+                else if (muon->nAllMuons==0)               hTimingL1_Rpc2Dt0->Fill(7.);
 
               }
             }
             if (collCSC.isMatching_DRBx_At(0.3, ibxDTCSC, 0., eta,phi) ) {
               if (ibxDTCSC==0 && noRPCBX0) hTimingL1_RpcVsCsc_noRPCBX0->Fill(0.,0.);
-              if (muon->nAllMuons==0)                  hTimingL1_RpcVsCsc_NoMu->Fill(ibxRPC, ibxDTCSC);
-              else if (muon->isGlobal() && matchingMu) hTimingL1_RpcVsCsc_MuOK->Fill(ibxRPC, ibxDTCSC);
-              else                                     hTimingL1_RpcVsCsc_MuBad->Fill(ibxRPC, ibxDTCSC);
+              if (muon->nAllMuons==0)                    hTimingL1_RpcVsCsc_NoMu->Fill(ibxRPC, ibxDTCSC);
+              else if (muon->isGlobal() && matchingProp) hTimingL1_RpcVsCsc_MuOK->Fill(ibxRPC, ibxDTCSC);
+              else                                       hTimingL1_RpcVsCsc_MuBad->Fill(ibxRPC, ibxDTCSC);
               if (noRPCBX0) hTimingL1_RpcVsCsc_noRPCBX0->Fill(ibxRPC, ibxDTCSC);
             }
           } 

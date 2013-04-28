@@ -23,6 +23,7 @@
 
 BestMuonFinder::BestMuonFinder(const edm::ParameterSet& cfg)
   : lastEvent(0), lastRun(0), theConfig(cfg), theUnique(true), theAllMuons(0), theMuon(0),
+    theTrackerHits(0), theRPCHits(0), theDTHits(0), theCSCHits(0),
     hMuChi2Tk(0), hMuChi2Gl(0), hMuNHitsTk(0), 
     hMuPtVsEta(0), hMuHitsRPCvsCSC(0), hMuHitsRPCvsDT(0),
     hMuonPt_BMF(0),hMuonEta_BMF (0),hMuonPhi_BMF(0)
@@ -140,7 +141,13 @@ if (ev.id().event() == 352597514) {
     if ( nRPCHits < theConfig.getParameter<int>("minNumberRpcHits")) continue;
     if ( nDTHits + nCSCHits < theConfig.getParameter<int>("minNumberDtCscHits")  ) continue;
 
-    if (!theMuon || (im->bestTrack()->pt() > theMuon->bestTrack()->pt()) ) theMuon = &(*im);
+    if (!theMuon || (im->bestTrack()->pt() > theMuon->bestTrack()->pt()) ) {
+      theMuon = &(*im);
+      theTrackerHits = nTrackerHits;
+      theRPCHits = nRPCHits;
+      theDTHits = nDTHits;
+      theCSCHits = nCSCHits;
+    }
   }
 
   //

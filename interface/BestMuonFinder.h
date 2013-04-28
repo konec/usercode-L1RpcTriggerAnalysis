@@ -21,6 +21,11 @@ public:
   unsigned int numberOfAllMuons( const edm::Event &ev, const edm::EventSetup &es) { run(ev,es); return theAllMuons; }
   void initHistos( TObjArray & histos);
 
+  unsigned int numberOfValidMuonRPCHits() const { return theRPCHits; }
+  unsigned int numberOfValidMuonDTHits()  const { return theDTHits; }
+  unsigned int numberOfValidMuonCSCHits() const { return theCSCHits; }
+  unsigned int numberOfValidTrackerHits() const { return theTrackerHits; } 
+
 private:
   bool run(const edm::Event &ev, const edm::EventSetup &es);
 
@@ -32,6 +37,8 @@ private:
   bool theUnique;
   unsigned int theAllMuons;
   const reco::Muon* theMuon;
+
+  unsigned int theTrackerHits, theRPCHits, theDTHits, theCSCHits;
 
   TH1D *hMuChi2Tk, *hMuChi2Gl, *hMuNHitsTk ;
   TH2D *hMuPtVsEta, *hMuHitsRPCvsCSC, *hMuHitsRPCvsDT; 

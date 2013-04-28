@@ -129,17 +129,14 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   muon->isUnique = theBestMuonFinder.isUnique(ev,es);
   muon->nAllMuons = theBestMuonFinder.numberOfAllMuons(ev,es);
+  muon->nRPCHits = theBestMuonFinder.numberOfValidMuonRPCHits();
+  muon->nDTHits  = theBestMuonFinder.numberOfValidMuonDTHits();
+  muon->nCSCHits = theBestMuonFinder.numberOfValidMuonCSCHits();
+  muon->nTrackerHits = theBestMuonFinder.numberOfValidTrackerHits();
   if (theMuon) {
     muon->setKine(theMuon->bestTrack()->pt(), theMuon->bestTrack()->eta(), theMuon->bestTrack()->phi(), theMuon->bestTrack()->charge());
     muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
     muon->nMatchedStations = theMuon->numberOfMatchedStations();
-    if (theMuon->isGlobalMuon()) {
-      const reco::HitPattern& hp = (theMuon->combinedMuon())->hitPattern();
-      muon->nRPCHits = hp.numberOfValidMuonRPCHits();
-      muon->nDTHits  = hp.numberOfValidMuonDTHits();
-      muon->nCSCHits = hp.numberOfValidMuonCSCHits();
-    } else  muon->nRPCHits = muon->nDTHits = muon->nCSCHits = 0;
-    muon->nTrackerHits = theMuon->isTrackerMuon() ? (theMuon->innerTrack())->hitPattern().numberOfValidTrackerHits() : 0;
   }
 
   //
