@@ -24,6 +24,13 @@
 #include "TFile.h"
 #include "TTree.h"
 
+//tmp
+//#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+//#include "DataFormats/MuonDetId/interface/RPCDetId.h"
+//#include "DataFormats/RPCRecHit/interface/RPCRecHitCollection.h"
+//#include "DataFormats/DetId/interface/DetIdCollection.h"
+
+
 template <class T> T sqr( T t) {return t*t;}
 
 L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
@@ -151,6 +158,16 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   bitsL1->firedAlgos = theMenuInspector.firedAlgosL1(ev,es);
   bitsHLT->firedAlgos = theMenuInspector.firedAlgosHLT(ev,es);
   
+
+/* tmp
+  edm::Handle<RPCRecHitCollection> recHits;
+  ev.getByLabel("rpcRecHits", recHits);
+  typedef RPCRecHitCollection::const_iterator IH;
+  std::cout <<"Event: " << *event << std::endl;
+  for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
+    std::cout <<"Det: "<< ih->rpcId()<<"is valid: "<< ih->isValid()<< "BX= "<<ih->BunchX() << std::endl;
+}
+*/
 
   //
   // hits and detectors compatible with muon track

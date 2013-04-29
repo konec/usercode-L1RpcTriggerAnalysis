@@ -10,7 +10,7 @@ process.RPCCabling.connect = 'sqlite_file:RPCEMap3.db'
 
 
 process.l1RpcAnalysis = cms.EDAnalyzer("L1RpcTreeAnalysis",
-  treeFileNames = cms.vstring("l1RpcTree_CO10.root"),
+  treeFileNames = cms.vstring("l1RpcTree_CO11.root"),
   histoFileName = cms.string("l1RpcAnalysis.root"),
   filterByAnaMuonDistribution = cms.bool(False),
   filterByAnaMenu = cms.bool(True),

@@ -12,7 +12,8 @@ process.source = cms.Source("PoolSource", fileNames =  cms.untracked.vstring(
 #  '/store/2012C_MinimumBias_RECO/6CCBE4DE-FEF4-E111-B54E-003048F118AA.root',
 #  '/store/2012C_SingleMu_RAW-RECO/0AE926CA-94CB-E111-A92F-00261834B51E.root',
 #  '/store/2012C_SingleMu_RAW-RECO/24ADA49F-89F5-E111-AFA6-E0CB4E1A118A.root',
-  '/store/2012D_Commissioning_RECO/E0E972B4-E030-E211-8E98-0019B9F72D71.root',
+#  '/store/2012D_Commissioning_RECO/E0E972B4-E030-E211-8E98-0019B9F72D71.root',
+  '/store/2012D_Commissioning_RECO/70747E0E-2634-E211-9733-5404A63886C7.root'
   ),
   skipEvents = cms.untracked.uint32(0)
 )

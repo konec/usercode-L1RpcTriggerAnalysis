@@ -192,7 +192,7 @@ void  AnaTimingL1::run(const EventObj* ev_noBx, const MuonObj* muon, const L1Obj
       bool noRPCBX0   = !collRPC.isMatching_DRBx_At(0.3, 0, 0., eta,phi); 
       if (noRPCBX0 && collDT.isMatching_DRBx_At(0.2, 0, 0., eta,phi)) {
         hTimingL1_RpcVsDt_noRPCBX0->Fill(0.,0.);
-        if (!muon->isGlobal() && !muon->isTracker() && muon->isOuter())
+        if (!muon->isGlobal() && !muon->isTracker() && muon->isOuter() && matchingDir)
             hTimingL1_HitsRpc0Dt0->Fill(muon->nRPCHits, muon->nDTHits);
       }
       for (int ibxRPC=-2; ibxRPC <=2; ibxRPC++) {
@@ -204,13 +204,13 @@ void  AnaTimingL1::run(const EventObj* ev_noBx, const MuonObj* muon, const L1Obj
               else                                       hTimingL1_RpcVsDt_MuBad->Fill(ibxRPC, ibxDTCSC);
               if (noRPCBX0) hTimingL1_RpcVsDt_noRPCBX0->Fill(ibxRPC, ibxDTCSC);
               if (noRPCBX0 && ibxDTCSC==0 && ibxRPC==2) {
-//std::cout << *ev << std::endl << *muon << std::endl << *l1Coll << std::endl;
                 if      (muon->isGlobal() && matchingProp) hTimingL1_Rpc2Dt0->Fill(1.);
                 else if (muon->isGlobal())                 hTimingL1_Rpc2Dt0->Fill(2.);
                 else if (muon->isTracker())                hTimingL1_Rpc2Dt0->Fill(3.);
                 else if (muon->isOuter() && matchingDir) { 
                   hTimingL1_Rpc2Dt0->Fill(4.);
                   hTimingL1_HitsRpc2Dt0->Fill(muon->nRPCHits, muon->nDTHits);
+std::cout << *ev << std::endl << *muon << std::endl << *l1Coll << std::endl;
                 }
                 else if (muon->isOuter())                  hTimingL1_Rpc2Dt0->Fill(5.);
                 else if (muon->nAllMuons>0)                hTimingL1_Rpc2Dt0->Fill(6.);
