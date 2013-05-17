@@ -36,6 +36,7 @@ private:
 
   L1GtUtils theL1GtUtils;
   HLTConfigProvider theHltConfig;
+  bool theWarnNoColl;
 
   std::vector<std::string> theNamesAlgoHLT, theNamesAlgoL1;
 

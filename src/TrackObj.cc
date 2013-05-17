@@ -4,7 +4,7 @@ ClassImp(TrackObj)
 ostream & operator<< (ostream &out, const TrackObj &o)
 {
   out<<"TrackObj: ";
-  out <<" pt: "<<o.thePt<<", eta: "<<o.theEta<<", phi: "<<o.thePhi;
+  out <<" pt: "<<o.thePt<<", eta: "<<o.theEta<<", phi: "<<o.thePhi<<", charge: "<<o.theCharge;
   return out;
 }
 

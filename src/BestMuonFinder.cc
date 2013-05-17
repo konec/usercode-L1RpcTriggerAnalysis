@@ -48,7 +48,13 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
 
   //get Muon
   edm::Handle<reco::MuonCollection> muons;
-  ev.getByLabel( theConfig.getParameter<std::string>("muonColl"), muons);
+  static std::string muonCollName =  theConfig.getParameter<std::string>("muonColl");
+  static bool warnNoColl = theConfig.getUntrackedParameter<bool>("warnNoColl", true);
+  ev.getByLabel( muonCollName, muons);
+  if (!muons.isValid()) {
+    if (warnNoColl) std::cout <<"** WARNING - no collection labeled: "<<muonCollName<<std::endl; 
+    return false;
+  }
   theAllMuons = muons->size();
   
   for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {

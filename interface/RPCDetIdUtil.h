@@ -3,11 +3,14 @@
 
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include <iostream>
+#include <ostream>
 #include <cmath>
+namespace edm { class EventSetup; }
 
 class RPCDetIdUtil{
 public:
   RPCDetIdUtil( const RPCDetId & rpcDet) : theRpcDet(rpcDet) { }
+  RPCDetIdUtil( uint32_t rawId) : theRpcDet( RPCDetId(rawId) ) { }
 
   bool isBarrel() const { return (theRpcDet.region()==0); }
 
@@ -23,6 +26,7 @@ public:
     return isBarrel() ? barrelLayer() : endcapLayer(); 
   }
 
+  //WARNING - use eta of DetUnit position, not muon direction 
   unsigned int layer(float eta) const {
     if (fabs(eta) < 0.83) { 
       return barrelLayer();
@@ -53,13 +57,10 @@ public:
 
   RPCDetId rpdDetIt() { return theRpcDet; }
 
-  void print() { 
-    std::cout <<"DetId: "<<theRpcDet.rawId()
-              <<" region: "<<theRpcDet.region()
-              <<" layer:  "<<layer()
-              <<" ring/wheel: "<<theRpcDet.ring() << std::endl; }
+  void print(const edm::EventSetup& es);
      
 private:
   RPCDetId theRpcDet;
+  friend std::ostream & operator<< (std::ostream &out, const RPCDetIdUtil &o);
 };
 #endif

@@ -23,38 +23,64 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/HitSpecObj.h"
 
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
 
 L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   : theConfig(cfg),
-    theAnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") ),
-    theAnaTimingL1 (cfg.getParameter<edm::ParameterSet>("anaTimingL1") ),
-    theAnaMenu(cfg.getParameter<edm::ParameterSet>("anaMenu") ),
-    theAnaEvent(cfg.getParameter<edm::ParameterSet>("anaEvent") )
-{ }
+    theAnaMuonDistribution(0), 
+    theAnaRpcVsOth(0), 
+    theAnaRpcMisc(0), 
+    theAnaEff(0), 
+    theAnaDet(0), 
+    theAnaEmu(0), 
+    theAnaSynch(0), 
+    theAnaClu(0), 
+    theAnaTimingL1(0), 
+    theAnaMenu(0), 
+    theAnaEvent(0),
+    theAnaDigiSpec(0),
+    theAnaHitSpec(0), 
+    thePatternProducer(0),
+    thePatternProvider(0)
+{ 
+  if (theConfig.exists("anaMuonDistribution")) theAnaMuonDistribution = new AnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") );
+  if (theConfig.exists("anaMenu")) theAnaMenu = new AnaMenu(theConfig.getParameter<edm::ParameterSet>("anaMenu"));
+  if (theConfig.exists("anaTimingL1")) theAnaTimingL1 = new AnaTimingL1( theConfig.getParameter<edm::ParameterSet>("anaTimingL1") );
+  if (theConfig.exists("anaEvent")) theAnaEvent = new   AnaEvent(cfg.getParameter<edm::ParameterSet>("anaEvent") );
+  if (theConfig.exists("anaDigiSpec")) theAnaDigiSpec = new AnaDigiSpec(cfg.getParameter<edm::ParameterSet>("anaDigiSpec")); 
+  if (theConfig.exists("anaHitSpec")) theAnaHitSpec = new AnaHitSpec(cfg.getParameter<edm::ParameterSet>("anaHitSpec")); 
+  if (theConfig.exists("patternProducer")) thePatternProducer = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProducer"));
+  if (theConfig.exists("patternProvider")) thePatternProvider = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProvider"));
+  
+}
 
 void L1RpcTreeAnalysis::beginJob()
 {
   theHistos.SetOwner();
 
-  theAnaMuonDistribution.init(theHistos);
-  theAnaRpcVsOth.init(theHistos);
-  theAnaRpcMisc.init(theHistos);
-  theAnaEff.init(theHistos);
-  theAnaDet.init(theHistos);
-  theAnaEmu.init(theHistos);
-  theAnaSynch.init(theHistos);
-  theAnaClu.init(theHistos);
-  theAnaTimingL1.init(theHistos);
-  theAnaEvent.init(theHistos);
-  theAnaMenu.init(theHistos);
+  if (theAnaMuonDistribution) theAnaMuonDistribution->init(theHistos);
+  if (theAnaRpcVsOth)         theAnaRpcVsOth->init(theHistos);
+  if (theAnaRpcMisc)          theAnaRpcMisc->init(theHistos);
+  if (theAnaEff)              theAnaEff->init(theHistos);
+  if (theAnaDet)              theAnaDet->init(theHistos);
+  if (theAnaEmu)              theAnaEmu->init(theHistos);
+  if (theAnaSynch)            theAnaSynch->init(theHistos);
+  if (theAnaClu)              theAnaClu->init(theHistos);
+  if (theAnaTimingL1)         theAnaTimingL1->init(theHistos);
+  if (theAnaEvent)            theAnaEvent->init(theHistos);
+  if (theAnaMenu)             theAnaMenu->init(theHistos);
+  if (theAnaDigiSpec)         theAnaDigiSpec->init(theHistos);
+  if (theAnaHitSpec)          theAnaHitSpec->init(theHistos);
+
+  if (thePatternProvider)     thePatternProvider->beginJob();
 }
 
 void L1RpcTreeAnalysis::beginRun(const edm::Run& ru, const edm::EventSetup& es)
 {
-  theAnaSynch.beginRun(ru,es);
+  if (theAnaSynch) theAnaSynch->beginRun(ru,es);
 }
 
 void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
@@ -85,9 +111,11 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   std::vector<uint32_t> *detsCrossedByMuonDeepInside = 0;
   std::vector<DetCluDigiObj> *detsHitsCompatibleWithMuon = 0;
   std::vector<uint32_t> *detsSIMU = 0;
+  std::vector<std::pair<uint32_t, uint32_t> > *digSpec = 0;
 
   EventObj * event = 0;
   MuonObj * muon = 0;
+  TrackObj * simu = 0;
 
   TriggerMenuResultObj *bitsL1  = 0;
   TriggerMenuResultObj *bitsHLT = 0;
@@ -97,11 +125,15 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   TBranch *bdetsCrossedByMuonDeepInside =0;
   TBranch *bdetsHitsCompatibleWithMuon = 0;
   TBranch *bdetsSIMU =0;
+  TBranch *bdigSpec = 0;
 
   L1ObjColl* l1ObjColl = 0;
+  HitSpecObj* hitSpec = 0;
+  
 
   chain.SetBranchAddress("event",&event);
   chain.SetBranchAddress("muon",&muon);
+  chain.SetBranchAddress("simu",&simu);
 
   chain.SetBranchAddress("bitsL1",&bitsL1);
   chain.SetBranchAddress("bitsHLT",&bitsHLT);
@@ -111,8 +143,10 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   chain.SetBranchAddress("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside,&bdetsCrossedByMuonDeepInside);
   chain.SetBranchAddress("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon,&bdetsHitsCompatibleWithMuon);
   chain.SetBranchAddress("detsSIMU",&detsSIMU,&bdetsSIMU);
+  chain.SetBranchAddress("digSpec",&digSpec,&bdigSpec);
 
   chain.SetBranchAddress("l1ObjColl",&l1ObjColl);
+  chain.SetBranchAddress("hitSpec",&hitSpec);
 
 
   //
@@ -128,9 +162,9 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   unsigned int lastRun = 0;
   for (int ev=0; ev<nentries; ev++) {
     chain.GetEntry(ev);
-    theAnaMenu.updateMenu(bitsL1->names, bitsHLT->names);
+    if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
-    if (lastRun != (*event).run) { 
+    if ( (lastRun != (*event).run) || (ev/10000*10000==ev) ) { 
 //    if (true) {
 //    if (! ((*event).run==204601 && (*event).id ==109463402)) { continue;
       lastRun = (*event).run; 
@@ -162,41 +196,67 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 
    // EVENT NUMBER, BX structure etc.
    EventObjBXExtra eventBx(*event);
-   if ( !theAnaEvent.filter(&eventBx) && theConfig.getParameter<bool>("filterByAnaEvent") ) continue;
+   if ( theAnaEvent && !theAnaEvent->filter(&eventBx) && theConfig.getParameter<bool>("filterByAnaEvent") ) continue;
    // ANALYSE AND FILTER KINEMCTICS 
-   if ( !theAnaMuonDistribution.filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
+   if ( theAnaMuonDistribution && !theAnaMuonDistribution->filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
    // ANALYSE AND FILTER TRIGGER MENU
-   if ( !theAnaMenu.filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("filterByAnaMenu") ) continue;
+   if ( theAnaMenu && !theAnaMenu->filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("filterByAnaMenu") ) continue;
 
-//   theAnaRpcVsOth.run(muon,l1ObjColl);
-//   theAnaEff.run(muon, l1ObjColl);
-//   theAnaRpcMisc.run(event,muon,l1ObjColl);
-//   theAnaDet.run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
-//   theAnaEmu.run ( event, muon, l1ObjColl);
-//   theAnaSynch.run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
-//   theAnaClu.run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
-   theAnaTimingL1.run( &eventBx, muon, l1ObjColl);
+   // ANALYSES 
+   if (theAnaRpcVsOth) theAnaRpcVsOth->run(muon,l1ObjColl);
+   if (theAnaEff)      theAnaEff->run(muon, l1ObjColl);
+   if (theAnaRpcMisc)  theAnaRpcMisc->run(event,muon,l1ObjColl);
+   if (theAnaDet)      theAnaDet->run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
+   if (theAnaEmu)      theAnaEmu->run ( event, muon, l1ObjColl);
+   if (theAnaSynch)    theAnaSynch->run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
+   if (theAnaClu)      theAnaClu->run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
+   if (theAnaTimingL1) theAnaTimingL1->run( &eventBx, muon, l1ObjColl);
 
+   // HITPATTERN ANALYSES & MC EFFICIENCY
+   if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
+   if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
+   if (thePatternProducer) thePatternProducer->run(event, simu, hitSpec, *digSpec);
+   if (thePatternProvider) thePatternProvider->check(event, simu, hitSpec, *digSpec);
   }
 }
 
 void L1RpcTreeAnalysis::endJob()
 {
   std::cout <<"ENDJOB, summaries:"<<std::endl;
-  TGraph* hGraph_DetEff = theAnaDet.resume();
-  theAnaRpcMisc.resume(theHistos);
-  TGraph* hGraph_RunClu = theAnaClu.resume();
-  theAnaTimingL1.resume(theHistos);
-  theAnaMenu.resume(theHistos);
-  theAnaEvent.resume(theHistos);
+  TGraph* hGraph_DetEff = (theAnaDet) ? theAnaDet->resume() : 0;
+  TGraph* hGraph_RunClu = (theAnaClu) ? theAnaClu->resume(): 0;
+  if (theAnaRpcMisc) theAnaRpcMisc->resume(theHistos);
+  if (theAnaTimingL1)  theAnaTimingL1->resume(theHistos);
+  if (theAnaMenu)     theAnaMenu->resume(theHistos);
+  if (theAnaMenu) theAnaEvent->resume(theHistos);
+  if (theAnaHitSpec) theAnaHitSpec->resume(theHistos);
+  if (theAnaDigiSpec) theAnaDigiSpec->resume(theHistos);
 
-  theAnaSynch.endJob();
+  if (theAnaSynch) theAnaSynch->endJob();
+  if (thePatternProducer) thePatternProducer->endJob();
+  if (thePatternProvider) thePatternProvider->endJob();
 
   std::string histoFile = theConfig.getParameter<std::string>("histoFileName");
   TFile f(histoFile.c_str(),"RECREATE");
   theHistos.Write();
-  hGraph_DetEff->Write("hGraph_DetEff");
-  hGraph_RunClu->Write("hGraph_RunClu");
+  if (hGraph_DetEff) hGraph_DetEff->Write("hGraph_DetEff");
+  if (hGraph_RunClu) hGraph_RunClu->Write("hGraph_RunClu");
   f.Close();
   std::cout <<"END"<<std::endl;
+
+  delete theAnaMuonDistribution;
+  delete theAnaRpcVsOth;
+  delete theAnaRpcMisc;
+  delete theAnaEff;
+  delete theAnaDet;
+  delete theAnaEmu;
+  delete theAnaSynch;
+  delete theAnaClu;
+  delete theAnaTimingL1;
+  delete theAnaMenu;
+  delete theAnaEvent;
+  delete theAnaDigiSpec;
+  delete theAnaHitSpec;
+  delete thePatternProducer;
+  delete thePatternProvider;
 }

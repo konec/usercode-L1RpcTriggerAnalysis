@@ -17,6 +17,8 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsGrabber.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/FilterMenu.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjMaker.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/DetHitDigiGrabber.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/HitSpecObj.h"
 
 
 
@@ -49,7 +51,7 @@ private:
 
   EventObj* event;
   MuonObj* muon;
-  TrackObj* track;
+  TrackObj* simu;
   TriggerMenuResultObj *bitsL1;
   TriggerMenuResultObj *bitsHLT;
   
@@ -57,6 +59,8 @@ private:
   std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsSIMU;
   std::vector<DetCluDigiObj> detsHitsCompatibleWithMuon;
   L1ObjColl * l1ObjColl;
+  HitSpecObj * hitSpec;
+  std::vector< std::pair<uint32_t, uint32_t> > digSpec;
 
   unsigned int theCounter;
 								    
@@ -67,5 +71,6 @@ private:
   SynchroCountsGrabber theSynchroGrabber;
   L1ObjMaker theL1ObjMaker;
   FilterMenu theMenuInspector;
+  DetHitDigiGrabber theDetHitDigiGrabber;
 };
 #endif

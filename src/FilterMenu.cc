@@ -38,7 +38,8 @@
 
 
 FilterMenu::FilterMenu(const edm::ParameterSet& cfg)
-  : theCounterIN(0), theCounterL1(0), theCounterHLT(0)
+  : theCounterIN(0), theCounterL1(0), theCounterHLT(0),
+    theWarnNoColl(cfg.getUntrackedParameter<bool>("warnNoColl",true))
 { }
 
 bool FilterMenu::checkRun(const edm::Run& run, const edm::EventSetup & es)
@@ -114,7 +115,10 @@ std::vector<unsigned int>  FilterMenu::firedAlgosL1(const edm::Event&ev, const e
   edm::Handle<L1GlobalTriggerReadoutRecord> gtReadoutRecord;
   edm::InputTag l1GtDaqReadoutRecordInputTag("gtDigis");
   ev.getByLabel(l1GtDaqReadoutRecordInputTag, gtReadoutRecord);
-  if (!gtReadoutRecord.isValid()) { std::cout <<" PROBLEM, record not OK" << std::endl; return result;}
+  if (!gtReadoutRecord.isValid()) { 
+    if (theWarnNoColl) std::cout <<" PROBLEM, record not OK" << std::endl; 
+    return result;
+  }
   DecisionWord gtDecisionWord = gtReadoutRecord->decisionWord();
 
   //
@@ -142,7 +146,10 @@ std::vector<unsigned int> FilterMenu::firedAlgosHLT(const edm::Event&ev, const e
   std::vector<unsigned int> result;
   edm::Handle<edm::TriggerResults>   triggerResultsHandle;
   ev.getByLabel(edm::InputTag("TriggerResults","","HLT"), triggerResultsHandle);
-  if (!triggerResultsHandle.isValid()) { std::cout << "firedAlgosHLT, PROBLEM, record not OK"<< std::endl; return result; }
+  if (!triggerResultsHandle.isValid()) { 
+    if (theWarnNoColl)std::cout << "firedAlgosHLT, PROBLEM, record not OK"<< std::endl; 
+    return result; 
+  }
   assert(triggerResultsHandle->size()==theHltConfig.size());
 
   //unsigned int ntrig=0;
@@ -193,7 +200,7 @@ bool FilterMenu::filterL1(edm::Event&ev, const edm::EventSetup&es)
 
   //std::cout <<"Fired L1 Algorithms: " << std::endl;
   const L1GtTriggerMenuLite* menu = theL1GtUtils.ptrL1GtTriggerMenuLite(errorCode);
-  bool hasMuSeed = false;
+//  bool hasMuSeed = false;
   unsigned int ntrig = 0;
   for (unsigned int  i= 0; i<128; ++i) {
     const std::string * pname = menu->gtAlgorithmName(i,errorCode);
@@ -205,10 +212,10 @@ bool FilterMenu::filterL1(edm::Event&ev, const edm::EventSetup&es)
      bool isMu = ( (*pname).find("Mu") != std::string::npos);
       std::cout<<"L1 idx: "<<i<<" "<<*pname; //<<" decision: "<<gtDecisionWord[i];
       if (!isMu) ;
-      if (isMu) hasMuSeed = true;
+ //     if (isMu) hasMuSeed = true;
       if (!isMu) result = true;
-      int triggerMask,prescaleFactor;
-      bool decisionBeforeMask, decisionAfterMask;
+      //int triggerMask,prescaleFactor;
+      //bool decisionBeforeMask, decisionAfterMask;
       //theL1GtUtils.l1Results(ev, *pname, decisionBeforeMask, decisionAfterMask, prescaleFactor, triggerMask);
       //theL1GtUtils.prescaleFactorSetIndex(ev, L1GtUtils::AlgorithmTrigger, errorCode);;
       std::cout <<std::endl;
@@ -237,7 +244,7 @@ bool FilterMenu::filterHLT(edm::Event&ev, const edm::EventSetup&es)
   }
   assert(triggerResultsHandle->size()==theHltConfig.size());
 
-  bool hasMuSeed = false;
+//  bool hasMuSeed = false;
   std::cout <<"Number of HLT algorithms: "<<theHltConfig.size() << std::endl;
   unsigned int ntrig = 0;
   for (unsigned int triggerIndex =0; triggerIndex < theHltConfig.size()-1; ++triggerIndex) {   //skip "Final" decision indes
@@ -250,7 +257,7 @@ bool FilterMenu::filterHLT(edm::Event&ev, const edm::EventSetup&es)
       ntrig++;
       bool isMu = ( (triggerName.find("Mu") != std::string::npos) && (triggerName.find("Multi") == std::string::npos) );
 //      std::cout <<triggerName;  if (!isMu) std::cout <<" <---- "; std::cout << std::endl;
-      if (isMu)  hasMuSeed = true;
+//      if (isMu)  hasMuSeed = true;
       if (!isMu)  result = true;
        std::cout <<" HLT idx: "<<triggerIndex <<" "<<triggerName<< " Trigger path status:" 
               //<< " WasRun=" << triggerResultsHandle->wasrun(triggerIndex)

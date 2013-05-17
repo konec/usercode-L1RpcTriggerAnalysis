@@ -15,7 +15,9 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaTimingL1.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaMenu.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaEvent.h"
-
+#include "UserCode/L1RpcTriggerAnalysis/interface/AnaDigiSpec.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/AnaHitSpec.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/PatternManager.h"
 #include "TObjArray.h"
 
 
@@ -34,18 +36,23 @@ private:
   TObjArray theHistos;
   edm::ParameterSet theConfig;
 
-  AnaMuonDistribution theAnaMuonDistribution;
-  AnaRpcVsOth         theAnaRpcVsOth;
-  AnaRpcMisc          theAnaRpcMisc;
-  AnaEff              theAnaEff;
-  AnaDet              theAnaDet;
-  AnaEmu              theAnaEmu;
-  AnaSynch            theAnaSynch;
-  AnaClu              theAnaClu;
-  AnaTimingL1         theAnaTimingL1;
-  AnaMenu             theAnaMenu;
-  AnaEvent            theAnaEvent;
+  AnaMuonDistribution *theAnaMuonDistribution;
+  AnaRpcVsOth         *theAnaRpcVsOth;
+  AnaRpcMisc          *theAnaRpcMisc;
+  AnaEff              *theAnaEff;
+  AnaDet              *theAnaDet;
+  AnaEmu              *theAnaEmu;
+  AnaSynch            *theAnaSynch;
+  AnaClu              *theAnaClu;
+  AnaTimingL1         *theAnaTimingL1;
+  AnaMenu             *theAnaMenu;
+  AnaEvent            *theAnaEvent;
 
+  AnaDigiSpec         *theAnaDigiSpec;
+  AnaHitSpec          *theAnaHitSpec;
+
+  PatternManager      *thePatternProducer;
+  PatternManager      *thePatternProvider;
 
 }; 
 

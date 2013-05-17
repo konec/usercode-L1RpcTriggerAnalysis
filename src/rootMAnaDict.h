@@ -41,6 +41,7 @@ extern void G__set_cpp_environmentrootMAnaDict();
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObjVect.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/HitSpecObj.h"
 #include <algorithm>
 namespace std { }
 using namespace std;
@@ -78,5 +79,8 @@ extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEDetCluDigiO
 extern G__linked_taginfo G__rootMAnaDictLN_TriggerMenuResultObj;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlEstringcOallocatorlEstringgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEstringcOallocatorlEstringgRsPgRcLcLiteratorgR;
+extern G__linked_taginfo G__rootMAnaDictLN_Point3DBaselEfloatcOGlobalTaggR;
+extern G__linked_taginfo G__rootMAnaDictLN_Vector3DBaselEfloatcOGlobalTaggR;
+extern G__linked_taginfo G__rootMAnaDictLN_HitSpecObj;
 
 /* STUB derived class for protected member access */

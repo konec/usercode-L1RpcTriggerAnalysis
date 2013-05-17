@@ -11,6 +11,8 @@
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "SimDataFormats/Track/interface/SimTrack.h"
+
 
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestMuonFinder.h"
@@ -20,6 +22,8 @@
 #include "DataFormats/RPCDigi/interface/RPCRawSynchro.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/ConverterRPCRawSynchroSynchroCountsObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
+
+#include "UserCode/L1RpcTriggerAnalysis/interface/BestSimulatedMuonFinder.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -34,16 +38,19 @@
 template <class T> T sqr( T t) {return t*t;}
 
 L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
-  : theConfig(cfg), theTree(0), event(0), muon(0), track(0), 
+  : theConfig(cfg), theTree(0), event(0), muon(0), simu(0), 
     bitsL1(0), bitsHLT(0),
     counts(0), 
-    l1ObjColl(0), 
+    l1ObjColl(0),hitSpec(0), 
     theCounter(0),
     theBestMuonFinder(cfg.getParameter<edm::ParameterSet>("bestMuonFinder")),
     theDetHitCollector(cfg.getParameter<edm::ParameterSet>("detHitCollector")),
     theSynchroGrabber(cfg.getParameter<edm::ParameterSet>("linkSynchroGrabber")),
     theL1ObjMaker(cfg.getParameter<edm::ParameterSet>("l1ObjMaker")),
-    theMenuInspector(edm::ParameterSet())
+    theMenuInspector( cfg.exists("menuInspector") 
+                      ?  cfg.getParameter<edm::ParameterSet>("menuInspector")
+                      : edm::ParameterSet() ),
+    theDetHitDigiGrabber( cfg.getParameter<edm::ParameterSet>("detHitDigiGrabber") )
 { }
 
 void L1RpcTreeMaker::beginRun(const edm::Run &ru, const edm::EventSetup &es)
@@ -59,7 +66,7 @@ void L1RpcTreeMaker::beginJob()
 
   theTree->Branch("event","EventObj",&event,32000,99);
   theTree->Branch("muon","MuonObj",&muon,32000,99);
-  theTree->Branch("track", "TrackObj",&track,32000,99);
+  theTree->Branch("simu", "TrackObj",&simu,32000,99);
 
   theTree->Branch("bitsL1" ,"TriggerMenuResultObj",&bitsL1 ,32000,99);
   theTree->Branch("bitsHLT","TriggerMenuResultObj",&bitsHLT,32000,99);
@@ -71,11 +78,14 @@ void L1RpcTreeMaker::beginJob()
   theTree->Branch("detsSIMU",&detsSIMU);
 
   theTree->Branch("l1ObjColl","L1ObjColl",&l1ObjColl,32000,99);
+  theTree->Branch("hitSpec","HitSpecObj",&hitSpec,32000,99);
+  theTree->Branch("digSpec",&digSpec);
 
   theHelper.SetOwner();
   theBestMuonFinder.initHistos(theHelper);
   theDetHitCollector.initHistos(theHelper);
   theSynchroGrabber.initHistos(theHelper);
+  theDetHitDigiGrabber.initHistos(theHelper);
 }
 
 void L1RpcTreeMaker::endJob()
@@ -96,6 +106,7 @@ L1RpcTreeMaker::~L1RpcTreeMaker()
 
 void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
 {
+
   //
   // check reference muon
   //
@@ -113,12 +124,13 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   event->id = ev.id().event();
   event->run = ev.run();
   event->lumi = ev.luminosityBlock();
+  //std::cout <<"-----------------------"<< *event << std::endl;
 
   //
   // create other objects structure
   //
   muon = new MuonObj();
-  track = new TrackObj();
+  simu = new TrackObj();
 
   bitsL1 = new TriggerMenuResultObj();
   bitsHLT = new TriggerMenuResultObj();
@@ -130,6 +142,18 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   detsSIMU = std::vector<uint32_t>();
 
   l1ObjColl = new L1ObjColl;
+  hitSpec = new HitSpecObj(); 
+  digSpec = std::vector< std::pair<uint32_t, uint32_t> >();
+
+  //
+  // fill Simulated Mu Info 
+  //
+  const SimTrack* aSimMuon = BestSimulatedMuonFinder().result(ev,es);
+  if (aSimMuon) { 
+    int charge = (abs(aSimMuon->type()) == 13) ? aSimMuon->type()/-13 : 0;
+    simu->setKine(aSimMuon->momentum().pt(), aSimMuon->momentum().eta(),aSimMuon->momentum().phi(), charge);
+  }
+  //  std::cout << *simu << std::endl;
 
   //
   // fill muon info
@@ -207,19 +231,27 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   }
   l1ObjColl->set( matching );
   l1ObjColl->set( deltaR );
-//  std::cout <<"----------"<<std::endl;
+
 //  std::cout <<*l1ObjColl << std::endl;
+
+  //
+  // det HIT+DIGI grabber
+  //
+  *hitSpec = theDetHitDigiGrabber.rpcDetHits(ev,es,simu);
+  digSpec  = theDetHitDigiGrabber.digiCollector(ev,es);
+  
 
   //
   // fill ntuple + cleanup
   //
-  //std::cout <<" THIS event written!" << std::endl;
+//  std::cout <<"THIS event written!" << std::endl;
   theTree->Fill();
   delete event; event = 0;
   delete muon;  muon = 0;
-  delete track; track = 0;
+  delete simu;  simu = 0;
   delete bitsL1;  bitsL1= 0;
   delete bitsHLT;  bitsHLT= 0;
   delete l1ObjColl; l1ObjColl = 0;
+  delete hitSpec; hitSpec = 0;
 }
 				
