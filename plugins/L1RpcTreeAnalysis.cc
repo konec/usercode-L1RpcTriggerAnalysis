@@ -46,7 +46,7 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
     thePatternProducer(0),
     thePatternProvider(0),
     theAnaSiMuDistribution(0),
-    theAnaOtf(0)
+    theAnaOtfEff(0)
 { 
   if (theConfig.exists("anaMuonDistribution")) theAnaMuonDistribution = new AnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution"));
   if (theConfig.exists("anaMenu")) theAnaMenu = new AnaMenu(theConfig.getParameter<edm::ParameterSet>("anaMenu"));
@@ -57,7 +57,7 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   if (theConfig.exists("patternProducer")) thePatternProducer = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProducer"));
   if (theConfig.exists("patternProvider")) thePatternProvider = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProvider"));
   if (theConfig.exists("anaSiMuDistribution")) theAnaSiMuDistribution = new AnaSiMuDistribution( cfg.getParameter<edm::ParameterSet>("anaSiMuDistribution"));
-  if (theConfig.exists("anaOtf")) theAnaOtf = new AnaOtf( cfg.getParameter<edm::ParameterSet>("anaOtf"));
+  if (theConfig.exists("anaOtfEff")) theAnaOtfEff = new AnaOtfEff( cfg.getParameter<edm::ParameterSet>("anaOtfEff"));
   
 }
 
@@ -79,7 +79,7 @@ void L1RpcTreeAnalysis::beginJob()
   if (theAnaDigiSpec)         theAnaDigiSpec->init(theHistos);
   if (theAnaHitSpec)          theAnaHitSpec->init(theHistos);
   if (theAnaSiMuDistribution) theAnaSiMuDistribution->init(theHistos);
-  if (theAnaOtf)              theAnaOtf->init(theHistos);
+  if (theAnaOtfEff)           theAnaOtfEff->init(theHistos);
 
   if (thePatternProvider)     thePatternProvider->beginJob();
 }
@@ -226,7 +226,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    if (thePatternProducer) thePatternProducer->run(event, simu, hitSpec, *digSpec);
    L1Obj l1otf;
    if (thePatternProvider) l1otf=thePatternProvider->check(event, simu, hitSpec, *digSpec);
-   if (theAnaOtf) theAnaOtf->run(event,simu,l1otf);  
+   if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf);  
   }
 }
 
@@ -269,4 +269,6 @@ void L1RpcTreeAnalysis::endJob()
   delete theAnaHitSpec;
   delete thePatternProducer;
   delete thePatternProvider;
+  delete theAnaSiMuDistribution;
+  delete theAnaOtfEff;
 }
