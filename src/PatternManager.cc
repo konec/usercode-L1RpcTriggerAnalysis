@@ -119,6 +119,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
 //    std::cout << " HAS PATTERN "<<pattern << std::endl;
     GoldenPattern & gp = igps->second;
     GoldenPattern::Result result = gp.compare(pattern);
+    if (!result.hasRpcDet(637602109) && !result.hasRpcDet(637634877) && !result.hasRpcDet(637599914) && !result.hasRpcDet(637632682)) continue;
     if (result > bestMatching) {
       bestMatching = result;
       bestKey =  igps->first;

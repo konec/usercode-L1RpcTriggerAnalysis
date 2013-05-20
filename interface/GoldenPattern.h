@@ -58,6 +58,12 @@ public:
     operator bool() const;
     double value() const;
     unsigned int nMatchedTot() const;
+    bool hasRpcDet(uint32_t rawId) {
+      for (auto it=posRpcResult.begin(); it != posRpcResult.end(); it++) {
+        if (it->first == rawId && it->second > 0. && it->second < 1.) return true; 
+      }
+      return false;
+    }
   private:
     void run() const { if (checkMe) {checkMe=false; runNoCheck(); } }
     void runNoCheck() const;
