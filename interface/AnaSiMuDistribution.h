@@ -17,7 +17,7 @@ public:
   void init(TObjArray& histos);
   bool filter(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec);
 private:
-  double ptMin, etaMinRef, etaMaxRef, phiMinRef, phiMaxRef;
+  double ptMin, ptMax, etaMinRef, etaMaxRef, phiMinRef, phiMaxRef;
   bool checkMatchedDets;
   std::vector<uint32_t> matchedDets;
 };

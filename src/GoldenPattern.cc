@@ -44,7 +44,17 @@ double GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, double where
 }
 
 bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
-  return (value() < o.value() ); 
+  if ( *this && o) {
+    if (nMatchedTot() < o.nMatchedTot()) return true;
+    else if (nMatchedTot() == o.nMatchedTot() && value() < o.value()) return true;
+    else return false; 
+  } 
+  else if (o) {return true; }
+  else if (*this) { return false; } 
+  else return false;
+
+//  return (value() < o.value() ); 
+//  return false;
 }
 
 GoldenPattern::Result::operator bool() const {

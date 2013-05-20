@@ -20,6 +20,7 @@ namespace {
 
 AnaSiMuDistribution::AnaSiMuDistribution(const edm::ParameterSet& cfg)
   : ptMin( cfg.getParameter<double>("ptMin") ),
+    ptMax( cfg.getParameter<double>("ptMax") ),
     etaMinRef (cfg.getParameter<double>("absEtaMinRef") ),
     etaMaxRef (cfg.getParameter<double>("absEtaMaxRef") ),
     phiMinRef (cfg.getParameter<double>("phiMinRef") ),
@@ -49,6 +50,7 @@ bool AnaSiMuDistribution::filter(const EventObj* ev, const TrackObj * simu, cons
   hSiMuPhi_INP->Fill(simu->phi());
 
   if (simu->pt() < ptMin) return false;
+  if (simu->pt() > ptMax) return false;
   if ( fabs(hitSpec->position().eta()) < etaMinRef) return false;
   if ( fabs(hitSpec->position().eta()) > etaMaxRef) return false;
   if ( hitSpec->position().phi() < phiMinRef) return false;

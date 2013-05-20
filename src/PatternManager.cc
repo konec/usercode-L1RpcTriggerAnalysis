@@ -36,7 +36,7 @@ PatternManager::PatternManager(const edm::ParameterSet &cfg)
 PatternManager::~PatternManager()
 {
   std::cout <<" Events checked for pattenrs:    " << theEvForPatCounter << std::endl;
-  std::cout <<" Events used    for pattenrs:    " << theEvForPatCounter << std::endl;
+  std::cout <<" Events used    for pattenrs:    " << theEvUsePatCounter << std::endl;
   std::cout <<" Size of GoldenPatterns:         " << theGPs.size() << std::endl;
   if (theConfig.getUntrackedParameter<bool>("dump",false)) {
   for (std::map< GoldenPattern::Key, GoldenPattern>::const_iterator 
@@ -85,12 +85,12 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
 {
   L1Obj candidate;
   if (!hitSpec) return candidate;
-/*
   if (hitSpec->rawId() == 0 ) return candidate;
   double phiref = hitSpec->position().phi();
   double ptref  = simu->pt();
   int    chargeref = simu->charge();
   unsigned int detref =  hitSpec->rawId();
+/*
   if (detref != 637602109 && detref != 637634877 &&
       detref != 637599914 && detref != 637632682 ) return candidate;
 
@@ -98,8 +98,8 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   if (!precisePos) return candidate;
   if ( simu->pt() < 26. || simu->pt() > 27.  ) return candidate;
 
-  std::cout <<" ------------------ EVENT: " << std::endl;
 */
+//  std::cout <<" ------------------ EVENT: " << std::endl;
   Pattern pattern;
   theEvForPatCounter++;
   for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); is++) {
@@ -109,8 +109,8 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   if (pattern.size() == 0) return candidate;
 //  std::cout <<" ------------------ END EVENT, COMPARE" << std::endl;
 
-//  GoldenPattern::Key thisKey(detref, ptref, chargeref, phiref );
-//  std::cout << thisKey << std::endl;
+  GoldenPattern::Key thisKey(detref, ptref, chargeref, phiref );
+//  std::cout << thisKey <<" PATTENR_SIZE: "<<pattern.size()<< std::endl;
 
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
@@ -121,14 +121,19 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
     GoldenPattern::Result result = gp.compare(pattern);
 //    if (!result.hasRpcDet(637602109) && !result.hasRpcDet(637634877) && !result.hasRpcDet(637599914) && !result.hasRpcDet(637632682)) continue;
     if (!result.hasRpcDet(igps->first.theDet)) continue;
-    if (result > bestMatching) {
+    if (result.nMatchedTot() < 5 )continue; 
+    if (!result) continue;
+ //    std::cout <<"PATT KEY: "<<igps->first<<" "<<result<<" is Less: "<<(result<bestMatching)<<" isBetter: "<<(result>bestMatching)<<" isBerres: "<<(bestMatching<result)  ; //<<std::endl;
+    if (bestMatching < result) {
       bestMatching = result;
       bestKey =  igps->first;
-    }
-//    std::cout <<result << std::endl;
+//      std::cout <<" ----"<<" pt: "<< bestKey.ptValue()<<std::endl; 
+    } 
+//else std::cout <<std::endl;
   }
+
 //  std::cout <<" ------------------ END COMPARE: " << std::endl;
-//  std::cout <<"BEST: "<< bestMatching<<" pt: "<<bestKey.ptValue()<<std::endl;
+//  std::cout <<"BEST KEY: "<<bestKey<<" "<< bestMatching<<std::cout <<" ######"<<" pt: "<< bestKey.ptValue()<<std::endl;
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
     candidate.eta = 1.;
