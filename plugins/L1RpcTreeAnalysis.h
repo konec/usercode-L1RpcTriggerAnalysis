@@ -18,6 +18,9 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaHitSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/PatternManager.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/AnaSiMuDistribution.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/AnaOtf.h"
+
 #include "TObjArray.h"
 
 
@@ -54,6 +57,8 @@ private:
   PatternManager      *thePatternProducer;
   PatternManager      *thePatternProvider;
 
+  AnaSiMuDistribution *theAnaSiMuDistribution;
+  AnaOtf              *theAnaOtf;
 }; 
 
 #endif

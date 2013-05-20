@@ -55,12 +55,14 @@ void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpe
   double ptref  = simu->pt(); 
   int    chargeref = simu->charge();
   unsigned int detref =  hitSpec->rawId();
+/*
   if (detref != 637602109 && detref != 637634877 &&
       detref != 637599914 && detref != 637632682 ) return;
 
   bool precisePos = ( fabs(hitSpec->position().phi()-1.025) < 0.001);
   if (!precisePos) return;
   if ( simu->pt() < 16.) return;
+*/
 
 
   GoldenPattern::Key key( detref, ptref, chargeref, phiref);
@@ -83,6 +85,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
 {
   L1Obj candidate;
   if (!hitSpec) return candidate;
+/*
   if (hitSpec->rawId() == 0 ) return candidate;
   double phiref = hitSpec->position().phi();
   double ptref  = simu->pt();
@@ -96,6 +99,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   if ( simu->pt() < 26. || simu->pt() > 27.  ) return candidate;
 
   std::cout <<" ------------------ EVENT: " << std::endl;
+*/
   Pattern pattern;
   theEvForPatCounter++;
   for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); is++) {
@@ -103,7 +107,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
     if (!isOK) { return candidate; }
   }
   if (pattern.size() == 0) return candidate;
-  std::cout <<" ------------------ END EVENT, COMPARE" << std::endl;
+//  std::cout <<" ------------------ END EVENT, COMPARE" << std::endl;
 
 //  GoldenPattern::Key thisKey(detref, ptref, chargeref, phiref );
 //  std::cout << thisKey << std::endl;
@@ -121,8 +125,8 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
     }
 //    std::cout <<result << std::endl;
   }
-  std::cout <<" ------------------ END COMPARE: " << std::endl;
-  std::cout <<"BEST: "<< bestMatching<<" pt: "<<bestKey.ptValue()<<std::endl;
+//  std::cout <<" ------------------ END COMPARE: " << std::endl;
+//  std::cout <<"BEST: "<< bestMatching<<" pt: "<<bestKey.ptValue()<<std::endl;
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
     candidate.eta = 1.;

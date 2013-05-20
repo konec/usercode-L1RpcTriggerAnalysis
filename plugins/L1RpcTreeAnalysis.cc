@@ -44,9 +44,11 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
     theAnaDigiSpec(0),
     theAnaHitSpec(0), 
     thePatternProducer(0),
-    thePatternProvider(0)
+    thePatternProvider(0),
+    theAnaSiMuDistribution(0),
+    theAnaOtf(0)
 { 
-  if (theConfig.exists("anaMuonDistribution")) theAnaMuonDistribution = new AnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution") );
+  if (theConfig.exists("anaMuonDistribution")) theAnaMuonDistribution = new AnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution"));
   if (theConfig.exists("anaMenu")) theAnaMenu = new AnaMenu(theConfig.getParameter<edm::ParameterSet>("anaMenu"));
   if (theConfig.exists("anaTimingL1")) theAnaTimingL1 = new AnaTimingL1( theConfig.getParameter<edm::ParameterSet>("anaTimingL1") );
   if (theConfig.exists("anaEvent")) theAnaEvent = new   AnaEvent(cfg.getParameter<edm::ParameterSet>("anaEvent") );
@@ -54,6 +56,8 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   if (theConfig.exists("anaHitSpec")) theAnaHitSpec = new AnaHitSpec(cfg.getParameter<edm::ParameterSet>("anaHitSpec")); 
   if (theConfig.exists("patternProducer")) thePatternProducer = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProducer"));
   if (theConfig.exists("patternProvider")) thePatternProvider = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProvider"));
+  if (theConfig.exists("anaSiMuDistribution")) theAnaSiMuDistribution = new AnaSiMuDistribution( cfg.getParameter<edm::ParameterSet>("anaSiMuDistribution"));
+  if (theConfig.exists("anaOtf")) theAnaOtf = new AnaOtf( cfg.getParameter<edm::ParameterSet>("anaOtf"));
   
 }
 
@@ -74,6 +78,8 @@ void L1RpcTreeAnalysis::beginJob()
   if (theAnaMenu)             theAnaMenu->init(theHistos);
   if (theAnaDigiSpec)         theAnaDigiSpec->init(theHistos);
   if (theAnaHitSpec)          theAnaHitSpec->init(theHistos);
+  if (theAnaSiMuDistribution) theAnaSiMuDistribution->init(theHistos);
+  if (theAnaOtf)              theAnaOtf->init(theHistos);
 
   if (thePatternProvider)     thePatternProvider->beginJob();
 }
@@ -201,6 +207,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    if ( theAnaMuonDistribution && !theAnaMuonDistribution->filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
    // ANALYSE AND FILTER TRIGGER MENU
    if ( theAnaMenu && !theAnaMenu->filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("filterByAnaMenu") ) continue;
+   // ANALYSE AND FILTER SIMU KONEMATICs
+   if ( theAnaSiMuDistribution && !theAnaSiMuDistribution->filter(event, simu, hitSpec) && theConfig.getParameter<bool>("filterByAnaSiMuDistribution") ) continue;
 
    // ANALYSES 
    if (theAnaRpcVsOth) theAnaRpcVsOth->run(muon,l1ObjColl);
@@ -216,7 +224,9 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
    if (thePatternProducer) thePatternProducer->run(event, simu, hitSpec, *digSpec);
-   if (thePatternProvider) thePatternProvider->check(event, simu, hitSpec, *digSpec);
+   L1Obj l1otf;
+   if (thePatternProvider) l1otf=thePatternProvider->check(event, simu, hitSpec, *digSpec);
+   if (theAnaOtf) theAnaOtf->run(event,simu,l1otf);  
   }
 }
 

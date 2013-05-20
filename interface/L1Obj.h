@@ -12,7 +12,7 @@ struct L1Obj : public TObject {
   TYPE  type;
 
   L1Obj() : pt(0.),eta(0.),phi(0.),bx(0),q(-1), type(NONE) {}
-  bool isValid() { return q >= 0;}
+  bool isValid() const { return q >= 0;}
 
   friend ostream & operator<< (ostream &out, const L1Obj &o);
 
