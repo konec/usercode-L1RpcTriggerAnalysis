@@ -21,6 +21,26 @@ bool Pattern::add ( std::pair<uint32_t,  unsigned int > aData)
   return true;
 }
 
+bool Pattern::add (  std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData)
+{
+  bool allOK = true;
+  std::vector<Pattern> copied;
+  for (std::vector<Pattern>::iterator ip = vpat.begin(); ip != vpat.end(); ++ip) {
+    if (! ip->add(aData) ) {
+      allOK = false;
+      Pattern modified = *ip; 
+      for (auto ic =modified.theData.begin(); ic!=modified.theData.end(); ic++) {
+        if (ic->first==aData.first) {ic->second = aData.second; break; }
+      } 
+      copied.push_back(modified);
+    }
+  }
+  if (copied.size() != 0) vpat.insert(vpat.end(), copied.begin(), copied.end()); 
+  return allOK; 
+}
+
+
+
 std::ostream & operator << (std::ostream &out, const Pattern &o)
 {
   out <<" Pattern:  size: "<<o.size();

@@ -58,17 +58,18 @@ double AnaEff::maxPt(const std::vector<L1Obj> & l1Objs) const
   return result; 
 }
 
-void AnaEff::run( const MuonObj *muon, const L1ObjColl *l1Coll)
+void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll)
 {
   double etaMu = fabs(muon->eta());
   double ptMu  = muon->pt();   
-  if (!muon->isGlobal()) return;
+//  if (!muon->isGlobal()) return;
 
 //  if (ptMu < 6.) return;
 //  if (ptMu > 7.) return;
 
-  std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByBx().selectByMatched().getL1ObjsSelected();
-  std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByBx().selectByMatched().selectByEta().getL1ObjsSelected();
+  static double matchingdR = theConfig.getParameter<double>("maxDR");
+  std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByBx().selectByDeltaR( matchingdR);
+  std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByBx().selectByDeltaR( matchingdR).selectByEta();
 
 
   hEfficMuPt_D->Fill(ptMu); 

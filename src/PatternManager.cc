@@ -100,13 +100,12 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
 
 */
 //  std::cout <<" ------------------ EVENT: " << std::endl;
-  Pattern pattern;
+  std::vector<Pattern> vpattern(1);
   theEvForPatCounter++;
   for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); is++) {
-    bool isOK = pattern.add(*is);
-    if (!isOK) { return candidate; }
+    bool isOK = Pattern::add(vpattern,*is);
   }
-  if (pattern.size() == 0) return candidate;
+  if (vpattern[0].size() == 0) return candidate;
 //  std::cout <<" ------------------ END EVENT, COMPARE" << std::endl;
 
   GoldenPattern::Key thisKey(detref, ptref, chargeref, phiref );
@@ -115,14 +114,16 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
   for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = theGPs.begin(); igps != theGPs.end(); igps++) {
+  for (auto ip=vpattern.begin(); ip!= vpattern.end();++ip) {
+    const Pattern & pattern = *ip;
 //    if (!(thisKey==igps->first)) continue;
 //    std::cout << " HAS PATTERN "<<pattern << std::endl;
     GoldenPattern & gp = igps->second;
     GoldenPattern::Result result = gp.compare(pattern);
 //    if (!result.hasRpcDet(637602109) && !result.hasRpcDet(637634877) && !result.hasRpcDet(637599914) && !result.hasRpcDet(637632682)) continue;
-    if (!result.hasRpcDet(igps->first.theDet)) continue;
-    if (result.nMatchedTot() < 5 )continue; 
-    if (!result) continue;
+ //   if (!result.hasRpcDet(igps->first.theDet)) continue;
+ //   if (result.nMatchedTot() < 5 )continue; 
+ //   if (!result) continue;
  //    std::cout <<"PATT KEY: "<<igps->first<<" "<<result<<" is Less: "<<(result<bestMatching)<<" isBetter: "<<(result>bestMatching)<<" isBerres: "<<(bestMatching<result)  ; //<<std::endl;
     if (bestMatching < result) {
       bestMatching = result;
@@ -130,6 +131,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
 //      std::cout <<" ----"<<" pt: "<< bestKey.ptValue()<<std::endl; 
     } 
 //else std::cout <<std::endl;
+  }
   }
 
 //  std::cout <<" ------------------ END COMPARE: " << std::endl;

@@ -19,6 +19,8 @@ public:
   void push_back(const L1Obj & obj, bool match, double deltaR);
 
   const std::vector<L1Obj> & getL1Objs() const { return theL1Obj; }
+  operator  const std::vector<L1Obj> & () const {  return theL1Obj; }
+
   const std::vector<bool> & getL1ObjsMatching() const { return theL1Matching; }
   const std::vector<double> & getL1ObjDeltaR() const { return theDeltaR; }
  
@@ -85,7 +87,7 @@ public:
 		  int bxMin = 0, int bxMax = 0,                  
 		  double etaMin = -2.5, double etaMax = 2.5,
 		  double phiMin = 0., double phiMax = 7.,
-		  int qMin = 0, int qMax = 7) const;
+		  int qMin = 0, int qMax = 99) const;
   static  std::vector<L1Obj> typeSelector(const  std::vector<L1Obj> & col,  TYPE t1=L1Obj::NONE, TYPE t2=L1Obj::NONE, TYPE t3=L1Obj::NONE, TYPE t4=L1Obj::NONE);
   
 private:

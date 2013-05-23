@@ -58,6 +58,8 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   if (theConfig.exists("patternProvider")) thePatternProvider = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProvider"));
   if (theConfig.exists("anaSiMuDistribution")) theAnaSiMuDistribution = new AnaSiMuDistribution( cfg.getParameter<edm::ParameterSet>("anaSiMuDistribution"));
   if (theConfig.exists("anaOtfEff")) theAnaOtfEff = new AnaOtfEff( cfg.getParameter<edm::ParameterSet>("anaOtfEff"));
+  if (theConfig.exists("anaEff")) theAnaEff = new   AnaEff(cfg.getParameter<edm::ParameterSet>("anaEff") );
+  if (theConfig.exists("anaRpcVsOth")) theAnaRpcVsOth = new   AnaRpcVsOth(cfg.getParameter<edm::ParameterSet>("anaRpcVsOth") );
   
 }
 
@@ -210,9 +212,15 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    // ANALYSE AND FILTER SIMU KONEMATICs
    if ( theAnaSiMuDistribution && !theAnaSiMuDistribution->filter(event, simu, hitSpec) && theConfig.getParameter<bool>("filterByAnaSiMuDistribution") ) continue;
 
+   const TrackObj * refTrack = theConfig.getParameter<bool>("useSiMuReference") ? simu : muon;
+
    // ANALYSES 
-   if (theAnaRpcVsOth) theAnaRpcVsOth->run(muon,l1ObjColl);
-   if (theAnaEff)      theAnaEff->run(muon, l1ObjColl);
+   if (theAnaRpcVsOth) theAnaRpcVsOth->run(refTrack,l1ObjColl);
+   if (theAnaEff)      theAnaEff->run(refTrack, l1ObjColl);
+
+//   std::cout <<"refTrack: "<< *refTrack<<std::endl;
+//   std::cout <<"l1ObjColl: "<< *l1ObjColl << std::endl;
+
    if (theAnaRpcMisc)  theAnaRpcMisc->run(event,muon,l1ObjColl);
    if (theAnaDet)      theAnaDet->run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
    if (theAnaEmu)      theAnaEmu->run ( event, muon, l1ObjColl);
@@ -220,7 +228,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    if (theAnaClu)      theAnaClu->run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
    if (theAnaTimingL1) theAnaTimingL1->run( &eventBx, muon, l1ObjColl);
 
-   // HITPATTERN ANALYSES & MC EFFICIENCY
+   // HITPATTERN ANALYSES & OTF EFFICIENCY
    if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
    if (thePatternProducer) thePatternProducer->run(event, simu, hitSpec, *digSpec);

@@ -15,6 +15,8 @@ public:
   bool add ( std::pair<uint32_t,  unsigned int > aData); 
   unsigned int size() const { return theData.size(); }
   operator const DataType & () const {  return theData; }
+
+  static bool add( std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData);
   
 private:
   DataType  theData;

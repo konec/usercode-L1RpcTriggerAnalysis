@@ -3,17 +3,20 @@
 class TObjArray;
 class TH1D;
 class TH2D;
-class MuonObj;
+class TrackObj;
 class L1ObjColl;
 class L1Obj;
 #include <vector>
 #include <map>
 #include <string>
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+
 
 class AnaRpcVsOth {
 public: 
+  AnaRpcVsOth(const edm::ParameterSet & cfg) : theConfig(cfg) {}
   void init(TObjArray& histos); 
-  void run(const MuonObj* muon, const L1ObjColl *l1Coll);
+  void run(const TrackObj* muon, const L1ObjColl *l1Coll);
 private:
   double maxPt(const std::vector<L1Obj> & l1Objs) const; 
 
@@ -23,6 +26,7 @@ private:
   const static int nBinsEff= 6;
   const static double binsEff[];
   
+  edm::ParameterSet theConfig;
 };
 
 #endif
