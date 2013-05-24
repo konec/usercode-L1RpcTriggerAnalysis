@@ -53,7 +53,8 @@ public:
   class Result {
   public: 
     Result() : checkMe(true), theValue(0.), 
-               nMatchedPosRpc(0), nMatchedPosCsc(0), nMatchedPosDt(0), nMatchedBenCsc(0), nMatchedBenDt(0)  {}
+               nMatchedPosRpc(0), nMatchedPosCsc(0), nMatchedPosDt(0), nMatchedBenCsc(0), nMatchedBenDt(0),
+               hasStation1(false), hasStation2(false) {}
     bool operator<( const Result & o) const;
     operator bool() const;
     double value() const;
@@ -72,6 +73,7 @@ public:
     mutable bool checkMe; 
     mutable double theValue;
     mutable unsigned int nMatchedPosRpc, nMatchedPosCsc, nMatchedPosDt, nMatchedBenCsc, nMatchedBenDt;
+    bool hasStation1, hasStation2;
     std::vector< std::pair<uint32_t, double > > posRpcResult;
     std::vector< std::pair<uint32_t, double > > posCscResult;
     std::vector< std::pair<uint32_t, double > > benCscResult;

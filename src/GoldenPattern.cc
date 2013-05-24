@@ -58,7 +58,7 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 }
 
 GoldenPattern::Result::operator bool() const {
-  return (value() > 0.1);
+  return (value() > 0.1); // && hasStation1 && hasStation2);
 }
 
 double GoldenPattern::Result::value() const { 
@@ -139,8 +139,11 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       RPCDigiSpec digi(rawId, is->second);
       DetFreq::const_iterator idm = posRpc.find(rawId);
       if (idm != posRpc.end() ) {
-          double f = whereInDistribution(digi.halfStrip(), idm->second);
-          result.posRpcResult.push_back( std::make_pair(rawId, f) ); 
+        double f = whereInDistribution(digi.halfStrip(), idm->second);
+        result.posRpcResult.push_back( std::make_pair(rawId, f) ); 
+        RPCDetId rpc(rawId);
+        if(rpc.station()==1) result.hasStation1 = true;
+        if(rpc.station()==2) result.hasStation2 = true;
       }
     } else if (detId.subdetId() == MuonSubdetId::DT) {
       DTphDigiSpec digi(rawId, is->second);
@@ -148,6 +151,9 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       if (idm != posDt.end() ) {
         double f = whereInDistribution(digi.phi(), idm->second);
         result.posDtResult.push_back( std::make_pair(rawId, f) );
+        DTChamberId dt(rawId);
+        if(dt.station()==1) result.hasStation1 = true;
+        if(dt.station()==2) result.hasStation2 = true;
       }
       idm = bendingDt.find(rawId);
       if (idm != bendingDt.end() ) {
@@ -160,6 +166,9 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       if (idm != posCsc.end() ) {
         double f = whereInDistribution(digi.strip(), idm->second);
         result.posCscResult.push_back( std::make_pair(rawId, f) );
+        CSCDetId csc(rawId);
+        if (csc.station()==1) result.hasStation1 = true;
+        if (csc.station()==2) result.hasStation1 = true;
       }
       idm = bendingCsc.find(rawId);
       if (idm != bendingCsc.end() ) {
