@@ -102,9 +102,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
 //  std::cout <<" ------------------ EVENT: " << std::endl;
   std::vector<Pattern> vpattern(1);
   theEvForPatCounter++;
-  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); is++) {
-    bool isOK = Pattern::add(vpattern,*is);
-  }
+  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); is++)  Pattern::add(vpattern,*is);
   if (vpattern[0].size() == 0) return candidate;
 //  std::cout <<" ------------------ END EVENT, COMPARE" << std::endl;
 

@@ -9,34 +9,27 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
-
-bool Pattern::add ( std::pair<uint32_t,  unsigned int > aData)
+Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData)
 {
-  for (DataType::const_iterator it=theData.begin(); it!= theData.end(); it++) {
-    if (it->first == aData.first) {
-      return false;
+  for (unsigned int idx=0; idx < theData.size(); ++idx) {
+    if (theData[idx].first == aData.first) {
+      Pattern modified =  *this;
+      modified.theData[idx].second = aData.second;
+      return modified;
     }
   }
   theData.push_back(aData);
-  return true;
+  return Pattern();
 }
 
-bool Pattern::add (  std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData)
+void Pattern::add (  std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData)
 {
-  bool allOK = true;
   std::vector<Pattern> copied;
   for (std::vector<Pattern>::iterator ip = vpat.begin(); ip != vpat.end(); ++ip) {
-    if (! ip->add(aData) ) {
-      allOK = false;
-      Pattern modified = *ip; 
-      for (auto ic =modified.theData.begin(); ic!=modified.theData.end(); ic++) {
-        if (ic->first==aData.first) {ic->second = aData.second; break; }
-      } 
-      copied.push_back(modified);
-    }
+    Pattern modified =  ip->addOrCopy(aData);
+    if (modified) copied.push_back(modified);
   }
   if (copied.size() != 0) vpat.insert(vpat.end(), copied.begin(), copied.end()); 
-  return allOK; 
 }
 
 
