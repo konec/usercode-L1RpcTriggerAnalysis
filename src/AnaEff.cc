@@ -24,12 +24,12 @@ void AnaEff::init(TObjArray& histos)
   hEfficRpcPtCut_N = new TH1D("hEfficRpcPtCut_N","hEfficRpcPtCut_N", L1PtScale::nPtBins, L1PtScale::ptBins);  histos.Add(hEfficRpcPtCut_N);
 
   std::string  base("hEff");
-  std::string opt[2]={"_RpcPtCut","_OthPtCut"};
+  std::string opt[4]={"_RpcPtCut","_OthPtCut","_GmtPtCut","_OtfPtCut"};
   for (unsigned int ir=0; ir<5; ++ir) {
     std::string name=base+"_PtDenom"+reg[ir];
     TH1D *h= new TH1D(name.c_str(),name.c_str(), L1PtScale::nPtBins, L1PtScale::ptBins);
     histos.Add(h); hm[name]=h;
-    for (unsigned int iopt=0; iopt<2; ++iopt) {
+    for (unsigned int iopt=0; iopt<4; ++iopt) {
     if (iopt >0 && ir >2) continue;
     for (unsigned int icut=0; icut<AnaEff::nPtCuts; ++icut) {
       std::stringstream str;
@@ -70,6 +70,8 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll)
   static double matchingdR = theConfig.getParameter<double>("maxDR");
   std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByBx().selectByDeltaR( matchingdR);
   std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByBx().selectByDeltaR( matchingdR).selectByEta();
+  std::vector<L1Obj> l1Gmts = l1Coll->selectByType(L1Obj::GMT).selectByBx().selectByQuality(4,7).selectByDeltaR( matchingdR).selectByEta();
+  std::vector<L1Obj> l1Otfs = l1Coll->selectByType(L1Obj::OTF);
 
 
   hEfficMuPt_D->Fill(ptMu); 
@@ -98,6 +100,14 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll)
        std::stringstream strPt;  strPt  << "hEff_OthPtCut"<<  ptCuts[icut]<<reg[iregion];
        hm[strPt.str()]->Fill(ptMu);
     }
+    if (maxPt(l1Gmts)+epsilon > threshold) {
+       std::stringstream strPt;  strPt  << "hEff_GmtPtCut"<<  ptCuts[icut]<<reg[iregion];
+       hm[strPt.str()]->Fill(ptMu);
+    }
+    if (maxPt(l1Otfs)+epsilon > threshold) {
+       std::stringstream strPt;  strPt  << "hEff_OtfPtCut"<<  ptCuts[icut]<<reg[iregion];
+       hm[strPt.str()]->Fill(ptMu);
+    }
   }
   
 
@@ -108,7 +118,7 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll)
     for (unsigned int ir=3; ir <=4; ++ir) {
       hm["hEff_PtDenom"+reg[ir]]->Fill(ptMu);
       std::vector<L1Obj> l1RpcsQ;
-      L1ObjColl l1RpcCollQ = l1Coll->l1RpcColl().selectByMatched().selectByBx();
+      L1ObjColl l1RpcCollQ = l1Coll->l1RpcColl().selectByDeltaR( matchingdR).selectByBx();
       if (ir==3) l1RpcsQ = l1RpcCollQ.selectByQuality(0,0).getL1Objs();
       if (ir==4) l1RpcsQ = l1RpcCollQ.selectByQuality(1,7).getL1Objs();
       double epsilon=1.e-5;

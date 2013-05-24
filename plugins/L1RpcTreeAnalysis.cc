@@ -216,7 +216,6 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 
    // ANALYSES 
    if (theAnaRpcVsOth) theAnaRpcVsOth->run(refTrack,l1ObjColl);
-   if (theAnaEff)      theAnaEff->run(refTrack, l1ObjColl);
 
 //   std::cout <<"refTrack: "<< *refTrack<<std::endl;
 //   std::cout <<"l1ObjColl: "<< *l1ObjColl << std::endl;
@@ -235,6 +234,9 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    L1Obj l1otf;
    if (thePatternProvider) l1otf=thePatternProvider->check(event, simu, hitSpec, *digSpec);
    if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf);  
+   L1ObjColl myL1ObjColl = *l1ObjColl;
+   myL1ObjColl.push_back(l1otf, false, 0.); 
+   if (theAnaEff)      theAnaEff->run(refTrack, &myL1ObjColl);
   }
 }
 
