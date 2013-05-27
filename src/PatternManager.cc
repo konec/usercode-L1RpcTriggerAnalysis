@@ -100,7 +100,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   if ( simu->pt() < 26. || simu->pt() > 27.  ) return candidate;
 
 */
-//  std::cout <<" ------------------ EVENT: " << std::endl;
+//  std::cout <<" ------------------ EVENT: "<<*ev <<" number of digis: "<<vDigi.size()<< std::endl;
   std::vector<Pattern> vpattern(1);
   theEvForPatCounter++;
   static bool skipRpcData   = theConfig.getUntrackedParameter<bool>("skipRpcData",  false);
@@ -109,7 +109,10 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
     DetId detId( is->first);
     if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
     if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;
+//    std::cout << "adding------- "<< is-vDigi.begin()+1 <<" digi det: "<<is->first<<"(rpc:"<<(detId.subdetId()==MuonSubdetId::RPC)<<") data: "<<is->second<< std::endl; 
     Pattern::add(vpattern,*is);
+//    std::cout <<" after vpattern has size: "<<vpattern.size() << std::endl;
+    if (vpattern.size() > 100) break;
   }
   if (vpattern[0].size() == 0) return candidate;
 //  std::cout <<" ------------------ END EVENT, NOW COMPARE, has #patterns: "<<vpattern.size()<<" vpattern[0].size="<<vpattern[0].size() << std::endl;
@@ -127,9 +130,9 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
     GoldenPattern & gp = igps->second;
     GoldenPattern::Result result = gp.compare(pattern);
 //    if (!result.hasRpcDet(637602109) && !result.hasRpcDet(637634877) && !result.hasRpcDet(637599914) && !result.hasRpcDet(637632682)) continue;
- //   if (!result.hasRpcDet(igps->first.theDet)) continue;
- //   if (result.nMatchedTot() < 5 )continue; 
- //   if (!result) continue;
+//    if (!result.hasRpcDet(igps->first.theDet)) continue;
+//    if (result.nMatchedTot() < 5 )continue; 
+//    if (!result) continue;
 //     std::cout <<"PATT KEY: "<<igps->first<<" "<<result ; //<<std::endl;
     if (bestMatching < result) {
       bestMatching = result;

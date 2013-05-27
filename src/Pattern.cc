@@ -9,6 +9,17 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
+bool Pattern::operator==(const Pattern& o) const
+{
+  unsigned int thissize = theData.size();
+  if (thissize != o.size()) return false;
+  for (unsigned int idx=0; idx<thissize; idx++) {
+     if (theData[idx].first != o.theData[idx].first) return false;
+     if (theData[idx].second != o.theData[idx].second) return false; 
+  } 
+  return true;
+}
+
 Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData)
 {
   for (unsigned int idx=0; idx < theData.size(); ++idx) {
@@ -16,6 +27,8 @@ Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData)
       Pattern modified =  *this;
       modified.theData[idx].second = aData.second;
       return modified;
+//      if (*this == modified) return Pattern(); // nothing to do 
+//      else  return modified;                   // really duplicate
     }
   }
   theData.push_back(aData);
@@ -27,7 +40,7 @@ void Pattern::add (  std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned 
   std::vector<Pattern> copied;
   for (std::vector<Pattern>::iterator ip = vpat.begin(); ip != vpat.end(); ++ip) {
     Pattern modified =  ip->addOrCopy(aData);
-    if (modified) copied.push_back(modified);
+    if (modified && (find(copied.begin(), copied.end(), modified) == copied.end()) ) copied.push_back(modified);
   }
   if (copied.size() != 0) vpat.insert(vpat.end(), copied.begin(), copied.end()); 
 }

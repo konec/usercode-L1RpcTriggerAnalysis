@@ -172,7 +172,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
     chain.GetEntry(ev);
     if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
-    if ( (lastRun != (*event).run) || (ev/2000*2000==ev) ) { 
+//    if (ev < 44055) continue;
+    if ( (lastRun != (*event).run) || (ev/1000*1000==ev) ) { 
 //    if (true) {
 //    if (! ((*event).run==204601 && (*event).id ==109463402)) { continue;
       lastRun = (*event).run; 

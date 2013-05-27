@@ -23,6 +23,8 @@ public:
   unsigned int size() const { return theData.size(); }
   operator const DataType & () const {  return theData; }
 
+  bool operator==(const Pattern& o) const;
+
 private:
 
   // try to add data from raw id to this pattern. if the data from detUnit 
