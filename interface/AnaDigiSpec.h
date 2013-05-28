@@ -25,7 +25,8 @@ public:
 private:
   edm::ParameterSet theConfig;
   typedef std::map< uint32_t, TH2D* > HMap;
-  HMap  theCscPos, theCscBend, theDtPos, theDtBend, theRpcBPos, theRpcEPos,; 
+  HMap  theCscPosB, theCscBendB, theDtPosB, theDtBendB, theRpcBPosB, theRpcEPosB; 
+  HMap  theCscPosE, theCscBendE, theDtPosE, theDtBendE, theRpcBPosE, theRpcEPosE; 
 private:
   typedef std::vector<TH2D*> VHisto;
   VHisto topN(const HMap & hmap, unsigned int n) const;

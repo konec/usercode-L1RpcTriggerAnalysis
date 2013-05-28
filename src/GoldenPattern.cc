@@ -20,7 +20,7 @@ void GoldenPattern::Result::runNoCheck() const
   for (auto i=benCscResult.begin(); i!=benCscResult.end();i++) fract *= norm(BENCSC,i->second);
   for (auto i=benDtResult.begin();  i!=benDtResult.end();i++)  fract *= norm(BENDT, i->second);
   unsigned int nTot = nMatchedPosRpc+nMatchedPosCsc+nMatchedPosDt+nMatchedBenCsc+nMatchedBenDt;
-  theValue = ( nTot > 2) ? pow(fract, 1./((double) nTot)) : 0.;
+  theValue = ( nTot > 4) ? pow(fract, 1./((double) nTot)) : 0.;
   if (posRpcResult.size() != nMatchedPosRpc) theValue = 0.;
   if (posCscResult.size() != nMatchedPosCsc) theValue = 0.;
   if (posDtResult.size()  != nMatchedPosDt)  theValue = 0.;
