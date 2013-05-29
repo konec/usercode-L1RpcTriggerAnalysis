@@ -137,7 +137,7 @@ void  AnaDigiSpec::run(const EventObj* ev, const TrackObj * simu, const HitSpecO
               std::stringstream str;
               str<<"hDigiSpec_RpcEVsPt_PosB_"<<digi.rawId();
               std::string hName = str.str();
-              str<<"_la"<<util.layer()<<"ch"<<(rpcId.sector()-1)*6+rpcId.subsector()<<"ro"<<rpcId.roll();
+              str<<"_la"<<util.layer()<<"ch"<<(rpcId.sector()-1)*6+rpcId.subsector()<<"rn"<<rpcId.ring()<<"ro"<<rpcId.roll();
               std::string hTitle = str.str();
               theRpcEPosB[digi.rawId()] = new TH2D(hName.c_str(), hTitle.c_str(), L1PtScale::nPtBins, L1PtScale::ptBins, 191,2.,193.);
             }
