@@ -84,10 +84,10 @@
 //  plotsTimingL1();
 
 //  plotsHitSpec();
-  plotsDigiSpec();
-//  plotsSiMuDistribution();
-//  plotsOtfEff();
-//  plotsEff();
+//  plotsDigiSpec();
+  plotsSiMuDistribution();
+  plotsOtfEff();
+  plotsEff();
 
 
 
