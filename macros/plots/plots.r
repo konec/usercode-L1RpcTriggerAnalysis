@@ -19,21 +19,27 @@
 #include "utilsObjArray.h"
 #include "utilsHistoFromGraph.h"
 
-  gROOT->LoadMacro("utilsL1RpcStyle.C+");
+//  gROOT->LoadMacro("utilsL1RpcStyle.C+");
   gROOT->LoadMacro("utilsPlotsSaver.C+g");
   gROOT->LoadMacro("utilsObjArray.C+g");
   gROOT->LoadMacro("utilsHistoFromGraph.C+");
 
   gROOT->LoadMacro("plotsMuonDist.C+");
-  gROOT->LoadMacro("plotsRpcMisc.C+");
+//  gROOT->LoadMacro("plotsRpcMisc.C+");
   gROOT->LoadMacro("plotsEff.C+");
   gROOT->LoadMacro("plotsRpcVsOth.C+");
   gROOT->LoadMacro("plotsDet.C+");
-  gROOT->LoadMacro("plotsClu.C+");
+//  gROOT->LoadMacro("plotsClu.C+");
   gROOT->LoadMacro("plotsSynch.C+");
   gROOT->LoadMacro("plotsTimingL1.C+");
   gROOT->LoadMacro("plotsMenu.C+");
   gROOT->LoadMacro("plotsEvent.C+");
+
+  gROOT->LoadMacro("plotsHitSpec.C+");
+  gROOT->LoadMacro("plotsDigiSpec.C+");
+  gROOT->LoadMacro("plotsSiMuDistribution.C+");
+  gROOT->LoadMacro("plotsOtfEff.C+");
+
 
   if (std::string(gStyle->GetName()) != "L1RpcStyle" ) {
     if (0==gROOT->GetListOfStyles()->FindObject("L1RpcStyle")) utilsL1RpcStyle();
@@ -60,7 +66,7 @@
 
   TFile file("../l1RpcAnalysis.root");
   if (file.IsZombie()) return;
-  file.ls(); 
+//  file.ls(); 
 
   //
   // plots
@@ -75,7 +81,13 @@
 //    plotsClu();
 //    plotsRpcMisc();
 //    plotsSynch();
-  plotsTimingL1();
+//  plotsTimingL1();
+
+//  plotsHitSpec();
+  plotsDigiSpec();
+//  plotsSiMuDistribution();
+//  plotsOtfEff();
+//  plotsEff();
 
 
 
@@ -83,22 +95,7 @@
   // cleanup
   //
   g_L1RpcGlobalTObjects.Delete();
-//  file.Close();
-   
-
-  gROOT->ProcessLine(".U plotsMenu_C.so");
-  gROOT->ProcessLine(".U plotsTimingL1_C.so");
-  gROOT->ProcessLine(".U plotsSynch_C.so");
-  gROOT->ProcessLine(".U plotsClu_C.so");
-  gROOT->ProcessLine(".U plotsEff_C.so");
-  gROOT->ProcessLine(".U plotsDet_C.so");
-  gROOT->ProcessLine(".U plotsRpcMisc_C.so");
-  gROOT->ProcessLine(".U plotsRpcVsOth_C.so");
-  gROOT->ProcessLine(".U plotsMuonDist_C.so");
-
-  gROOT->ProcessLine(".U utilsHistoFromGraph_C.so");
   gROOT->ProcessLine(".U utilsObjArray_C.so");
-  gROOT->ProcessLine(".U utilsPlotsSaver_C.so");
-
+   
   std::cout <<"----------------->END"<<std::endl;
 }

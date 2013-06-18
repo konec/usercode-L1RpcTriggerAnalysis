@@ -200,8 +200,10 @@ void plotsEff()
 {
  utilsPlotsSaver( pEff_Pt("Rpc") );
  utilsPlotsSaver( pEff_Pt("Oth") );
- utilsPlotsSaver( pEff_RpcPtCut_Q() );
- utilsPlotsSaver( pEff_Eta() );
+ utilsPlotsSaver( pEff_Pt("Gmt") );
+ utilsPlotsSaver( pEff_Pt("Otf") );
+// utilsPlotsSaver( pEff_RpcPtCut_Q() );
+// utilsPlotsSaver( pEff_Eta() );
  utilsPlotsSaver( pEff_Effic() );
 }
 #endif

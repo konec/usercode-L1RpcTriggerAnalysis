@@ -12,7 +12,7 @@ TH1D runHistoFromGraph(const TGraph* gr);
 
 void fillHistoFromGraph(TH1D &histo, TGraph* graph);
 
-std::pair<TH1D,TGaxis* > getDatOnRef(const TH1D &histoDat, const TH1D &histoRef);
+//std::pair<TH1D,TGaxis* > getDatOnRef(const TH1D &histoDat, const TH1D &histoRef);
 
 TH1D *getPressVsRunHisto(TH1D *histo);
 

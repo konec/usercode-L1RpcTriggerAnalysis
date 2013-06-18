@@ -89,6 +89,7 @@ void fillHistoFromGraph(TH1D &histo, TGraph* graph)
 //
 // a copy of input histo but whith valueas changed to put it in Min,Max scale, Axis provided 
 //
+/*
 std::pair<TH1D,TGaxis* > getDatOnRef(const TH1D &histoDat, const TH1D &histoRef)
 {
   float axisMax = histoRef.GetMaximum();
@@ -135,6 +136,7 @@ std::pair<TH1D,TGaxis* > getDatOnRef(const TH1D &histoDat, const TH1D &histoRef)
 
   return std::make_pair(hResult,axis);
 }
+*/
 
 
 
