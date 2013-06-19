@@ -9,6 +9,9 @@ class TH1D;
 class FilterGM :  public edm::EDFilter {
 public:
   explicit FilterGM(const edm::ParameterSet&);
+  explicit FilterGM() {}
+  explicit FilterGM(const FilterGM &) {}
+
   virtual ~FilterGM();
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 private:

@@ -37,7 +37,7 @@ void AnaClu::run(
 TGraph* AnaClu::resume()
 {
   TGraphErrors * hGraphRun = new TGraphErrors();
-   unsigned int nPoints = 0;
+//   unsigned int nPoints = 0;
 //  for( CluRunMap::const_iterator im = cluRunMap.begin(); im != cluRunMap.end(); ++im) if (im->second.first != 0) ++nPoints;
 //  hGraphRun->Set(nPoints);
   hGraphRun->Set(cluRunMap.size());

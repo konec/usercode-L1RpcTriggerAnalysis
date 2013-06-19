@@ -28,11 +28,11 @@ std::string DetEfficiency::print() const
 {
   RPCDetId rpc(theRawId);
   std::stringstream name;
-  std::string localPartVal[7]={"Forward","Central","Backward","A","B","C","D"};
+  //AK std::string localPartVal[7]={"Forward","Central","Backward","A","B","C","D"};
   if (rpc.roll()==0) name.str("DUMMY");
   else if (rpc.region() ==0) {
     std::string layerVal[6]={"RB1in","RB1out","RB2in","RB2out","RB3","RB4"};
-    std::string subsVal[5]={"--","-","","+","++"};
+    //AK std::string subsVal[5]={"--","-","","+","++"};
     name << "W";
     if (rpc.ring()>0) name <<"+";
     name <<rpc.ring();

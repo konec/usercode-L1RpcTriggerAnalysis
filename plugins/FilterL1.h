@@ -8,6 +8,10 @@ namespace edm {class ParameterSet; class Event; class EventSetup; }
 
 class FilterL1 :  public edm::EDFilter {
 public:
+
+  explicit FilterL1(const FilterL1&){}
+  explicit FilterL1(){}
+
   explicit FilterL1(const edm::ParameterSet&);
   virtual ~FilterL1();
   virtual bool filter(edm::Event&, const edm::EventSetup&);

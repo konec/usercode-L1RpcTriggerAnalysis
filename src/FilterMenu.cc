@@ -155,8 +155,9 @@ std::vector<unsigned int> FilterMenu::firedAlgosHLT(const edm::Event&ev, const e
   //unsigned int ntrig=0;
   for (unsigned int triggerIndex =0; triggerIndex < theHltConfig.size()-1; ++triggerIndex) {   //skip "Final" decision indes
     std::string triggerName = theHltConfig.triggerName(triggerIndex);
-    unsigned int triggerIndex = theHltConfig.triggerIndex(triggerName);
-    assert(triggerIndex==ev.triggerNames(*triggerResultsHandle).triggerIndex(triggerName));
+    unsigned int triggerIndexTmp = theHltConfig.triggerIndex(triggerName);
+    assert(triggerIndex==triggerIndexTmp);
+    //AK assert(triggerIndex==ev.triggerNames(*triggerResultsHandle).triggerIndex(triggerName));
     bool isAccept = triggerResultsHandle->accept(triggerIndex);
     if (isAccept) result.push_back(triggerIndex);
 //    if (isAccept) std::cout <<  triggerIndex <<" ";
@@ -249,8 +250,9 @@ bool FilterMenu::filterHLT(edm::Event&ev, const edm::EventSetup&es)
   unsigned int ntrig = 0;
   for (unsigned int triggerIndex =0; triggerIndex < theHltConfig.size()-1; ++triggerIndex) {   //skip "Final" decision indes
     std::string triggerName = theHltConfig.triggerName(triggerIndex);
-    unsigned int triggerIndex = theHltConfig.triggerIndex(triggerName);
-    assert(triggerIndex==ev.triggerNames(*triggerResultsHandle).triggerIndex(triggerName));
+    unsigned int triggerIndexTmp = theHltConfig.triggerIndex(triggerName);
+    assert(triggerIndexTmp==triggerIndex);
+    //AK assert(triggerIndex==ev.triggerNames(*triggerResultsHandle).triggerIndex(triggerName));
     bool isAccept = triggerResultsHandle->accept(triggerIndex);
 //    if (true) {
     if (isAccept) {

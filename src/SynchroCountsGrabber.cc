@@ -54,7 +54,9 @@ RPCRawSynchro::ProdItem SynchroCountsGrabber::counts(const edm::Event &ev, const
   }
 
   edm::Handle<RPCRawSynchro::ProdItem> synchroCounts;
-  ev.getByType(synchroCounts);
+  std::vector<edm::Handle<RPCRawSynchro::ProdItem> > handle_vec;
+  ev.getManyByType(handle_vec);
+  if(handle_vec.size()) synchroCounts = handle_vec[0];
   if (!synchroCounts.isValid()) {
     theNoSynchroWarning = true;
     return result;

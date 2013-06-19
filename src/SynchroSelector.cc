@@ -90,7 +90,9 @@ bool SynchroSelector::checkUniqueRecHitMatching( const TrajectoryStateOnSurface 
   LocalError trackAtRPCError = trackAtRPC.localError().positionError();
 
   edm::Handle<RPCRecHitCollection> rpcHits;
-  ev.getByType(rpcHits);
+  std::vector<edm::Handle<RPCRecHitCollection> > handle_vec;
+  ev.getManyByType(handle_vec);
+  if(handle_vec.size()) rpcHits = handle_vec[0];
   bool matched = false;
   bool unique = true;
   pair<RPCRecHitCollection::const_iterator, RPCRecHitCollection::const_iterator> recHitsInDet =  rpcHits->get(det);

@@ -9,6 +9,8 @@ namespace edm {class ParameterSet; class Event; class EventSetup; }
 
 class Filter_L1_GM :  public edm::EDFilter {
 public:
+
+  explicit Filter_L1_GM(const Filter_L1_GM &) {;}
   explicit Filter_L1_GM(const edm::ParameterSet&p) : theL1(FilterL1(p)), theGM(FilterGM(p)) {}
   virtual ~Filter_L1_GM() {}
 private:
