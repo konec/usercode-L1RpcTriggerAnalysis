@@ -71,6 +71,7 @@ unsigned int GoldenPattern::Result::nMatchedTot() const {
   return nMatchedPosRpc+nMatchedPosCsc+nMatchedBenCsc+nMatchedPosDt+nMatchedBenDt;
 }
 
+
 std::ostream & operator << (std::ostream &out, const GoldenPattern::Result& o)
 {
   o.run();
@@ -130,6 +131,7 @@ void GoldenPattern::add(const Pattern & p)
 GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const 
 {
   Result result;
+
   const Pattern::DataType & detdigi = p;
   for (Pattern::DataType::const_iterator is = detdigi.begin(); is != detdigi.end(); ++is) {
     uint32_t rawId = is->first;
@@ -196,6 +198,7 @@ double GoldenPattern::whereInDistribution( int obj, const GoldenPattern::MFreq &
 
 void GoldenPattern::purge()
 {
+
   for (DetFreq::iterator idf=posRpc.begin(); idf != posRpc.end(); idf++) {
     MFreq & mfreq = idf->second;
     MFreq::iterator imf =  mfreq.begin();
@@ -210,44 +213,44 @@ void GoldenPattern::purge()
       if (mfreq[pos]==1 && bef1==0 && aft1==0) remove = true;
       if (mfreq[pos]==1 && aft1==1 && aft2==0 && aft3==0 && bef1==0 && bef2==0)  remove = true;
       if (mfreq[pos]==2 && aft1==0 && aft2==0 && bef1==0 && bef2==0)  remove = true;
+      //if(remove) std::cout<<"Cleaning pattern: "<<*this<<std::endl;      
       if (remove) { mfreq.erase(imf++); } else { ++imf; }
     }
   }
   DetFreq::iterator idf=posRpc.begin();  
   while (idf != posRpc.end()) if (idf->second.size()==0) posRpc.erase(idf++);  else  ++idf; 
  
-}
+  }
 
 std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
    out <<"GoldenPattern"<< o.theKey <<std::endl;
    // RPC
    for (GoldenPattern::DetFreq::const_iterator im = o.posRpc.begin(); im != o.posRpc.end(); im++) {
-     out <<"RPC Det:"<< im->first<<" Pos: ";
+     out <<"POSRPC Det: "<< im->first<<" Value: ";
      for (GoldenPattern::MFreq::const_iterator it = im->second.begin(); it !=  im->second.end(); it++) { out << it->first<<":"<<it->second<<", "; }
      out << std::endl;
    }
-   // DT pos
-   for (GoldenPattern::DetFreq::const_iterator im = o.posDt.begin(); im != o.posDt.end(); im++) {
-     out <<"DT  Det:"<< im->first<<" Pos: ";
-     for (GoldenPattern::MFreq::const_iterator it = im->second.begin(); it !=  im->second.end(); it++) { out << it->first<<":"<<it->second<<", "; }
-     out << std::endl;
-   }
-   // DT bending 
-   for (GoldenPattern::DetFreq::const_iterator im = o.bendingDt.begin(); im != o.bendingDt.end(); im++) {
-     out <<"DT  Det:"<< im->first<<" Ben: ";
-     for (GoldenPattern::MFreq::const_iterator it = im->second.begin(); it !=  im->second.end(); it++) { out << it->first<<":"<<it->second<<", "; }
-     out << std::endl;
-   }
-
    // Csc pos
    for (GoldenPattern::DetFreq::const_iterator im = o.posCsc.begin(); im != o.posCsc.end(); im++) {
-     out <<"Csc  Det:"<< im->first<<" Pos: ";
+     out <<"POSCSC Det: "<< im->first<<" Value: ";
      for (GoldenPattern::MFreq::const_iterator it = im->second.begin(); it !=  im->second.end(); it++) { out << it->first<<":"<<it->second<<", "; }
      out << std::endl;
    }
    // Csc bending 
    for (GoldenPattern::DetFreq::const_iterator im = o.bendingCsc.begin(); im != o.bendingCsc.end(); im++) {
-     out <<"Csc  Det:"<< im->first<<" Ben: ";
+     out <<"BENCSC Det: "<< im->first<<" Value: ";
+     for (GoldenPattern::MFreq::const_iterator it = im->second.begin(); it !=  im->second.end(); it++) { out << it->first<<":"<<it->second<<", "; }
+     out << std::endl;
+   }
+   // DT pos
+   for (GoldenPattern::DetFreq::const_iterator im = o.posDt.begin(); im != o.posDt.end(); im++) {
+     out <<"POSDT Det: "<< im->first<<" Value: ";
+     for (GoldenPattern::MFreq::const_iterator it = im->second.begin(); it !=  im->second.end(); it++) { out << it->first<<":"<<it->second<<", "; }
+     out << std::endl;
+   }
+   // DT bending 
+   for (GoldenPattern::DetFreq::const_iterator im = o.bendingDt.begin(); im != o.bendingDt.end(); im++) {
+     out <<"BENDT Det: "<< im->first<<" Value: ";
      for (GoldenPattern::MFreq::const_iterator it = im->second.begin(); it !=  im->second.end(); it++) { out << it->first<<":"<<it->second<<", "; }
      out << std::endl;
    }

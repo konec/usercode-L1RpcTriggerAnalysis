@@ -11,17 +11,20 @@
 
 bool Pattern::operator==(const Pattern& o) const
 {
-  unsigned int thissize = theData.size();
-  if (thissize != o.size()) return false;
+  unsigned int thissize = theData.size(); 
+ if (thissize != o.size()) return false;
+
   for (unsigned int idx=0; idx<thissize; idx++) {
      if (theData[idx].first != o.theData[idx].first) return false;
      if (theData[idx].second != o.theData[idx].second) return false; 
   } 
+ 
   return true;
 }
 
 Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData)
 {
+
   for (unsigned int idx=0; idx < theData.size(); ++idx) {
     if (theData[idx].first == aData.first) {
       Pattern modified =  *this;

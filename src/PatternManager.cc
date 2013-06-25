@@ -50,6 +50,8 @@ PatternManager::~PatternManager()
 
 void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec,  const VDigiSpec & vDigi)
 {
+
+
   if (!hitSpec) return;
   if (hitSpec->rawId() == 0 ) return;
   double phiref = hitSpec->position().phi();
@@ -74,6 +76,7 @@ void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpe
     bool isOK = pattern.add(*is); 
     if (!isOK) return;
   }
+
   if (pattern.size() == 0) return; 
   theEvUsePatCounter++;
 
@@ -85,6 +88,7 @@ void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpe
 L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec,  const VDigiSpec & vDigi)
 {
   L1Obj candidate;
+
   if (!hitSpec) return candidate;
   if (hitSpec->rawId() == 0 ) return candidate;
   double phiref = hitSpec->position().phi();
@@ -92,7 +96,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   int    chargeref = simu->charge();
   unsigned int detref =  hitSpec->rawId();
 /*
-  if (detref != 637602109 && detref != 637634877 &&
+   if (detref != 637602109 && detref != 637634877 &&
       detref != 637599914 && detref != 637632682 ) return candidate;
 
   bool precisePos = ( fabs(hitSpec->position().phi()-1.025) < 0.001);
@@ -109,23 +113,23 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
     DetId detId( is->first);
     if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
     if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;
-//    std::cout << "adding------- "<< is-vDigi.begin()+1 <<" digi det: "<<is->first<<"(rpc:"<<(detId.subdetId()==MuonSubdetId::RPC)<<") data: "<<is->second<< std::endl; 
+    //std::cout << "adding------- "<< is-vDigi.begin()+1 <<" digi det: "<<is->first<<"(rpc:"<<(detId.subdetId()==MuonSubdetId::RPC)<<") data: "<<is->second<< std::endl; 
     Pattern::add(vpattern,*is);
-//    std::cout <<" after vpattern has size: "<<vpattern.size() << std::endl;
+    //std::cout <<" after vpattern has size: "<<vpattern.size() << std::endl;
     if (vpattern.size() > 100) break;
   }
   if (vpattern[0].size() == 0) return candidate;
-//  std::cout <<" ------------------ END EVENT, NOW COMPARE, has #patterns: "<<vpattern.size()<<" vpattern[0].size="<<vpattern[0].size() << std::endl;
+  //std::cout <<" ------------------ END EVENT, NOW COMPARE, has #patterns: "<<vpattern.size()<<" vpattern[0].size="<<vpattern[0].size() << std::endl;
 
   GoldenPattern::Key thisKey(detref, ptref, chargeref, phiref );
-//  std::cout << thisKey << std::endl;
+  //std::cout << thisKey << std::endl;
 
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
   for (auto ip=vpattern.begin(); ip!= vpattern.end();++ip) {
   const Pattern & pattern = *ip;
-//  std::cout << " HAS PATTERN "<<pattern << std::endl;
-  for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = theGPs.begin(); igps != theGPs.end(); igps++) {
+  //std::cout << " HAS PATTERN "<<pattern << std::endl;
+  for (auto igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
 //    if (!(thisKey==igps->first)) continue;
     GoldenPattern & gp = igps->second;
     GoldenPattern::Result result = gp.compare(pattern);
@@ -133,18 +137,18 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
 //    if (!result.hasRpcDet(igps->first.theDet)) continue;
 //    if (result.nMatchedTot() < 5 )continue; 
 //    if (!result) continue;
-//     std::cout <<"PATT KEY: "<<igps->first<<" "<<result ; //<<std::endl;
+    //std::cout <<"PATT KEY: "<<igps->first<<" "<<result ; //<<std::endl;
     if (bestMatching < result) {
       bestMatching = result;
       bestKey =  igps->first;
-//      std::cout <<" ----"<<" pt: "<< bestKey.ptValue()<<std::endl; 
+      //std::cout <<" ----"<<" pt: "<< bestKey.ptValue()<<std::endl; 
     } 
-//else std::cout <<std::endl;
+    //else std::cout <<std::endl;
   }
   }
 
-//  std::cout <<" ------------------ END COMPARE: " << std::endl;
-//  std::cout <<"BEST KEY: "<<bestKey<<" "<< bestMatching<<std::cout <<" ######"<<" pt: "<< bestKey.ptValue()<<std::endl;
+  //std::cout <<" ------------------ END COMPARE: " << std::endl;
+  //std::cout <<"BEST KEY: "<<bestKey<<" "<< bestMatching<<std::cout <<" ######"<<" pt: "<< bestKey.ptValue()<<std::endl;
 //  abort();
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();

@@ -48,6 +48,7 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
     theAnaSiMuDistribution(0),
     theAnaOtfEff(0)
 { 
+
   if (theConfig.exists("anaMuonDistribution")) theAnaMuonDistribution = new AnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution"));
   if (theConfig.exists("anaMenu")) theAnaMenu = new AnaMenu(theConfig.getParameter<edm::ParameterSet>("anaMenu"));
   if (theConfig.exists("anaTimingL1")) theAnaTimingL1 = new AnaTimingL1( theConfig.getParameter<edm::ParameterSet>("anaTimingL1") );
@@ -65,6 +66,7 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
 
 void L1RpcTreeAnalysis::beginJob()
 {
+
   theHistos.SetOwner();
 
   if (theAnaMuonDistribution) theAnaMuonDistribution->init(theHistos);
@@ -106,10 +108,10 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   // 
   // define input chain
   //
+
   TChain chain("tL1Rpc");
   std::vector<std::string> treeFileNames = theConfig.getParameter<std::vector<std::string> >("treeFileNames");
   for (std::vector<std::string>::const_iterator it = treeFileNames.begin(); it != treeFileNames.end(); ++it)  chain.Add((*it).c_str() );
-
 
   //
   // prepare datastructures and branches
@@ -156,12 +158,12 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   chain.SetBranchAddress("l1ObjColl",&l1ObjColl);
   chain.SetBranchAddress("hitSpec",&hitSpec);
 
-
   //
   // number of events
   //
   Int_t nentries = (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
+
 
 
   //
@@ -173,7 +175,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
     if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
 //    if (ev < 44055) continue;
-    if ( (lastRun != (*event).run) || (ev/1000*1000==ev) ) { 
+    if ( (lastRun != (*event).run) || (ev%10000==0) ) { 
 //    if (true) {
 //    if (! ((*event).run==204601 && (*event).id ==109463402)) { continue;
       lastRun = (*event).run; 

@@ -33,7 +33,7 @@ public:
       else return false;
     }
     bool operator==(const Key& o) const {
-      return theDet==o.theDet && thePtCode==o.thePtCode && thePhiCode==o.thePhiCode && theCharge==o.theCharge;
+      return !(theDet!=o.theDet || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge);
     }
     double ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptValue( thePtCode); }
     double phiValue() const { return (double)thePhiCode/3000.; }

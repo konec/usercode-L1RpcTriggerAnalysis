@@ -5,6 +5,7 @@
 #include <vector>
 #include <utility>
 #include <ostream>
+#include <map>
 
 
 class  Pattern {
@@ -16,7 +17,7 @@ public:
   //is not empty
   operator bool() const { return theData.size() > 0; }
 
-  bool add(std::pair<uint32_t,  unsigned int > aData) { return addOrCopy(aData); }
+  bool add(std::pair<uint32_t,  unsigned int > aData) { return !addOrCopy(aData); }
 
   static void add( std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData);
 
@@ -30,7 +31,7 @@ private:
   // try to add data from raw id to this pattern. if the data from detUnit 
   // is already assigned to this patterns return a copy of this pattern with
   // modified (from aData) data attached to detUnit. Otherwise add data from detUnit
-  // to this pattern and return an ampty pattern;  
+  // to this pattern and return an empty pattern;  
   Pattern  addOrCopy ( std::pair<uint32_t,  unsigned int > aData); 
   
 private:
