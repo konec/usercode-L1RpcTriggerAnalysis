@@ -10,7 +10,8 @@
 
 class  Pattern {
 public:
-  typedef std::vector< std::pair <uint32_t,  unsigned int > >  DataType;
+  //typedef std::vector< std::pair <uint32_t,  unsigned int > >  DataType;
+  typedef std::map<uint32_t,  unsigned int >  DataType;
 
   Pattern() {}
 

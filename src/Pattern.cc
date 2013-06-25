@@ -9,51 +9,55 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
-bool Pattern::operator==(const Pattern& o) const
-{
-  unsigned int thissize = theData.size(); 
- if (thissize != o.size()) return false;
+bool Pattern::operator==(const Pattern& o) const{
+  unsigned int thissize = theData.size();
+  if (thissize != o.size()) return false;
 
-  for (unsigned int idx=0; idx<thissize; idx++) {
-     if (theData[idx].first != o.theData[idx].first) return false;
-     if (theData[idx].second != o.theData[idx].second) return false; 
-  } 
- 
+  for (auto it = theData.cbegin(); it != theData.cend(); ++it){
+    auto itComp = o.theData.find(it->first);    
+    if(itComp==o.theData.cend()) return false;
+    if(itComp->second!=it->second) return false;    
+  }
+
   return true;
 }
 
-Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData)
-{
+Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData){
 
-  for (unsigned int idx=0; idx < theData.size(); ++idx) {
-    if (theData[idx].first == aData.first) {
-      Pattern modified =  *this;
-      modified.theData[idx].second = aData.second;
-      return modified;
-//      if (*this == modified) return Pattern(); // nothing to do 
-//      else  return modified;                   // really duplicate
-    }
+  auto it = theData.find(aData.first);    
+  if(it!= theData.cend()){
+    Pattern modified =  *this;
+    modified.theData[aData.first] = aData.second;
+    return modified;
   }
-  theData.push_back(aData);
+  theData[aData.first] = aData.second;
   return Pattern();
 }
 
 void Pattern::add (  std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData)
 {
+  /*
   std::vector<Pattern> copied;
   for (std::vector<Pattern>::iterator ip = vpat.begin(); ip != vpat.end(); ++ip) {
     Pattern modified =  ip->addOrCopy(aData);
     if (modified && (find(copied.begin(), copied.end(), modified) == copied.end()) ) copied.push_back(modified);
   }
   if (copied.size() != 0) vpat.insert(vpat.end(), copied.begin(), copied.end()); 
-}
+  */
 
+  //Use indexing to avoid problem with iterator invalidation afer adding new elements to vector
+  uint32_t vSize = vpat.size(); 
+  for(uint32_t index = 0;index<vSize;++index){
+    Pattern modified =  vpat[index].addOrCopy(aData);
+    if (modified && (find(vpat.begin(), vpat.end(), modified) == vpat.end()) ) vpat.push_back(modified);
+  }
+}
 
 
 std::ostream & operator << (std::ostream &out, const Pattern &o)
 {
   out <<" Pattern:  size: "<<o.size();
-  for (Pattern::DataType::const_iterator it=o.theData.begin(); it!= o.theData.end(); it++) {
+  for (auto it = o.theData.cbegin(); it != o.theData.cend(); ++it){
     DetId detId( it->first);
     switch (detId.subdetId()) {
       case MuonSubdetId::RPC: { out << std::endl <<" RPC: "<<RPCDigiSpec(it->first, it->second);  break; }

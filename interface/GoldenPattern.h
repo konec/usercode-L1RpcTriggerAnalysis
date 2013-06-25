@@ -15,7 +15,7 @@ public:
   //
   // where
   //
-  enum PosBenCase { POSRPC=1, POSCSC=2, BENCSC=3, POSDT=4, BENDT=5 };
+  enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
 
   //
   // Key
@@ -26,7 +26,7 @@ public:
       while  (phi < 0) { phi+=2*M_PI; }
       thePhiCode = int( phi * 3000.); 
     } 
-    bool operator< (const Key & o) const {
+    inline bool operator< (const Key & o) const {
       if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
       else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode < o.thePhiCode) return true;
       else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode==o.thePhiCode && theDet<o.theDet) return true;
@@ -37,6 +37,10 @@ public:
     }
     double ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptValue( thePtCode); }
     double phiValue() const { return (double)thePhiCode/3000.; }
+    double etaValue() const { return 6*(theDet==637602109) + 
+	                                    7*(theDet==637634877) +
+	                                    8*(theDet==637599914) +
+	                                    9*(theDet==637632682); }
     uint32_t     theDet; 
     unsigned int thePtCode; 
     unsigned int thePhiCode;
@@ -52,15 +56,21 @@ public:
   //
   class Result {
   public: 
-    Result() : checkMe(true), theValue(0.), 
-               nMatchedPosRpc(0), nMatchedPosCsc(0), nMatchedPosDt(0), nMatchedBenCsc(0), nMatchedBenDt(0),
-               hasStation1(false), hasStation2(false) {}
+    Result() : checkMe(true), theValue(0.),
+               hasStation1(false), hasStation2(false) {
+      nMatchedPoints[GoldenPattern::POSRPC] = 0;
+      nMatchedPoints[GoldenPattern::POSDT] = 0;
+      nMatchedPoints[GoldenPattern::POSCSC] = 0;
+      nMatchedPoints[GoldenPattern::BENDT] = 0;
+      nMatchedPoints[GoldenPattern::BENCSC] = 0;      
+    }
     bool operator<( const Result & o) const;
     operator bool() const;
     double value() const;
     unsigned int nMatchedTot() const;
     bool hasRpcDet(uint32_t rawId) {
-      for (auto it=posRpcResult.begin(); it != posRpcResult.end(); it++) {
+      for (auto it=myResults[GoldenPattern::POSRPC].cbegin(); 
+	   it != myResults[GoldenPattern::POSRPC].cend(); ++it) {
         if (it->first == rawId && it->second > 0. && it->second < 1.) return true; 
       }
       return false;
@@ -72,13 +82,18 @@ public:
   private:
     mutable bool checkMe; 
     mutable double theValue;
-    mutable unsigned int nMatchedPosRpc, nMatchedPosCsc, nMatchedPosDt, nMatchedBenCsc, nMatchedBenDt;
+    //mutable unsigned int nMatchedPosRpc, nMatchedPosCsc, nMatchedPosDt, nMatchedBenCsc, nMatchedBenDt;
+    mutable std::map<GoldenPattern::PosBenCase, unsigned int> nMatchedPoints;
+   
     bool hasStation1, hasStation2;
+    mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, double > > > myResults;
+    /*
     std::vector< std::pair<uint32_t, double > > posRpcResult;
     std::vector< std::pair<uint32_t, double > > posCscResult;
     std::vector< std::pair<uint32_t, double > > benCscResult;
     std::vector< std::pair<uint32_t, double > > posDtResult;
     std::vector< std::pair<uint32_t, double > > benDtResult;
+    */
     friend std::ostream & operator << (std::ostream &out, const Result& o); 
     friend class GoldenPattern; 
   };
@@ -95,17 +110,20 @@ public:
 
 private:
 
+  ///Pattern kinematical identification (eta,phi,pt)
   Key theKey;
+
+  ///Distribution in given DetUnit.
   typedef  std::map<int, unsigned int> MFreq;
+
+  ///Ditribution in DetUnits. For given measuremnt type, one can have
+  ///measurementd in many layers(=DetUnits)
   typedef  std::map<uint32_t, MFreq > DetFreq; 
+  
+  ///Set of distributions for all measurement types (DT position, DT bending, RPC, etc)
+  typedef  std::map<GoldenPattern::PosBenCase, DetFreq > SystFreq;
 
-  DetFreq posRpc;
-
-  DetFreq posCsc;
-  DetFreq bendingCsc;
-
-  DetFreq posDt;
-  DetFreq bendingDt;
+  SystFreq PattCore;
 
 private:
 

@@ -50,8 +50,6 @@ PatternManager::~PatternManager()
 
 void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec,  const VDigiSpec & vDigi)
 {
-
-
   if (!hitSpec) return;
   if (hitSpec->rawId() == 0 ) return;
   double phiref = hitSpec->position().phi();
@@ -72,11 +70,10 @@ void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpe
 
   Pattern pattern;
   theEvForPatCounter++;
-  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); is++) {
+  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
     bool isOK = pattern.add(*is); 
     if (!isOK) return;
   }
-
   if (pattern.size() == 0) return; 
   theEvUsePatCounter++;
 
@@ -88,7 +85,6 @@ void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpe
 L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec,  const VDigiSpec & vDigi)
 {
   L1Obj candidate;
-
   if (!hitSpec) return candidate;
   if (hitSpec->rawId() == 0 ) return candidate;
   double phiref = hitSpec->position().phi();
@@ -96,7 +92,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   int    chargeref = simu->charge();
   unsigned int detref =  hitSpec->rawId();
 /*
-   if (detref != 637602109 && detref != 637634877 &&
+  if (detref != 637602109 && detref != 637634877 &&
       detref != 637599914 && detref != 637632682 ) return candidate;
 
   bool precisePos = ( fabs(hitSpec->position().phi()-1.025) < 0.001);
@@ -109,50 +105,51 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   theEvForPatCounter++;
   static bool skipRpcData   = theConfig.getUntrackedParameter<bool>("skipRpcData",  false);
   static bool skipDtCscData = theConfig.getUntrackedParameter<bool>("skipDtCscData",false);
-  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); is++) {
+  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
     DetId detId( is->first);
     if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
     if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;
-    //std::cout << "adding------- "<< is-vDigi.begin()+1 <<" digi det: "<<is->first<<"(rpc:"<<(detId.subdetId()==MuonSubdetId::RPC)<<") data: "<<is->second<< std::endl; 
+    if(detId.subdetId()==MuonSubdetId::DT && DTphDigiSpec(is->first, is->second).bxNum()!=0) continue; //AK. Correct?
+//    std::cout << "adding------- "<< is-vDigi.begin()+1 <<" digi det: "<<is->first<<"(rpc:"<<(detId.subdetId()==MuonSubdetId::RPC)<<") data: "<<is->second<< std::endl; 
     Pattern::add(vpattern,*is);
-    //std::cout <<" after vpattern has size: "<<vpattern.size() << std::endl;
+//    std::cout <<" after vpattern has size: "<<vpattern.size() << std::endl;
     if (vpattern.size() > 100) break;
   }
   if (vpattern[0].size() == 0) return candidate;
   //std::cout <<" ------------------ END EVENT, NOW COMPARE, has #patterns: "<<vpattern.size()<<" vpattern[0].size="<<vpattern[0].size() << std::endl;
 
   GoldenPattern::Key thisKey(detref, ptref, chargeref, phiref );
-  //std::cout << thisKey << std::endl;
+//  std::cout << thisKey << std::endl;
 
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
-  for (auto ip=vpattern.begin(); ip!= vpattern.end();++ip) {
-  const Pattern & pattern = *ip;
-  //std::cout << " HAS PATTERN "<<pattern << std::endl;
-  for (auto igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
-//    if (!(thisKey==igps->first)) continue;
-    GoldenPattern & gp = igps->second;
-    GoldenPattern::Result result = gp.compare(pattern);
-//    if (!result.hasRpcDet(637602109) && !result.hasRpcDet(637634877) && !result.hasRpcDet(637599914) && !result.hasRpcDet(637632682)) continue;
-//    if (!result.hasRpcDet(igps->first.theDet)) continue;
-//    if (result.nMatchedTot() < 5 )continue; 
-//    if (!result) continue;
-    //std::cout <<"PATT KEY: "<<igps->first<<" "<<result ; //<<std::endl;
-    if (bestMatching < result) {
-      bestMatching = result;
-      bestKey =  igps->first;
-      //std::cout <<" ----"<<" pt: "<< bestKey.ptValue()<<std::endl; 
-    } 
-    //else std::cout <<std::endl;
-  }
+  for (auto ip=vpattern.cbegin(); ip!= vpattern.cend();++ip) {
+    const Pattern & pattern = *ip;
+    //  std::cout << " HAS PATTERN "<<pattern << std::endl;
+    for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
+      //    if (!(thisKey==igps->first)) continue;
+      GoldenPattern & gp = igps->second;
+      GoldenPattern::Result result = gp.compare(pattern);
+      //    if (!result.hasRpcDet(637602109) && !result.hasRpcDet(637634877) && !result.hasRpcDet(637599914) && !result.hasRpcDet(637632682)) continue;
+      //    if (!result.hasRpcDet(igps->first.theDet)) continue;
+      //    if (result.nMatchedTot() < 5 )continue; 
+      //    if (!result) continue;
+      //     std::cout <<"PATT KEY: "<<igps->first<<" "<<result ; //<<std::endl;
+      if (bestMatching < result) {
+	bestMatching = result;
+	bestKey =  igps->first;
+	//      std::cout <<" ----"<<" pt: "<< bestKey.ptValue()<<std::endl; 
+      } 
+      //else std::cout <<std::endl;
+    }
   }
 
-  //std::cout <<" ------------------ END COMPARE: " << std::endl;
-  //std::cout <<"BEST KEY: "<<bestKey<<" "<< bestMatching<<std::cout <<" ######"<<" pt: "<< bestKey.ptValue()<<std::endl;
+//  std::cout <<" ------------------ END COMPARE: " << std::endl;
+//  std::cout <<"BEST KEY: "<<bestKey<<" "<< bestMatching<<std::cout <<" ######"<<" pt: "<< bestKey.ptValue()<<std::endl;
 //  abort();
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
-    candidate.eta = 1.;
+    candidate.eta = bestKey.etaValue();
     candidate.phi = bestKey.phiValue();
     candidate.q   = bestMatching.nMatchedTot();
     candidate.type = L1Obj::OTF;
@@ -171,7 +168,7 @@ void PatternManager::beginJob()
   static ENTRY entry;
   tree->SetBranchAddress("entry",&entry); 
   Int_t nentries = (Int_t) tree->GetEntries();
-  for (Int_t i=0; i<nentries; i++) {
+  for (Int_t i=0; i<nentries; ++i) {
     tree->GetEntry(i);
     GoldenPattern::Key key;
     key.theDet =     entry.key_det;
@@ -186,38 +183,33 @@ void PatternManager::beginJob()
   patternInpFile.Close();
 }
 
-void PatternManager::endJob()
-{
-  for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = theGPs.begin(); igps != theGPs.end(); igps++) {
-    GoldenPattern & gp = igps->second;
-    gp.purge();
-  }
+void PatternManager::endJob(){
 
   if ( !theConfig.exists("patternOutFile") ) return;
   std::string patternOutFileName = theConfig.getParameter<std::string>("patternOutFile");
   TFile patternOutFile( patternOutFileName.c_str(),"RECREATE"); 
 
+  for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
+    GoldenPattern & gp = igps->second;
+    gp.purge();
+  }
+
   static ENTRY entry;
   TTree *tree = new TTree("FlatPatterns","FlatPatterns");
   tree->Branch("entry",&entry,"key_det/i:key_pt/i:key_phi/i:key_ch/I:pat_Case/i:patDet/i:posOrBend/I:freq/i");
 
-  for (std::map< GoldenPattern::Key, GoldenPattern>::const_iterator igps = theGPs.begin(); igps != theGPs.end(); igps++) {
+  for (std::map< GoldenPattern::Key, GoldenPattern>::const_iterator igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
     const GoldenPattern & gp = igps->second; 
     entry.key_det =  gp.theKey.theDet;
     entry.key_pt =  gp.theKey.thePtCode;
     entry.key_phi =  gp.theKey.thePhiCode;
     entry.key_ch =  gp.theKey.theCharge;
-    for (unsigned int iCase =1; iCase <=5; ++iCase) {
-      entry.pat_Case = iCase; 
-      const GoldenPattern::DetFreq * detFreq = 0;
-      if (iCase==GoldenPattern::POSRPC) detFreq = &gp.posRpc;
-      if (iCase==GoldenPattern::POSCSC) detFreq = &gp.posCsc;
-      if (iCase==GoldenPattern::BENCSC) detFreq = &gp.bendingCsc;
-      if (iCase==GoldenPattern::POSDT ) detFreq = &gp.posDt;
-      if (iCase==GoldenPattern::BENDT ) detFreq = &gp.bendingDt;
-      for (GoldenPattern::DetFreq::const_iterator idf = detFreq->begin(); idf != detFreq->end(); idf++) {
+    
+    for (auto it=gp.PattCore.cbegin();it!=gp.PattCore.cend();++it){
+      entry.pat_Case = it->first; 
+      for (GoldenPattern::DetFreq::const_iterator idf = it->second.cbegin(); idf !=it->second.cend(); ++idf) {
         entry.patDet = idf->first;
-        for (GoldenPattern::MFreq::const_iterator imf = idf->second.begin(); imf != idf->second.end(); imf++) {
+        for (GoldenPattern::MFreq::const_iterator imf = idf->second.cbegin(); imf != idf->second.cend(); ++imf) {
           entry.posOrBend = imf->first;
           entry.freq = imf->second; 
           tree->Fill();
