@@ -25,7 +25,7 @@ private:
   TH1D* hEfficMuPt_D, *hEfficRpcNoCut_N, *hEfficRpcPtCut_N;
   std::map< std::string, TH1D* > hm;
 
-  const static unsigned int nPtCuts= 6;
+  const static unsigned int nPtCuts= 30;
   const static double ptCuts[];
 
   edm::ParameterSet theConfig;

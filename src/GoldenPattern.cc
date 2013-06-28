@@ -14,7 +14,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
 void GoldenPattern::Result::runNoCheck() const {
-  double fract = 1;
+  float fract = 1;
 
   for(auto mType=myResults.cbegin();mType!=myResults.cend();++mType){    
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it) fract *= norm(mType->first,it->second); 
@@ -25,14 +25,15 @@ void GoldenPattern::Result::runNoCheck() const {
   theValue*=(myResults[GoldenPattern::POSRPC].size()==nMatchedPoints[GoldenPattern::POSRPC]);
   theValue*=(myResults[GoldenPattern::POSDT].size()==nMatchedPoints[GoldenPattern::POSDT]);
   theValue*=(myResults[GoldenPattern::POSCSC].size()==nMatchedPoints[GoldenPattern::POSCSC]);
-  theValue = ( nTot > 4) ? pow(fract, 1./((double) nTot)) : 0.;
+  theValue = ( nTot > 4) ? pow(fract, 1./((float) nTot)) : 0.;
 }
 
-double GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, double whereInDist) const {
-  double normValue = 2.*(0.5-fabs(whereInDist-0.5));   
-  static const double epsilon = 1.e-9;
+float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereInDist) const {
+  float normValue = 2.*(0.5-fabs(whereInDist-0.5));   
+  //normValue = whereInDist; //AK
+  static const float epsilon = 1.e-9;
   if (normValue > epsilon) ++nMatchedPoints[where];
-  else normValue =1.;
+  else normValue = 0.05;
   return normValue; 
 }
 
@@ -54,7 +55,7 @@ GoldenPattern::Result::operator bool() const {
   return (value() > 0.1); // && hasStation1 && hasStation2);
 }
 
-double GoldenPattern::Result::value() const { 
+float GoldenPattern::Result::value() const { 
   run(); 
   return theValue; 
 }
@@ -70,22 +71,15 @@ unsigned int GoldenPattern::Result::nMatchedTot() const {
 std::ostream & operator << (std::ostream &out, const GoldenPattern::Result& o)
 {
   o.run();
-
-  /*
+  
   out <<"Result: "
       << " value: "<<o.theValue
       <<" nPos+Ben: (";
-  for(auto mType=o.myResults.cbegin();
-      mType!=myResults.cend();++mType){
-    out<<o.nMatchedPoints[iType]<<"/"<<o.myResults[mType].size()<<", ";
+  for(auto cit=o.myResults.cbegin();cit!=o.myResults.cend();++cit){
+    out<<o.nMatchedPoints[cit->first]<<"/"<<cit->second.size()<<", ";
   }
   out <<", tot:"<<o.nMatchedTot()<<")";
-  */
-  /*
-  <<o.nMatchedPosCsc<<"/"<<o.posCscResult.size()<<"+"<<o.nMatchedBenCsc<<"/"<<o.benCscResult.size()
-  <<", "<<o.nMatchedPosDt <<"/"<<o.posDtResult.size()<<"+"<<o.nMatchedBenDt<<"/"<<o.benDtResult.size()
-  <<", "<<o.nMatchedPosRpc<<"/"<<o.posRpcResult.size()
-  */
+  
   return out;
 }
 
@@ -149,20 +143,17 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
     uint32_t rawId = is->first;
     DetId detId(rawId);
     if (detId.det() != DetId::Muon){
-      std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
+      std::cout << "GoldenPattern::compare PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
       return result;
     }
     if (detId.subdetId() == MuonSubdetId::RPC) {
       RPCDigiSpec digi(rawId, is->second);
       mType = GoldenPattern::POSRPC;
       cit = PattCore.find(mType);
-      if(cit==PattCore.cend()){
-	std::cout << "PROBLEM: unknown measurement type: "<<mType<<std::endl;
-	return result;
-      }
+      if(cit==PattCore.cend()) 	return result; //AK: Ugly, FIX.
       idm = cit->second.find(rawId);
       if (idm != cit->second.cend() ) {
-        double f = whereInDistribution(digi.halfStrip(), idm->second);
+        float f = whereInDistribution(digi.halfStrip(), idm->second);
         result.myResults[mType].push_back(std::make_pair(rawId, f)); 
         RPCDetId rpc(rawId);
         if(rpc.station()==1) result.hasStation1 = true;
@@ -173,13 +164,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       DTphDigiSpec digi(rawId, is->second);
       mType = GoldenPattern::POSDT;
       cit = PattCore.find(mType);
-      if(cit==PattCore.cend()){
-	std::cout << "PROBLEM: unknown measurement type: "<<mType<<std::endl;
-	return result;
-      }
+      if(cit==PattCore.cend()) return result;
       idm = cit->second.find(rawId);
       if (idm != cit->second.cend() ) {
-        double f = whereInDistribution(digi.phi(), idm->second);
+        float f = whereInDistribution(digi.phi(), idm->second);
         result.myResults[mType].push_back(std::make_pair(rawId, f)); 
         DTChamberId dt(rawId);
         if(dt.station()==1) result.hasStation1 = true;
@@ -187,13 +175,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       }
       mType = GoldenPattern::BENDT;
       cit = PattCore.find(mType);
-      if(cit==PattCore.cend()){
-	std::cout << "PROBLEM: unknown measurement type: "<<mType<<std::endl;
-	return result;
-      }
+      if(cit==PattCore.cend()) return result;
       idm = cit->second.find(rawId);
       if (idm != cit->second.cend() ) {
-	double f = whereInDistribution(digi.phiB(), idm->second);
+	float f = whereInDistribution(digi.phiB(), idm->second);
         result.myResults[mType].push_back(std::make_pair(rawId, f));
       }
     }
@@ -201,13 +186,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       CSCDigiSpec digi(rawId, is->second);
       mType = GoldenPattern::POSCSC;
       cit = PattCore.find(mType);
-      if(cit==PattCore.cend()){
-	std::cout << "PROBLEM: unknown measurement type: "<<mType<<std::endl;
-	return result;
-      }
+      if(cit==PattCore.cend()) return result;
       auto idm = cit->second.find(rawId);
       if (idm != cit->second.cend() ) {
-	double f = whereInDistribution(digi.strip(), idm->second);
+	float f = whereInDistribution(digi.strip(), idm->second);
         result.myResults[mType].push_back(std::make_pair(rawId, f)); 
         CSCDetId csc(rawId);
         if (csc.station()==1) result.hasStation1 = true;
@@ -215,13 +197,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       }
       mType = GoldenPattern::BENCSC;
       cit = PattCore.find(mType);
-      if(cit==PattCore.cend()){
-	std::cout << "PROBLEM: unknown measurement type: "<<mType<<std::endl;
-	return result;
-      }
+      if(cit==PattCore.cend()) return result;
       idm = cit->second.find(rawId);
       if (idm != cit->second.cend() ) {
-        double f = whereInDistribution(digi.pattern(), idm->second);
+        float f = whereInDistribution(digi.pattern(), idm->second);
         result.myResults[mType].push_back(std::make_pair(rawId, f));
       }
     }
@@ -230,28 +209,28 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
   return result;
 }
 
-double GoldenPattern::whereInDistribution( int obj, const GoldenPattern::MFreq & m) const
+float GoldenPattern::whereInDistribution( int obj, const GoldenPattern::MFreq & m) const
 {
 
-  double sum_before = 0;
-  double sum_after = 0;
-  double sum_obj = 0;
+  float sum_before = 0;
+  float sum_after = 0;
+  float sum_obj = 0;
   for (MFreq::const_iterator im = m.begin(); im != m.end(); ++im) {
     if (im->first  < obj) sum_before+= im->second;
     if (im->first == obj) sum_obj = im->second;  
     if (im->first  > obj) sum_after += im->second;
   }
-  double sum = std::max(1.,sum_before+sum_after+sum_obj );
+  float sum = std::max((float)1.,sum_before+sum_after+sum_obj );
   //return sum_obj/sum; //AK
   return (sum_before+sum_obj/2.)/sum; 
 }
 
-void GoldenPattern::purge(){
+bool GoldenPattern::purge(){
 
   bool remove = false;
   int pos;
   unsigned int bef2, bef1, aft1, aft2, aft3;
-  for (auto isf=PattCore.begin();isf!=PattCore.end();++isf){
+  for (auto isf=PattCore.begin();isf!=PattCore.end();){
     for (auto idf = isf->second.begin(); idf !=isf->second.end();) {
       for (auto imf = idf->second.begin(); imf != idf->second.end();) {
 	remove = false;
@@ -269,8 +248,10 @@ void GoldenPattern::purge(){
       }
       if (idf->second.size()==0) isf->second.erase(idf++);  else  ++idf;
     }
-    break;
+      if (isf->second.size()==0) PattCore.erase(isf++);  else  ++isf;
   }
+  ///Usefull pattern has at least 4 measurements and has a RPC measurement
+  return PattCore.find(POSRPC)!=PattCore.end() && PattCore.size()>4;
 }
 
 std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
@@ -281,7 +262,20 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
 
  for (auto isf=o.PattCore.cbegin();isf!=o.PattCore.cend();++isf){
    for (auto idf = isf->second.cbegin(); idf!=isf->second.cend();++idf) {      
-     out <<typeInfos[isf->first]<<" Det: "<< idf->first<<" Value: ";
+     out <<typeInfos[isf->first]<<" Det: "<< idf->first;
+     if(typeInfos[isf->first].find("RPC")!=std::string::npos){
+       RPCDetId rpc(idf->first);
+       out<<" ("<<rpc<<") ";
+     }
+     if(typeInfos[isf->first].find("CSC")!=std::string::npos){
+       CSCDetId csc(idf->first);
+       out<<" ("<<csc<<") ";
+     }
+     if(typeInfos[isf->first].find("DT")!=std::string::npos){
+       DTChamberId dt(idf->first);
+       out<<" ("<<dt<<") ";
+     }
+     out <<" Value: ";
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf) 
        { out << imf->first<<":"<<imf->second<<", "; }
      out << std::endl;

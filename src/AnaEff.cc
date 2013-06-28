@@ -13,7 +13,12 @@
 #include <vector>
 #include <sstream>
 
-const double AnaEff::ptCuts[ AnaEff::nPtCuts] = { 0., 5., 10., 16., 30., 100.};
+const double AnaEff::ptCuts[ AnaEff::nPtCuts] ={0., 0.1, 
+						1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 6., 7., 8., 
+						10., 12., 14., 16., 18., 20., 25., 30., 35., 40., 45., 
+						50., 60., 70., 80., 90., 100.};
+
+
 std::string reg[5]={"_Bar","_Int","_End","_Qeq0","_Qgt0"};
 
 

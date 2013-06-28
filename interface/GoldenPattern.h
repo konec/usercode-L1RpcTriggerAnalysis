@@ -21,11 +21,12 @@ public:
   // Key
   //
   struct Key {
-    Key(uint32_t det=0, double pt=0, int charge= 0, double phi=0) : theDet(det), theCharge(charge) { 
+    Key(uint32_t det=0, float pt=0, int charge= 0, float phi=0) : theDet(det), theCharge(charge) { 
       thePtCode = L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptCode(pt);
-      while  (phi < 0) { phi+=2*M_PI; }
-      thePhiCode = int( phi * 3000.); 
-    } 
+      //while  (phi < 0) { phi+=2*M_PI; }
+      //thePhiCode = int( phi * 3000.); 
+      thePhiCode = phi;
+    }
     inline bool operator< (const Key & o) const {
       if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
       else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode < o.thePhiCode) return true;
@@ -35,9 +36,9 @@ public:
     bool operator==(const Key& o) const {
       return !(theDet!=o.theDet || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge);
     }
-    double ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptValue( thePtCode); }
-    double phiValue() const { return (double)thePhiCode/3000.; }
-    double etaValue() const { return 6*(theDet==637602109) + 
+    float ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptValue( thePtCode); }
+    float phiValue() const { return thePhiCode;}//(float)thePhiCode/3000.; }
+    float etaValue() const { return 6*(theDet==637602109) + 
 	                                    7*(theDet==637634877) +
 	                                    8*(theDet==637599914) +
 	                                    9*(theDet==637632682); }
@@ -66,7 +67,7 @@ public:
     }
     bool operator<( const Result & o) const;
     operator bool() const;
-    double value() const;
+    float value() const;
     unsigned int nMatchedTot() const;
     bool hasRpcDet(uint32_t rawId) {
       for (auto it=myResults[GoldenPattern::POSRPC].cbegin(); 
@@ -78,22 +79,14 @@ public:
   private:
     void run() const { if (checkMe) {checkMe=false; runNoCheck(); } }
     void runNoCheck() const;
-    double norm(PosBenCase where, double whereInDist) const;
+    float norm(PosBenCase where, float whereInDist) const;
   private:
     mutable bool checkMe; 
-    mutable double theValue;
-    //mutable unsigned int nMatchedPosRpc, nMatchedPosCsc, nMatchedPosDt, nMatchedBenCsc, nMatchedBenDt;
+    mutable float theValue;
     mutable std::map<GoldenPattern::PosBenCase, unsigned int> nMatchedPoints;
    
     bool hasStation1, hasStation2;
-    mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, double > > > myResults;
-    /*
-    std::vector< std::pair<uint32_t, double > > posRpcResult;
-    std::vector< std::pair<uint32_t, double > > posCscResult;
-    std::vector< std::pair<uint32_t, double > > benCscResult;
-    std::vector< std::pair<uint32_t, double > > posDtResult;
-    std::vector< std::pair<uint32_t, double > > benDtResult;
-    */
+    mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, float > > > myResults;
     friend std::ostream & operator << (std::ostream &out, const Result& o); 
     friend class GoldenPattern; 
   };
@@ -127,8 +120,8 @@ private:
 
 private:
 
-  void purge();
-  double whereInDistribution(int obj, const MFreq & m) const;
+  bool purge();
+  float whereInDistribution(int obj, const MFreq & m) const;
   friend std::ostream & operator << (std::ostream &out, const GoldenPattern & o);
   friend class PatternManager;
 };

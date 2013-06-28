@@ -50,23 +50,32 @@ PatternManager::~PatternManager()
 
 void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec,  const VDigiSpec & vDigi)
 {
+
+  if (theConfig.exists("patternInpFile") && 
+      theConfig.exists("patternOutFile")) return;
+
   if (!hitSpec) return;
   if (hitSpec->rawId() == 0 ) return;
-  double phiref = hitSpec->position().phi();
-  double ptref  = simu->pt(); 
+
+  int stripRef = -1;
+  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {   
+    if(is->first!=hitSpec->rawId()) continue;
+    RPCDigiSpec digi(is->first, is->second);
+    stripRef = digi.halfStrip();
+  } 
+
+  ///Use only events with a digi in reference station
+  if(stripRef<0) return;
+
+  //float phiref = hitSpec->position().phi();
+  float phiref = stripRef;
+  float ptref  = simu->pt(); 
   int    chargeref = simu->charge();
   unsigned int detref =  hitSpec->rawId();
-/*
-  if (detref != 637602109 && detref != 637634877 &&
-      detref != 637599914 && detref != 637632682 ) return;
-
-  bool precisePos = ( fabs(hitSpec->position().phi()-1.025) < 0.001);
-  if (!precisePos) return;
-  if ( simu->pt() < 16.) return;
-*/
-
 
   GoldenPattern::Key key( detref, ptref, chargeref, phiref);
+  //if(detref!=637602109 || chargeref<0 || phiref!=80) return;
+  //std::cout<<key<<std::endl;
 
   Pattern pattern;
   theEvForPatCounter++;
@@ -85,10 +94,14 @@ void PatternManager::run(const EventObj* ev, const TrackObj * simu, const HitSpe
 L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec,  const VDigiSpec & vDigi)
 {
   L1Obj candidate;
+
+  if (theConfig.exists("patternInpFile") && 
+      theConfig.exists("patternOutFile")) return candidate;
+
   if (!hitSpec) return candidate;
   if (hitSpec->rawId() == 0 ) return candidate;
-  double phiref = hitSpec->position().phi();
-  double ptref  = simu->pt();
+  float phiref = hitSpec->position().phi();
+  float ptref  = simu->pt();
   int    chargeref = simu->charge();
   unsigned int detref =  hitSpec->rawId();
 /*
@@ -119,7 +132,7 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
   //std::cout <<" ------------------ END EVENT, NOW COMPARE, has #patterns: "<<vpattern.size()<<" vpattern[0].size="<<vpattern[0].size() << std::endl;
 
   GoldenPattern::Key thisKey(detref, ptref, chargeref, phiref );
-//  std::cout << thisKey << std::endl;
+  //std::cout << thisKey << std::endl;
 
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
@@ -127,14 +140,11 @@ L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const Hit
     const Pattern & pattern = *ip;
     //  std::cout << " HAS PATTERN "<<pattern << std::endl;
     for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
-      //    if (!(thisKey==igps->first)) continue;
+      //if (!(thisKey==igps->first)) continue;
       GoldenPattern & gp = igps->second;
       GoldenPattern::Result result = gp.compare(pattern);
-      //    if (!result.hasRpcDet(637602109) && !result.hasRpcDet(637634877) && !result.hasRpcDet(637599914) && !result.hasRpcDet(637632682)) continue;
-      //    if (!result.hasRpcDet(igps->first.theDet)) continue;
-      //    if (result.nMatchedTot() < 5 )continue; 
-      //    if (!result) continue;
-      //     std::cout <<"PATT KEY: "<<igps->first<<" "<<result ; //<<std::endl;
+      
+      std::cout <<"PATT KEY: "<<igps->first<<" "<<result<<std::endl;
       if (bestMatching < result) {
 	bestMatching = result;
 	bestKey =  igps->first;
@@ -175,6 +185,14 @@ void PatternManager::beginJob()
     key.thePtCode =  entry.key_pt;
     key.thePhiCode = entry.key_phi;
     key.theCharge =  entry.key_ch;
+
+    /*
+    if(entry.key_det!=637602109 ||
+       entry.key_pt!=7 ||
+       entry.key_phi!=166 ||
+       entry.key_ch!=-1) continue;
+    */
+
     GoldenPattern::PosBenCase pat_Case = static_cast<GoldenPattern::PosBenCase>(entry.pat_Case);
     if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key); 
     theGPs[key].add(pat_Case, entry.patDet, entry.posOrBend, entry.freq);
@@ -188,12 +206,14 @@ void PatternManager::endJob(){
   if ( !theConfig.exists("patternOutFile") ) return;
   std::string patternOutFileName = theConfig.getParameter<std::string>("patternOutFile");
   TFile patternOutFile( patternOutFileName.c_str(),"RECREATE"); 
-
-  for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
-    GoldenPattern & gp = igps->second;
-    gp.purge();
+  
+  if (theConfig.exists("patternInpFile") && theConfig.exists("patternOutFile")){
+    for (auto igps = theGPs.begin(); igps != theGPs.end();) {
+      GoldenPattern & gp = igps->second;      
+      if(!gp.purge()) {theGPs.erase(igps++); } else { ++igps; } 
+    }
   }
-
+  
   static ENTRY entry;
   TTree *tree = new TTree("FlatPatterns","FlatPatterns");
   tree->Branch("entry",&entry,"key_det/i:key_pt/i:key_phi/i:key_ch/I:pat_Case/i:patDet/i:posOrBend/I:freq/i");
