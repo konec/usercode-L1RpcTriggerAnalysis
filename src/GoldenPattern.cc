@@ -14,11 +14,12 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
 void GoldenPattern::Result::runNoCheck() const {
-  float fract = 1;
 
+  float fract = 1;
   for(auto mType=myResults.cbegin();mType!=myResults.cend();++mType){    
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it) fract *= norm(mType->first,it->second); 
   }
+
   unsigned int nTot = 0;
   for(auto it=nMatchedPoints.cbegin();it!=nMatchedPoints.cend();++it) nTot+=it->second;    
 
@@ -26,11 +27,13 @@ void GoldenPattern::Result::runNoCheck() const {
   theValue*=(myResults[GoldenPattern::POSDT].size()==nMatchedPoints[GoldenPattern::POSDT]);
   theValue*=(myResults[GoldenPattern::POSCSC].size()==nMatchedPoints[GoldenPattern::POSCSC]);
   theValue = ( nTot > 4) ? pow(fract, 1./((float) nTot)) : 0.;
+  //AK theValue = ( nTot > 4) ? -log(fract) : 9999.0;
 }
 
 float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereInDist) const {
   float normValue = 2.*(0.5-fabs(whereInDist-0.5));   
-  //normValue = whereInDist; //AK
+  //normValue = 0.95*whereInDist; //AK
+
   static const float epsilon = 1.e-9;
   if (normValue > epsilon) ++nMatchedPoints[where];
   else normValue = 0.05;
@@ -74,20 +77,21 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern::Result& o)
   
   out <<"Result: "
       << " value: "<<o.theValue
-      <<" nPos+Ben: (";
+      <<" (POSRPC, POSCSC, BENCSC, POSDT, BENDT)(";
   for(auto cit=o.myResults.cbegin();cit!=o.myResults.cend();++cit){
     out<<o.nMatchedPoints[cit->first]<<"/"<<cit->second.size()<<", ";
   }
-  out <<", tot:"<<o.nMatchedTot()<<")";
+  out <<"tot:"<<o.nMatchedTot()<<")";
   
   return out;
 }
-
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 void GoldenPattern::add( GoldenPattern::PosBenCase aCase, uint32_t rawId, int posOrBen, unsigned int freq){
   PattCore[aCase][rawId][posOrBen] += freq; 
 }
-
-
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
 void GoldenPattern::add(const Pattern & p) {
 
   const Pattern::DataType & detdigi = p ;
@@ -104,7 +108,7 @@ void GoldenPattern::add(const Pattern & p) {
       }
       case MuonSubdetId::DT: {
         DTphDigiSpec digi(rawId, is->second);
-        if (digi.bxNum() != 0 || digi.bxCnt() != 0 || digi.ts2() != 0) break;	
+        if (digi.bxNum() != 0 || digi.bxCnt() != 0 || digi.ts2() != 0 ||  digi.code()<4) break;	
         PattCore[GoldenPattern::POSDT][rawId][digi.phi()]++;
 	PattCore[GoldenPattern::BENDT][rawId][digi.phiB()]++;
         break;
@@ -134,7 +138,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
     }
   }
   if(nTot<5) return result;
-
+  /////////////////////////////////////////////////////////////////////
 
   SystFreq::const_iterator cit;
   DetFreq::const_iterator idm;

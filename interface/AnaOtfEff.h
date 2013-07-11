@@ -5,6 +5,7 @@ class TrackObj;
 class L1Obj;
 class TObjArray;
 class EventObj;
+
 namespace edm {class ParameterSet;}
 
 class AnaOtfEff {
@@ -16,6 +17,7 @@ public:
   bool debug;
 private:
   double ptCut;
+
 };
 
 #endif

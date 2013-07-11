@@ -42,6 +42,7 @@ public:
 	                                    7*(theDet==637634877) +
 	                                    8*(theDet==637599914) +
 	                                    9*(theDet==637632682); }
+    int chargeValue() const { return theCharge;}
     uint32_t     theDet; 
     unsigned int thePtCode; 
     unsigned int thePhiCode;
@@ -63,7 +64,13 @@ public:
       nMatchedPoints[GoldenPattern::POSDT] = 0;
       nMatchedPoints[GoldenPattern::POSCSC] = 0;
       nMatchedPoints[GoldenPattern::BENDT] = 0;
-      nMatchedPoints[GoldenPattern::BENCSC] = 0;      
+      nMatchedPoints[GoldenPattern::BENCSC] = 0;  
+
+      myResults[GoldenPattern::POSRPC] =  std::vector< std::pair<uint32_t, float > >();   
+      myResults[GoldenPattern::POSDT] =  std::vector< std::pair<uint32_t, float > >();   
+      myResults[GoldenPattern::POSCSC] =  std::vector< std::pair<uint32_t, float > >();   
+      myResults[GoldenPattern::BENDT] =  std::vector< std::pair<uint32_t, float > >();   
+      myResults[GoldenPattern::BENCSC] =  std::vector< std::pair<uint32_t, float > >();   
     }
     bool operator<( const Result & o) const;
     operator bool() const;
@@ -97,9 +104,14 @@ public:
   //
   GoldenPattern() {}
   GoldenPattern(const GoldenPattern::Key & key) : theKey(key) {}
+
+  Key key() const {return theKey;}
+
   void add( const Pattern & p);
   void add( GoldenPattern::PosBenCase aCase, uint32_t rawId, int pos, unsigned int freq);
   Result compare( const Pattern & p) const;
+
+
 
 private:
 

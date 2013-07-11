@@ -28,6 +28,7 @@ private:
     obj.pt = t.ptValue();
     obj.eta = t.etaValue();
     obj.phi = t.phiValue();
+    //obj.charge = t.charge();
     obj.type = type;
     return obj;
   }

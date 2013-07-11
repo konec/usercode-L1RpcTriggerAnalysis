@@ -103,6 +103,7 @@ bool L1ObjMaker:: getRpcRegional(const edm::Event &ev, std::vector<L1Obj> & resu
     obj.eta = RPCConst::etaFromTowerNum(tower);
     obj.phi = 2*M_PI*(it.phi_packed())/144;
     obj.pt  = RPCConst::ptFromIpt(it.pt_packed());
+    obj.charge = it.chargeValue();
     obj.q   = it.quality();
     obj.bx  = it.bx();
     obj.type = (icand < candB->size()) ? L1Obj::RPCb_emu : L1Obj::RPCf_emu;

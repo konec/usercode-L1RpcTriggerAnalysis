@@ -48,7 +48,10 @@ DetHitDigiGrabber::DetHitDigiGrabber(const edm::ParameterSet& cfg)
 
 DetHitDigiGrabber::~DetHitDigiGrabber() {}
 
-HitSpecObj DetHitDigiGrabber::rpcDetHits(const edm::Event &ev, const edm::EventSetup &es, const TrackObj * simu) const
+HitSpecObj DetHitDigiGrabber::rpcDetHits(const edm::Event &ev, 
+					 const edm::EventSetup &es, 
+					 const TrackObj * simu,
+					 int station) const
 {
   HitSpecObj result;
   std::vector<uint32_t> simuHits;
@@ -69,7 +72,8 @@ HitSpecObj DetHitDigiGrabber::rpcDetHits(const edm::Event &ev, const edm::EventS
     uint32_t rpcRawId = hitItr->detUnitId();
     RPCDetId rpcDet(rpcRawId);
     RPCDetIdUtil  u(rpcDet);
-    if (    (u.isBarrel() && u.barrelLayer()==4) || ((!u.isBarrel()) && u.endcapLayer()==2) ) {
+    if((station==2 && ((u.isBarrel() && u.barrelLayer()==4) || (!u.isBarrel() && u.endcapLayer()==2))) ||
+       (station==1 && u.isBarrel() && u.barrelLayer()==1)){
 
       GlobalPoint hitPoint = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->entryPoint());
       GlobalVector glbMom = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->momentumAtEntry());

@@ -9,6 +9,74 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+uint32_t Pattern::rotateDetId(uint32_t rawId, int step){
+
+  ///Assume 60deg steps
+  while(step<0){step+=6;}
+
+  uint32_t rawIdRotated = rawId; 
+
+  DetId detId(rawId);
+  switch (detId.subdetId()){    
+  case MuonSubdetId::RPC: {
+    RPCDetId rpcDet(rawId);
+    ///Barrel has 30deg sectors
+    if(rpcDet.region()==0) step*=2;
+    RPCDetId rpcDetRotated(rpcDet.region(),
+			   rpcDet.ring(),
+			   rpcDet.station(), 
+			   (rpcDet.sector()+step-1)%12+1,
+			   rpcDet.layer(),
+			   rpcDet.subsector(),
+			   rpcDet.roll());
+    return rpcDetRotated.rawId();      
+  }
+  case MuonSubdetId::DT: {
+    ///Barrel has 30deg sectors
+    step*=2;
+    DTChamberId dtDet(rawId);
+    DTChamberId dtDetRotated(dtDet.wheel(),
+			     dtDet.station(),
+			     (dtDet.sector()+step)%12);
+    return dtDetRotated.rawId();      
+    break;
+  }
+  case MuonSubdetId::CSC: {
+    CSCDetId cscDet(rawId);
+    //Most CSC chambers are 10deg wide
+    int cscFactor = 6; 
+    int maxChamber = 36;
+    ///Some are 20deg wide
+    if(cscDet.station()>1 && cscDet.ring()==1){
+	cscFactor = 3;
+	maxChamber = 18;
+      }
+    int cscStep = step*cscFactor;
+    CSCDetId cscDetRotated(cscDet.endcap(),
+			   cscDet.station(),
+			   cscDet.ring(),
+			   (cscDet.chamber()+cscStep-1)%maxChamber+1,
+			   cscDet.layer());
+    return cscDetRotated.rawId();      
+  }
+  }  
+  return rawIdRotated;
+}
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+Pattern Pattern::getRotated(int step) const{
+
+  Pattern rotated;
+  
+  for (auto it = theData.cbegin(); it != theData.cend(); ++it){
+    rotated.add(std::pair<uint32_t,  unsigned int >(rotateDetId(it->first,step),it->second));
+  }
+  return rotated;
+}
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
 bool Pattern::operator==(const Pattern& o) const{
   unsigned int thissize = theData.size();
   if (thissize != o.size()) return false;
@@ -34,17 +102,8 @@ Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData){
   return Pattern();
 }
 
-void Pattern::add (  std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData)
+void Pattern::add (std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData)
 {
-  /*
-  std::vector<Pattern> copied;
-  for (std::vector<Pattern>::iterator ip = vpat.begin(); ip != vpat.end(); ++ip) {
-    Pattern modified =  ip->addOrCopy(aData);
-    if (modified && (find(copied.begin(), copied.end(), modified) == copied.end()) ) copied.push_back(modified);
-  }
-  if (copied.size() != 0) vpat.insert(vpat.end(), copied.begin(), copied.end()); 
-  */
-
   //Use indexing to avoid problem with iterator invalidation afer adding new elements to vector
   uint32_t vSize = vpat.size(); 
   for(uint32_t index = 0;index<vSize;++index){
@@ -60,9 +119,9 @@ std::ostream & operator << (std::ostream &out, const Pattern &o)
   for (auto it = o.theData.cbegin(); it != o.theData.cend(); ++it){
     DetId detId( it->first);
     switch (detId.subdetId()) {
-      case MuonSubdetId::RPC: { out << std::endl <<" RPC: "<<RPCDigiSpec(it->first, it->second);  break; }
-      case MuonSubdetId::DT:  { out << std::endl <<" DT:  "<<DTphDigiSpec(it->first, it->second); break; }
-      case MuonSubdetId::CSC: { out << std::endl <<" CSC: "<<CSCDigiSpec(it->first, it->second);  break; }
+    case MuonSubdetId::RPC: { out << std::endl <<RPCDetId(it->first)<<" "<<RPCDigiSpec(it->first, it->second);  break; }
+    case MuonSubdetId::DT:  { out << std::endl <<DTChamberId(it->first)<<" "<<DTphDigiSpec(it->first, it->second); break; }
+    case MuonSubdetId::CSC: { out << std::endl <<CSCDetId(it->first)<<" "<<CSCDigiSpec(it->first, it->second);  break; }
     };
   }
   return out;

@@ -8,10 +8,10 @@ struct L1Obj : public TObject {
   enum TYPE { NONE, RPCb, RPCf, DT, CSC, GMT, RPCb_emu, RPCf_emu, GMT_emu, OTF };
 
   float pt, eta, phi;
-  int   bx, q;
+  int   bx, q, charge;
   TYPE  type;
 
-  L1Obj() : pt(0.),eta(0.),phi(0.),bx(0),q(-1), type(NONE) {}
+ L1Obj() : pt(0.),eta(0.),phi(0.),bx(0),q(-1), charge(99), type(NONE) {}
   bool isValid() const { return q >= 0;}
 
   friend ostream & operator<< (ostream &out, const L1Obj &o);

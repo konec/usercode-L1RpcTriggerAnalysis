@@ -1,7 +1,7 @@
 #include "TStyle.h"
 #include <iostream>
 
-void utilsL1RpcStyle() 
+TStyle* utilsL1RpcStyle() 
 { 
   TStyle *l1RpcStyle = new TStyle("L1RpcStyle","L1Rpc Style for common plots");
 
@@ -73,4 +73,6 @@ void utilsL1RpcStyle()
 //  l1RpcStyle->SetTitleX(0.12); 
 //  l1RpcStyle->SetTitleW(0.78); 
   std::cout <<"..done"<<std::endl;
+
+  return l1RpcStyle;
 }

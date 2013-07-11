@@ -162,44 +162,22 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   //
   Int_t nentries = (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
+  //nentries = 10938;
   //
   // main loop
   //
   unsigned int lastRun = 0;
-  for (int ev=0; ev<nentries; ev++) {
+  for (int ev=0; ev<nentries; ev+=10) {
     chain.GetEntry(ev);
     if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
-//    if (ev < 44055) continue;
-    if ( (lastRun != (*event).run) || (ev%10000==0) ) { 
-//    if (true) {
-//    if (! ((*event).run==204601 && (*event).id ==109463402)) { continue;
+    if ( (lastRun != (*event).run) || (ev%1000000==0) ) { 
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
                 <<" done:"  << std::setw(6)<< std::setiosflags(std::ios::fixed) << std::setprecision(2) << ev*100./nentries<<"%";
       std::cout<<std::endl; 
     }
-
-/*   
-   if (     event->id == 597978012 
-        ||  event->id == 14791798  
-        ||  event->id == 436261807 
-        ||  event->id == 873776280  
-        ||  event->id == 960307389 
-        ||  event->id == 150097556 
-        ||  event->id == 42062946 
-        ||  event->id == 1064121551 
-        ||  event->id == 1499489591 
-        ||  event->id == 60161631
-        ||  event->id == 624624695
-        ||  event->id == 727298833
-        ||  event->id == 835600542
-        ||  event->id == 216373776
-        ||  event->id == 1107585611
-        ||  event->id == 197907027
-      ) theAnaMenu.debug = true; else theAnaMenu.debug = false;
-*/
 
    // EVENT NUMBER, BX structure etc.
    EventObjBXExtra eventBx(*event);
@@ -235,7 +213,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf);  
    L1ObjColl myL1ObjColl = *l1ObjColl;
    myL1ObjColl.push_back(l1otf, false, 0.); 
-   if (theAnaEff)      theAnaEff->run(refTrack, &myL1ObjColl);
+   if (theAnaEff)      theAnaEff->run(refTrack, &myL1ObjColl, hitSpec);
   }
 }
 

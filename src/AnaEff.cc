@@ -5,7 +5,12 @@
 #include "TH1D.h"
 #include "TGraphErrors.h"
 #include "TF1.h"
+#include "TTree.h"
+#include "TFile.h"
+
+#include "UserCode/L1RpcTriggerAnalysis/interface/EventData.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/HitSpecObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/Utilities.h"
@@ -22,8 +27,22 @@ const double AnaEff::ptCuts[ AnaEff::nPtCuts] ={0., 0.1,
 std::string reg[5]={"_Bar","_Int","_End","_Qeq0","_Qgt0"};
 
 
+AnaEff::~AnaEff(){
+
+  file->Write();
+  delete file;
+
+}
+
 void AnaEff::init(TObjArray& histos)
 {
+
+
+  file = new TFile("EfficiencyTree.root","RECREATE");
+  tree = new TTree("efficiencyTree","efficiencyTree");
+  myEvent = new EventData();
+  tree->Branch("Events", myEvent);
+
   hEfficMuPt_D = new TH1D("hEfficMuPt_D","hEfficMuPt_D", L1PtScale::nPtBins, L1PtScale::ptBins); histos.Add(hEfficMuPt_D);
   hEfficRpcNoCut_N = new TH1D("hEfficRpcNoCut_N","hEfficRpcNoCut_N", L1PtScale::nPtBins, L1PtScale::ptBins);  histos.Add(hEfficRpcNoCut_N);
   hEfficRpcPtCut_N = new TH1D("hEfficRpcPtCut_N","hEfficRpcPtCut_N", L1PtScale::nPtBins, L1PtScale::ptBins);  histos.Add(hEfficRpcPtCut_N);
@@ -63,10 +82,22 @@ double AnaEff::maxPt(const std::vector<L1Obj> & l1Objs) const
   return result; 
 }
 
-void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll)
+void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecObj * hitSpec)
 {
   double etaMu = fabs(muon->eta());
-  double ptMu  = muon->pt();   
+  double ptMu  = muon->pt();  
+
+  //////////Fill plotting tree
+  myEvent->clear();
+  myEvent->weight = 1.0;
+  myEvent->pt = muon->pt();
+  myEvent->eta = muon->eta();
+  myEvent->phi = muon->phi(); 
+  myEvent->phiHit = hitSpec->position().phi();
+  myEvent->etaHit = hitSpec->position().eta();
+  myEvent->charge = muon->charge(); 
+  /////////////////////////////
+ 
 //  if (!muon->isGlobal()) return;
 
 //  if (ptMu < 6.) return;
@@ -77,6 +108,10 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll)
   std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByBx().selectByDeltaR( matchingdR).selectByEta();
   std::vector<L1Obj> l1Gmts = l1Coll->selectByType(L1Obj::GMT).selectByBx().selectByQuality(4,7).selectByDeltaR( matchingdR).selectByEta();
   std::vector<L1Obj> l1Otfs = l1Coll->selectByType(L1Obj::OTF);
+
+  myEvent->l1ObjectsOtf = l1Otfs;
+  myEvent->l1ObjectsGmt = l1Gmts;
+  tree->Fill();
 
 
   hEfficMuPt_D->Fill(ptMu); 

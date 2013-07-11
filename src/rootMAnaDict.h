@@ -32,6 +32,7 @@ extern void G__set_cpp_environmentrootMAnaDict();
 #include "TObject.h"
 #include "TMemberInspector.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/EventData.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
@@ -61,13 +62,14 @@ extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEROOTcLcLTSc
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlETVirtualArraymUcOallocatorlETVirtualArraymUgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlETVirtualArraymUcOallocatorlETVirtualArraymUgRsPgRcLcLiteratorgR;
 extern G__linked_taginfo G__rootMAnaDictLN_EventObj;
-extern G__linked_taginfo G__rootMAnaDictLN_TrackObj;
-extern G__linked_taginfo G__rootMAnaDictLN_MuonObj;
 extern G__linked_taginfo G__rootMAnaDictLN_L1Obj;
 extern G__linked_taginfo G__rootMAnaDictLN_L1ObjcLcLTYPE;
-extern G__linked_taginfo G__rootMAnaDictLN_L1ObjColl;
+extern G__linked_taginfo G__rootMAnaDictLN_EventData;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlEL1ObjcOallocatorlEL1ObjgRsPgR;
 extern G__linked_taginfo G__rootMAnaDictLN_reverse_iteratorlEvectorlEL1ObjcOallocatorlEL1ObjgRsPgRcLcLiteratorgR;
+extern G__linked_taginfo G__rootMAnaDictLN_TrackObj;
+extern G__linked_taginfo G__rootMAnaDictLN_MuonObj;
+extern G__linked_taginfo G__rootMAnaDictLN_L1ObjColl;
 extern G__linked_taginfo G__rootMAnaDictLN_SynchroCountsObj;
 extern G__linked_taginfo G__rootMAnaDictLN_SynchroCountsObjVect;
 extern G__linked_taginfo G__rootMAnaDictLN_vectorlESynchroCountsObjcOallocatorlESynchroCountsObjgRsPgR;

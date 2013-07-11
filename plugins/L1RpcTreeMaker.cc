@@ -41,7 +41,7 @@ L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
   : theConfig(cfg), theTree(0), event(0), muon(0), simu(0), 
     bitsL1(0), bitsHLT(0),
     counts(0), 
-    l1ObjColl(0),hitSpec(0), 
+    l1ObjColl(0),hitSpec(0), hitSpecSt1(0), 
     theCounter(0),
     theBestMuonFinder(cfg.getParameter<edm::ParameterSet>("bestMuonFinder")),
     theDetHitCollector(cfg.getParameter<edm::ParameterSet>("detHitCollector")),
@@ -79,6 +79,7 @@ void L1RpcTreeMaker::beginJob()
 
   theTree->Branch("l1ObjColl","L1ObjColl",&l1ObjColl,32000,99);
   theTree->Branch("hitSpec","HitSpecObj",&hitSpec,32000,99);
+  theTree->Branch("hitSpecSt1","HitSpecObj",&hitSpecSt1,32000,99);
   theTree->Branch("digSpec",&digSpec);
 
   theHelper.SetOwner();
@@ -143,6 +144,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
 
   l1ObjColl = new L1ObjColl;
   hitSpec = new HitSpecObj(); 
+  hitSpecSt1 = new HitSpecObj(); 
   digSpec = std::vector< std::pair<uint32_t, uint32_t> >();
 
   //
@@ -237,7 +239,8 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   // det HIT+DIGI grabber
   //
-  *hitSpec = theDetHitDigiGrabber.rpcDetHits(ev,es,simu);
+  *hitSpec = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,2);
+  *hitSpecSt1 = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,1);
   digSpec  = theDetHitDigiGrabber.digiCollector(ev,es);
   
 
@@ -253,5 +256,6 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   delete bitsHLT;  bitsHLT= 0;
   delete l1ObjColl; l1ObjColl = 0;
   delete hitSpec; hitSpec = 0;
+  delete hitSpecSt1; hitSpecSt1 = 0;
 }
 				
