@@ -162,12 +162,11 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
   //
   Int_t nentries = (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
-  //nentries = 10938;
   //
   // main loop
   //
   unsigned int lastRun = 0;
-  for (int ev=0; ev<nentries; ev+=10) {
+  for (int ev=0; ev<nentries; ev+=1) {
     chain.GetEntry(ev);
     if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
