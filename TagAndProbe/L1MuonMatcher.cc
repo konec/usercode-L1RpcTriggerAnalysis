@@ -1,5 +1,5 @@
 //
-// $Id: L1MuonMatcher.cc,v 1.4 2011/03/31 09:59:33 gpetrucc Exp $
+// $Id: L1MuonMatcher.cc,v 1.1 2012/03/07 12:56:48 rybinska Exp $
 //
 
 /**
@@ -7,7 +7,7 @@
   \brief    Matcher of reconstructed objects to L1 Muons 
             
   \author   Giovanni Petrucciani
-  \version  $Id: L1MuonMatcher.cc,v 1.4 2011/03/31 09:59:33 gpetrucc Exp $
+  \version  $Id: L1MuonMatcher.cc,v 1.1 2012/03/07 12:56:48 rybinska Exp $
 */
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"

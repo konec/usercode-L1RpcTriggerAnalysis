@@ -75,6 +75,9 @@ HitSpecObj DetHitDigiGrabber::rpcDetHits(const edm::Event &ev,
     if((station==2 && ((u.isBarrel() && u.barrelLayer()==4) || (!u.isBarrel() && u.endcapLayer()==2))) ||
        (station==1 && u.isBarrel() && u.barrelLayer()==1)){
 
+      ///Do not use endcap roll 3 in trigger tower 7
+      if(!u.isBarrel() && u.endcapLayer()==2 && rpcDet.roll()==3) continue;
+
       GlobalPoint hitPoint = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->entryPoint());
       GlobalVector glbMom = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->momentumAtEntry());
 

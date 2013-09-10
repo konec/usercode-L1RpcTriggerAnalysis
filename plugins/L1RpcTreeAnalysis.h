@@ -32,7 +32,7 @@ public:
   virtual ~L1RpcTreeAnalysis(){}
   virtual void beginJob();
   virtual void beginRun(const edm::Run&,  const edm::EventSetup& es);
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void analyze(const edm::Event&, const edm::EventSetup& es);
   virtual void endJob();
 
 private:

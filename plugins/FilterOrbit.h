@@ -15,7 +15,7 @@
 //
 // Original Author:  Tomasz Maciej Frueboes
 //         Created:  Sat Jan 24 15:11:35 CET 2009
-// $Id: FilterOrbit.h,v 1.1 2010/01/14 15:29:01 konec Exp $
+// $Id: FilterOrbit.h,v 1.1 2010/05/18 10:52:22 konec Exp $
 //
 //
 

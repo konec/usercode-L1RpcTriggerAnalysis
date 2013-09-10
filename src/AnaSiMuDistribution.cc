@@ -10,6 +10,9 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/HitSpecObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
 
+#include "DataFormats/MuonDetId/interface/RPCDetId.h"
+#include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
+
 #include <cmath>
 #include <algorithm>
 
@@ -26,7 +29,9 @@ AnaSiMuDistribution::AnaSiMuDistribution(const edm::ParameterSet& cfg)
     phiMinRef (cfg.getParameter<double>("phiMinRef") ),
     phiMaxRef (cfg.getParameter<double>("phiMaxRef") ),
     checkMatchedDets (cfg.exists("matchedDets")),
-    matchedDets(checkMatchedDets ? cfg.getParameter<  std::vector<uint32_t> >("matchedDets") : std::vector<uint32_t>())
+    checkMatchedSectors (cfg.exists("matchedSectors")),
+    matchedDets(checkMatchedDets ? cfg.getParameter<  std::vector<uint32_t> >("matchedDets") : std::vector<uint32_t>()),
+    matchedSectors(checkMatchedSectors ? cfg.getParameter<  std::vector<uint32_t> >("matchedSectors") : std::vector<uint32_t>())
 { }
 
 void AnaSiMuDistribution::init(TObjArray& histos)
@@ -39,12 +44,35 @@ void AnaSiMuDistribution::init(TObjArray& histos)
   hSiMuPhi_INP = new TH1D("hSiMuPhi_INP","All global SiMus Phi;Glb.SiMu #phi [rad];SiMus / bin",90,-M_PI,M_PI);  histos.Add(hSiMuPhi_INP);
 }
 
-bool AnaSiMuDistribution::filter(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec)
-{
+bool AnaSiMuDistribution::filter(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec){
   if (!hitSpec) return false;
   if (!simu) return false;
   uint32_t rawId = hitSpec->rawId();
 
+  int rpcSector = 0;
+  int rpcSubsector = 0;
+  int rpcRegion = 0;
+  if(checkMatchedSectors){
+    if(rawId<1) return false;
+    
+    DetId detId(rawId);
+    RPCDetId aId(rawId);
+    
+    if(aId.region()==0){
+      matchedSectors.clear(); 
+      matchedSectors.push_back(1);
+      matchedSectors.push_back(12);
+    }
+    else{
+      matchedSectors.clear(); 
+      matchedSectors.push_back(1);
+      matchedSectors.push_back(6);
+    } 
+    rpcSector = aId.sector();
+    rpcSubsector = aId.subsector();
+    rpcRegion = aId.region();
+  }
+  
   hSiMuPt_INP->Fill(simu->pt());
   hSiMuEta_INP->Fill(simu->eta());
   hSiMuPhi_INP->Fill(simu->phi());
@@ -57,6 +85,11 @@ bool AnaSiMuDistribution::filter(const EventObj* ev, const TrackObj * simu, cons
   if ( hitSpec->position().phi() > phiMaxRef) return false;
 
   if (checkMatchedDets && matchedDets.end()==find(matchedDets.begin(),matchedDets.end(), rawId) ) return false;
+  if (checkMatchedSectors && matchedSectors.end()==find(matchedSectors.begin(),matchedSectors.end(), rpcSector) ) return false;
+  if (checkMatchedSectors &&  rpcRegion!=0 && 
+	((rpcSector==6 && rpcSubsector<3) ||
+	(rpcSector==1 && rpcSubsector>2))
+	)  return false;
 
   hSiMuPt_DIS->Fill(simu->pt());
   hSiMuEta_DIS->Fill(simu->eta());

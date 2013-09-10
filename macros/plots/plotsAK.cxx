@@ -23,6 +23,7 @@ TH1D *getTurnOncurve(TTree *tree, float ptCut,
 		     string var="pt",     
 		     string sysType="Otf",
 		     string sel = "1"){
+
   ///Add events with at least one recontructed L1Mu
   tree->Draw(TString::Format("(l1Objects%s.pt>%3.2f):%s>>h2D",
 			     sysType.c_str(),ptCut,var.c_str()).Data(),
@@ -43,7 +44,9 @@ TH1D *getTurnOncurve(TTree *tree, float ptCut,
 void plotEffPanel(TTree *tree,
 		  string sysType="Otf"){
 
-  TCanvas* c = new TCanvas("EffVsPt","EffVsPt",460,500);
+  TCanvas* c = new TCanvas(TString::Format("EffVsPt_%s",sysType.c_str()),
+			   TString::Format("EffVsPt_%s",sysType.c_str()),			    
+			   460,500);
   
   TLegend l(0.6513158,0.1673729,0.8903509,0.470339,NULL,"brNDC");
   l.SetTextSize(0.05);
@@ -77,7 +80,8 @@ void plotEffPanel(TTree *tree,
 }
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
-void plotEffVsPhi(TTree *tree){
+void plotEffVsPhi(TTree *tree,
+		  string sysType="Otf"){
 
   TCanvas* c = new TCanvas("EffVsPhi","EffVsPhi",460,500);
   
@@ -91,7 +95,7 @@ void plotEffVsPhi(TTree *tree){
   TH2F *h2D = new TH2F("h2D","",2*32,-3.2,3.2,2,-0.5,1.5);
   for (int icut=0; icut <=5;++icut){
     string selection(TString::Format("pt>%d",ptCuts[icut]).Data());
-    TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"phi","Otf",selection);
+    TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"phi",sysType,selection);
     hEff->SetStats(kFALSE);
     hEff->SetMinimum(0.0001); 
     hEff->SetMaximum(1.04);
@@ -106,17 +110,19 @@ void plotEffVsPhi(TTree *tree){
     l.AddEntry(hEff,nameCut.c_str());   
   }    
   l.DrawClone();
-  c->Print("fig_eps/EffVsPhi.eps");				       
-  c->Print("fig_png/EffVsPhi.png");				       
+  c->Print(TString::Format("fig_eps/EffVsPhi_%s.eps",sysType.c_str()).Data());
+  c->Print(TString::Format("fig_png/EffVsPhi_%s.png",sysType.c_str()).Data());				       
 }
 
 
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
-void plotEffVsHitPhi(TTree *tree){
+void plotEffVsHitPhi(TTree *tree, string sysType="Otf"){
 
-  TCanvas* c = new TCanvas("EffVsHitPhi","EffVsHitPhi",460,500);
+  TCanvas* c = new TCanvas(TString::Format("EffVsHitPhi_%s",sysType.c_str()),
+			   TString::Format("EffVsHitPhi_%s",sysType.c_str()),			    
+			   460,500);
   
   TLegend l(0.6513158,0.1673729,0.8903509,0.470339,NULL,"brNDC");
   l.SetTextSize(0.05);
@@ -125,10 +131,18 @@ void plotEffVsHitPhi(TTree *tree){
   l.SetFillColor(10);
   c->SetGrid(0,1);
 
-  TH2F *h2D = new TH2F("h2D","",4*24,-1.3,1.1,2,-0.5,1.5);
-  for (int icut=0; icut <=5;++icut){
+  TH2F *h2D = new TH2F("h2D","",20*13,-0.9,0.4,2,-0.5,1.5);
+  //TH2F *h2D = new TH2F("h2D","",10*21,-1.3,0.8,2,-0.5,1.5);
+  //TH2F *h2D = new TH2F("h2D","",2*40,-0.06,0.04,2,-0.5,1.5);
+  
+  //TH2F *h2D = new TH2F("h2D","",2*1152+1,-0.5,2*1152+0.5,2,-0.5,1.5);
+  //TH2F *h2D = new TH2F("h2D","",30,-0.5,300.5,2,-0.5,1.5);
+  //TH2F *h2D = new TH2F("h2D","",100,0,2*TMath::Pi(),2,-0.5,1.5);
+
+  for (int icut=0; icut <=1;++icut){
     string selection(TString::Format("pt>%d",ptCuts[icut]).Data());
-    TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"phiHit","Otf",selection);
+    //TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"TMath::Nint(phiHit*2*1152./(2*TMath::Pi()))",sysType,selection);
+    TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"phiHit",sysType,selection);
     hEff->SetStats(kFALSE);
     hEff->SetMinimum(-0.0001); 
     hEff->SetMaximum(1.04);
@@ -143,8 +157,16 @@ void plotEffVsHitPhi(TTree *tree){
     l.AddEntry(hEff,nameCut.c_str());   
   }    
   l.DrawClone();
-  c->Print("fig_eps/EffVsHitPhi.eps");				       
-  c->Print("fig_png/EffVsHitPhi.png");				       
+
+  ///Phi range used for generating patterns.
+  TLine *aLine = new TLine(0,0,0,0);
+  aLine->SetLineWidth(2);
+  aLine->SetLineColor(2);
+  //aLine->DrawLine(-0.8+2*TMath::Pi(),0,-0.8+2*TMath::Pi(),1.0);
+  //aLine->DrawLine(0.25,0,0.25,1.0);
+
+  c->Print(TString::Format("fig_eps/EffVsHitPhi_%s.eps",sysType.c_str()).Data());
+  c->Print(TString::Format("fig_png/EffVsHitPhi_%s.png",sysType.c_str()).Data());
 }
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -160,7 +182,7 @@ void plotEffVsEta(TTree *tree){
   c->SetGrid(0,1);
 
   TH2F *h2D = new TH2F("h2D","",2*26,0.5,1.8,2,-0.5,1.5);
-  for (int icut=0; icut <=5;++icut){
+  for (int icut=0; icut <=1;++icut){
     string selection(TString::Format("pt>%d",ptCuts[icut]).Data());
     TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"eta","Otf",selection);
     hEff->SetStats(kFALSE);
@@ -254,19 +276,21 @@ void plotsAK(){
   utilsL1RpcStyle()->cd();
  
   string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/job_4_ana/test/";
+  path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/job_4_ana/SingleMu_22_m/";
   //path = "/home/akalinow/scratch0/OverlapTrackFinder/job_4_ana/";
   TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
 
   TTree *tree = (TTree*)file->Get("efficiencyTree");
-  
+
   ///Plot panel with a few turn on curves.
-  plotEffPanel(tree,"Otf");
+  //plotEffPanel(tree,"Otf");
   //plotEffPanel(tree,"Gmt");
   ///Plot efficiency as a function of generated phi
-  plotEffVsPhi(tree);
+  //plotEffVsPhi(tree);
   ///Plot efficiency as a function of phi of hit in reference station
-  plotEffVsHitPhi(tree);
+  plotEffVsHitPhi(tree,"Otf");
+  //plotEffVsHitPhi(tree,"Gmt");
   ///Plot efficiency as a function of generated eta
   plotEffVsEta(tree);
   ///Plot Otf vs Gmt efficiency for given pt cut

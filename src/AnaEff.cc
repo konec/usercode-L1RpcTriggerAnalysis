@@ -14,7 +14,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/Utilities.h"
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <sstream>
 
@@ -94,6 +94,7 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecOb
   myEvent->eta = muon->eta();
   myEvent->phi = muon->phi(); 
   myEvent->phiHit = hitSpec->position().phi();
+  //while  (myEvent->phiHit < 0) {  myEvent->phiHit+=2*M_PI; }
   myEvent->etaHit = hitSpec->position().eta();
   myEvent->charge = muon->charge(); 
   /////////////////////////////

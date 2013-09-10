@@ -11,21 +11,30 @@
 class  Pattern {
 public:
 
-  typedef std::map<uint32_t,  unsigned int >  DataType;
+  typedef std::multimap<uint32_t,  unsigned int >  DataType;
 
-  Pattern() {}
-
+ Pattern():multipleHits(false) {}
 
   static uint32_t rotateDetId(uint32_t rawId, int step);
   Pattern getRotated(int step) const;
 
-
   //is not empty
   operator bool() const { return theData.size() > 0; }
 
-  bool add(std::pair<uint32_t,  unsigned int > aData) { return !addOrCopy(aData); }
+  bool add(std::pair<uint32_t,  unsigned int > aData) {
+    theData.insert(aData);
+    int aCounts = theData.count(aData.first);
+    if(aCounts>1) multipleHits = true;
+    return (aCounts==1);
+  }
 
-  static void add( std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData);
+  ///Function making a list of unique detIds
+  void makeHitDetsList();
+
+  ///Returns true if a Patter has multiple hits in ady detunit
+  bool hasMultipleHits() const {return multipleHits;}
+
+  const std::vector<DataType::value_type> & uniqueDigis() const {return detsHit;}
 
   unsigned int size() const { return theData.size(); }
   operator const DataType & () const {  return theData; }
@@ -33,15 +42,11 @@ public:
   bool operator==(const Pattern& o) const;
 
 private:
-
-  // try to add data from raw id to this pattern. if the data from detUnit 
-  // is already assigned to this patterns return a copy of this pattern with
-  // modified (from aData) data attached to detUnit. Otherwise add data from detUnit
-  // to this pattern and return an empty pattern;  
-  Pattern  addOrCopy ( std::pair<uint32_t,  unsigned int > aData); 
   
 private:
+  bool multipleHits;
   DataType  theData;
+  std::vector<DataType::value_type> detsHit;
   friend std::ostream & operator << (std::ostream &out, const Pattern &o);
 };
 #endif

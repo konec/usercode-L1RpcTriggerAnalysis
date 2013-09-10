@@ -8,7 +8,7 @@
 //
 // Original Author:  Werner Sun
 //         Created:  Tue Jul 25 17:51:21 EDT 2006
-// $Id: L1MuonParticle.cc,v 1.9 2008/04/03 03:37:21 wsun Exp $
+// $Id: L1MuonParticle.cc,v 1.1 2011/12/14 17:29:28 rybinska Exp $
 //
 
 // system include files

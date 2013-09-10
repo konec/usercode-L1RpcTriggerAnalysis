@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "UserCode/L1RpcTriggerAnalysis/interface/Pattern.h"
 
 #include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
@@ -9,12 +11,26 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
+
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+void  Pattern::makeHitDetsList(){
+
+  unique_copy(begin(theData),
+              end(theData),
+              back_inserter(detsHit),
+              [](const DataType::value_type &entry1,
+                 const DataType::value_type &entry2) {
+                   return (entry1.first == entry2.first);
+	      } );
+}
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 uint32_t Pattern::rotateDetId(uint32_t rawId, int step){
 
   ///Assume 60deg steps
   while(step<0){step+=6;}
+  int maxSector = 6;
 
   uint32_t rawIdRotated = rawId; 
 
@@ -23,11 +39,14 @@ uint32_t Pattern::rotateDetId(uint32_t rawId, int step){
   case MuonSubdetId::RPC: {
     RPCDetId rpcDet(rawId);
     ///Barrel has 30deg sectors
-    if(rpcDet.region()==0) step*=2;
+      if(rpcDet.region()==0){
+	step*=2;
+	maxSector = 12;
+      }
     RPCDetId rpcDetRotated(rpcDet.region(),
 			   rpcDet.ring(),
 			   rpcDet.station(), 
-			   (rpcDet.sector()+step-1)%12+1,
+			   (rpcDet.sector()+step-1)%maxSector+1,
 			   rpcDet.layer(),
 			   rpcDet.subsector(),
 			   rpcDet.roll());
@@ -73,6 +92,7 @@ Pattern Pattern::getRotated(int step) const{
   for (auto it = theData.cbegin(); it != theData.cend(); ++it){
     rotated.add(std::pair<uint32_t,  unsigned int >(rotateDetId(it->first,step),it->second));
   }
+  rotated.makeHitDetsList();
   return rotated;
 }
 /////////////////////////////////////////////////
@@ -89,30 +109,8 @@ bool Pattern::operator==(const Pattern& o) const{
 
   return true;
 }
-
-Pattern Pattern::addOrCopy( std::pair<uint32_t,  unsigned int > aData){
-
-  auto it = theData.find(aData.first);    
-  if(it!= theData.cend()){
-    Pattern modified =  *this;
-    modified.theData[aData.first] = aData.second;
-    return modified;
-  }
-  theData[aData.first] = aData.second;
-  return Pattern();
-}
-
-void Pattern::add (std::vector<Pattern> & vpat, std::pair<uint32_t,  unsigned int > aData)
-{
-  //Use indexing to avoid problem with iterator invalidation afer adding new elements to vector
-  uint32_t vSize = vpat.size(); 
-  for(uint32_t index = 0;index<vSize;++index){
-    Pattern modified =  vpat[index].addOrCopy(aData);
-    if (modified && (find(vpat.begin(), vpat.end(), modified) == vpat.end()) ) vpat.push_back(modified);
-  }
-}
-
-
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &out, const Pattern &o)
 {
   out <<" Pattern:  size: "<<o.size();

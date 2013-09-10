@@ -26,10 +26,11 @@ void GoldenPattern::Result::runNoCheck() const {
   theValue*=(myResults[GoldenPattern::POSRPC].size()==nMatchedPoints[GoldenPattern::POSRPC]);
   theValue*=(myResults[GoldenPattern::POSDT].size()==nMatchedPoints[GoldenPattern::POSDT]);
   theValue*=(myResults[GoldenPattern::POSCSC].size()==nMatchedPoints[GoldenPattern::POSCSC]);
-  theValue = ( nTot > 4) ? pow(fract, 1./((float) nTot)) : 0.;
+  theValue = ( nTot > 2) ? pow(fract, 1./((float) nTot)) : 0.;
   //AK theValue = ( nTot > 4) ? -log(fract) : 9999.0;
 }
-
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereInDist) const {
   float normValue = 2.*(0.5-fabs(whereInDist-0.5));   
   //normValue = 0.95*whereInDist; //AK
@@ -39,7 +40,8 @@ float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereIn
   else normValue = 0.05;
   return normValue; 
 }
-
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
   if ( *this && o) {
     if (nMatchedTot() < o.nMatchedTot()) return true;
@@ -53,7 +55,8 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 //  return (value() < o.value() ); 
 //  return false;
 }
-
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
   return (value() > 0.1); // && hasStation1 && hasStation2);
 }
@@ -62,15 +65,16 @@ float GoldenPattern::Result::value() const {
   run(); 
   return theValue; 
 }
-
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 unsigned int GoldenPattern::Result::nMatchedTot() const {
   run();
   unsigned int nTot = 0;
   for(auto it=nMatchedPoints.cbegin();it!=nMatchedPoints.cend();++it) nTot+=it->second;    
   return nTot;   
 }
-
-
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &out, const GoldenPattern::Result& o)
 {
   o.run();
@@ -123,11 +127,13 @@ void GoldenPattern::add(const Pattern & p) {
     };
   } 
 }
-
-GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
-{
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+GoldenPattern::Result GoldenPattern::compare(const Pattern &p){
   Result result;
   const Pattern::DataType & detdigi = p;
+  const std::vector<Pattern::DataType::value_type> detsHit=p.uniqueDigis();
+
   uint32_t  nTot = 0;
   ///Check spatial compatibility of GP with Pattern.
   ///Require at least 5 measurements in common detUnits
@@ -137,79 +143,96 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p) const
       nTot+=mType->second.count(rawId);
     }
   }
-  if(nTot<5) return result;
+  //if(nTot<5) return result;
   /////////////////////////////////////////////////////////////////////
 
   SystFreq::const_iterator cit;
   DetFreq::const_iterator idm;
   PosBenCase mType;
-  for (auto is = detdigi.cbegin(); is != detdigi.cend(); ++is) {
-    uint32_t rawId = is->first;
+
+  ///Loop over unique detIds
+  for (auto aEntry : detsHit){
+    uint32_t rawId = aEntry.first;
     DetId detId(rawId);
     if (detId.det() != DetId::Muon){
       std::cout << "GoldenPattern::compare PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
       return result;
     }
-    if (detId.subdetId() == MuonSubdetId::RPC) {
-      RPCDigiSpec digi(rawId, is->second);
-      mType = GoldenPattern::POSRPC;
-      cit = PattCore.find(mType);
-      if(cit==PattCore.cend()) 	return result; //AK: Ugly, FIX.
-      idm = cit->second.find(rawId);
-      if (idm != cit->second.cend() ) {
-        float f = whereInDistribution(digi.halfStrip(), idm->second);
-        result.myResults[mType].push_back(std::make_pair(rawId, f)); 
-        RPCDetId rpc(rawId);
-        if(rpc.station()==1) result.hasStation1 = true;
-        if(rpc.station()==2) result.hasStation2 = true;
+    
+    auto aRange = detdigi.equal_range(rawId);
+    auto beginIt = aRange.first;
+    auto endIt =   aRange.second;
+    ///Maximum measure over hits in the same detId
+    float fMax = 0.0;
+    ///Loop over hits in given detId
+    for (auto is = beginIt; is != endIt; ++is) {
+      if (detId.subdetId() == MuonSubdetId::RPC) {
+	RPCDigiSpec digi(rawId, is->second);
+	mType = GoldenPattern::POSRPC;
+	cit = PattCore.find(mType);
+	if(cit==PattCore.cend()) continue; //AK: Ugly, FIX.
+	idm = cit->second.find(rawId);
+	if (idm != cit->second.cend() ) {
+	  //float f = whereInDistribution(digi.halfStrip(), idm->second);
+	  float f = whereInDistribution(mType,rawId, digi.halfStrip());
+	  if(f>fMax) fMax = f;
+	  RPCDetId rpc(rawId);
+	  if(rpc.station()==1) result.hasStation1 = true;
+	  if(rpc.station()==2) result.hasStation2 = true;
+	}
+      }
+      else if (detId.subdetId() == MuonSubdetId::DT) {
+	DTphDigiSpec digi(rawId, is->second);
+	mType = GoldenPattern::POSDT;
+	cit = PattCore.find(mType);
+	if(cit==PattCore.cend()) continue;
+	idm = cit->second.find(rawId);
+	if (idm != cit->second.cend() ) {
+	  //float f = whereInDistribution(digi.phi(), idm->second);
+	  float f = whereInDistribution(mType,rawId, digi.phi());
+	  if(f>fMax) fMax = f;
+	  DTChamberId dt(rawId);
+	  if(dt.station()==1) result.hasStation1 = true;
+	  if(dt.station()==2) result.hasStation2 = true;
+	}
+	mType = GoldenPattern::BENDT;
+	cit = PattCore.find(mType);
+	if(cit==PattCore.cend()) continue;
+	idm = cit->second.find(rawId);
+	if (idm != cit->second.cend() ) {
+	  //float f = whereInDistribution(digi.phiB(), idm->second);
+	  float f = whereInDistribution(mType,rawId, digi.phiB());
+	  if(f>fMax) fMax = f;
+	}
+      }
+      else if (detId.subdetId() == MuonSubdetId::CSC) {
+	CSCDigiSpec digi(rawId, is->second);
+	mType = GoldenPattern::POSCSC;
+	cit = PattCore.find(mType);
+	if(cit==PattCore.cend()) continue;
+	auto idm = cit->second.find(rawId);
+	if (idm != cit->second.cend() ) {
+	  //float f = whereInDistribution(digi.strip(), idm->second);
+	  float f = whereInDistribution(mType,rawId, digi.strip());
+	  if(f>fMax) fMax = f;
+	  CSCDetId csc(rawId);
+	  if (csc.station()==1) result.hasStation1 = true;
+	  if (csc.station()==2) result.hasStation1 = true;
+	}
+	mType = GoldenPattern::BENCSC;
+	cit = PattCore.find(mType);
+	if(cit==PattCore.cend()) continue;
+	idm = cit->second.find(rawId);
+	if (idm != cit->second.cend() ) {
+	  //float f = whereInDistribution(digi.pattern(), idm->second);
+	  float f = whereInDistribution(mType,rawId, digi.pattern());
+	  if(f>fMax) fMax = f;
+	}
       }
     }
-    else if (detId.subdetId() == MuonSubdetId::DT) {
-      DTphDigiSpec digi(rawId, is->second);
-      mType = GoldenPattern::POSDT;
-      cit = PattCore.find(mType);
-      if(cit==PattCore.cend()) return result;
-      idm = cit->second.find(rawId);
-      if (idm != cit->second.cend() ) {
-        float f = whereInDistribution(digi.phi(), idm->second);
-        result.myResults[mType].push_back(std::make_pair(rawId, f)); 
-        DTChamberId dt(rawId);
-        if(dt.station()==1) result.hasStation1 = true;
-        if(dt.station()==2) result.hasStation2 = true;
-      }
-      mType = GoldenPattern::BENDT;
-      cit = PattCore.find(mType);
-      if(cit==PattCore.cend()) return result;
-      idm = cit->second.find(rawId);
-      if (idm != cit->second.cend() ) {
-	float f = whereInDistribution(digi.phiB(), idm->second);
-        result.myResults[mType].push_back(std::make_pair(rawId, f));
-      }
-    }
-    else if (detId.subdetId() == MuonSubdetId::CSC) {
-      CSCDigiSpec digi(rawId, is->second);
-      mType = GoldenPattern::POSCSC;
-      cit = PattCore.find(mType);
-      if(cit==PattCore.cend()) return result;
-      auto idm = cit->second.find(rawId);
-      if (idm != cit->second.cend() ) {
-	float f = whereInDistribution(digi.strip(), idm->second);
-        result.myResults[mType].push_back(std::make_pair(rawId, f)); 
-        CSCDetId csc(rawId);
-        if (csc.station()==1) result.hasStation1 = true;
-        if (csc.station()==2) result.hasStation1 = true;
-      }
-      mType = GoldenPattern::BENCSC;
-      cit = PattCore.find(mType);
-      if(cit==PattCore.cend()) return result;
-      idm = cit->second.find(rawId);
-      if (idm != cit->second.cend() ) {
-        float f = whereInDistribution(digi.pattern(), idm->second);
-        result.myResults[mType].push_back(std::make_pair(rawId, f));
-      }
-    }
+    result.myResults[mType].push_back(std::make_pair(rawId, fMax));
+    fMax = -999.0;
   }
-
   return result;
 }
 
@@ -228,7 +251,23 @@ float GoldenPattern::whereInDistribution( int obj, const GoldenPattern::MFreq & 
   //return sum_obj/sum; //AK
   return (sum_before+sum_obj/2.)/sum; 
 }
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+float GoldenPattern::whereInDistribution(PosBenCase mType, uint32_t rawId, int pos) const{
 
+  float freqInt = 0;
+  auto detsMap = PattCoreIntegrated.find(mType);
+  if(detsMap!=PattCoreIntegrated.cend()){
+    auto freqMap = detsMap->second.find(rawId);
+    if(freqMap!=detsMap->second.cend()){
+      auto freqVal = freqMap->second.find(pos);
+      if(freqVal!=freqMap->second.cend()) freqInt = freqVal->second;	    
+    }
+  }
+  return freqInt;
+}
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 bool GoldenPattern::purge(){
 
   bool remove = false;
@@ -254,10 +293,32 @@ bool GoldenPattern::purge(){
     }
       if (isf->second.size()==0) PattCore.erase(isf++);  else  ++isf;
   }
+  ///////////////////
   ///Usefull pattern has at least 4 measurements and has a RPC measurement
-  return PattCore.find(POSRPC)!=PattCore.end() && PattCore.size()>4;
+  return PattCore.find(POSRPC)!=PattCore.end() && PattCore.size()>2;
 }
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+void GoldenPattern::makeIntegratedCache(){
 
+  ///////////////////
+  ///Prepare tables of integrated frequencies
+  PattCoreIntegrated = PattCore;
+  for (auto isf=PattCoreIntegrated.begin();isf!=PattCoreIntegrated.end();++isf){
+    for (auto idf = isf->second.begin(); idf !=isf->second.end();++idf) {
+      float sum = 0;
+      float sumTmp = 0;
+      for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
+      sumTmp = sum;
+      for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
+	sumTmp-=rmf->second;
+	rmf->second=(sumTmp+rmf->second/2.0)/sum;        
+      }
+    }
+  }
+}
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
 
  out <<"GoldenPattern"<< o.theKey <<std::endl;
@@ -287,4 +348,5 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
  }
  return out;
 }
- 
+//////////////////////////////////////////////////// 
+////////////////////////////////////////////////////

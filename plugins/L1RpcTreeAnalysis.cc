@@ -91,7 +91,7 @@ void L1RpcTreeAnalysis::beginRun(const edm::Run& ru, const edm::EventSetup& es)
   if (theAnaSynch) theAnaSynch->beginRun(ru,es);
 }
 
-void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
+void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
 {
   //
   // prevent  multievent execution
@@ -137,7 +137,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 
   L1ObjColl* l1ObjColl = 0;
   HitSpecObj* hitSpec = 0;
-  
+  HitSpecObj* hitSpecSt1 = 0;
 
   chain.SetBranchAddress("event",&event);
   chain.SetBranchAddress("muon",&muon);
@@ -155,12 +155,21 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
 
   chain.SetBranchAddress("l1ObjColl",&l1ObjColl);
   chain.SetBranchAddress("hitSpec",&hitSpec);
-
-
+  chain.SetBranchAddress("hitSpecSt1",&hitSpecSt1);
+  /*
+  chain.SetBranchStatus("*",0);
+  chain.SetBranchStatus("event",1);
+  chain.SetBranchStatus("simu",1);
+  chain.SetBranchStatus("digSpec",1);
+  chain.SetBranchStatus("l1ObjColl",1);
+  chain.SetBranchStatus("hitSpec",1);
+  */
   //
   // number of events
   //
   Int_t nentries = (Int_t) chain.GetEntries();
+  //if(nentries<1E6) nentries = 5E4;
+  if(nentries>1E6) nentries = 1E6;
   std::cout <<" ENTRIES: " << nentries << std::endl;
   //
   // main loop
@@ -170,7 +179,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
     chain.GetEntry(ev);
     if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
-    if ( (lastRun != (*event).run) || (ev%1000000==0) ) { 
+    if ( (lastRun != (*event).run) || (ev%500000==0) ) { 
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
@@ -206,9 +215,13 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup&)
    // HITPATTERN ANALYSES & OTF EFFICIENCY
    if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
-   if (thePatternProducer) thePatternProducer->run(event, simu, hitSpec, *digSpec);
+   if (thePatternProducer) thePatternProducer->run(event, es, simu, hitSpec, *digSpec);
    L1Obj l1otf;
-   if (thePatternProvider) l1otf=thePatternProvider->check(event, simu, hitSpec, *digSpec);
+   //if (thePatternProvider) l1otf=thePatternProvider->check(event, simu, hitSpec, *digSpec);
+   if (thePatternProvider){
+     thePatternProvider->makePhiMap(es);
+     l1otf=thePatternProvider->checkNew(event, simu, hitSpec, hitSpecSt1, *digSpec);   
+   }
    if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf);  
    L1ObjColl myL1ObjColl = *l1ObjColl;
    myL1ObjColl.push_back(l1otf, false, 0.); 

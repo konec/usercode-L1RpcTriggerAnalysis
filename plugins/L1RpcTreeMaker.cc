@@ -65,9 +65,9 @@ void L1RpcTreeMaker::beginJob()
   theTree = new TTree("tL1Rpc","L1RpcEfficciency");
 
   theTree->Branch("event","EventObj",&event,32000,99);
-  theTree->Branch("muon","MuonObj",&muon,32000,99);
+  //theTree->Branch("muon","MuonObj",&muon,32000,99);
   theTree->Branch("simu", "TrackObj",&simu,32000,99);
-
+  /*
   theTree->Branch("bitsL1" ,"TriggerMenuResultObj",&bitsL1 ,32000,99);
   theTree->Branch("bitsHLT","TriggerMenuResultObj",&bitsHLT,32000,99);
 
@@ -76,7 +76,7 @@ void L1RpcTreeMaker::beginJob()
   theTree->Branch("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside);
   theTree->Branch("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon);
   theTree->Branch("detsSIMU",&detsSIMU);
-
+  */
   theTree->Branch("l1ObjColl","L1ObjColl",&l1ObjColl,32000,99);
   theTree->Branch("hitSpec","HitSpecObj",&hitSpec,32000,99);
   theTree->Branch("hitSpecSt1","HitSpecObj",&hitSpecSt1,32000,99);

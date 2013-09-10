@@ -19,7 +19,9 @@ public:
 private:
   double ptMin, ptMax, etaMinRef, etaMaxRef, phiMinRef, phiMaxRef;
   bool checkMatchedDets;
+  bool checkMatchedSectors;
   std::vector<uint32_t> matchedDets;
+  std::vector<uint32_t> matchedSectors;
 };
 #endif
 

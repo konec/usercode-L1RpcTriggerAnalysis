@@ -12,7 +12,7 @@
 //
 // Original Author:  Werner Sun
 //         Created:  Sat Jul 15 12:41:07 EDT 2006
-// $Id: L1MuonParticle.h,v 1.14 2008/04/03 03:37:20 wsun Exp $
+// $Id: L1MuonParticle.h,v 1.1 2011/12/14 17:29:28 rybinska Exp $
 //
 // system include files
 

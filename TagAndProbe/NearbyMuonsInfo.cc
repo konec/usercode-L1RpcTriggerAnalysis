@@ -1,5 +1,5 @@
 //
-// $Id: NearbyMuonsInfo.cc,v 1.6 2011/07/21 01:07:49 botta Exp $
+// $Id: NearbyMuonsInfo.cc,v 1.2 2012/03/07 10:47:37 rybinska Exp $
 //
 
 /**
@@ -7,7 +7,7 @@
   \brief    Matcher of reconstructed objects to L1 Muons 
             
   \author   Giovanni Petrucciani
-  \version  $Id: NearbyMuonsInfo.cc,v 1.6 2011/07/21 01:07:49 botta Exp $
+  \version  $Id: NearbyMuonsInfo.cc,v 1.2 2012/03/07 10:47:37 rybinska Exp $
 
   RPC Trigger efficiency analysis
   Author: Katarzyna Romanowska-Rybinska

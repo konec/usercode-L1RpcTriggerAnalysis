@@ -13,7 +13,7 @@
 //
 // Original Author:  
 //         Created:  Tue Oct 17 00:13:51 EDT 2006
-// $Id: L1ExtraParticlesProd.h,v 1.11 2010/02/11 00:12:50 wmtan Exp $
+// $Id: L1ExtraParticlesProd.h,v 1.1 2011/12/14 17:42:51 rybinska Exp $
 //
 
 // system include files

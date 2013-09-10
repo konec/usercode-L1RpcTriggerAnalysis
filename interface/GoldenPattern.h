@@ -23,9 +23,11 @@ public:
   struct Key {
     Key(uint32_t det=0, float pt=0, int charge= 0, float phi=0) : theDet(det), theCharge(charge) { 
       thePtCode = L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptCode(pt);
-      //while  (phi < 0) { phi+=2*M_PI; }
-      //thePhiCode = int( phi * 3000.); 
-      thePhiCode = phi;
+      while  (phi < 0) { phi+=2*M_PI; }
+      thePhiCode = round( phi * 2*1152./(2*M_PI)); 
+      //thePhiCode = phi;
+      theRotation = 0;
+      theRefStrip = 999;
     }
     inline bool operator< (const Key & o) const {
       if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
@@ -37,7 +39,7 @@ public:
       return !(theDet!=o.theDet || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge);
     }
     float ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptValue( thePtCode); }
-    float phiValue() const { return thePhiCode;}//(float)thePhiCode/3000.; }
+    float phiValue() const { return (float)thePhiCode/(2*1152./(2*M_PI)); }
     float etaValue() const { return 6*(theDet==637602109) + 
 	                                    7*(theDet==637634877) +
 	                                    8*(theDet==637599914) +
@@ -46,9 +48,13 @@ public:
     uint32_t     theDet; 
     unsigned int thePtCode; 
     unsigned int thePhiCode;
+    unsigned int theRefStrip;
     int          theCharge;
+    int          theRotation;
     friend std::ostream & operator << (std::ostream &out, const Key & o) {
-      out << "Key_det:"<<o.theDet<<"_pt:"<<o.thePtCode<<"_charge"<<o.theCharge<<"_phi:"<<o.thePhiCode; 
+      out << "Key_det:"<<o.theDet<<"_pt:"<<o.thePtCode<<"_charge"<<o.theCharge
+	  <<"_phi:"<<o.thePhiCode<<"("<<o.theRefStrip<<")"
+	  <<"_rotation: "<<o.theRotation; 
       return out;
     }
   };
@@ -109,7 +115,8 @@ public:
 
   void add( const Pattern & p);
   void add( GoldenPattern::PosBenCase aCase, uint32_t rawId, int pos, unsigned int freq);
-  Result compare( const Pattern & p) const;
+  void makeIntegratedCache();
+  Result compare( const Pattern & p);
 
 
 
@@ -119,7 +126,7 @@ private:
   Key theKey;
 
   ///Distribution in given DetUnit.
-  typedef  std::map<int, unsigned int> MFreq;
+  typedef  std::map<int, float> MFreq;
 
   ///Ditribution in DetUnits. For given measuremnt type, one can have
   ///measurementd in many layers(=DetUnits)
@@ -129,11 +136,13 @@ private:
   typedef  std::map<GoldenPattern::PosBenCase, DetFreq > SystFreq;
 
   SystFreq PattCore;
+  SystFreq PattCoreIntegrated;
 
 private:
 
   bool purge();
   float whereInDistribution(int obj, const MFreq & m) const;
+  float whereInDistribution(PosBenCase mType, uint32_t rawId, int pos) const;
   friend std::ostream & operator << (std::ostream &out, const GoldenPattern & o);
   friend class PatternManager;
 };
