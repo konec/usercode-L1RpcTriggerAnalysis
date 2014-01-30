@@ -1,6 +1,9 @@
 #ifndef UserCode_L1RpcTriggerAnalysis_GoldenPattern_H
 #define UserCode_L1RpcTriggerAnalysis_GoldenPattern_H
 
+#include "DataFormats/MuonDetId/interface/RPCDetId.h"
+
+#include "UserCode/L1RpcTriggerAnalysis/interface/MtfCoordinateConverter.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1RpcTriggerAnalysisEfficiencyUtilities.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/Pattern.h"
 #include <map>
@@ -12,60 +15,64 @@
 class GoldenPattern {
 public:
 
-  //
-  // where
-  //
-  enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
+//
+// where
+//
+enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
 
-  //
-  // Key
-  //
-  struct Key {
-    Key(uint32_t det=0, float pt=0, int charge= 0, float phi=0) : theDet(det), theCharge(charge) { 
-      thePtCode = L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptCode(pt);
-      while  (phi < 0) { phi+=2*M_PI; }
-      thePhiCode = round( phi * 2*1152./(2*M_PI)); 
-      //thePhiCode = phi;
-      theRotation = 0;
-      theRefStrip = 999;
-    }
-    inline bool operator< (const Key & o) const {
-      if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
-      else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode < o.thePhiCode) return true;
-      else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode==o.thePhiCode && theDet<o.theDet) return true;
-      else return false;
-    }
-    bool operator==(const Key& o) const {
-      return !(theDet!=o.theDet || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge);
-    }
-    float ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale().ptValue( thePtCode); }
-    float phiValue() const { return (float)thePhiCode/(2*1152./(2*M_PI)); }
-    float etaValue() const { return 6*(theDet==637602109) + 
-	                                    7*(theDet==637634877) +
-	                                    8*(theDet==637599914) +
-	                                    9*(theDet==637632682); }
-    int chargeValue() const { return theCharge;}
-    uint32_t     theDet; 
-    unsigned int thePtCode; 
-    unsigned int thePhiCode;
-    unsigned int theRefStrip;
-    int          theCharge;
-    int          theRotation;
-    friend std::ostream & operator << (std::ostream &out, const Key & o) {
-      out << "Key_det:"<<o.theDet<<"_pt:"<<o.thePtCode<<"_charge"<<o.theCharge
-	  <<"_phi:"<<o.thePhiCode<<"("<<o.theRefStrip<<")"
-	  <<"_rotation: "<<o.theRotation; 
-      return out;
-    }
-  };
+//
+// Key
+//
+ struct Key {
+ Key(int etaCode=99, float pt=0, int charge= 0, float phi=0, 
+     unsigned int refStrip=-99) : 
+   theEtaCode(etaCode), theRefStrip(refStrip), theCharge(charge) { 
+   
+   thePtCode = L1RpcTriggerAnalysisEfficiencyUtilities::PtScale::ptCode(pt);
+   if(thePtCode>31) thePtCode = 31;
+   while  (phi < 0) { phi+=2*M_PI; }
+   while  (phi > 2*M_PI) { phi-=2*M_PI; }
+   thePhiCode = floor(phi * 1.0/(2*M_PI)); 
+   theRotation = 0;
+   theDet = 0;
+ }
+   inline bool operator< (const Key & o) const {
+     if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
+     else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode < o.thePhiCode) return true;
+     else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode==o.thePhiCode && theEtaCode<o.theEtaCode) return true;
+     else return false;
+   }
+   bool operator==(const Key& o) const {
+     return !(theEtaCode!=o.theEtaCode || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge);
+   }
+   float ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale::ptValue(thePtCode); }
+   float phiValue() const { return (float)(thePhiCode)/(nPhi/(2*M_PI)); }
+   float etaValue() const {return L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaValue(theEtaCode);}
+   int chargeValue() const { return theCharge;}
+   uint32_t     theDet; 
+   int theEtaCode;
+   unsigned int thePtCode; 
+   unsigned int thePhiCode;
+   unsigned int theRefStrip;
+   int          theCharge;
+   int          theRotation;
+   static const int nPhi = 2*1152;
 
+   friend std::ostream & operator << (std::ostream &out, const Key & o) {
+     out << "Key_eta:"<<o.theEtaCode<<"("<<o.theDet<<")_pt:"<<o.thePtCode<<"_charge"<<o.theCharge
+	 <<"_phi:"<<o.thePhiCode<<"("<<o.theRefStrip<<")"
+	 <<"_rotation:"<<o.theRotation; 
+     return out;
+   }
+ };
+ 
   //
   // Result
   //
   class Result {
   public: 
     Result() : checkMe(true), theValue(0.),
-               hasStation1(false), hasStation2(false) {
+      hasStation1(false), hasStation2(false), hasStation3(false), hasRefStation(false) {
       nMatchedPoints[GoldenPattern::POSRPC] = 0;
       nMatchedPoints[GoldenPattern::POSDT] = 0;
       nMatchedPoints[GoldenPattern::POSCSC] = 0;
@@ -82,6 +89,11 @@ public:
     operator bool() const;
     float value() const;
     unsigned int nMatchedTot() const;
+
+    bool withStation1() const { return hasStation1;}
+    bool withStation2() const { return hasStation2;}
+    bool withStation3() const { return hasStation3;}
+
     bool hasRpcDet(uint32_t rawId) {
       for (auto it=myResults[GoldenPattern::POSRPC].cbegin(); 
 	   it != myResults[GoldenPattern::POSRPC].cend(); ++it) {
@@ -98,7 +110,7 @@ public:
     mutable float theValue;
     mutable std::map<GoldenPattern::PosBenCase, unsigned int> nMatchedPoints;
    
-    bool hasStation1, hasStation2;
+    bool hasStation1, hasStation2, hasStation3, hasRefStation;
     mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, float > > > myResults;
     friend std::ostream & operator << (std::ostream &out, const Result& o); 
     friend class GoldenPattern; 
@@ -108,17 +120,20 @@ public:
   //
   // GoldenPatterns methods
   //
-  GoldenPattern() {}
-  GoldenPattern(const GoldenPattern::Key & key) : theKey(key) {}
+ GoldenPattern(): hasIntegratedCache(false) {}
+ GoldenPattern(const GoldenPattern::Key & key) : theKey(key), hasIntegratedCache(false){}
 
   Key key() const {return theKey;}
 
-  void add( const Pattern & p);
+  void add( const Pattern & p,  MtfCoordinateConverter *myPhiConverter);
   void add( GoldenPattern::PosBenCase aCase, uint32_t rawId, int pos, unsigned int freq);
   void makeIntegratedCache();
-  Result compare( const Pattern & p);
+  Result compare( const Pattern & p,  MtfCoordinateConverter *myPhiConverter);
 
+  void plot();
 
+  int size();
+  
 
 private:
 
@@ -137,6 +152,10 @@ private:
 
   SystFreq PattCore;
   SystFreq PattCoreIntegrated;
+
+  std::map<int64_t,float> patternDataIntegrated;
+
+  bool hasIntegratedCache;
 
 private:
 

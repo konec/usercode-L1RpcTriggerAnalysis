@@ -21,12 +21,7 @@ public:
   //is not empty
   operator bool() const { return theData.size() > 0; }
 
-  bool add(std::pair<uint32_t,  unsigned int > aData) {
-    theData.insert(aData);
-    int aCounts = theData.count(aData.first);
-    if(aCounts>1) multipleHits = true;
-    return (aCounts==1);
-  }
+  bool add(std::pair<uint32_t,  unsigned int > aData);
 
   ///Function making a list of unique detIds
   void makeHitDetsList();

@@ -15,7 +15,10 @@ class AnaSiMuDistribution {
 public:
   AnaSiMuDistribution (const edm::ParameterSet&);
   void init(TObjArray& histos);
-  bool filter(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec);
+  bool filter(const EventObj* ev, 
+	      const TrackObj * simu, 
+	      const HitSpecObj * hitSpec,
+	      const HitSpecObj * hitSpecProp=0);
 private:
   double ptMin, ptMax, etaMinRef, etaMaxRef, phiMinRef, phiMaxRef;
   bool checkMatchedDets;

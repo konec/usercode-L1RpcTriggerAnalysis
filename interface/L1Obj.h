@@ -8,6 +8,7 @@ struct L1Obj : public TObject {
   enum TYPE { NONE, RPCb, RPCf, DT, CSC, GMT, RPCb_emu, RPCf_emu, GMT_emu, OTF };
 
   float pt, eta, phi;
+  //float disc;
   int   bx, q, charge;
   TYPE  type;
 

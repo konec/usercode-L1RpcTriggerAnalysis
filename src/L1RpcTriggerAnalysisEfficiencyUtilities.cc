@@ -33,7 +33,7 @@ unsigned int PtScale::ptCode(float ptValue)
   int result = 0;
   for (unsigned int i = 1; i < n_binspt; i++)
   {
-     if (ptValue >= xBins[i]) result += 1;
+     if (ptValue >= xBins[i]+1E-3) result += 1;
      else break;
   }
   return result;

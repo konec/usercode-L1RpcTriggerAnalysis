@@ -14,6 +14,46 @@
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
+bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
+
+  ///Clean up digis. Remove unconnected detectors
+  uint32_t rawId = aData.first;   
+  DetId detId(rawId);
+  if (detId.det() != DetId::Muon) 
+    std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
+  switch (detId.subdetId()) {
+  case MuonSubdetId::RPC: {
+    RPCDetId aId(rawId);
+    
+    if(aId.region()<0 || 
+       (aId.region()==0 && aId.ring()<2) ||
+       (aId.region()==0 && aId.station()==4) ||
+       (aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
+       (aId.region()==1 && aId.ring()<3)) return false;       
+    
+  }
+    break;
+  case MuonSubdetId::DT: {
+    DTChamberId dt(rawId);
+    DTphDigiSpec digi(rawId, aData.second);
+    if (digi.bxNum() != 0 || digi.bxCnt() != 0 || digi.ts2() != 0 ||  digi.code()<4) return false;	
+    //if(dt.wheel()<2) return false;       
+    break;
+  }
+  case MuonSubdetId::CSC: {
+    CSCDetId csc(rawId);
+    //if(csc.station()==2) return false;   ////Only for TEST in tower 7
+    break;
+  }
+    ///////////////////
+  }
+  theData.insert(aData);
+  int aCounts = theData.count(aData.first);
+  if(aCounts>1) multipleHits = true;
+  return (aCounts==1);
+}
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
 void  Pattern::makeHitDetsList(){
 
   unique_copy(begin(theData),

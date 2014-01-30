@@ -93,9 +93,14 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecOb
   myEvent->pt = muon->pt();
   myEvent->eta = muon->eta();
   myEvent->phi = muon->phi(); 
-  myEvent->phiHit = hitSpec->position().phi();
-  //while  (myEvent->phiHit < 0) {  myEvent->phiHit+=2*M_PI; }
-  myEvent->etaHit = hitSpec->position().eta();
+  if(hitSpec && hitSpec->position().mag()>100){
+    myEvent->phiHit = hitSpec->position().phi();
+    myEvent->etaHit = hitSpec->position().eta();
+  }
+  else{
+    myEvent->phiHit = -999;
+    myEvent->etaHit = -999;
+  }
   myEvent->charge = muon->charge(); 
   /////////////////////////////
  

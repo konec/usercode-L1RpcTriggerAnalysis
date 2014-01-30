@@ -36,6 +36,15 @@ private:
   const static unsigned int nPtCuts= 30;
   const static double ptCuts[];
 
+  inline double vxmurateParam(double x){
+    
+   double a = -0.235801;
+   double b = -2.82346;
+   double c = 17.162;
+   
+   return std::pow( x,a*std::log(x) ) * std::pow(x,b)*std::exp(c);
+  }
+
   edm::ParameterSet theConfig;
 
   TFile *file;

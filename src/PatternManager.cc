@@ -15,11 +15,8 @@
 
 #include "TFile.h"
 #include "TTree.h"
-
+#include "TRandom3.h"
 ////
-#include "FWCore/Framework/interface/ESHandle.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 #include "Geometry/RPCGeometry/interface/RPCRoll.h"
 #include "Geometry/RPCGeometry/interface/RPCRollSpecs.h"
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
@@ -34,6 +31,7 @@ namespace {
     UInt_t key_det;
     unsigned int key_pt;
     unsigned int key_phi;
+    int key_eta;
     unsigned int key_strip;
     int key_ch;   
     unsigned int pat_Case;
@@ -44,19 +42,33 @@ namespace {
 }
 
 PatternManager::PatternManager(const edm::ParameterSet &cfg) 
-  : theConfig(cfg), theEvForPatCounter(0), theEvUsePatCounter(0), phiMapDone(false) 
-{}
+  : theConfig(cfg), theEvForPatCounter(0), theEvUsePatCounter(0), phiMapDone(false){
+
+  myPhiConverter = 0;
+
+}
 
 PatternManager::~PatternManager(){
   std::cout <<" Events checked for pattenrs:    " << theEvForPatCounter << std::endl;
   std::cout <<" Events used    for pattenrs:    " << theEvUsePatCounter << std::endl;
   std::cout <<" Size of GoldenPatterns:         " << theGPs.size() << std::endl;
+  ////Calculate total and average size of GPs
+  int memSize = 0;
+  for (auto im = theGPs.begin(); im!= theGPs.end(); ++im) {
+    (*im).second.makeIntegratedCache();
+    memSize+=(*im).second.size();
+  }
+
+  std::cout <<"Number of chambers connected:         " << memSize << std::endl;
+
   if (theConfig.getUntrackedParameter<bool>("dump",false)) {
   for (std::map< GoldenPattern::Key, GoldenPattern>::const_iterator 
       im = theGPs.begin(); im!= theGPs.end(); ++im) {
     std::cout <<" GP: "<< (*im).second << std::endl;
   }
   }
+
+  if(myPhiConverter) delete myPhiConverter;
 
 }
 ////////////////////////////////////////////
@@ -66,54 +78,26 @@ void PatternManager::makePhiMap(const edm::EventSetup& es){
   if(phiMapDone) return;
   phiMapDone = true;
 
-  edm::ESHandle<RPCGeometry> rpcGeometry;
   es.get<MuonGeometryRecord>().get(rpcGeometry);
 
   for (auto igps = theGPs.begin(); igps != theGPs.end(); ++igps){
+    igps->second.purge();
     igps->second.makeIntegratedCache();
+
     //Create phi map of Golden Patterns. Rotate key to use S6 symmetry.
     //Encode rotation degree in the pt code 
-    for(int iStep=0;iStep<1;++iStep){
-      const RPCRoll* roll = rpcGeometry->roll(Pattern::rotateDetId(igps->first.theDet,iStep));
-      unsigned int detref = igps->first.theDet;
-      unsigned int stripRef = igps->first.theRefStrip;
-      unsigned int stripFrom = 0;
-      unsigned int stripTo = 0;
-      if(stripRef%2==0){
-        stripFrom = stripRef/2;
-        stripTo = stripFrom;
-      }
-      else{
-        stripFrom = (stripRef-1)/2;
-        stripTo = stripFrom+1;
-      }
-      LocalPoint aLocalPoint1 = roll->centreOfStrip((int)stripFrom);
-      LocalPoint aLocalPoint2 = roll->centreOfStrip((int)stripTo);
-      GlobalPoint aGlobalPoint1 = rpcGeometry->idToDet(Pattern::rotateDetId(detref,iStep))->toGlobal(aLocalPoint1);
-      GlobalPoint aGlobalPoint2 = rpcGeometry->idToDet(Pattern::rotateDetId(detref,iStep))->toGlobal(aLocalPoint2);
-      float phi = ((float)aGlobalPoint2.phi() + (float)aGlobalPoint1.phi())/2.0;
-      GoldenPattern::Key rotatedKey(Pattern::rotateDetId(igps->first.theDet,iStep), 
+    for(int iStep=0;iStep<1;++iStep){      
+      float phi = igps->first.phiValue() + iStep*60.0/180.0*M_PI;
+      while  (phi < 0) { phi+=2*M_PI; }
+      while  (phi > 2*M_PI) { phi-=2*M_PI; }
+  
+      GoldenPattern::Key rotatedKey(igps->first.theEtaCode, 
 				    0,
 				    igps->first.theCharge, 
-				    phi);
+				    phi,
+				    igps->first.theRefStrip);
       rotatedKey.theRotation = iStep;
-      rotatedKey.thePhiCode = igps->first.thePhiCode;      
-      /*
-      while  (phi < 0) { phi+=2*M_PI; }
-      unsigned int phiCode = round( phi * 2*1152./(2*M_PI));      
-      //if(igps->first.thePhiCode!=36 || phiCode!=36) continue;
-      if(phiCode!=36) continue;
-      if(abs(igps->first.thePhiCode-phiCode)>0){
-	std::cout
-	  //<<rotatedKey<<std::endl
-	         <<" igps->first.thePhiCode: "<< igps->first.thePhiCode
-		 <<" from geometry: "<<phiCode
-		 <<" stripRef: "<<stripRef
-		 <<std::endl;
-	//std::cout<<igps->second<<std::endl;       
-	//continue;
-      }
-      */
+      //rotatedKey.theDet = Pattern::rotateDetId(igps->first.theDet,iStep);
       theGPsPhiMap.insert(std::pair<GoldenPattern::Key,GoldenPattern::Key>(rotatedKey,igps->first));
     }
   }
@@ -124,30 +108,228 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
 			   const TrackObj * simu, const HitSpecObj * hitSpec,  
 			   const VDigiSpec & vDigi){
 
+
+
   if (theConfig.exists("patternInpFile") && 
       theConfig.exists("patternOutFile")) return;
 
   if (!hitSpec) return;
-  if (hitSpec->rawId() == 0 ) return;
 
-  int stripRef = -1;
-  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {   
-    if(is->first!=hitSpec->rawId()) continue;
-    RPCDigiSpec digi(is->first, is->second);
-    stripRef = digi.halfStrip();   
-  }
-  ///Use only events with a digi in reference station
-  if(stripRef<0){
-    //std::cout<<"phiref: "<<hitSpec->position().phi()<<std::endl;
-    return;
-  }
-
+  int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());;
   float phiref = hitSpec->position().phi();
   float ptref  = simu->pt(); 
-  int    chargeref = simu->charge();
-  unsigned int detref =  hitSpec->rawId();
+  int chargeref = simu->charge();
+  unsigned int detref = 0;
+  int stripRef = 0;
+
+  int aRotation = 0;
+  /*
+  ///Rotate muons to a single 60deg sector
+  if(phiref>0){
+    while  (phiref<atan(-2) || phiref>M_PI/4.0){ 
+      phiref-=M_PI/3.0; 
+      aRotation++;
+    }
+  }
+  if(phiref<0){
+    while  (phiref<atan(-2) || phiref>M_PI/4.0){ 
+      phiref+=M_PI/3.0; 
+      aRotation++;
+    }
+  }
+  aRotation=(6-aRotation)%6;
+  */  
+  ////////////////////////////////////////////  
+  GoldenPattern::Key key(theEtaCode, ptref, chargeref, phiref,stripRef);
+  key.theDet = detref;
+  
+  Pattern pattern;
+  theEvForPatCounter++;
+  if(!myPhiConverter) myPhiConverter = new MtfCoordinateConverter(es);
+  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
+    DetId detId( is->first);    
+    if(detId.subdetId()==MuonSubdetId::DT && DTphDigiSpec(is->first, is->second).bxNum()!=0) continue;
+     
+    bool isOK = pattern.add(*is); 
+    if (!isOK) return;
+  }
+  if (pattern.size() == 0) return; 
+
+  Pattern rotatedPattern = pattern.getRotated(aRotation);
+
+  theEvUsePatCounter++;
+  
+  if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key);
+
+  //float phiWidth = 2*M_PI/(1152.0); //RPC strip
+  //float aSmear = (aRandom.Rndm()-0.5)*phiWidth;
+  float aSmear = 0.0;
+
+  myPhiConverter->setReferencePhi(phiref+aSmear);
+  theGPs[key].add(rotatedPattern, myPhiConverter);
+
+  ///Count number of events for each key
+  if (aCounterMap.find(key)==aCounterMap.end()) aCounterMap[key]=1;
+  else aCounterMap[key]++;
+  theGPs[key].theKey.theRefStrip = aCounterMap[key];
+}
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
+			    const TrackObj * simu, 
+			    const HitSpecObj * hitSpec,  const HitSpecObj * hitSpecSt1,  
+			    const VDigiSpec & vDigi){
+
+  L1Obj candidate;
+ 
+  if (theConfig.exists("patternInpFile") && 
+      theConfig.exists("patternOutFile")) return candidate;
+
+  if(!myPhiConverter) myPhiConverter = new MtfCoordinateConverter(es);
+
+  int chargeref = simu->charge();
+  float phiref = hitSpec->position().phi();
+
+  //int iPhiCodeMin = 0;
+  //int iPhiCodeMax = GoldenPattern::Key::nPhi;
+
+  int iEtaCodeMin = 0;
+  int iEtaCodeMax = 9;
+
+  int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());
+
+  iEtaCodeMin = theEtaCode;
+  iEtaCodeMax = theEtaCode;
+
+  if(iEtaCodeMin<0) iEtaCodeMin = 0;
+  if(iEtaCodeMax>9) iEtaCodeMax = 9;
+
+  float radius = 0.0;
+  float maxPhi = phiref+radius;
+  float minPhi = phiref-radius;
+  while  (maxPhi < 0) {maxPhi+=2*M_PI; };
+  while  (minPhi < 0) {minPhi+=2*M_PI; };
+  while  (maxPhi > 2*M_PI) {maxPhi-=2*M_PI; };
+  while  (minPhi > 2*M_PI) {minPhi-=2*M_PI; };
+  //iPhiCodeMin = floor(minPhi * GoldenPattern::Key::nPhi/(2*M_PI));
+  //iPhiCodeMax = floor(maxPhi * GoldenPattern::Key::nPhi/(2*M_PI));
+  //////////////////////
+  theEvForPatCounter++;
+
+  Pattern pattern;
+  static bool skipRpcData   = theConfig.getUntrackedParameter<bool>("skipRpcData",  false);
+  static bool skipDtCscData = theConfig.getUntrackedParameter<bool>("skipDtCscData",false);
+  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
+    DetId detId( is->first);
+    if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
+    if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;    
+    if(detId.subdetId()==MuonSubdetId::DT && 
+       (DTphDigiSpec(is->first, is->second).bxNum()!=0 ||
+	DTphDigiSpec(is->first, is->second).bxCnt()!=0 ||
+	DTphDigiSpec(is->first, is->second).ts2()!=0 ||
+	DTphDigiSpec(is->first, is->second).code()<4)
+	) continue;    
+    pattern.add(*is); 
+  }
+  pattern.makeHitDetsList();
+  if (pattern.size() == 0) return candidate; 
+
+  GoldenPattern::Result bestMatching;
+  GoldenPattern::Key    bestKey;
 
   /*
+  std::cout<<"eta: "<<simu->eta()<<" phi: "
+	   <<maxPhi<<" ("<<maxPhi * GoldenPattern::Key::nPhi/(2*M_PI)<<")"
+	   <<" theEtaCode: "<<theEtaCode
+	   <<std::endl;
+  */
+  
+  myPhiConverter->setReferencePhi(phiref);
+
+  for(int iEtaCode=iEtaCodeMin;iEtaCode<=iEtaCodeMax;++iEtaCode){
+    //for(int iPhiCode=iPhiCodeMin;iPhiCode!=iPhiCodeMax;iPhiCode = (++iPhiCode)%(GoldenPattern::Key::nPhi+1)){
+    for(int iPhiCode=0;iPhiCode<1;++iPhiCode){
+      
+      GoldenPattern::Key thisKey(iEtaCode, 0, chargeref,phiref);      
+      //thisKey.thePhiCode = iPhiCode;
+      thisKey.thePhiCode = 0;
+      
+      auto aRange = theGPsPhiMap.equal_range(thisKey);
+      auto beginIt = aRange.first;
+      auto endIt =   aRange.second;
+        
+      for (auto igps = beginIt; igps != endIt; ++igps) {
+
+	///Rotation stored in keys in maps correposnds to key rotation,
+	///we want to rotate the hit pattern into opposite direction.
+	int theRotation = (6 - igps->first.theRotation)%6;
+	float thePhiCode =  igps->first.thePhiCode;
+	
+	Pattern rotatedPattern = pattern.getRotated(theRotation);
+
+	float phiWidth = 2*M_PI/(GoldenPattern::Key::nPhi);//phi granularity
+	myPhiConverter->setReferencePhi(phiref);
+	myPhiConverter->setReferencePhi( (0+iPhiCode)*phiWidth );
+	GoldenPattern::Result result =  theGPs[igps->second].compare(rotatedPattern,myPhiConverter);
+        //break;
+	//std::cout<<"iPhiCode: "<<iPhiCode<<std::endl;	
+	//std::cout<<igps->second<<std::endl;
+	//std::cout<< theGPs[igps->second]<<std::endl;
+	//std::cout<<result<<std::endl;
+      	
+	if (bestMatching < result) {
+	  bestMatching = result;
+	  bestKey =  igps->second;
+	  bestKey.thePhiCode = thePhiCode;       
+	} 	
+      }
+    }     
+  }
+
+  if(bestKey.thePtCode<7 && false){
+    std::cout<<*ev<<std::endl;
+    std::cout<<"eta: "<<simu->eta()<<" phi: "
+	     <<maxPhi<<" ("<<maxPhi * GoldenPattern::Key::nPhi/(2*M_PI)<<")"
+	     <<" theEtaCode: "<<theEtaCode
+	     <<std::endl;
+    std::cout<<bestKey<<std::endl;
+    std::cout<<bestMatching<<std::endl;
+    GoldenPattern::Key thisKey(theEtaCode,simu->pt(), chargeref,phiref);      
+    std::cout<<thisKey<<std::endl;
+    std::cout<<theGPs[thisKey].compare(pattern,myPhiConverter)<<std::endl;
+    GoldenPattern::Key thisKey1(theEtaCode,5.5, chargeref,phiref);      
+    std::cout<<thisKey1<<std::endl;
+    std::cout<<theGPs[thisKey1].compare(pattern,myPhiConverter)<<std::endl;
+    std::cout<<pattern<<std::endl;
+    std::cout<<theGPs[thisKey]<<std::endl;
+  }
+  if (!bestMatching && false){
+    std::cout<<pattern<<std::endl;
+    std::cout<<"aaaa "<<std::endl;
+  }
+
+  if (bestMatching) {
+    candidate.pt = bestKey.ptValue();
+    //candidate.eta = bestKey.etaValue();
+    candidate.eta = bestMatching.value();
+    candidate.phi = bestKey.phiValue();
+    candidate.charge = bestKey.chargeValue();
+    candidate.q   = bestMatching.nMatchedTot()
+ 	+ 100*bestMatching.withStation1()
+        + 200*bestMatching.withStation2()    
+        + 500*bestMatching.withStation3();    
+    //candidate.disc = bestMatching.value();
+    candidate.type = L1Obj::OTF;
+  }
+
+  //exit(0);
+
+  return candidate;
+}
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+float PatternManager::phiForDigi(uint32_t detref, unsigned int stripRef){
+
   unsigned int stripFrom = 0;
   unsigned int stripTo = 0;
   if(stripRef%2==0){
@@ -158,242 +340,14 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
     stripFrom = (stripRef-1)/2;
     stripTo = stripFrom+1;
   }
-  
-  edm::ESHandle<RPCGeometry> rpcGeometry;
-  es.get<MuonGeometryRecord>().get(rpcGeometry);
+
   const RPCRoll* roll = rpcGeometry->roll(detref);
   LocalPoint aLocalPoint1 = roll->centreOfStrip((int)stripFrom);
   LocalPoint aLocalPoint2 = roll->centreOfStrip((int)stripTo);
   GlobalPoint aGlobalPoint1 = rpcGeometry->idToDet(detref)->toGlobal(aLocalPoint1);
   GlobalPoint aGlobalPoint2 = rpcGeometry->idToDet(detref)->toGlobal(aLocalPoint2);
-  phiref = ((float)aGlobalPoint2.phi() + (float)aGlobalPoint1.phi())/2.0;
-  */
-  GoldenPattern::Key key(detref, ptref, chargeref, phiref);
-  key.theRefStrip = stripRef;
-
-  Pattern pattern;
-  theEvForPatCounter++;
-  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
-    DetId detId( is->first);    
-    if(detId.subdetId()==MuonSubdetId::DT && DTphDigiSpec(is->first, is->second).bxNum()!=0) continue;
-    bool isOK = pattern.add(*is); 
-    if (!isOK) return;
-  }
-  if (pattern.size() == 0) return; 
-  theEvUsePatCounter++;
-
-  if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key); 
-  theGPs[key].add(pattern);
-}
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-L1Obj PatternManager::check(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec,  const VDigiSpec & vDigi)
-{
-  L1Obj candidate;
-
-  if (theConfig.exists("patternInpFile") && 
-      theConfig.exists("patternOutFile")) return candidate;
-
-  if (!hitSpec) return candidate;
-  if (hitSpec->rawId() == 0 ) return candidate;
-  float phiref = hitSpec->position().phi();
-  float ptref  = simu->pt();
-  int    chargeref = simu->charge();
-  unsigned int detref =  hitSpec->rawId();
-  
-  VDigiSpec::const_iterator is=vDigi.end();
-  for (is = vDigi.begin(); is!=vDigi.end(); ++is) {   
-    if(is->first==hitSpec->rawId()) break;
-  }
-  if(is==vDigi.end())return candidate; //Require a digi in reference station. Creates inefficiency!
-
-  theEvForPatCounter++;
-  
-  RPCDigiSpec digiRef(is->first, is->second);
-  phiref = digiRef.halfStrip();
-
-  Pattern pattern;
-  static bool skipRpcData   = theConfig.getUntrackedParameter<bool>("skipRpcData",  false);
-  static bool skipDtCscData = theConfig.getUntrackedParameter<bool>("skipDtCscData",false);
-  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
-    DetId detId( is->first);
-    if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
-    if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;
-    if(detId.subdetId()==MuonSubdetId::DT && DTphDigiSpec(is->first, is->second).bxNum()!=0) continue;
-    pattern.add(*is); 
-  }
-  if (pattern.size() == 0) return candidate; 
-  
-  GoldenPattern::Key thisKey(detref, ptref, chargeref,phiref);
-  GoldenPattern::Result bestMatching;
-  GoldenPattern::Key    bestKey;
-
-  /*
-  std::cout << thisKey << std::endl;  
-  RPCDetId aId(637632554);
-  std::cout<<aId<<std::endl;
-  uint32_t rawIdRotated = Pattern::rotateDetId(thisKey.theDet,1);  
-  RPCDetId bId(rawIdRotated);
-  std::cout<<rawIdRotated<<" "<<bId<<std::endl;
-  RPCDetId cId(637602109);
-  std::cout<<637602109<<" "<<cId<<std::endl;
-  */
-
-  ///Find rotation degree to match the base set of patterns. This still can be optimised.
-  //if(theGPs.find(thisKey)== theGPs.end()) return candidate;
-  //auto beginIt = theGPs.find(thisKey);
-  //auto endIt = ++theGPs.find(thisKey);
-
-  auto beginIt = theGPs.begin();
-  auto endIt =   theGPs.end();
-  Pattern rotatedPattern;
-  int phiRotation = -1;
-  for (std::map< GoldenPattern::Key, GoldenPattern>::iterator igps = beginIt; igps != endIt; ++igps) {
-    ///Rotate the hit pattern to match the golden pattern      
-    ///For the moment a single rotation is good for all golden patterns,
-    ///so we make rotation only once
-    if(phiRotation==-1){
-      for(int iStep=0;iStep<5;++iStep){
-	uint32_t rawIdRotated = Pattern::rotateDetId(digiRef.rawId(),iStep);
-	if(rawIdRotated==igps->first.theDet && igps->first.thePhiCode==digiRef.halfStrip()){
-	  //if(rawIdRotated==igps->first.theDet){
-	  rotatedPattern = pattern.getRotated(iStep);
-	  phiRotation = iStep;
-	  break;
-	}
-      }
-    }
-    if(phiRotation<0) continue;
-    /*
-      if(phiRotation!=0){
-      std::cout<<"phiRotation: "<<phiRotation<<std::endl;
-      std::cout<<"detId: "<<hitSpec->rawId()<<std::endl;
-      std::cout<<"digiRef.halfStrip(): "<<digiRef.halfStrip()<<std::endl;
-      }
-    */
-    GoldenPattern::Key thisRotatedKey(Pattern::rotateDetId(digiRef.rawId(),phiRotation), ptref, chargeref,phiref);
-    GoldenPattern & gp = igps->second;
-    GoldenPattern::Result result = gp.compare(rotatedPattern);  
-    /*
-      std::cout<<"Step: "<<phiRotation<<std::endl;
-      std::cout<<*ip<<std::endl;
-      std::cout<<pattern<<std::endl;
-      std::cout<<gp<<std::endl;
-      //std::cout <<"PATT KEY: "<<igps->first<<" "<<result<<std::endl;
-      */
-    if (bestMatching < result) {
-      bestMatching = result;
-      bestKey =  igps->first;
-      //      std::cout <<" ----"<<" pt: "<< bestKey.ptValue()<<std::endl; 
-    } 
-    //else std::cout <<std::endl;
-  }
-
-  //std::cout <<" ------------------ END COMPARE: " << std::endl;
-  //std::cout <<"THIS KEY: "<<thisKey << std::endl;
-  //std::cout <<"BEST KEY: "<<bestKey<<" "<< bestMatching<<std::endl;
-  //abort();
-  if (bestMatching) {
-    candidate.pt = bestKey.ptValue();
-    candidate.eta = bestKey.etaValue();
-    candidate.phi = bestKey.phiValue();
-    candidate.charge = bestKey.chargeValue();
-    candidate.q   = bestMatching.nMatchedTot();
-    candidate.type = L1Obj::OTF;
-  }
-  return candidate;  
-}
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-L1Obj PatternManager::checkNew(const EventObj* ev, const TrackObj * simu, 
-			       const HitSpecObj * hitSpec,  const HitSpecObj * hitSpecSt1,  
-			       const VDigiSpec & vDigi){
-  
-  L1Obj candidate;
-
-  if (theConfig.exists("patternInpFile") && 
-      theConfig.exists("patternOutFile")) return candidate;
-
-  if(!hitSpec) return candidate;   
-  if (hitSpec->rawId() == 0) return candidate;
-  
-  int    chargeref = simu->charge();
-  float phiref = hitSpec->position().phi();
-  unsigned int detref =  hitSpec->rawId();
-  /*  
-  VDigiSpec::const_iterator is=vDigi.end();
-  for (is = vDigi.begin(); is!=vDigi.end(); ++is) {   
-    if(is->first==hitSpec->rawId()) break;
-  }
-  if(is==vDigi.end())return candidate; //Require a digi in reference station. Creates inefficiency!
-  RPCDigiSpec digiRef(is->first, is->second);
-  */
-  theEvForPatCounter++;
-
-  Pattern pattern;
-  static bool skipRpcData   = theConfig.getUntrackedParameter<bool>("skipRpcData",  false);
-  static bool skipDtCscData = theConfig.getUntrackedParameter<bool>("skipDtCscData",false);
-  for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
-    DetId detId( is->first);
-    if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
-    if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;
-    if(detId.subdetId()==MuonSubdetId::DT && DTphDigiSpec(is->first, is->second).bxNum()!=0) continue;
-    pattern.add(*is); 
-  }
-  pattern.makeHitDetsList();
-  if (pattern.size() == 0) return candidate; 
-
-  GoldenPattern::Key thisKey(detref, 0, chargeref,phiref);
-  GoldenPattern::Result bestMatching;
-  GoldenPattern::Key    bestKey;
-
-  auto aRange = theGPsPhiMap.equal_range(thisKey);
-  auto beginIt = aRange.first;
-  auto endIt =   aRange.second;
-
-
-  ///Rotation stored in keys in maps correposnds to key rotation,
-  ///we want to rotate the hit pattern into opposite direction.
-  int theRotation = 6 - theGPsPhiMap.find(thisKey)->first.theRotation;
-  Pattern rotatedPattern = pattern.getRotated(theRotation);
-
-  for (auto igps = beginIt; igps != endIt; ++igps) {
-    GoldenPattern::Result result =  theGPs[igps->second].compare(rotatedPattern);
-    if (bestMatching < result) {
-      bestMatching = result;
-      bestKey =  igps->second;
-    } 
-  }
-  
-  //RPCDetId aId(637620906);
-  //std::cout<<aId<<std::endl;
-  if(!bestMatching){
-    std::cout<<"--- BEGIN ---"<<std::endl;
-    std::cout<<thisKey<<std::endl;
-    std::cout<<pattern<<std::endl;
-    std::cout<<" bestMatching: "<<bestMatching<<std::endl;
-    if(theGPsPhiMap.find(thisKey)!=theGPsPhiMap.end()){
-      std::cout<<"golden: "<<theGPsPhiMap.find(thisKey)->second<<std::endl;
-    }
-    for (auto igps = beginIt; igps != endIt; ++igps) {
-      GoldenPattern::Result result =  theGPs[igps->second].compare(rotatedPattern);      
-      std::cout<<"result: "<<result<<std::endl;
-      std::cout<<theGPs[igps->second]<<std::endl;
-      std::cout<<rotatedPattern<<std::endl;
-    }
-    std::cout<<"--- END ---"<<std::endl;
-  }
-  if(detref==637620906 && thisKey.thePhiCode==2237) exit(0);
-  
-  if (bestMatching) {
-    candidate.pt = bestKey.ptValue();
-    candidate.eta = bestKey.etaValue();
-    candidate.phi = bestKey.phiValue();
-    candidate.charge = bestKey.chargeValue();
-    candidate.q   = bestMatching.nMatchedTot();
-    candidate.type = L1Obj::OTF;
-  }
-  return candidate;
+  float phiref = ((float)aGlobalPoint2.phi() + (float)aGlobalPoint1.phi())/2.0;
+  return phiref;
 }
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -412,23 +366,22 @@ void PatternManager::beginJob()
     key.theDet =     entry.key_det;
     key.thePtCode =  entry.key_pt;
     key.thePhiCode = entry.key_phi;
+    key.theEtaCode = entry.key_eta;
     key.theCharge =  entry.key_ch;
     key.theRefStrip =  entry.key_strip;
 
+    //if(key.theRefStrip<300 || key.theEtaCode<6 ||  key.theEtaCode>9) continue;
+    //if(key.theRefStrip<100 || key.theEtaCode>3) continue;
+    if(key.theRefStrip<10000) continue;
+
     GoldenPattern::PosBenCase pat_Case = static_cast<GoldenPattern::PosBenCase>(entry.pat_Case);
-    if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key); 
+    if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key);
     theGPs[key].add(pat_Case, entry.patDet, entry.posOrBend, entry.freq);
   }
- 
+
   delete tree;
   patternInpFile.Close();
 
-  /*
-  float a;
-  std::cout<<"Pause"<<std::endl;
-  std::cin>>a;
-  exit(0);
-  */
 }
 
 void PatternManager::endJob(){
@@ -436,23 +389,23 @@ void PatternManager::endJob(){
   if ( !theConfig.exists("patternOutFile") ) return;
   std::string patternOutFileName = theConfig.getParameter<std::string>("patternOutFile");
   TFile patternOutFile( patternOutFileName.c_str(),"RECREATE");   
-
-  //if (theConfig.exists("patternInpFile") && theConfig.exists("patternOutFile")){
-    for (auto igps = theGPs.begin(); igps != theGPs.end();) {
-      GoldenPattern & gp = igps->second;      
-      if(!gp.purge()) {theGPs.erase(igps++);} else { ++igps; } 
-    }
-    //}  
-
+  
+  for (auto igps = theGPs.begin(); igps != theGPs.end();) {
+    GoldenPattern & gp = igps->second;      
+    if(!gp.purge()) {theGPs.erase(igps++);} else { ++igps; } 
+  }
+  
+   
   static ENTRY entry;
   TTree *tree = new TTree("FlatPatterns","FlatPatterns");
-  tree->Branch("entry",&entry,"key_det/i:key_pt/i:key_phi/i:key_strip/i:key_ch/I:pat_Case/i:patDet/i:posOrBend/I:freq/i");
+  tree->Branch("entry",&entry,"key_det/i:key_pt/i:key_phi/i:key_eta/i:key_strip/i:key_ch/I:pat_Case/i:patDet/i:posOrBend/I:freq/i");
 
   for (std::map< GoldenPattern::Key, GoldenPattern>::const_iterator igps = theGPs.begin(); igps != theGPs.end(); ++igps) {
     const GoldenPattern & gp = igps->second; 
     entry.key_det =  gp.theKey.theDet;
     entry.key_pt =  gp.theKey.thePtCode;
     entry.key_phi =  gp.theKey.thePhiCode;
+    entry.key_eta =  gp.theKey.theEtaCode;
     entry.key_ch =  gp.theKey.theCharge;
     entry.key_strip =  gp.theKey.theRefStrip;
     
@@ -470,6 +423,12 @@ void PatternManager::endJob(){
   } 
   patternOutFile.Write();
   patternOutFile.Close();
-//  delete tree;
+
+  /*
+  for (auto igps = theGPs.begin(); igps != theGPs.end();++igps) {
+    GoldenPattern & gp = igps->second;      
+    gp.plot();   
+  }
+  */
 }
 

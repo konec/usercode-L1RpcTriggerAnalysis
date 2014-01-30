@@ -44,18 +44,64 @@ void AnaSiMuDistribution::init(TObjArray& histos)
   hSiMuPhi_INP = new TH1D("hSiMuPhi_INP","All global SiMus Phi;Glb.SiMu #phi [rad];SiMus / bin",90,-M_PI,M_PI);  histos.Add(hSiMuPhi_INP);
 }
 
-bool AnaSiMuDistribution::filter(const EventObj* ev, const TrackObj * simu, const HitSpecObj * hitSpec){
+bool AnaSiMuDistribution::filter(const EventObj* ev, 
+				 const TrackObj * simu, 
+				 const HitSpecObj * hitSpec,
+				 const HitSpecObj * hitSpecProp
+				 ){
   if (!hitSpec) return false;
   if (!simu) return false;
+
+  hSiMuPt_INP->Fill(simu->pt());
+  hSiMuEta_INP->Fill(simu->eta());
+  hSiMuPhi_INP->Fill(simu->phi());
+
   uint32_t rawId = hitSpec->rawId();
+
+  if (fabs(simu->eta()) < etaMinRef) return false;
+  if (fabs(simu->eta()) > etaMaxRef) return false;
+
+  //if (simu->phi() < -0.35) return false;
+  //if (simu->phi() > -0.25) return false;
+
+  //if (simu->phi() > 0.62) return false;
+  //if (simu->phi() < 0.59) return false;
+
+  /*
+  if(hitSpec &&       
+     hitSpec->position().phi()>0.3 &&
+     hitSpec->position().phi()<0.35) return true;
+  else return false;
+  */
+  /*
+  if(rawId<1 && hitSpecProp &&       
+     hitSpecProp->position().phi()>-0.1 &&
+     hitSpecProp->position().phi()<0.4) return true;
+  else return false;
+  */
 
   int rpcSector = 0;
   int rpcSubsector = 0;
   int rpcRegion = 0;
   if(checkMatchedSectors){
-    if(rawId<1) return false;
+    //If there is no hit in reference station,
+    //accept only events with propagated phi near the
+    ///phi acceptance hole
+    ///This is reasonable only for muons with pt>~5,
+    ///as lower pt muons do not cross ref layer at all
+    if(rawId<1 && hitSpecProp){       
+      if(simu->pt()>5 && 
+	 (hitSpecProp->position().phi()>-0.5 &&
+	  hitSpecProp->position().phi()<0.5)
+	 ){
+	 hSiMuPt_DIS->Fill(simu->pt());
+	 hSiMuEta_DIS->Fill(simu->eta());
+	 hSiMuPhi_DIS->Fill(simu->phi());	 
+	return true;
+      }
+      else return false;
+    }
     
-    DetId detId(rawId);
     RPCDetId aId(rawId);
     
     if(aId.region()==0){
@@ -73,14 +119,11 @@ bool AnaSiMuDistribution::filter(const EventObj* ev, const TrackObj * simu, cons
     rpcRegion = aId.region();
   }
   
-  hSiMuPt_INP->Fill(simu->pt());
-  hSiMuEta_INP->Fill(simu->eta());
-  hSiMuPhi_INP->Fill(simu->phi());
-
   if (simu->pt() < ptMin) return false;
   if (simu->pt() > ptMax) return false;
-  if ( fabs(hitSpec->position().eta()) < etaMinRef) return false;
-  if ( fabs(hitSpec->position().eta()) > etaMaxRef) return false;
+  //if ( fabs(hitSpec->position().eta()) < etaMinRef) return false;
+  //if ( fabs(hitSpec->position().eta()) > etaMaxRef) return false;
+  
   if ( hitSpec->position().phi() < phiMinRef) return false;
   if ( hitSpec->position().phi() > phiMaxRef) return false;
 
