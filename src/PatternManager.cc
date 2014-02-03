@@ -108,8 +108,6 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
 			   const TrackObj * simu, const HitSpecObj * hitSpec,  
 			   const VDigiSpec & vDigi){
 
-
-
   if (theConfig.exists("patternInpFile") && 
       theConfig.exists("patternOutFile")) return;
 
@@ -121,28 +119,10 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   int chargeref = simu->charge();
   unsigned int detref = 0;
   int stripRef = 0;
-
-  int aRotation = 0;
-  /*
-  ///Rotate muons to a single 60deg sector
-  if(phiref>0){
-    while  (phiref<atan(-2) || phiref>M_PI/4.0){ 
-      phiref-=M_PI/3.0; 
-      aRotation++;
-    }
-  }
-  if(phiref<0){
-    while  (phiref<atan(-2) || phiref>M_PI/4.0){ 
-      phiref+=M_PI/3.0; 
-      aRotation++;
-    }
-  }
-  aRotation=(6-aRotation)%6;
-  */  
   ////////////////////////////////////////////  
   GoldenPattern::Key key(theEtaCode, ptref, chargeref, phiref,stripRef);
   key.theDet = detref;
-  
+   
   Pattern pattern;
   theEvForPatCounter++;
   if(!myPhiConverter) myPhiConverter = new MtfCoordinateConverter(es);
@@ -155,18 +135,12 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   }
   if (pattern.size() == 0) return; 
 
-  Pattern rotatedPattern = pattern.getRotated(aRotation);
-
   theEvUsePatCounter++;
   
   if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key);
 
-  //float phiWidth = 2*M_PI/(1152.0); //RPC strip
-  //float aSmear = (aRandom.Rndm()-0.5)*phiWidth;
-  float aSmear = 0.0;
-
-  myPhiConverter->setReferencePhi(phiref+aSmear);
-  theGPs[key].add(rotatedPattern, myPhiConverter);
+  myPhiConverter->setReferencePhi(phiref);
+  theGPs[key].add(pattern, myPhiConverter);
 
   ///Count number of events for each key
   if (aCounterMap.find(key)==aCounterMap.end()) aCounterMap[key]=1;
