@@ -342,7 +342,6 @@ bool GoldenPattern::purge(){
 	aft1 = (idf->second.find(pos+1) != idf->second.end()) ?  idf->second[pos+1] : 0;  
 	aft2 = (idf->second.find(pos+2) != idf->second.end()) ?  idf->second[pos+2] : 0;  
 	aft3 = (idf->second.find(pos+3) != idf->second.end()) ?  idf->second[pos+3] : 0; 
- 	//if (refSum<1000) remove = true;
  	if (idf->second[pos]/refSum<5E-4) remove = true;
  	if (idf->second[pos]==1 && bef1==0 && aft1==0) remove = true;
 	if (idf->second[pos]==1 && aft1==1 && aft2==0 && aft3==0 && bef1==0 && bef2==0)  remove = true;

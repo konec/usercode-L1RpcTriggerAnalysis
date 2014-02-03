@@ -172,7 +172,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   //if(nentries>1E6) nentries = 5E6;
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
-  nentries = 5E1;
+  //nentries = 5E1;
 
   //
   // main loop
@@ -183,8 +183,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
     chain.GetEntry(ev);
     //AK if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
-    //if ( (lastRun != (*event).run) || (ev%(nentries/20)==0)) { 
-    if ( (lastRun != (*event).run) || true) { 
+    if ( (lastRun != (*event).run) || (ev%(nentries/20)==0)) { 
+    //if ( (lastRun != (*event).run) || true) { 
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
