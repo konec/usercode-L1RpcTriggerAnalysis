@@ -172,20 +172,19 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   //if(nentries>1E6) nentries = 5E6;
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
-  nentries = 35;
-  nentries = 1E4;
+  nentries = 5E1;
 
   //
   // main loop
   //
   unsigned int lastRun = 0;
-  for (int ev=31; ev<nentries; ev+=1) {
+  for (int ev=0; ev<nentries; ev+=1) {
 
     chain.GetEntry(ev);
     //AK if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
-    if ( (lastRun != (*event).run) || (ev%(nentries/20)==0)) { 
-    //if ( (lastRun != (*event).run) || true) { 
+    //if ( (lastRun != (*event).run) || (ev%(nentries/20)==0)) { 
+    if ( (lastRun != (*event).run) || true) { 
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
@@ -221,12 +220,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
    if (thePatternProducer) thePatternProducer->run(event, es, simu, hitSpecProp, *digSpec);/////propageted state used, filtered digis used!!!
    L1Obj l1otf;
-   if (thePatternProvider){
-     //std::string a;
-     //std::cin>>a;
-     thePatternProvider->makePhiMap(es);
-     l1otf=thePatternProvider->check(event, es, simu, hitSpecProp, hitSpecSt1, *digSpec);   
-   }
+   if (thePatternProvider) l1otf=thePatternProvider->check(event, es, simu, hitSpecProp, hitSpecSt1, *digSpec);      
    if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf);  
    L1ObjColl myL1ObjColl = *l1ObjColl;
    myL1ObjColl.push_back(l1otf, false, 0.); 

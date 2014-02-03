@@ -36,9 +36,6 @@ public:
 	   const TrackObj * simu, const HitSpecObj * hitSpec,  
 	   const VDigiSpec & higSpec);
   
-  void makePhiMap(const edm::EventSetup& es);
-float phiForDigi(uint32_t detref, unsigned int stripRef);
-
 L1Obj check(const EventObj* ev, const edm::EventSetup& es,
 	      const TrackObj * simu, 
 	      const HitSpecObj * hitSpec,  const HitSpecObj * hitSpecSt1,  
@@ -61,9 +58,6 @@ private:
   std::map< GoldenPattern::Key, int> aCounterMap; 
   std::map< GoldenPattern::Key, GoldenPattern> theGPs; 
   std::multimap<GoldenPattern::Key, GoldenPattern::Key> theGPsPhiMap;
-
-  std::map<int,int> stripToPhiBarrel, stripToPhiEndcap;
-  
 
 };
 #endif

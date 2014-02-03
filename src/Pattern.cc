@@ -36,6 +36,7 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
   case MuonSubdetId::DT: {
     DTChamberId dt(rawId);
     DTphDigiSpec digi(rawId, aData.second);
+    ///Select TD digis with hits in inner and outer layers 
     if (digi.bxNum() != 0 || digi.bxCnt() != 0 || digi.ts2() != 0 ||  digi.code()<4) return false;	
     //if(dt.wheel()<2) return false;       
     break;

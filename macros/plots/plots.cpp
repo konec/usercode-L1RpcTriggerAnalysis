@@ -149,9 +149,9 @@ void plotLLH(int ipt=22){
 }
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
-void plotGoldenPattern(int iPt=9, int iTower=9, int iPhi=2260, int iCharge=-1){
+void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 
-  string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/job_3_pat/SingleMu_31_p/";
+  string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat/SingleMu_30_m/";
   TFile *file = new TFile((path+"GoldenPatterns.root").c_str());
 
 
@@ -159,10 +159,10 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iPhi=2260, int iCharge=-1){
 
   iCharge*=-1;
   iCharge+=1;
-  TString dirName = TString::Format("fig_png/iPt_%d_iTower_%d_iPhi_%d_iCh_%d",iPt,iTower,iPhi,iCharge);
+  TString dirName = TString::Format("fig_png/iPt_%d_iTower_%d_iRef_%d_iCh_%d",iPt,iTower,iRef,iCharge);
   gSystem->mkdir(dirName);
 
-  TString locName = TString::Format("tower%d_phi%d_pt%d_sign%d",iTower,iPhi,iPt,iCharge);
+  TString locName = TString::Format("tower%d_ref%d_pt%d_sign%d",iTower,iRef,iPt,iCharge);
   ////
   TString cName = "RPC"+locName;
   TCanvas *cRPC = (TCanvas*)file->Get(cName.Data());
@@ -179,7 +179,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iPhi=2260, int iCharge=-1){
     TObject *obj = objItr();
     while (obj){
       string aName(obj->GetName());
-      if(aName.find("Station")!=std::string::npos){
+      if(aName.find("layer")!=std::string::npos){
 	TGraph *aGr = (TGraph*)obj; 
 	Double_t x,y, sum=0;
 	for(int i=0;i<aGr->GetN();++i){aGr->GetPoint(i,x,y);sum+=y;}
@@ -199,7 +199,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iPhi=2260, int iCharge=-1){
     TObject *obj = objItr();
     while (obj){
       string aName(obj->GetName());
-      if(aName.find("Station")!=std::string::npos){
+      if(aName.find("layer")!=std::string::npos){
 	TGraph *aGr = (TGraph*)obj;
 	Double_t x,y, sum=0;
 	for(int i=0;i<aGr->GetN();++i){aGr->GetPoint(i,x,y);sum+=y;}
@@ -219,7 +219,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iPhi=2260, int iCharge=-1){
     TObject *obj = objItr();
     while (obj){
       string aName(obj->GetName());
-      if(aName.find("Station")!=std::string::npos){
+      if(aName.find("layer")!=std::string::npos){
 	TGraph *aGr = (TGraph*)obj; 
 	Double_t x,y, sum=0;
 	for(int i=0;i<aGr->GetN();++i){aGr->GetPoint(i,x,y);sum+=y;}
@@ -274,15 +274,9 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iPhi=2260, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
-
-  plotRecoPt("Otf",22);
-  plotRecoPt("Gmt",22);
-  plotRecoPhi(22);
-  return;
-
-  //plotGoldenPattern(31,6,10000,1);  
+  plotGoldenPattern(30,9,44,-1);  
   //plotGoldenPattern(31,7,10000,1);  
-  //return;
+  return;
   ///
   plotRecoPhi(0);
   plotRecoPhi(22);

@@ -121,43 +121,6 @@ void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConvert
       case MuonSubdetId::RPC: {
         RPCDigiSpec digi(rawId, is->second);
 	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(*is)]++;
-	///Sum contributions in all rolls connected to this GP
-	///Code does not work with layer number as identifier
-	/*	
-	RPCDetId aRPC(rawId);
-	if(aRPC.region()==0){
-	  RPCDetId aNextRoll(aRPC.region(), 
-			     aRPC.ring(),
-			     aRPC.station(), 
-			     aRPC.sector(),
-			     aRPC.layer(),
-			     aRPC.subsector(),
-			     (aRPC.roll()+2)%4);
-	  if(PattCore[GoldenPattern::POSRPC].find(aNextRoll.rawId())!=PattCore[GoldenPattern::POSRPC].cend()){
-	    PattCore[GoldenPattern::POSRPC][aNextRoll.rawId()][myPhiConverter->convert(*is) - 
-							       theKey.thePhiCode
-							       ]++;
-	  }
-	}
-	  if(aRPC.region()==1){
-	    for(int iStep=1;iStep<4;++iStep){
-	      if((aRPC.roll()+iStep)%4==0) continue;
-	      RPCDetId aNextRoll(aRPC.region(), 
-				 aRPC.ring(),
-				 aRPC.station(), 
-				 aRPC.sector(),
-				 aRPC.layer(),
-				 aRPC.subsector(),
-				 (aRPC.roll()+iStep)%4);
-	      if(PattCore[GoldenPattern::POSRPC].find(aNextRoll.rawId())!=PattCore[GoldenPattern::POSRPC].cend()){
-		PattCore[GoldenPattern::POSRPC][aNextRoll.rawId()][myPhiConverter->convert(*is) - 
-								   theKey.thePhiCode
-								   ]++;
-	      }
-	    }
-	  }		
-	//////////////////
-	*/
         break;
       }	
       case MuonSubdetId::DT: {
@@ -187,60 +150,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
   SystFreq::const_iterator cit;
   DetFreq::const_iterator idm;
   PosBenCase mType;
-  
-  
-  ///Find the reference phi  
-  //float aPhiRef = myPhiConverter->getReferencePhi();
-  //myPhiConverter->setReferencePhi(0.0);
-  
-  int iPhiRef = -999;
-  int iPhiRefDT = -999;
-  int iPhiRefCSC = -999;
-  int iPhiRefRPC3 = -999;
-  int iPhiRefRPC4 = -999;
-  for (auto aEntry : detsHit){
-    uint32_t rawId = aEntry.first;
-    DetId detId(rawId);
-    if (detId.det() != DetId::Muon){
-      std::cout << "GoldenPattern::compare PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
-      return result;
-    }
-    auto aRange = detdigi.equal_range(rawId);
-    auto beginIt = aRange.first;
-    auto endIt =   aRange.second;
-    ///Loop over hits in given detId
-    int aLayer = myPhiConverter->getLayerNumber(rawId);
-    if(aLayer!=2 && aLayer!=3  && aLayer!=4 && aLayer!=12) continue;		  
-    for (auto is = beginIt; is != endIt; ++is) {
-        int iPhiRefTmp = myPhiConverter->convert(*is);
-	if(iPhiRefTmp<0) iPhiRefTmp+=GoldenPattern::Key::nPhi;
-	//break;
-	if(detId.subdetId() == MuonSubdetId::DT && theKey.theEtaCode<8) iPhiRefDT = iPhiRefTmp; 
-	if(detId.subdetId() == MuonSubdetId::CSC && theKey.theEtaCode>7) iPhiRefCSC = iPhiRefTmp; 
-	if(detId.subdetId() == MuonSubdetId::RPC && 
-	   ((aLayer==4 && theKey.theEtaCode<8) || (aLayer==12 && theKey.theEtaCode>7)) 
-	   ) iPhiRefRPC4 = iPhiRefTmp; 
-	if(detId.subdetId() == MuonSubdetId::RPC && aLayer==3 && theKey.theEtaCode<8) iPhiRefRPC3 = iPhiRefTmp; 
-
-	//if (detId.subdetId() == MuonSubdetId::RPC) std::cout<<rawId<<" RPC phiref "<<iPhiRefTmp<<std::endl;
-	//if (detId.subdetId() == MuonSubdetId::DT) std::cout<<rawId<<" DT phiref "<<iPhiRefTmp<<std::endl;
-	//if (detId.subdetId() == MuonSubdetId::CSC) std::cout<<rawId<<" CSC phiref "<<iPhiRefTmp<<std::endl;
-    }
-  }
-  /////////////////////
-  if(iPhiRefDT>0) iPhiRef = iPhiRefDT;
-  else if(iPhiRefCSC>0) iPhiRef = iPhiRefCSC;
-  else if(iPhiRefRPC4>0) iPhiRef = iPhiRefRPC4;
-  else if(iPhiRefRPC3>0) iPhiRef = iPhiRefRPC3;
-
-  if(iPhiRef<0) return result;
-
-  float tmpPhiRef = (float)(iPhiRef)/GoldenPattern::Key::nPhi*2*M_PI;
-  //if(fabs(aPhiRef-tmpPhiRef)>0.01) std::cout<<"idealPhiref: "<<aPhiRef<<" phiRef: "<<tmpPhiRef<<std::endl;
-  //std::cout<<"idealPhiref: "<<aPhiRef<<" phiRef: "<<tmpPhiRef<<std::endl;
-  myPhiConverter->setReferencePhi(tmpPhiRef);
- 
-  
+    
   ///Loop over unique detIds
   for (auto aEntry : detsHit){
     uint32_t rawId = aEntry.first;
@@ -271,7 +181,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  fPos = whereInDistribution(mType,
 				     myPhiConverter->getLayerNumber(rawId),
 				     myPhiConverter->convert(*is));
-	  /*
+	  /*	  
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
 		   <<" pos rel: "<<myPhiConverter->convert(*is)
 		   <<" RPC  f: "<<fPos<<std::endl;
@@ -432,7 +342,7 @@ bool GoldenPattern::purge(){
 	aft1 = (idf->second.find(pos+1) != idf->second.end()) ?  idf->second[pos+1] : 0;  
 	aft2 = (idf->second.find(pos+2) != idf->second.end()) ?  idf->second[pos+2] : 0;  
 	aft3 = (idf->second.find(pos+3) != idf->second.end()) ?  idf->second[pos+3] : 0; 
- 	if (refSum<1000) remove = true;
+ 	//if (refSum<1000) remove = true;
  	if (idf->second[pos]/refSum<5E-4) remove = true;
  	if (idf->second[pos]==1 && bef1==0 && aft1==0) remove = true;
 	if (idf->second[pos]==1 && aft1==1 && aft2==0 && aft3==0 && bef1==0 && bef2==0)  remove = true;
@@ -457,14 +367,8 @@ void GoldenPattern::makeIntegratedCache(){
   if(hasIntegratedCache) return;
   else hasIntegratedCache = true;
 
-  int refSum = 0;
-  if(theKey.theDet>1){
-    for (auto idf = PattCore.find(POSRPC)->second[theKey.theDet].begin();
-	 idf!=PattCore.find(POSRPC)->second[theKey.theDet].end();++idf) refSum+=idf->second;
-  }
-  else refSum = theKey.theRefStrip;
+  int refSum = theKey.theRefStrip;
 
-    
   //int nBits = 11;
   ///////////////////
   ///Prepare tables of integrated frequencies
@@ -476,6 +380,7 @@ void GoldenPattern::makeIntegratedCache(){
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
 	//int digitisedVal = ((rmf->second)/refSum)*std::pow(2,nBits);
 	//rmf->second= digitisedVal/std::pow(2,nBits);
+
 	rmf->second= (rmf->second)/refSum;
 	if(rmf->second>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
       }
@@ -572,15 +477,15 @@ void GoldenPattern::plot(){
 
  TFile file("GoldenPatterns.root","UPDATE");
  //////////////
- TCanvas* cRPC = new TCanvas(TString::Format("RPCtower%d_phi%d_pt%d_sign%d",theKey.theEtaCode, theKey.thePhiCode, theKey.thePtCode, theKey.theCharge+1).Data(),
+ TCanvas* cRPC = new TCanvas(TString::Format("RPCtower%d_ref%d_pt%d_sign%d",theKey.theEtaCode, theKey.theDet, theKey.thePtCode, theKey.theCharge+1).Data(),
 			  TString::Format("GoldenPattern").Data(),
 			  600,150,1100,600);
 
- TCanvas* cDT = new TCanvas(TString::Format("DTtower%d_phi%d_pt%d_sign%d",theKey.theEtaCode, theKey.thePhiCode, theKey.thePtCode, theKey.theCharge+1).Data(),
+ TCanvas* cDT = new TCanvas(TString::Format("DTtower%d_ref%d_pt%d_sign%d",theKey.theEtaCode, theKey.theDet, theKey.thePtCode, theKey.theCharge+1).Data(),
 			    TString::Format("GoldenPattern").Data(),
 			    600,150,1100,600);
  
- TCanvas* cCSC = new TCanvas(TString::Format("CSCtower%d_phi%d_pt%d_sign%d",theKey.theEtaCode, theKey.thePhiCode, theKey.thePtCode, theKey.theCharge+1).Data(),
+ TCanvas* cCSC = new TCanvas(TString::Format("CSCtower%d_ref%d_pt%d_sign%d",theKey.theEtaCode, theKey.theDet, theKey.thePtCode, theKey.theCharge+1).Data(),
 			     TString::Format("GoldenPattern").Data(),
 			     600,150,1100,600);
  int iCnt = 0;
@@ -591,8 +496,6 @@ void GoldenPattern::plot(){
  //////////////RPC
  for(auto it=graphsRPCMap.begin();
      it!=graphsRPCMap.end();++it){   
-   RPCDetId rpc(it->first);
-   RPCDetIdUtil rpcUtil(it->first);
    iCnt++;
    cRPC->cd(iCnt);   
    it->second->Sort();
@@ -606,16 +509,15 @@ void GoldenPattern::plot(){
    pt->SetFillColor(0);
    pt->SetFillStyle(0);
    pt->SetTextSize(0.1);
-   pt->AddText(TString::Format("Station: %d, region: %d",rpc.station(), rpc.region()));
+   pt->AddText(TString::Format("RPC layer: %d",it->first));
    pt->Draw();
-   it->second->SetName(TString::Format("RPC_Station_%d_region_%d_sector_%d_layer_%d_roll_%d_%d",rpc.station(), rpc.region(),rpc.sector(),rpc.layer(),rpc.roll(),it->first));
+   it->second->SetName(TString::Format("RPC_layer_%d",it->first));
  }
  cRPC->Write();
  //////////////DT
  iCnt = 0;
  for(auto it=graphsDTMap.begin();
      it!=graphsDTMap.end();++it){   
-   DTChamberId dt(it->first);
    iCnt++;
    cDT->cd(iCnt);   
    it->second->Sort();
@@ -629,14 +531,13 @@ void GoldenPattern::plot(){
    pt->SetFillColor(0);
    pt->SetFillStyle(0);
    pt->SetTextSize(0.1);
-   pt->AddText(TString::Format("Station: %d, wheel: %d",dt.station(), dt.wheel()));
+   pt->AddText(TString::Format("DT position layer: %d",it->first));
    pt->Draw();
-   it->second->SetName(TString::Format("DTPOS_Station_%d_wheel_%d_%d",dt.station(), dt.wheel(),it->first));
+   it->second->SetName(TString::Format("DTPOS_layer_%d",it->first));
  }
 
  for(auto it=graphsBENDTMap.begin();
      it!=graphsBENDTMap.end();++it){   
-   DTChamberId dt(it->first);
    iCnt++;
    cDT->cd(iCnt);   
    it->second->Sort();
@@ -652,9 +553,9 @@ void GoldenPattern::plot(){
    pt->SetTextSize(0.1);
    pt->AddText("BEN");
    pt->AddLine(.0,.5,1.,.5);
-   pt->AddText(TString::Format("Station: %d, wheel: %d",dt.station(), dt.wheel()));
+   pt->AddText(TString::Format("DT bending layer: %d",it->first));
    pt->Draw();
-   it->second->SetName(TString::Format("DTBEN_Station_%d_wheel_%d_%d",dt.station(), dt.wheel(),it->first));
+   it->second->SetName(TString::Format("DTBEN_layer_%d",it->first));
  }
  cDT->Write();
 
@@ -662,7 +563,6 @@ void GoldenPattern::plot(){
  iCnt = 0;
  for(auto it=graphsCSCMap.begin();
      it!=graphsCSCMap.end();++it){   
-   CSCDetId csc(it->first);
    iCnt++;
    cCSC->cd(iCnt);   
    it->second->Sort();
@@ -676,13 +576,12 @@ void GoldenPattern::plot(){
    pt->SetFillColor(0);
    pt->SetFillStyle(0);
    pt->SetTextSize(0.1);
-   pt->AddText(TString::Format("Station: %d, ring: %d",csc.station(), csc.ring()));
+   pt->AddText(TString::Format("CSC position layer: %d",it->first));
    pt->Draw();
-   it->second->SetName(TString::Format("CSCPOS_Station_%d_ring_%d_%d",csc.station(), csc.ring(),it->first));
+   it->second->SetName(TString::Format("CSCPOS_layer_%d",it->first));
  }
  for(auto it=graphsBENCSCMap.begin();
      it!=graphsBENCSCMap.end();++it){   
-   CSCDetId csc(it->first);
    iCnt++;
    cCSC->cd(iCnt);   
    it->second->Sort();
@@ -698,9 +597,9 @@ void GoldenPattern::plot(){
    pt->SetTextSize(0.1);
    pt->AddText("BEN");
    pt->AddLine(.0,.5,1.,.5);
-   pt->AddText(TString::Format("Station: %d, ring: %d",csc.station(), csc.ring()));
+   pt->AddText(TString::Format("CSC bending layer: %d",it->first));
    pt->Draw();
-   it->second->SetName(TString::Format("CSCBEN_Station_%d_ring_%d_%d",csc.station(), csc.ring(),it->first));
+   it->second->SetName(TString::Format("CSCBEN_layer_%d",it->first));
  }
  cCSC->Write();
 

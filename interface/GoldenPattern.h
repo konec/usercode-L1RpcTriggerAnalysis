@@ -40,10 +40,11 @@ enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
      if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
      else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode < o.thePhiCode) return true;
      else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode==o.thePhiCode && theEtaCode<o.theEtaCode) return true;
+     else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode==o.thePhiCode && theEtaCode==o.theEtaCode &&  theDet<o.theDet) return true;
      else return false;
    }
    bool operator==(const Key& o) const {
-     return !(theEtaCode!=o.theEtaCode || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge);
+     return !(theEtaCode!=o.theEtaCode || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge || theDet!=o.theDet);
    }
    float ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale::ptValue(thePtCode); }
    float phiValue() const { return (float)(thePhiCode)/(nPhi/(2*M_PI)); }

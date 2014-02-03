@@ -587,40 +587,22 @@ void plotsAK(){
 
   utilsL1RpcStyle()->cd();
  
-  string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev2/job_4_ana/";
-  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev2/job_4_ana/";
-  
-  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev2/job_4_ana/SingleMu_30_m/";
+  string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
+  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
+  path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_m/";
 
   TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
 
   TTree *tree = (TTree*)file->Get("efficiencyTree");
-  makeFriendTree(tree);
-  delete tree;
+  //makeFriendTree(tree);
+  //delete tree;
   tree = (TTree*)file->Get("efficiencyTree");
 
-  plotEffVsEta(tree,"Otf");
-  return;
-
-
-  /*
   plotEffPanel(tree,"Otf");
   plotEffPanel(tree,"Gmt");
-
-  plotEffVsEta(tree,"Otf");
-  plotEffVsEta(tree,"Gmt");
-
-  plotEffVsPhi(tree,"Otf");
-  plotEffVsPhi(tree,"Gmt");
-  */
-
-  plotEffVsRate(tree,16);
-  plotEffVsRate(tree,20);
-  plotEffVsRate(tree,30);
-
-  //plotOtfVsGmt(tree,20);
   return;
+
 
   ///Plot panel with a few turn on curves.
   plotEffPanel(tree,"Otf");
