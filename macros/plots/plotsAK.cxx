@@ -589,7 +589,7 @@ void plotsAK(){
  
   string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
-  path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_m/";
+  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_m/";
 
   TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
@@ -601,6 +601,7 @@ void plotsAK(){
 
   plotEffPanel(tree,"Otf");
   plotEffPanel(tree,"Gmt");
+  plotEffVsEta(tree,"Otf");
   return;
 
 

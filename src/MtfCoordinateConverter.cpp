@@ -199,6 +199,7 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
 
   switch (detId.subdetId()) {
   case MuonSubdetId::RPC: {
+    RPCDetId aId(rawId);
     RPCDetIdUtil aIdUtil(rawId);
     aLayer = aIdUtil.layer() + 10*(!aIdUtil.isBarrel());
   }
