@@ -586,10 +586,10 @@ void plotsAK(){
  
   string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
-  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/05RPC/";
+  path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/05RPC/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/01RPC/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/1RPC/";
-  path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_m/";
+  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_m/";
   
 
   TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
@@ -600,10 +600,10 @@ void plotsAK(){
   delete tree;
   tree = (TTree*)file->Get("efficiencyTree");
 
-  plotEffVsEta(tree,"Otf");
+  //plotEffVsEta(tree,"Otf");
   //plotEffVsHitPhi(tree,"Otf");
   //plotEffVsEta(tree,"Gmt");  
-  //plotEffVsRate(tree,20);
+  plotEffVsRate(tree,20);
   return;
 
   ///Plot panel with a few turn on curves.

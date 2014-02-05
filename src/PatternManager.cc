@@ -270,10 +270,12 @@ void PatternManager::endJob(){
   std::string patternOutFileName = theConfig.getParameter<std::string>("patternOutFile");
   TFile patternOutFile( patternOutFileName.c_str(),"RECREATE");   
   
+  /*
   for (auto igps = theGPs.begin(); igps != theGPs.end();) {
     GoldenPattern & gp = igps->second;      
     if(!gp.purge()) {theGPs.erase(igps++);} else { ++igps; } 
   }
+  */
   
   static ENTRY entry;
   TTree *tree = new TTree("FlatPatterns","FlatPatterns");
