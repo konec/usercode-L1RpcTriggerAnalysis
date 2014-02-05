@@ -7,16 +7,14 @@
 #include <ostream>
 #include <map>
 
+class MtfCoordinateConverter;
 
 class  Pattern {
 public:
 
-  typedef std::multimap<uint32_t,  unsigned int >  DataType;
+  typedef std::multimap<uint32_t,  std::pair<uint32_t, unsigned int> >  DataType;
 
  Pattern():multipleHits(false) {}
-
-  static uint32_t rotateDetId(uint32_t rawId, int step);
-  Pattern getRotated(int step) const;
 
   //is not empty
   operator bool() const { return theData.size() > 0; }
@@ -35,10 +33,9 @@ public:
   operator const DataType & () const {  return theData; }
 
   bool operator==(const Pattern& o) const;
-
-private:
   
 private:
+
   bool multipleHits;
   DataType  theData;
   std::vector<DataType::value_type> detsHit;

@@ -6,16 +6,20 @@ double ptBins[33]={0., 0.1,
 		 10., 12., 14., 16., 18., 20., 25., 30., 35., 40., 45., 
 		 50., 60., 70., 80., 90., 100., 120., 140., 
 		 160. };
+
+
+string path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/05RPC/";
+//string path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_3_pat/1Tower/";
+
+ 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 void plotRecoPt(string sysType="Otf",
 		int ipt=22){
 
-  string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev1/job_4_ana/"; 
-  path+= string(TString::Format("SingleMu_%d_p/",ipt));
-
+  string filePath = path + string(TString::Format("SingleMu_%d_p/",ipt));
   
-  TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
+  TFile *file = new TFile((filePath+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
   
   TTree *tree = (TTree*)file->Get("efficiencyTree");
@@ -54,12 +58,10 @@ void plotRecoPt(string sysType="Otf",
 ///////////////////////////////////////////////////////
 void plotRecoPhi(int ipt=0){
 
-
-  string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev1/job_4_ana/"; 
-  if(ipt>0) path+= string(TString::Format("SingleMu_%d_m/",ipt));
-
+  string filePath = path;
+  if(ipt>0) filePath = path+ string(TString::Format("SingleMu_%d_m/",ipt));
   
-  TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
+  TFile *file = new TFile((filePath+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
   
   TTree *tree = (TTree*)file->Get("efficiencyTree");
@@ -107,18 +109,17 @@ void plotRecoPhi(int ipt=0){
   }
   
 
-  c->Print(TString::Format("eps/RecoPhiRes_%d.eps",ipt).Data());
-  c->Print(TString::Format("png/RecoPhiRes_%d.png",ipt).Data());
+  c->Print(TString::Format("fig_eps/RecoPhiRes_%d.eps",ipt).Data());
+  c->Print(TString::Format("fig_png/RecoPhiRes_%d.png",ipt).Data());
 
 }
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 void plotLLH(int ipt=22){
 
-  string path = "/home/akalinow/scratch0/OverlapTrackFinder/job_4_ana/"; 
-  path+= string(TString::Format("SingleMu_%d_m/",ipt));
+  string filePath path + string(TString::Format("SingleMu_%d_m/",ipt));
 
-  TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
+  TFile *file = new TFile((filePath+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
   
   TTree *tree = (TTree*)file->Get("efficiencyTree");
@@ -151,9 +152,7 @@ void plotLLH(int ipt=22){
 ///////////////////////////////////////////////////////
 void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 
-  string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat/SingleMu_30_m/";
   TFile *file = new TFile((path+"GoldenPatterns.root").c_str());
-
 
   TObjArray grRPC, grCSC, grDT;
 
@@ -274,11 +273,15 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
-  plotGoldenPattern(30,9,44,-1);  
-  //plotGoldenPattern(31,7,10000,1);  
+  plotGoldenPattern(30,8,202,-1); 
+  plotGoldenPattern(11,8,202,-1); 
+  plotGoldenPattern(11,8,202,1); 
   return;
+
+
   ///
   plotRecoPhi(0);
+  plotRecoPhi(16);
   plotRecoPhi(22);
   ///
   plotRecoPt("Otf",16);
@@ -287,10 +290,11 @@ void plots(){
   plotRecoPt("Otf",22);
   plotRecoPt("Gmt",22);
   ///
-  // plotGoldenPattern(int iPt=9, int iTower=9, int iPhi=2260, int iCharge=-1)
-  plotGoldenPattern(9,6,2260,-1);  
-  plotGoldenPattern(9,9,2260,-1);  
-  //plotLLH(22);
-
+  plotGoldenPattern(16,6,302,-1);  
+  plotGoldenPattern(16,7,302,-1);  
+  plotGoldenPattern(16,8,312,-1);  
+  plotGoldenPattern(16,9,312,-1);  
   
 }
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////

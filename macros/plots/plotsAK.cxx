@@ -15,7 +15,6 @@ const int color[6] = {kBlack, kRed, kGreen, kBlue, kMagenta, kTeal};
 const int ptCutsGmt[4] = {0.1, 16, 20, 30};
 const int ptCutsOtf[4] = {0.1, 14, 18, 25};
 
-TF1 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 #include <cmath>
@@ -84,7 +83,6 @@ void makeFriendTree(TTree *tree){
   Double_t weight;
   TBranch *weightBranch = weightsTree->Branch("weight", &weight, "weight/D");  
 
-  //TH1F *hPtOrig = new TH1F("hPtOrig","",nPtBins,ptBins);
   TH1F *hPtOrig = new TH1F("hPtOrig","",400,0,200);
   tree->Draw("pt>>hPtOrig","eta<1.19","goff");
 
@@ -249,11 +247,11 @@ void plotEffVsHitPhi(TTree *tree, string sysType="Otf"){
   if(sysType=="Gmt") ptCuts = ptCutsGmt;
 
   for (int icut=0; icut <=1;++icut){
-    string selection(TString::Format("(pt>%d + 20) && eta<0.9",ptCuts[icut]).Data());
+    string selection(TString::Format("(pt>%d + 20) && eta<1.19",ptCuts[icut]).Data());
     //TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"TMath::Nint(phiHit*2*1152./(2*TMath::Pi()))",sysType,selection);
     TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"phiHit",sysType,selection);
     hEff->SetStats(kFALSE);
-    //hEff->SetMinimum(0.6); 
+    hEff->SetMinimum(0.7); 
     hEff->SetMaximum(1.04);
     hEff->SetMarkerStyle(21+icut);
     hEff->SetMarkerColor(color[icut]);
@@ -473,7 +471,6 @@ void plotRate(TTree *tree){
   hRateVx->Draw();
   hRateGmt->Draw("same");
   hRateOtf->Draw("same");
-  //fIntVxMuRate->Draw("same");
 
   leg->AddEntry(hRateVx,"#mu rate@Vx");
   leg->AddEntry(hRateGmt,"GMT");
@@ -552,7 +549,7 @@ void plotEffVsRate(TTree *tree,
     minY = 500;
   }
   if(aThreshold<20){
-    maxY = 4E5;
+    maxY = 7E4;
     minY = 2E3;
   }
 
@@ -589,21 +586,25 @@ void plotsAK(){
  
   string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
-  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_m/";
+  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/05RPC/";
+  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/01RPC/";
+  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/1RPC/";
+  path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_m/";
+  
 
   TFile *file = new TFile((path+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
 
   TTree *tree = (TTree*)file->Get("efficiencyTree");
-  //makeFriendTree(tree);
-  //delete tree;
+  makeFriendTree(tree);
+  delete tree;
   tree = (TTree*)file->Get("efficiencyTree");
 
-  plotEffPanel(tree,"Otf");
-  plotEffPanel(tree,"Gmt");
   plotEffVsEta(tree,"Otf");
+  //plotEffVsHitPhi(tree,"Otf");
+  //plotEffVsEta(tree,"Gmt");  
+  //plotEffVsRate(tree,20);
   return;
-
 
   ///Plot panel with a few turn on curves.
   plotEffPanel(tree,"Otf");

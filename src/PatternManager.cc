@@ -93,10 +93,13 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
     if (!isOK) return;
 
     int aLayer = myPhiConverter->getLayerNumber(is->first)+100*detId.subdetId();
-    int aPhi = myPhiConverter->convert(*is);
+    int iPhi = myPhiConverter->convert(*is);
 
-    if(refPhi.find(aLayer)!=refPhi.end()) return; //accept events with single hit in ref. layers
-    refPhi[aLayer] = aPhi;
+    //int nDivisions = GoldenPattern::Key::nPhi;
+    //if(iPhi<0) iPhi+=nDivisions;
+    //Accept only events with single hit in each layer
+    if(refPhi.find(aLayer)!=refPhi.end()) return; 
+    refPhi[aLayer] = iPhi;
   }
   if (pattern.size() == 0) return; 
 
@@ -148,8 +151,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	   <<std::endl;
   */
   //////////////////////
-  std::vector<int> myActiveRefs = {301, 302, 303, 304, 312, 101, 102, 202};
-  //std::vector<int> myActiveRefs = {304, 312}; //Only RPC PAC reference layers
+  std::vector<int> myActiveRefs = {301, 302, 303, 304, 101, 102, 312, 202};
 
   Pattern pattern;
   std::map<uint32_t,int> refPhi;
@@ -164,7 +166,6 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     int iPhi = myPhiConverter->convert(*is);
     int nDivisions = GoldenPattern::Key::nPhi;
     if(iPhi<0) iPhi+=nDivisions;
-    
     bool skipLayer = true;
     for(auto aRef : myActiveRefs){
       if(aRef==aLayer){
@@ -183,34 +184,37 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
 
-  //std::cout<<pattern<<std::endl;
-  
   for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
     igps->second.makeIntegratedCache();
     for (auto const & it : refPhi){  
       if(igps->first.theDet!=it.first) continue;
+      if(igps->first.theEtaCode<8 && 
+	 (it.first==312 || it.first==202)) continue;
+      if(igps->first.theEtaCode>7 && 
+	 (it.first!=312 && it.first!=202)) continue;
       myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);	  
       GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
-      ////////////DEBUG
-      /*
-      std::cout<<"ref phi: "<<(float)it.second/GoldenPattern::Key::nPhi*2*M_PI<<std::endl;
-      std::cout<<igps->first<<" "<<result<<std::endl;
-      //std::cout<<"GP: "<<igps->second<<std::endl;
-      */
+      ////////////DEBUG      
+      //std::cout<<igps->first<<" "<<result<<std::endl;
+      //std::cout<<"GP: "<<igps->second<<std::endl;      
       ////////////////////
       if (bestMatching < result) {
 	bestMatching = result;
 	bestKey =  igps->first;
 	bestKey.thePhiCode = it.second;       
+	bestKey.theCharge = it.first;       
 	} 	
     }
   }
 
-  if (bestMatching) {
+ if (bestMatching && bestKey.ptValue()<10 && false) {
       ////////////DEBUG
-    //std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
+      std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
+      std::cout<<pattern<<std::endl;
       //////////////////
+ }
 
+  if (bestMatching) {
     candidate.pt = bestKey.ptValue();
     //candidate.eta = bestKey.etaValue();
     candidate.eta = bestMatching.value();
@@ -270,7 +274,7 @@ void PatternManager::endJob(){
     GoldenPattern & gp = igps->second;      
     if(!gp.purge()) {theGPs.erase(igps++);} else { ++igps; } 
   }
-   
+  
   static ENTRY entry;
   TTree *tree = new TTree("FlatPatterns","FlatPatterns");
   tree->Branch("entry",&entry,"key_det/i:key_pt/i:key_phi/i:key_eta/i:key_strip/i:key_ch/I:pat_Case/i:patDet/i:posOrBend/I:freq/i");

@@ -113,25 +113,25 @@ void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConvert
 
   const Pattern::DataType & detdigi = p ;
   for (auto is = detdigi.cbegin(); is != detdigi.cend(); ++is) {
-    uint32_t rawId = is->first;
+    uint32_t rawId = is->second.first;
     DetId detId(rawId);
     if (detId.det() != DetId::Muon) 
       std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
     switch (detId.subdetId()) {
       case MuonSubdetId::RPC: {
-        RPCDigiSpec digi(rawId, is->second);
-	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(*is)]++;
+        RPCDigiSpec digi(rawId, is->second.second);
+	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second)]++;
         break;
       }	
       case MuonSubdetId::DT: {
-        DTphDigiSpec digi(rawId, is->second);
-        PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(*is)]++;
+        DTphDigiSpec digi(rawId, is->second.second);
+        PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second)]++;
 	PattCore[GoldenPattern::BENDT][myPhiConverter->getLayerNumber(rawId)][digi.phiB()]++;
         break;
       }
       case MuonSubdetId::CSC: {
-        CSCDigiSpec digi(rawId, is->second);
-        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(*is)]++;
+        CSCDigiSpec digi(rawId, is->second.second);
+        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second)]++;
         PattCore[GoldenPattern::BENCSC][myPhiConverter->getLayerNumber(rawId)][digi.pattern()]++;
         break;
       }
@@ -153,14 +153,15 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     
   ///Loop over unique detIds
   for (auto aEntry : detsHit){
-    uint32_t rawId = aEntry.first;
+    uint32_t rawId = aEntry.second.first;
+    uint32_t layer = aEntry.first;
     DetId detId(rawId);
     if (detId.det() != DetId::Muon){
       std::cout << "GoldenPattern::compare PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
       return result;
     }
     
-    auto aRange = detdigi.equal_range(rawId);
+    auto aRange = detdigi.equal_range(layer);
     auto beginIt = aRange.first;
     auto endIt =   aRange.second;
     ///Maximum measure over hits in the same detId
@@ -171,7 +172,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     ///Loop over hits in given detId
     for (auto is = beginIt; is != endIt; ++is) {
       if (detId.subdetId() == MuonSubdetId::RPC) {
-	RPCDigiSpec digi(rawId, is->second);
+	RPCDigiSpec digi(rawId, is->second.second);
 	if(rawId==theKey.theDet && digi.halfStrip()==theKey.theRefStrip) result.hasRefStation = true;
 	mType = GoldenPattern::POSRPC;
 	cit = PattCoreIntegrated.find(mType);
@@ -180,10 +181,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if (idm != cit->second.cend() ) {
 	  fPos = whereInDistribution(mType,
 				     myPhiConverter->getLayerNumber(rawId),
-				     myPhiConverter->convert(*is));
+				     myPhiConverter->convert(is->second));
 	  /*	  
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
-		   <<" pos rel: "<<myPhiConverter->convert(*is)
+		   <<" pos rel: "<<myPhiConverter->convert(is->second)
 		   <<" RPC  f: "<<fPos<<std::endl;
 	  */
 	  if(fPos>fPosMax) fPosMax = fPos;
@@ -194,7 +195,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	}
       }
       else if (detId.subdetId() == MuonSubdetId::DT) {
-	DTphDigiSpec digi(rawId, is->second);
+	DTphDigiSpec digi(rawId, is->second.second);
 	mType = GoldenPattern::POSDT;
 	cit = PattCoreIntegrated.find(mType);
 	if(cit==PattCoreIntegrated.cend()) continue;
@@ -202,10 +203,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if (idm != cit->second.cend() ) {
 	  fPos = whereInDistribution(mType, 
 				     myPhiConverter->getLayerNumber(rawId),
-				     myPhiConverter->convert(*is));
+				     myPhiConverter->convert(is->second));
 	  /*
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
-		   <<" pos rel: "<<myPhiConverter->convert(*is)
+		   <<" pos rel: "<<myPhiConverter->convert(is->second)
 		   <<" DT  f: "<<fPos<<std::endl;
 	  */
 	  DTChamberId dt(rawId);
@@ -228,7 +229,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	}
       }
       else if (detId.subdetId() == MuonSubdetId::CSC) {
-	CSCDigiSpec digi(rawId, is->second);
+	CSCDigiSpec digi(rawId, is->second.second);
 	mType = GoldenPattern::POSCSC;
 	cit = PattCoreIntegrated.find(mType);
 	if(cit==PattCoreIntegrated.cend()) continue;
@@ -236,10 +237,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if (idm != cit->second.cend() ) {
 	  fPos = whereInDistribution(mType, 
 				     myPhiConverter->getLayerNumber(rawId),
-				     myPhiConverter->convert(*is));
+				     myPhiConverter->convert(is->second));
 	  /*
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
-		   <<" pos rel: "<<myPhiConverter->convert(*is)
+		   <<" pos rel: "<<myPhiConverter->convert(is->second)
 		   <<" CSC  f: "<<fPos<<std::endl;
 	  */
 	  
@@ -323,12 +324,7 @@ bool GoldenPattern::purge(){
   int pos;
   unsigned int bef2, bef1, aft1, aft2, aft3;
 
-  int refSum = 0;
-  if(theKey.theDet>1){
-    for (auto idf = PattCore.find(POSRPC)->second[theKey.theDet].begin();
-	 idf!=PattCore.find(POSRPC)->second[theKey.theDet].end();++idf) refSum+=idf->second;
-  }
-  else refSum = theKey.theRefStrip;
+  int refSum = theKey.theRefStrip;
 
   for (auto isf=PattCore.begin();isf!=PattCore.end();){
     for (auto idf = isf->second.begin(); idf !=isf->second.end();) {
@@ -348,8 +344,7 @@ bool GoldenPattern::purge(){
 	if (idf->second[pos]==2 && aft1==0 && aft2==0 && bef1==0 && bef2==0)  remove = true;
 	if(remove) {idf->second.erase(imf++); } else { ++imf; } 	
       }
-      if (idf->second.size()==0 ||
-	  ((float)sum/refSum<0.05 && theKey.theEtaCode!=1 && theKey.theEtaCode!=2)) 
+      if (idf->second.size()==0 || (float)sum/refSum<0.05) 
 	isf->second.erase(idf++);  else  ++idf;
     }
       if (isf->second.size()==0) PattCore.erase(isf++);  else  ++isf;
@@ -400,25 +395,13 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
 
  for (auto isf=o.PattCoreIntegrated.cbegin();isf!=o.PattCoreIntegrated.cend();++isf){
    for (auto idf = isf->second.cbegin(); idf!=isf->second.cend();++idf) {      
-     out <<typeInfos[isf->first]<<" Det: "<< idf->first;
-     /*
-     if(typeInfos[isf->first].find("RPC")!=std::string::npos){
-       RPCDetId rpc(idf->first);
-       out<<" ("<<rpc<<") ";
-     }
-     if(typeInfos[isf->first].find("CSC")!=std::string::npos){
-       CSCDetId csc(idf->first);
-       out<<" ("<<csc<<") ";
-     }
-     if(typeInfos[isf->first].find("DT")!=std::string::npos){
-       DTChamberId dt(idf->first);
-       out<<" ("<<dt<<") ";
-     }
-     */
-     out <<" Value: ";
+     out <<typeInfos[isf->first]<<" Det: "<< idf->first;    
+     float aSum = 0.0;
+     out <<" Value: ";     
      out.precision(3);
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf) 
-       {out << imf->first<<":"<<imf->second<<", "; }
+       {out << imf->first<<":"<<imf->second<<", "; aSum+=imf->second;}
+     out <<" Sum: "<<aSum;
      out << std::endl;
    }
  }

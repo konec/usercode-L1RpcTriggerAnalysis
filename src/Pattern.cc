@@ -10,6 +10,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/DTphDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/MtfCoordinateConverter.h"
 
 
 /////////////////////////////////////////////////
@@ -23,12 +24,13 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
     std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
   switch (detId.subdetId()) {
   case MuonSubdetId::RPC: {
-    RPCDetId aId(rawId);    
+  RPCDetId aId(rawId);    
     if(aId.region()<0 || 
        (aId.region()==0 && aId.ring()<2) ||
        (aId.region()==0 && aId.station()==4) ||
        (aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
-       (aId.region()==1 && aId.ring()<3)) return false;           
+       (aId.region()==1 && aId.ring()<3)
+       ) return false;           
   }
     break;
   case MuonSubdetId::DT: {
@@ -45,93 +47,26 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
   }
     ///////////////////
   }
-  theData.insert(aData);
-  int aCounts = theData.count(aData.first);
+
+  int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first)+100*detId.subdetId();
+  std::pair<uint32_t,  std::pair<uint32_t, unsigned int> > aDataWithLayer(aLayer,aData);
+
+  theData.insert(aDataWithLayer);
+  int aCounts = theData.count(aLayer);
   if(aCounts>1) multipleHits = true;
   return (aCounts==1);
 }
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
-void  Pattern::makeHitDetsList(){
+void Pattern::makeHitDetsList(){
 
   unique_copy(begin(theData),
               end(theData),
               back_inserter(detsHit),
               [](const DataType::value_type &entry1,
                  const DataType::value_type &entry2) {
-                   return (entry1.first == entry2.first);
+		return (entry1.first == entry2.first);
 	      } );
-}
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-uint32_t Pattern::rotateDetId(uint32_t rawId, int step){
-
-  ///Assume 60deg steps
-  while(step<0){step+=6;}
-  int maxSector = 6;
-
-  uint32_t rawIdRotated = rawId; 
-
-  DetId detId(rawId);
-  switch (detId.subdetId()){    
-  case MuonSubdetId::RPC: {
-    RPCDetId rpcDet(rawId);
-    ///Barrel has 30deg sectors
-      if(rpcDet.region()==0){
-	step*=2;
-	maxSector = 12;
-      }
-    RPCDetId rpcDetRotated(rpcDet.region(),
-			   rpcDet.ring(),
-			   rpcDet.station(), 
-			   (rpcDet.sector()+step-1)%maxSector+1,
-			   rpcDet.layer(),
-			   rpcDet.subsector(),
-			   rpcDet.roll());
-    return rpcDetRotated.rawId();      
-  }
-  case MuonSubdetId::DT: {
-    ///Barrel has 30deg sectors
-    step*=2;
-    DTChamberId dtDet(rawId);
-    DTChamberId dtDetRotated(dtDet.wheel(),
-			     dtDet.station(),
-			     (dtDet.sector()+step)%12);
-    return dtDetRotated.rawId();      
-    break;
-  }
-  case MuonSubdetId::CSC: {
-    CSCDetId cscDet(rawId);
-    //Most CSC chambers are 10deg wide
-    int cscFactor = 6; 
-    int maxChamber = 36;
-    ///Some are 20deg wide
-    if(cscDet.station()>1 && cscDet.ring()==1){
-	cscFactor = 3;
-	maxChamber = 18;
-      }
-    int cscStep = step*cscFactor;
-    CSCDetId cscDetRotated(cscDet.endcap(),
-			   cscDet.station(),
-			   cscDet.ring(),
-			   (cscDet.chamber()+cscStep-1)%maxChamber+1,
-			   cscDet.layer());
-    return cscDetRotated.rawId();      
-  }
-  }  
-  return rawIdRotated;
-}
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-Pattern Pattern::getRotated(int step) const{
-
-  Pattern rotated;
-  
-  for (auto it = theData.cbegin(); it != theData.cend(); ++it){
-    rotated.add(std::pair<uint32_t,  unsigned int >(rotateDetId(it->first,step),it->second));
-  }
-  rotated.makeHitDetsList();
-  return rotated;
 }
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -153,13 +88,18 @@ std::ostream & operator << (std::ostream &out, const Pattern &o)
 {
   out <<" Pattern:  size: "<<o.size();
   for (auto it = o.theData.cbegin(); it != o.theData.cend(); ++it){
-    DetId detId( it->first);
+    DetId detId(it->second.first);
     switch (detId.subdetId()) {
-    case MuonSubdetId::RPC: { out << std::endl <<RPCDetId(it->first)<<" "<<RPCDigiSpec(it->first, it->second);  break; }
-    case MuonSubdetId::DT:  { out << std::endl <<DTChamberId(it->first)<<" "<<DTphDigiSpec(it->first, it->second); break; }
-    case MuonSubdetId::CSC: { out << std::endl <<CSCDetId(it->first)<<" "<<CSCDigiSpec(it->first, it->second);  break; }
+    case MuonSubdetId::RPC: { out << std::endl <<RPCDetId(it->second.first)<<" "<<RPCDigiSpec(it->second.first, it->second.second);  break; }
+    case MuonSubdetId::DT:  { out << std::endl <<DTChamberId(it->second.first)<<" "<<DTphDigiSpec(it->second.first, it->second.second); break; }
+    case MuonSubdetId::CSC: { out << std::endl <<CSCDetId(it->second.first)<<" "<<CSCDigiSpec(it->second.first, it->second.second);  break; }
     };
   }
+  out<<"Unique layers: ";
+  for (auto aEntry : o.detsHit) out<<aEntry.first<<" ";  
+  out<<std::endl;
+
   return out;
 }
-
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////

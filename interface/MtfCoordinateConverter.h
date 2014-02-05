@@ -31,7 +31,7 @@ public:
     MtfCoordinateConverter(const edm::EventSetup& es);
     virtual ~MtfCoordinateConverter();
 
-    uint32_t getLayerNumber(uint32_t rawId);
+    static uint32_t getLayerNumber(uint32_t rawId);
 
     void setReferencePhi(float aPhiRef);
 
