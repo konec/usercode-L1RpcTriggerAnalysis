@@ -94,7 +94,7 @@ std::ostream & operator << (std::ostream &out, const Pattern &o)
     case MuonSubdetId::CSC: { out << std::endl <<CSCDetId(it->second.first)<<" "<<CSCDigiSpec(it->second.first, it->second.second);  break; }
     };
   }
-  out<<"Unique layers: ";
+  out<<"\nUnique layers: ";
   for (auto aEntry : o.detsHit) out<<aEntry.first<<" ";  
   out<<std::endl;
 

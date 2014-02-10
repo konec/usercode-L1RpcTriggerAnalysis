@@ -161,11 +161,12 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     DetId detId( is->first);
     if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
     if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;    
-    pattern.add(*is); 
+    if(!pattern.add(*is)) continue; //For refernce use only layers with single hit (most likely too restrictive)
     int aLayer = myPhiConverter->getLayerNumber(is->first)+100*detId.subdetId();
     int iPhi = myPhiConverter->convert(*is);
-    int nDivisions = GoldenPattern::Key::nPhi;
-    if(iPhi<0) iPhi+=nDivisions;
+    //int nDivisions = GoldenPattern::Key::nPhi;
+    //if(iPhi<0) iPhi+=nDivisions;
+
     bool skipLayer = true;
     for(auto aRef : myActiveRefs){
       if(aRef==aLayer){
@@ -176,7 +177,6 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     if(skipLayer) continue;
     
     refPhi[aLayer] = iPhi; //FIXME! Use multimap
-    //std::cout<<"aLayer: "<<aLayer<<" aPhi: "<<(float)iPhi/GoldenPattern::Key::nPhi*2*M_PI<<std::endl;
   }
   pattern.makeHitDetsList();
   if (pattern.size() == 0) return candidate; 
@@ -196,6 +196,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
       GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
       ////////////DEBUG      
       //std::cout<<igps->first<<" "<<result<<std::endl;
+      //std::cout<<"Ref dig: "<<it.first<<" "<<it.second<<std::endl;
       //std::cout<<"GP: "<<igps->second<<std::endl;      
       ////////////////////
       if (bestMatching < result) {
@@ -212,12 +213,13 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
       std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
       std::cout<<pattern<<std::endl;
       //////////////////
+      //exit(0);
  }
 
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
-    //candidate.eta = bestKey.etaValue();
-    candidate.eta = bestMatching.value();
+    candidate.eta = bestKey.etaValue();
+    //candidate.eta = bestMatching.value();
     candidate.phi = bestKey.phiValue();
     candidate.charge = bestKey.chargeValue();
     candidate.q   = bestMatching.nMatchedTot()
@@ -252,12 +254,20 @@ void PatternManager::beginJob()
     key.theRefStrip =  entry.key_strip;
     
     if(key.theRefStrip<1000) continue;
+    //if(key.theEtaCode<9) continue;
+    //if(!(key.thePtCode==30 || key.thePtCode<10)) continue;
 
     GoldenPattern::PosBenCase pat_Case = static_cast<GoldenPattern::PosBenCase>(entry.pat_Case);
     if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key);
     theGPs[key].add(pat_Case, entry.patDet, entry.posOrBend, entry.freq);
   }
 
+  
+  for (auto igps = theGPs.begin(); igps != theGPs.end();) {
+    GoldenPattern & gp = igps->second;      
+    if(!gp.purge()) {theGPs.erase(igps++);} else { ++igps; } 
+  }
+  
   delete tree;
   patternInpFile.Close();
 

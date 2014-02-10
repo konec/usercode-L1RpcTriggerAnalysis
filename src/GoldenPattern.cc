@@ -29,7 +29,7 @@ void GoldenPattern::Result::runNoCheck() const {
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
       float val = norm(mType->first,it->second);
       fract += log(val); 
-//std::cout<<mType->first<<" "<<val<<" log(val): "<<log(val)<<std::endl;
+      //std::cout<<mType->first<<" "<<val<<" log(val): "<<log(val)<<std::endl;
     }
   }
 
@@ -170,6 +170,9 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     float fBenMax = 0.0;
     float fPos=0.0, fBen=0.0;
     ///Loop over hits in given detId
+
+    std::cout.precision(15);
+
     for (auto is = beginIt; is != endIt; ++is) {
       if (detId.subdetId() == MuonSubdetId::RPC) {
 	RPCDigiSpec digi(rawId, is->second.second);
@@ -182,7 +185,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  fPos = whereInDistribution(mType,
 				     myPhiConverter->getLayerNumber(rawId),
 				     myPhiConverter->convert(is->second));
-	  /*	  
+	  /*	  	  
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
 		   <<" pos rel: "<<myPhiConverter->convert(is->second)
 		   <<" RPC  f: "<<fPos<<std::endl;
@@ -242,8 +245,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
 		   <<" pos rel: "<<myPhiConverter->convert(is->second)
 		   <<" CSC  f: "<<fPos<<std::endl;
-	  */
-	  
+	  */	  
 	  CSCDetId csc(rawId);
 	  if (csc.station()==1) result.hasStation1 = true;
 	  if (csc.station()==2) result.hasStation2 = true;
@@ -257,7 +259,8 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  fBen = whereInDistribution(mType,
 				     myPhiConverter->getLayerNumber(rawId), 
 				     digi.pattern());
-	  //std::cout<<digi<<" CSC bend f: "<<fBen<<std::endl;
+	  //std::cout<<digi<<" CSC bend: "<<digi.pattern()
+	  //   <<" f: "<<fBen<<std::endl;
 	}
 	if(fPos*fBen>fMax){
 	  fMax = fPos*fBen;
@@ -322,7 +325,7 @@ bool GoldenPattern::purge(){
 
   bool remove = false;
   int pos;
-  unsigned int bef2, bef1, aft1, aft2, aft3;
+  //unsigned int bef2, bef1, aft1, aft2, aft3;
 
   int refSum = theKey.theRefStrip;
 
@@ -333,18 +336,20 @@ bool GoldenPattern::purge(){
 	remove = false;
 	pos = imf->first;  
 	sum += idf->second[pos];
+	/*
 	bef2 = (idf->second.find(pos-2) != idf->second.end()) ?  idf->second[pos-2] : 0;  
 	bef1 = (idf->second.find(pos-1) != idf->second.end()) ?  idf->second[pos-1] : 0;  
 	aft1 = (idf->second.find(pos+1) != idf->second.end()) ?  idf->second[pos+1] : 0;  
 	aft2 = (idf->second.find(pos+2) != idf->second.end()) ?  idf->second[pos+2] : 0;  
 	aft3 = (idf->second.find(pos+3) != idf->second.end()) ?  idf->second[pos+3] : 0; 
- 	if (idf->second[pos]/refSum<5E-4) remove = true;
- 	if (idf->second[pos]==1 && bef1==0 && aft1==0) remove = true;
-	if (idf->second[pos]==1 && aft1==1 && aft2==0 && aft3==0 && bef1==0 && bef2==0)  remove = true;
-	if (idf->second[pos]==2 && aft1==0 && aft2==0 && bef1==0 && bef2==0)  remove = true;
+	*/
+ 	if (idf->second[pos]/refSum<5E-3) remove = true;
+ 	//if (idf->second[pos]==1 && bef1==0 && aft1==0) remove = true;
+	//if (idf->second[pos]==1 && aft1==1 && aft2==0 && aft3==0 && bef1==0 && bef2==0)  remove = true;
+	//if (idf->second[pos]==2 && aft1==0 && aft2==0 && bef1==0 && bef2==0)  remove = true;
 	if(remove) {idf->second.erase(imf++); } else { ++imf; } 	
       }
-      if (idf->second.size()==0 || (float)sum/refSum<0.05) 
+      if (idf->second.size()==0 || (float)sum/refSum<-0.05) 
 	isf->second.erase(idf++);  else  ++idf;
     }
       if (isf->second.size()==0) PattCore.erase(isf++);  else  ++isf;
