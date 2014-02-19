@@ -29,7 +29,8 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
        (aId.region()==0 && aId.ring()<2) ||
        (aId.region()==0 && aId.station()==4) ||
        (aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
-       (aId.region()==1 && aId.ring()<3)) return false;           
+       (aId.region()==1 && aId.ring()<3)
+       ) return false;           
   }
     break;
   case MuonSubdetId::DT: {
@@ -42,9 +43,9 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
   }
   case MuonSubdetId::CSC: {
     CSCDetId csc(rawId);
+    ///////////////////
     break;
   }
-    ///////////////////
   }
 
   int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first)+100*detId.subdetId();
@@ -52,6 +53,7 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
 
   theData.insert(aDataWithLayer);
   int aCounts = theData.count(aLayer);
+
   if(aCounts>1) multipleHits = true;
   return (aCounts==1);
 }
@@ -99,6 +101,27 @@ std::ostream & operator << (std::ostream &out, const Pattern &o)
   out<<std::endl;
 
   return out;
+}
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+void Pattern::print(MtfCoordinateConverter *myPhiConverter){
+
+
+  std::cout <<" Pattern:  size: "<<size();
+  for (auto it = theData.cbegin(); it != theData.cend(); ++it){
+    DetId detId(it->second.first);
+    switch (detId.subdetId()) {
+    case MuonSubdetId::RPC: { std::cout << std::endl <<RPCDetId(it->second.first)<<" "<<RPCDigiSpec(it->second.first, it->second.second);  break; }
+    case MuonSubdetId::DT:  { std::cout << std::endl <<DTChamberId(it->second.first)<<" "<<DTphDigiSpec(it->second.first, it->second.second); break; }
+    case MuonSubdetId::CSC: { std::cout << std::endl <<CSCDetId(it->second.first)<<" "<<CSCDigiSpec(it->second.first, it->second.second);  break; }
+    };
+    std::cout<<" layer: "<<myPhiConverter->getLayerNumber(it->second.first)
+	     <<" pos rel: "<<myPhiConverter->convert(it->second);
+  }
+  std::cout<<"\nUnique layers: ";
+  for (auto aEntry : detsHit) std::cout<<aEntry.first<<" ";  
+  std::cout<<std::endl;
+
 }
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////

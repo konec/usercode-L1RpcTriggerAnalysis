@@ -164,6 +164,9 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     auto aRange = detdigi.equal_range(layer);
     auto beginIt = aRange.first;
     auto endIt =   aRange.second;
+
+    //std::cout<<"diff: "<<detdigi.count(layer)<<std::endl;
+    //if((layer==101 || layer==201 || layer==301 || layer==311) && detdigi.count(layer)>1) continue;
     ///Maximum measure over hits in the same detId
     float fMax = 0.0;
     float fPosMax = 0.0;
@@ -260,7 +263,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 				     myPhiConverter->getLayerNumber(rawId), 
 				     digi.pattern());
 	  //std::cout<<digi<<" CSC bend: "<<digi.pattern()
-	  //   <<" f: "<<fBen<<std::endl;
+	  // <<" f: "<<fBen<<std::endl;
 	}
 	if(fPos*fBen>fMax){
 	  fMax = fPos*fBen;
@@ -325,7 +328,6 @@ bool GoldenPattern::purge(){
 
   bool remove = false;
   int pos;
-  //unsigned int bef2, bef1, aft1, aft2, aft3;
 
   int refSum = theKey.theRefStrip;
 
@@ -336,17 +338,7 @@ bool GoldenPattern::purge(){
 	remove = false;
 	pos = imf->first;  
 	sum += idf->second[pos];
-	/*
-	bef2 = (idf->second.find(pos-2) != idf->second.end()) ?  idf->second[pos-2] : 0;  
-	bef1 = (idf->second.find(pos-1) != idf->second.end()) ?  idf->second[pos-1] : 0;  
-	aft1 = (idf->second.find(pos+1) != idf->second.end()) ?  idf->second[pos+1] : 0;  
-	aft2 = (idf->second.find(pos+2) != idf->second.end()) ?  idf->second[pos+2] : 0;  
-	aft3 = (idf->second.find(pos+3) != idf->second.end()) ?  idf->second[pos+3] : 0; 
-	*/
  	if (idf->second[pos]/refSum<5E-3) remove = true;
- 	//if (idf->second[pos]==1 && bef1==0 && aft1==0) remove = true;
-	//if (idf->second[pos]==1 && aft1==1 && aft2==0 && aft3==0 && bef1==0 && bef2==0)  remove = true;
-	//if (idf->second[pos]==2 && aft1==0 && aft2==0 && bef1==0 && bef2==0)  remove = true;
 	if(remove) {idf->second.erase(imf++); } else { ++imf; } 	
       }
       if (idf->second.size()==0 || (float)sum/refSum<-0.05) 
@@ -368,7 +360,7 @@ void GoldenPattern::makeIntegratedCache(){
 
   int refSum = theKey.theRefStrip;
 
-  //int nBits = 11;
+  int nBits = 6;
   ///////////////////
   ///Prepare tables of integrated frequencies
   PattCoreIntegrated = PattCore;
@@ -377,10 +369,10 @@ void GoldenPattern::makeIntegratedCache(){
       float sum = 0;
       for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
-	//int digitisedVal = ((rmf->second)/refSum)*std::pow(2,nBits);
-	//rmf->second= digitisedVal/std::pow(2,nBits);
-
-	rmf->second= (rmf->second)/refSum;
+	int digitisedVal = ((rmf->second)/refSum)*std::pow(2,nBits);
+	if(digitisedVal == 0 && rmf->second !=0) digitisedVal = 1.0;
+	rmf->second= digitisedVal/std::pow(2,nBits);
+	//rmf->second= (rmf->second)/refSum;
 	if(rmf->second>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
       }
     }

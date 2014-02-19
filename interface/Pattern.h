@@ -33,6 +33,8 @@ public:
   operator const DataType & () const {  return theData; }
 
   bool operator==(const Pattern& o) const;
+
+  void print(MtfCoordinateConverter *myPhiConverter);
   
 private:
 

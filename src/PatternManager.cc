@@ -75,6 +75,7 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   if (!hitSpec) return;
 
   int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());
+  theEtaCode = 0;
   float phiref = hitSpec->position().phi();
   float ptref  = simu->pt(); 
   int chargeref = simu->charge();
@@ -135,23 +136,10 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 
   if(!myPhiConverter) myPhiConverter = new MtfCoordinateConverter(es);
   myPhiConverter->setReferencePhi(0);
-
-  //int chargeref = simu->charge();
-  //float phiref = hitSpec->position().phi();
-  //int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());
   //////////////////////
   theEvForPatCounter++;
 
-  ////////////DEBUG
-  /*
-  std::cout.precision(4);
-  std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()
-	   <<" theEtaCode: "<<L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta())
-	   <<" pt: "<<simu->pt()
-	   <<std::endl;
-  */
-  //////////////////////
-  std::vector<int> myActiveRefs = {301, 302, 303, 304, 101, 102, 312, 202};
+  std::vector<int> myActiveRefs = {301, 302, 303, 304, 101, 102, 312, 313, 202};
 
   Pattern pattern;
   std::map<uint32_t,int> refPhi;
@@ -164,8 +152,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     if(!pattern.add(*is)) continue; //For refernce use only layers with single hit (most likely too restrictive)
     int aLayer = myPhiConverter->getLayerNumber(is->first)+100*detId.subdetId();
     int iPhi = myPhiConverter->convert(*is);
-    //int nDivisions = GoldenPattern::Key::nPhi;
-    //if(iPhi<0) iPhi+=nDivisions;
+    int nDivisions = GoldenPattern::Key::nPhi;
+    if(iPhi<0) iPhi+=nDivisions;
 
     bool skipLayer = true;
     for(auto aRef : myActiveRefs){
@@ -187,17 +175,9 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
     igps->second.makeIntegratedCache();
     for (auto const & it : refPhi){  
-      if(igps->first.theDet!=it.first) continue;
-      if(igps->first.theEtaCode<8 && 
-	 (it.first==312 || it.first==202)) continue;
-      if(igps->first.theEtaCode>7 && 
-	 (it.first!=312 && it.first!=202)) continue;
+      if(igps->first.theDet!=it.first) continue;     
       myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);	  
       GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
-      ////////////DEBUG      
-      //std::cout<<igps->first<<" "<<result<<std::endl;
-      //std::cout<<"Ref dig: "<<it.first<<" "<<it.second<<std::endl;
-      //std::cout<<"GP: "<<igps->second<<std::endl;      
       ////////////////////
       if (bestMatching < result) {
 	bestMatching = result;
@@ -208,14 +188,25 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
 
- if (bestMatching && bestKey.ptValue()<10 && false) {
-      ////////////DEBUG
-      std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
-      std::cout<<pattern<<std::endl;
-      //////////////////
-      //exit(0);
- }
+  if (bestMatching && bestKey.ptValue()<25 && false) {
+    ////////////DEBUG
+    std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
+    std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
+    std::cout<<theGPs[bestKey]<<std::endl;
 
+    for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
+      for (auto const & it : refPhi){  
+	myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);	  
+	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
+	if(igps->first.thePtCode==30){
+	  std::cout<<igps->first<<" "<<result<<std::endl;
+	  std::cout<<"GP: "<<igps->second<<std::endl; 
+	  pattern.print(myPhiConverter);
+	}
+      }
+    }
+  }
+  ////////////DEBUG            
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
     candidate.eta = bestKey.etaValue();
@@ -253,24 +244,25 @@ void PatternManager::beginJob()
     key.theCharge =  entry.key_ch;
     key.theRefStrip =  entry.key_strip;
     
-    if(key.theRefStrip<1000) continue;
+    if(key.theRefStrip<50000) continue;
     //if(key.theEtaCode<9) continue;
     //if(!(key.thePtCode==30 || key.thePtCode<10)) continue;
-
+    /*
+    if(key.theEtaCode==9 && 
+       (key.theDet==201 || key.theDet==204) continue;
+    */
     GoldenPattern::PosBenCase pat_Case = static_cast<GoldenPattern::PosBenCase>(entry.pat_Case);
     if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key);
     theGPs[key].add(pat_Case, entry.patDet, entry.posOrBend, entry.freq);
   }
 
-  
   for (auto igps = theGPs.begin(); igps != theGPs.end();) {
     GoldenPattern & gp = igps->second;      
     if(!gp.purge()) {theGPs.erase(igps++);} else { ++igps; } 
   }
-  
+    
   delete tree;
   patternInpFile.Close();
-
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
