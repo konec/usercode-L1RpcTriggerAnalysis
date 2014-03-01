@@ -140,6 +140,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   theEvForPatCounter++;
 
   std::vector<int> myActiveRefs = {301, 302, 303, 304, 101, 102, 312, 313, 202};
+  //myActiveRefs = {101, 102, 301, 302, 202};
 
   Pattern pattern;
   std::map<uint32_t,int> refPhi;
@@ -195,13 +196,14 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     std::cout<<theGPs[bestKey]<<std::endl;
 
     for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
-      for (auto const & it : refPhi){  
+      for (auto const & it : refPhi){
+	if(igps->first.theDet!=it.first) continue;  
 	myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);	  
 	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
-	if(igps->first.thePtCode==30){
-	  std::cout<<igps->first<<" "<<result<<std::endl;
-	  std::cout<<"GP: "<<igps->second<<std::endl; 
-	  pattern.print(myPhiConverter);
+	if(result.nMatchedTot()>bestMatching.nMatchedTot()-2){
+	  std::cout<<igps->first<<" "<<result<<" better? "<<(bestMatching<result)<<std::endl;
+	  //std::cout<<"GP: "<<igps->second<<std::endl; 
+	  //pattern.print(myPhiConverter);
 	}
       }
     }
@@ -209,8 +211,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   ////////////DEBUG            
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
-    candidate.eta = bestKey.etaValue();
-    //candidate.eta = bestMatching.value();
+    //candidate.eta = bestKey.etaValue();
+    candidate.eta = bestMatching.value();
     candidate.phi = bestKey.phiValue();
     candidate.charge = bestKey.chargeValue();
     candidate.q   = bestMatching.nMatchedTot()
@@ -244,7 +246,7 @@ void PatternManager::beginJob()
     key.theCharge =  entry.key_ch;
     key.theRefStrip =  entry.key_strip;
     
-    if(key.theRefStrip<50000) continue;
+    if(key.theRefStrip<5000) continue;
     //if(key.theEtaCode<9) continue;
     //if(!(key.thePtCode==30 || key.thePtCode<10)) continue;
     /*

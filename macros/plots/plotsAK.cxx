@@ -124,8 +124,9 @@ TH1D *getTurnOncurve(TTree *tree, float ptCut,
 	     TString::Format("@l1Objects%s.size()>0 && %s",sysType.c_str(),sel.c_str()).Data(),"goff");
   }
   if(sysType=="Otf"){
-    tree->Draw(TString::Format("(l1Objects%s[0].pt>=%3.2f && l1ObjectsOtf.q!=103 && l1ObjectsOtf.q!=104 && l1ObjectsOtf.q!=105 && l1ObjectsOtf.q%100>3):%s>>h2D",
-			       //TString::Format("(l1Objects%s[0].pt>=%3.2f && l1ObjectsOtf.q%100>2):%s>>h2D",
+    tree->Draw(TString::Format("(l1Objects%s[0].pt>=%3.2f && l1ObjectsOtf.q!=103 && l1ObjectsOtf.q!=104 && l1ObjectsOtf.q!=105 && l1ObjectsOtf.q%100>3 && l1ObjectsOtf.q>650):%s>>h2D",
+	       //TString::Format("(l1Objects%s[0].pt>=%3.2f && l1ObjectsOtf.q%100>3 && l1ObjectsOtf.q>250):%s>>h2D",
+			       //TString::Format("(l1Objects%s[0].pt>=%3.2f && l1ObjectsOtf.q%100>4 &&  l1ObjectsOtf.q/100==8):%s>>h2D",
 			       sysType.c_str(),ptCut,var.c_str()).Data(),
 	       TString::Format("@l1Objects%s.size()>0 && %s",sysType.c_str(),sel.c_str()).Data(),"goff");
   }
@@ -248,7 +249,7 @@ void plotEffVsHitPhi(TTree *tree, string sysType="Otf"){
   if(sysType=="Gmt") ptCuts = ptCutsGmt;
 
   for (int icut=0; icut <=1;++icut){
-    string selection(TString::Format("(pt>%d + 20) && eta<1.19",ptCuts[icut]).Data());
+    string selection(TString::Format("(pt>%d + 20)",ptCuts[icut]).Data());
     //TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"TMath::Nint(phiHit*2*1152./(2*TMath::Pi()))",sysType,selection);
     TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"phiHit",sysType,selection);
     hEff->SetStats(kFALSE);
@@ -298,6 +299,7 @@ void plotEffVsEta(TTree *tree, string sysType="Otf"){
 
   for (int icut=0; icut <=3;++icut){
     string selection(TString::Format("(pt>(%d + 20))",ptCuts[icut]).Data());
+    //string selection(TString::Format("(pt<(10))",ptCuts[icut]).Data());
     //string selection("1");
     TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"eta",sysType,selection);
     hEff->SetStats(kFALSE);
@@ -424,8 +426,8 @@ TH1F* getRateHisto(TTree *tree,
   hRate->SetYTitle("Arbitrary units");
 
   hRate->SetLineWidth(3);
-  std::string selection = friendVarName+"*(eta<11.19)";
-  if(type=="Otf") selection+= "*(l1ObjectsOtf.q!=103 && l1ObjectsOtf.q!=104 && l1ObjectsOtf.q!=105 && l1ObjectsOtf.q%100>3)";
+  std::string selection = friendVarName+"*(eta>1.15)";
+  if(type=="Otf") selection+= "*(l1ObjectsOtf.q!=103 && l1ObjectsOtf.q!=104 && l1ObjectsOtf.q!=105 && l1ObjectsOtf.q%100>3 && l1ObjectsOtf.q>650)";
 
   tree->Draw(var.c_str(),selection.c_str(),"goff");
 
@@ -499,7 +501,7 @@ void plotEffVsRate(TTree *tree,
   TH1F *hRateGmt = getRateHisto(tree,"Gmt");
   TH1F *hRateOtf = getRateHisto(tree,"Otf");
 
-  string selection(TString::Format("eta<11.19").Data());
+  string selection(TString::Format("eta>1.15").Data());
   
   TH2F *h2D = new TH2F("h2D","",1,aThreshold,9999,2,-0.5,1.5);
   
@@ -587,8 +589,11 @@ void plotsAK(){
   utilsL1RpcStyle()->cd();
  
   string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
+  path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
 
-  path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
+  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/DistanceFromMedian/";
+
+  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/Baseline_19_02_2014/SingleMu_8_p/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEtaFullStat/";
 
 
@@ -604,11 +609,12 @@ void plotsAK(){
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/01RPC/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/1RPC/";
 
-  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_p_TrainSample/";
-  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_p_TestSample/";
+  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/TrainSample/SingleMu_30_m/";
+  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/TestSample/SingleMu_30_m/";
 
-  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/TrainSample/";
-  //path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/TestSample/";
+  path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC/";
+  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC_noRPC_ref/";
+  //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC_noDT_CSC_ref/";
   
 
 
@@ -620,17 +626,19 @@ void plotsAK(){
   delete tree;
   tree = (TTree*)file->Get("efficiencyTree");
 
-  //plotEffVsEta(tree,"Rpc");
-  //plotEffPanel(tree,"Rpc");
-  //return;
-
   plotEffVsEta(tree,"Otf");
-  plotEffVsEta(tree,"Gmt");  
+  plotEffVsRate(tree,20);
+  //plotEffPanel(tree,"Otf");
+  //plotEffVsHitPhi(tree,"Otf");
+  return;
+
+  //plotEffVsEta(tree,"Otf");
+  //plotEffVsEta(tree,"Gmt");  
   //plotEffPanel(tree,"Otf");
   //plotEffPanel(tree,"Gmt");
   //plotEffVsHitPhi(tree,"Otf");
 
-  plotEffVsRate(tree,20);
+  //plotEffVsRate(tree,20);
   return;
 
   ///Plot panel with a few turn on curves.

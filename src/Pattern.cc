@@ -30,7 +30,7 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
        (aId.region()==0 && aId.station()==4) ||
        (aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
        (aId.region()==1 && aId.ring()<3)
-       ) return false;           
+       ) return false;
   }
     break;
   case MuonSubdetId::DT: {

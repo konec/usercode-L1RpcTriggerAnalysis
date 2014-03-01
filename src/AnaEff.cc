@@ -113,6 +113,7 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecOb
   myEvent->l1ObjectsOtf = l1Otfs;
   myEvent->l1ObjectsGmt = l1Gmts;
   myEvent->l1ObjectsRpc = l1Rpcs;
+  myEvent->l1ObjectsOther = l1Oths;
   tree->Fill();
 
 

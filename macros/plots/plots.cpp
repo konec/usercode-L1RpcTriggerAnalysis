@@ -11,6 +11,9 @@ double ptBins[33]={0., 0.1,
 //string path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/05RPC/";
 string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
 
+path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC/";
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC_noRPC_ref/";
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC_noDT_CSC_ref/";
  
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -33,9 +36,10 @@ void plotRecoPt(string sysType="Otf",
   gStyle->SetStatX(0.9);
   
   TH1F *h = (TH1F*)h1D->Clone(TString::Format("h%s",sysType.c_str()));
+  std::string selection = "eta<0.9";
   
   tree->Draw(TString::Format("l1Objects%s[0].pt>>h%s",sysType.c_str(),sysType.c_str())
-	     ,"","goff");
+	     ,selection.c_str(),"goff");
 
   TCanvas* c = new TCanvas(TString::Format("RecoPt_%s",sysType.c_str()),"RecoPt",460,500);			  
   h->Draw();
@@ -82,8 +86,9 @@ void plotRecoPhi(int ipt=0){
   hOtf->SetLineColor(4);
  
   std::string sysType = "Otf";
+  std::string selection = "";
   tree->Draw(TString::Format("l1Objects%s[0].phi - phiHit>>h%s",sysType.c_str(),sysType.c_str())
-	     ,"l1ObjectsOtf[0].q%100>4","goff");
+	     ,selection.c_str(),"goff");
 
   std::string sysType = "Gmt";
   tree->Draw(TString::Format("l1Objects%s[0].phi - phiHit>>h%s",sysType.c_str(),sysType.c_str())
@@ -273,7 +278,9 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
-  plotGoldenPattern(30,7,102,-1); 
+  plotRecoPhi(20);
+  plotRecoPt("Otf",20);
+  //plotGoldenPattern(30,7,102,-1); 
   //plotGoldenPattern(11,8,202,-1); 
   //plotGoldenPattern(11,8,202,1); 
   return;

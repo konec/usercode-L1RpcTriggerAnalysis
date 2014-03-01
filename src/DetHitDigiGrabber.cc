@@ -5,6 +5,26 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/Common/interface/Handle.h"
 
+////AK
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
+#include "TrackingTools/GeomPropagators/interface/StraightLineBarrelCylinderCrossing.h"
+#include "TrackingTools/GeomPropagators/interface/HelixBarrelCylinderCrossing.h"
+#include "TrackingTools/GeomPropagators/interface/HelixForwardPlaneCrossing.h"
+#include "DataFormats/TrajectoryState/interface/TrackCharge.h"
+
+#include "TrackingTools/GeomPropagators/interface/Propagator.h"
+#include "DataFormats/GeometrySurface/interface/BoundCylinder.h"
+#include "DataFormats/GeometrySurface/interface/SimpleCylinderBounds.h"
+#include "DataFormats/GeometrySurface/interface/BoundDisk.h"
+#include "DataFormats/GeometrySurface/interface/SimpleDiskBounds.h"
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
+
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
+#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
+//////
+
 #include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 
@@ -67,52 +87,195 @@ HitSpecObj DetHitDigiGrabber::rpcDetHits(const edm::Event &ev,
   edm::ESHandle<RPCGeometry> rpcGeometry;
   es.get<MuonGeometryRecord>().get(rpcGeometry);
 
+  GlobalPoint hitPoint;
+  GlobalVector glbMom;
+
   for (edm::PSimHitContainer::const_iterator hitItr = simHits->begin(); hitItr != simHits->end(); ++hitItr) {
     if ( !(13 == abs(hitItr->particleType()) ) ) continue;
     uint32_t rpcRawId = hitItr->detUnitId();
     RPCDetId rpcDet(rpcRawId);
     RPCDetIdUtil  u(rpcDet);
+    
     if((station==2 && ((u.isBarrel() && u.barrelLayer()==4) || (!u.isBarrel() && u.endcapLayer()==2))) ||
        (station==1 && u.isBarrel() && u.barrelLayer()==1)){
 
-      ///Do not use endcap roll 3 in trigger tower 7
-      if(!u.isBarrel() && u.endcapLayer()==2 && rpcDet.roll()==3) continue;
+      ///Do not use endcap roll 1 in trigger tower 7
+      if(rpcDet.region()!=0 && rpcDet.station()==2 && rpcDet.roll()==1) continue;
 
-      GlobalPoint hitPoint = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->entryPoint());
-      GlobalVector glbMom = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->momentumAtEntry());
+      hitPoint = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->entryPoint());
+      glbMom = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->momentumAtEntry());
 
       if (u.isBarrel() || result.rawId()==0) result = HitSpecObj(rpcRawId, hitPoint, glbMom);
 
       TH2D* h = u.isBarrel() ?  hDetHitDigiGrabber_DphiVsPt_Bar : hDetHitDigiGrabber_DphiVsPt_End;
       h->Fill( simu->pt(), deltaPhi(simu->phi(),hitPoint.phi())*simu->charge());
-/*
+      /*
       std::cout <<"Det: "<< rpcRawId 
-              <<" glbMom: pt:" << glbMom.perp() <<" pz: "<<glbMom.z()<<" phi: "<<glbMom.phi() 
-              <<" globalPosition: r:"<<hitPoint.perp()<<" z:"<<hitPoint.z()<<" phi: "<<hitPoint.phi()
-              <<std::endl;
-*/
+		<<rpcDet
+		<<" glbMom: pt:" << glbMom.perp() <<" pz: "<<glbMom.z()<<" phi: "<<glbMom.phi() 
+		<<" globalPosition: r:"<<hitPoint.perp()<<" z:"<<hitPoint.z()<<" phi: "<<hitPoint.phi()
+		<<std::endl;
+      */
     }
   }
+  ///In case no hit in reference station, find SimHit closest to reference plane
+  if(station==99){
+    edm::ESHandle<MagneticField> magField;
+    es.get<IdealMagneticFieldRecord>().get(magField);
+    
+    if(hitPoint.perp()<1){
+
+      GlobalPoint hitPointTmp;
+      GlobalVector glbMomTmp;
+      float minDist=999;
+      
+      BoundCylinder *aRefCylinder = new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 530, 530, -700, 700));
+      BoundDisk *aRefDisk = new  BoundDisk( GlobalPoint(0.,0.,790), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10.));
+      
+      for (edm::PSimHitContainer::const_iterator hitItr = simHits->begin(); hitItr != simHits->end(); ++hitItr) {
+	if ( !(13 == abs(hitItr->particleType()) ) ) continue;
+	uint32_t rpcRawId = hitItr->detUnitId();
+	RPCDetId rpcDet(rpcRawId);
+	hitPointTmp = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->entryPoint());
+	glbMomTmp = rpcGeometry->idToDet(rpcDet)->toGlobal(hitItr->momentumAtEntry());
+	
+	GlobalTrajectoryParameters ngtp=GlobalTrajectoryParameters (hitPointTmp,glbMomTmp, 
+								    simu->charge(),
+								    magField.product());
+	
+	HelixBarrelCylinderCrossing aBarrelCrossing(hitPointTmp,glbMomTmp,ngtp.transverseCurvature(),  
+						    PropagationDirection::anyDirection,
+						    *aRefCylinder);
+
+	HelixForwardPlaneCrossing aPlaneCrossing(HelixForwardPlaneCrossing::PositionType(hitPointTmp.x(), hitPointTmp.y(),hitPointTmp.z()),
+						 HelixForwardPlaneCrossing::PositionType(glbMomTmp.x(), glbMomTmp.y(), glbMomTmp.z()),
+						 ngtp.transverseCurvature(),  
+						 PropagationDirection::anyDirection);
+
+	if(aBarrelCrossing.hasSolution() && fabs(aBarrelCrossing.pathLength())<minDist){
+	  minDist = fabs(aBarrelCrossing.pathLength());
+	  hitPoint = hitPointTmp;
+	  glbMom = glbMom;
+	}
+
+	std::pair<bool,double> aCrossingRes = aPlaneCrossing.pathLength(*aRefDisk);
+
+	if(aCrossingRes.first && 
+	   fabs(aCrossingRes.second)<minDist){
+	  minDist = fabs(aCrossingRes.second);
+	  hitPoint = hitPointTmp;
+	  glbMom = glbMom;
+	}
+      }
+    }
+    ////Propagete closest hit to reference cylinder
+    float eta = simu->eta();
+    GlobalVector glbMom(simu->pt()*cos(simu->phi()),
+			simu->pt()*sin(simu->phi()),
+			simu->pt()*sinh(eta));
+    
+    const FreeTrajectoryState fts = FreeTrajectoryState(hitPoint,glbMom,TrackCharge(simu->charge()),magField.product());
+    
+    ReferenceCountingPointer<Surface> rpc;
+    if (eta < -1.04)       rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,-790), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
+    else if (eta < -0.72)  rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 530, 530, -700, 700 ) ) );
+    else if (eta < 0.72)   rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 500, 500, -700, 700 ) ) );
+    else if (eta < 1.04)   rpc = ReferenceCountingPointer<Surface>(new  BoundCylinder( GlobalPoint(0.,0.,0.), TkRotation<float>(), SimpleCylinderBounds( 530, 530, -700, 700 ) ) );
+    else                      rpc = ReferenceCountingPointer<Surface>(new  BoundDisk( GlobalPoint(0.,0.,790), TkRotation<float>(), SimpleDiskBounds( 300., 710., -10., 10. ) ) );
+    
+    edm::ESHandle<Propagator> propagator;
+    es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
+    TrajectoryStateOnSurface trackAtRPC =  propagator->propagate(fts, *rpc);
+    if(trackAtRPC.isValid()) result = HitSpecObj(1, trackAtRPC.globalPosition(), glbMom);
+  }
+  //////////////
   return result;
 }
 
-std::vector< std::pair<uint32_t,uint32_t> > DetHitDigiGrabber::digiCollector(const edm::Event &ev, const edm::EventSetup &es) const
+std::vector< std::pair<uint32_t,uint32_t> > DetHitDigiGrabber::digiCollector(const edm::Event &ev, 
+									     const edm::EventSetup &es, 
+									     bool filter) const
 {
   std::vector< std::pair<uint32_t,uint32_t> > result;
 
+  edm::Handle< edm::PSimHitContainer > simRPCHits;
+  static std::string rpcHitsCollName = theConfig.getParameter<std::string>("rpcHitsCollName");
+  ev.getByLabel("g4SimHits", rpcHitsCollName, simRPCHits);
+
+  edm::Handle< edm::PSimHitContainer > simDTHits;
+  static std::string dtHitsCollName = theConfig.getParameter<std::string>("dtHitsCollName");
+  ev.getByLabel("g4SimHits", dtHitsCollName, simDTHits);
+
+  edm::Handle< edm::PSimHitContainer > simCSCHits;
+  static std::string cscHitsCollName = theConfig.getParameter<std::string>("cscHitsCollName");
+  ev.getByLabel("g4SimHits", cscHitsCollName, simCSCHits);
+
   std::vector<RPCDigiSpec> rpc = rpcDetDigis(ev,es);
   for (std::vector<RPCDigiSpec>::const_iterator it = rpc.begin(); it!= rpc.end(); ++it) {
-    result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
+    //////////Filter noise digis
+    bool hasMuonHit = false;
+    for (edm::PSimHitContainer::const_iterator hitItr = simRPCHits->begin(); 
+	 filter && hitItr != simRPCHits->end(); ++hitItr) {
+      if (abs(hitItr->particleType())!=13) continue;
+      uint32_t rpcRawId = hitItr->detUnitId();
+      if(rpcRawId==it->rawId()) hasMuonHit = true;
+      std::cout<<"RPC hasMuonHit: "<<hasMuonHit<<std::endl;
+    }
+    ////////////////////////////////
+    if(hasMuonHit || !filter) result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
   }
 
   std::vector<CSCDigiSpec> csc = cscDetDigis(ev,es);
   for (std::vector<CSCDigiSpec>::const_iterator it = csc.begin(); it!= csc.end(); ++it) {
-    result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
+    //////////Filter noise digis
+    bool hasMuonHit = false;
+    for (edm::PSimHitContainer::const_iterator hitItr = simCSCHits->begin(); 
+	 filter && hitItr != simCSCHits->end(); ++hitItr) {
+      if (abs(hitItr->particleType())!=13) continue;
+      uint32_t cscRawId = hitItr->detUnitId();      
+
+      CSCDetId aId(cscRawId);
+      CSCDetId aIdFromDigi(it->rawId());
+      ///detID holds more info than wheel, station and sector
+      ///strip everything except the three above
+      CSCDetId aIdStripped(aId.endcap(),
+		   aId.station(),
+		   aId.ring(),
+		   aId.chamber());
+
+      if(aIdStripped.rawId()==it->rawId()) hasMuonHit = true;
+    }
+    ////////////////////////////////
+    if(hasMuonHit || !filter) result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
   }
 
   std::vector<DTphDigiSpec> dt = dtPhiDetDigis(ev,es);
   for (std::vector<DTphDigiSpec>::const_iterator it = dt.begin(); it!= dt.end(); ++it) {
-    result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
+    //////////Filter noise digis
+    bool hasMuonHit = false;
+    for (edm::PSimHitContainer::const_iterator hitItr = simDTHits->begin(); 
+	 filter && hitItr != simDTHits->end(); ++hitItr) {
+      if (abs(hitItr->particleType())!=13) continue;
+      uint32_t dtRawId = hitItr->detUnitId();
+
+
+      DTChamberId aDt(it->rawId());
+      DTChamberId aDt1(dtRawId);
+      ///Digi detId has sector numbering shifted by 1
+      DTChamberId aDtStripped(aDt.wheel(),
+			      aDt.station(),
+			      aDt.sector()+1);
+
+      ///detID holds more info than wheel, station and sector
+      ///strip everything except the three above
+      DTChamberId aDtStripped1(aDt1.wheel(),
+			      aDt1.station(),
+			      aDt1.sector());
+
+      if(aDtStripped1==aDtStripped.rawId()) hasMuonHit = true;
+    }
+    ////////////////////////////////
+    if(hasMuonHit || !filter) result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
   }
 
   return result;

@@ -27,8 +27,8 @@ void GoldenPattern::Result::runNoCheck() const {
   float fract = 0;
   for(auto mType=myResults.cbegin();mType!=myResults.cend();++mType){    
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
-      float val = norm(mType->first,it->second);
-      fract += log(val); 
+      float val = -norm(mType->first,it->second);
+      fract += 2.0*val; 
       //std::cout<<mType->first<<" "<<val<<" log(val): "<<log(val)<<std::endl;
     }
   }
@@ -36,8 +36,8 @@ void GoldenPattern::Result::runNoCheck() const {
   unsigned int nTot = 0;
   for(auto it=nMatchedPoints.cbegin();it!=nMatchedPoints.cend();++it) nTot+=it->second;    
   
-  //theValue = ( nTot > 3) ? 2.0*fract : -99999.;  
-  theValue = ( nTot > 2) ? 2.0*fract : -99999.;  
+  //theValue = ( nTot > 3) ? fract : -99999.;  
+  theValue = ( nTot > 2) ? fract : -99999.;  
 
 }
 ////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereIn
   static const float epsilon = 1.e-6;
   float normValue = whereInDist;  
   if(normValue > epsilon) ++nMatchedPoints[where];
-  else normValue = epsilon;
+  else normValue = -log(epsilon);
   /////////////////
   return normValue; 
 }
@@ -68,9 +68,8 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
-  //value();
-  //return true;
-  return (value() > -10000); // && hasStation1 && hasStation2);
+  value();
+  return true;
 }
 
 float GoldenPattern::Result::value() const { 
@@ -359,7 +358,6 @@ void GoldenPattern::makeIntegratedCache(){
   else hasIntegratedCache = true;
 
   int refSum = theKey.theRefStrip;
-
   int nBits = 6;
   ///////////////////
   ///Prepare tables of integrated frequencies
@@ -368,12 +366,22 @@ void GoldenPattern::makeIntegratedCache(){
     for (auto idf = isf->second.begin(); idf !=isf->second.end();++idf) {
       float sum = 0;
       for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
+      //refSum = sum;
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
-	int digitisedVal = ((rmf->second)/refSum)*std::pow(2,nBits);
-	if(digitisedVal == 0 && rmf->second !=0) digitisedVal = 1.0;
-	rmf->second= digitisedVal/std::pow(2,nBits);
-	//rmf->second= (rmf->second)/refSum;
-	if(rmf->second>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
+	float val=0;
+	///Distance from mean        
+        //sum-= rmf->second/2.0; 
+	//val = sum/refSum;
+	//val = 2.*(0.5-fabs(val-0.5)); 
+	////////////////////
+	///Plain pdf
+        val = -log((rmf->second)/refSum);
+	///Digitisation
+	int digitisedVal = val*std::pow(2,nBits);
+	//if(digitisedVal == 0 && val !=0) digitisedVal = 1.0;
+	rmf->second= digitisedVal/std::pow(2,nBits);	
+	//if(rmf->second>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
+	///	
       }
     }
   }

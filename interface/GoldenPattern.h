@@ -37,7 +37,9 @@ enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
    theDet = 0;
  }
    inline bool operator< (const Key & o) const {
-     if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
+     if (thePtCode > o.thePtCode) return true;
+     else if (thePtCode==o.thePtCode && theCharge < o.theCharge) return true;
+     //if (theCharge*thePtCode < o.theCharge*o.thePtCode) return true;
      else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode < o.thePhiCode) return true;
      else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode==o.thePhiCode && theEtaCode<o.theEtaCode) return true;
      else if (theCharge*thePtCode==o.theCharge*o.thePtCode && thePhiCode==o.thePhiCode && theEtaCode==o.theEtaCode &&  theDet<o.theDet) return true;

@@ -22,7 +22,7 @@ public:
   // get reference hit point (MS2out) or (RE2)
   //
   HitSpecObj rpcDetHits(const edm::Event &ev, const edm::EventSetup &es, const TrackObj * simu, int station = 2) const;
-  std::vector< std::pair<uint32_t, uint32_t> > digiCollector(const edm::Event &ev, const edm::EventSetup &es) const;
+  std::vector< std::pair<uint32_t, uint32_t> > digiCollector(const edm::Event &ev, const edm::EventSetup &es, bool filter = false) const;
 
   //std::vector<RpcDigiSpec> 
   std::vector<RPCDigiSpec> rpcDetDigis(const edm::Event &ev, const edm::EventSetup &es) const;
