@@ -168,7 +168,7 @@ HitSpecObj DetHitDigiGrabber::rpcDetHits(const edm::Event &ev,
 	}
       }
     }
-    ////Propagete closest hit to reference cylinder
+    ////Propagate closest hit to reference cylinder
     float eta = simu->eta();
     GlobalVector glbMom(simu->pt()*cos(simu->phi()),
 			simu->pt()*sin(simu->phi()),
@@ -219,7 +219,7 @@ std::vector< std::pair<uint32_t,uint32_t> > DetHitDigiGrabber::digiCollector(con
       if (abs(hitItr->particleType())!=13) continue;
       uint32_t rpcRawId = hitItr->detUnitId();
       if(rpcRawId==it->rawId()) hasMuonHit = true;
-      std::cout<<"RPC hasMuonHit: "<<hasMuonHit<<std::endl;
+      //std::cout<<"RPC hasMuonHit: "<<hasMuonHit<<std::endl;
     }
     ////////////////////////////////
     if(hasMuonHit || !filter) result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
