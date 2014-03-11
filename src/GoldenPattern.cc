@@ -27,9 +27,9 @@ void GoldenPattern::Result::runNoCheck() const {
   float fract = 0;
   for(auto mType=myResults.cbegin();mType!=myResults.cend();++mType){    
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
-      float val = -norm(mType->first,it->second);
+      float val = norm(mType->first,it->second);
       fract += 2.0*val; 
-      //std::cout<<mType->first<<" "<<val<<" log(val): "<<log(val)<<std::endl;
+      //std::cout<<mType->first<<" "<<val<<std::endl;
     }
   }
 
@@ -45,8 +45,8 @@ void GoldenPattern::Result::runNoCheck() const {
 float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereInDist) const {
   static const float epsilon = 1.e-6;
   float normValue = whereInDist;  
-  if(normValue > epsilon) ++nMatchedPoints[where];
-  else normValue = -log(epsilon);
+  if(normValue > log(epsilon)) ++nMatchedPoints[where];
+  else normValue = log(epsilon);
   /////////////////
   return normValue; 
 }
@@ -68,8 +68,7 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
-  value();
-  return true;
+  return(value()>-99999);
 }
 
 float GoldenPattern::Result::value() const { 
@@ -167,10 +166,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     //std::cout<<"diff: "<<detdigi.count(layer)<<std::endl;
     //if((layer==101 || layer==201 || layer==301 || layer==311) && detdigi.count(layer)>1) continue;
     ///Maximum measure over hits in the same detId
-    float fMax = 0.0;
-    float fPosMax = 0.0;
-    float fBenMax = 0.0;
-    float fPos=0.0, fBen=0.0;
+    float fMax = -30.0;
+    float fPosMax = -30.0;
+    float fBenMax = -30.0;
+    float fPos=-30.0, fBen=-30.0;
     ///Loop over hits in given detId
 
     std::cout.precision(15);
@@ -227,8 +226,8 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  fBen = whereInDistribution(mType, myPhiConverter->getLayerNumber(rawId), digi.phiB());
 	  //std::cout<<digi<<" DT bend f: "<<fBen<<std::endl;
 	}
-	if(fPos*fBen>fMax){
-	  fMax = fPos*fBen;
+	if(fPos+fBen>fMax){
+	  fMax = fPos+fBen;
 	  fPosMax = fPos;
 	  fBenMax = fBen;
 	}
@@ -264,8 +263,8 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  //std::cout<<digi<<" CSC bend: "<<digi.pattern()
 	  // <<" f: "<<fBen<<std::endl;
 	}
-	if(fPos*fBen>fMax){
-	  fMax = fPos*fBen;
+	if(fPos+fBen>fMax){
+	  fMax = fPos+fBen;
 	  fPosMax = fPos;
 	  fBenMax = fBen;
 	}
@@ -282,9 +281,9 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     if(mType==GoldenPattern::POSRPC)
       result.myResults[GoldenPattern::POSRPC].push_back(std::make_pair(rawId, fPosMax));
 
-    fMax = 0.0;
-    fPosMax = 0.0;
-    fBenMax = 0.0;
+    fMax = -30.0;
+    fPosMax = -30.0;
+    fBenMax = -30.0;
   }
 
   result.run();
@@ -310,7 +309,7 @@ float GoldenPattern::whereInDistribution( int obj, const GoldenPattern::MFreq & 
 ////////////////////////////////////////////////////
 float GoldenPattern::whereInDistribution(PosBenCase mType, uint32_t rawId, int pos) const{
 
-  float freqInt = 0;
+  float freqInt = -30;
   auto detsMap = PattCoreIntegrated.find(mType);
   if(detsMap!=PattCoreIntegrated.cend()){
     auto freqMap = detsMap->second.find(rawId);
@@ -368,19 +367,20 @@ void GoldenPattern::makeIntegratedCache(){
       for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
       //refSum = sum;
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
+	if((rmf->second)/refSum>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
 	float val=0;
 	///Distance from mean        
         //sum-= rmf->second/2.0; 
 	//val = sum/refSum;
-	//val = 2.*(0.5-fabs(val-0.5)); 
+	//val = -2.*(0.5-fabs(val-0.5)); 
 	////////////////////
 	///Plain pdf
-        val = -log((rmf->second)/refSum);
+        val = log(rmf->second/refSum);
 	///Digitisation
 	int digitisedVal = val*std::pow(2,nBits);
 	//if(digitisedVal == 0 && val !=0) digitisedVal = 1.0;
 	rmf->second= digitisedVal/std::pow(2,nBits);	
-	//if(rmf->second>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
+	//rmf->second = val;	
 	///	
       }
     }

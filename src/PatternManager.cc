@@ -212,7 +212,6 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
     //candidate.eta = bestKey.etaValue();
-    candidate.eta = bestMatching.value();
     candidate.phi = bestKey.phiValue();
     candidate.charge = bestKey.chargeValue();
     candidate.q   = bestMatching.nMatchedTot()
@@ -220,6 +219,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
         + 200*bestMatching.withStation2()    
         + 500*bestMatching.withStation3();    
     //candidate.disc = bestMatching.value();
+    candidate.eta = bestMatching.value();
     candidate.type = L1Obj::OTF;
   }
 
@@ -246,9 +246,9 @@ void PatternManager::beginJob()
     key.theCharge =  entry.key_ch;
     key.theRefStrip =  entry.key_strip;
     
-    if(key.theRefStrip<5000) continue;
+    if(key.theRefStrip<50000) continue;
     //if(key.theEtaCode<9) continue;
-    //if(!(key.thePtCode==30 || key.thePtCode<10)) continue;
+    //if(key.thePtCode!=11 || key.theCharge!=-1 || key.theDet!=301) continue;
     /*
     if(key.theEtaCode==9 && 
        (key.theDet==201 || key.theDet==204) continue;
