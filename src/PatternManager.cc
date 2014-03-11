@@ -140,7 +140,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   theEvForPatCounter++;
 
   std::vector<int> myActiveRefs = {301, 302, 303, 304, 101, 102, 312, 313, 202};
-  //myActiveRefs = {101, 102, 301, 302, 202};
+  //std::vector<int> myActiveRefs = {101, 102, 202}; //noRPC
+  //std::vector<int> myActiveRefs = {301, 302, 303, 304, 312, 313}; //no DT, CSC
 
   Pattern pattern;
   std::map<uint32_t,int> refPhi;

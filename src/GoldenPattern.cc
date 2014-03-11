@@ -365,14 +365,14 @@ void GoldenPattern::makeIntegratedCache(){
     for (auto idf = isf->second.begin(); idf !=isf->second.end();++idf) {
       float sum = 0;
       for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
-      //refSum = sum;
+      refSum = sum;
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
 	if((rmf->second)/refSum>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
 	float val=0;
 	///Distance from mean        
         //sum-= rmf->second/2.0; 
 	//val = sum/refSum;
-	//val = -2.*(0.5-fabs(val-0.5)); 
+	//val = 2.*(0.5-fabs(val-0.5)); 
 	////////////////////
 	///Plain pdf
         val = log(rmf->second/refSum);

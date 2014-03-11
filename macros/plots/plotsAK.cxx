@@ -84,7 +84,7 @@ void makeFriendTree(TTree *tree){
   TBranch *weightBranch = weightsTree->Branch("weight", &weight, "weight/D");  
 
   TH1F *hPtOrig = new TH1F("hPtOrig","",400,0,200);
-  tree->Draw("pt>>hPtOrig","eta<1.19","goff");
+  tree->Draw("pt>>hPtOrig","1","goff");
 
   int iBin, nEvInBin;
   float ptLow, ptHigh;
@@ -585,7 +585,7 @@ void plotsAK(){
   utilsL1RpcStyle()->cd();
  
   string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
-  path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_30_p/";
+  path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
   //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/06_03_2014/Likelihood/";
 
 
@@ -622,9 +622,10 @@ void plotsAK(){
   delete tree;
   tree = (TTree*)file->Get("efficiencyTree");
 
-  plotEffVsEta(tree,"Otf");
-  plotEffVsEta(tree,"Gmt");
+  //plotEffVsEta(tree,"Otf");
+  //plotEffVsEta(tree,"Gmt");
   //plotEffVsRate(tree,20);
+  plotOtfVsGmt(tree,20);
   //plotRate(tree);
   //plotEffPanel(tree,"Otf");
   //plotEffVsHitPhi(tree,"Otf");
