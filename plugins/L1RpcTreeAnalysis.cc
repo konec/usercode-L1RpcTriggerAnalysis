@@ -161,18 +161,20 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
 
   chain.SetBranchAddress("l1ObjColl",&l1ObjColl);
   chain.SetBranchAddress("hitSpec",&hitSpec);
-  chain.SetBranchAddress("hitSpecSt1",&hitSpecSt1);
-  chain.SetBranchAddress("hitSpecProp",&hitSpecProp);
+  chain.SetBranchAddress("hitSpecSt1",&hitSpecProp);
+  //chain.SetBranchAddress("hitSpecSt1",&hitSpecSt1);
+  //chain.SetBranchAddress("hitSpecProp",&hitSpecProp);
   
   //
   // number of events
   //
   Int_t nentries= (Int_t) chain.GetEntries();
-  if(nentries<1E6) nentries = 5E4;
-  //if(nentries>1E6) nentries = 5E6;
+  if(nentries<1E6) nentries = 5E6;
+  if(nentries>1E6) nentries = 2E4;
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
-  nentries = 2E4;
+  //nentries = 1E7;
+  nentries = 1E5;
 
   //
   // main loop

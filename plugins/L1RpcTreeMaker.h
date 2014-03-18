@@ -59,8 +59,8 @@ private:
   std::vector<uint32_t> detsCrossedByMuon, detsCrossedByMuonDeepInside, detsSIMU;
   std::vector<DetCluDigiObj> detsHitsCompatibleWithMuon;
   L1ObjColl * l1ObjColl;
-  HitSpecObj *hitSpec, *hitSpecSt1;
-  std::vector< std::pair<uint32_t, uint32_t> > digSpec;
+  HitSpecObj *hitSpec, *hitSpecSt1, *hitSpecProp;
+  std::vector< std::pair<uint32_t, uint32_t> > digSpec, digSpecFiltered;
 
   unsigned int theCounter;
 								    

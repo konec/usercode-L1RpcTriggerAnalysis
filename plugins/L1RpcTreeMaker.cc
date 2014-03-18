@@ -41,7 +41,8 @@ L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
   : theConfig(cfg), theTree(0), event(0), muon(0), simu(0), 
     bitsL1(0), bitsHLT(0),
     counts(0), 
-    l1ObjColl(0),hitSpec(0), hitSpecSt1(0), 
+    l1ObjColl(0),hitSpec(0), 
+    hitSpecSt1(0), hitSpecProp(0), 
     theCounter(0),
     theBestMuonFinder(cfg.getParameter<edm::ParameterSet>("bestMuonFinder")),
     theDetHitCollector(cfg.getParameter<edm::ParameterSet>("detHitCollector")),
@@ -80,7 +81,9 @@ void L1RpcTreeMaker::beginJob()
   theTree->Branch("l1ObjColl","L1ObjColl",&l1ObjColl,32000,99);
   theTree->Branch("hitSpec","HitSpecObj",&hitSpec,32000,99);
   theTree->Branch("hitSpecSt1","HitSpecObj",&hitSpecSt1,32000,99);
+  theTree->Branch("hitSpecProp","HitSpecObj",&hitSpecProp,32000,99);
   theTree->Branch("digSpec",&digSpec);
+  theTree->Branch("digSpecFiltered",&digSpecFiltered);
 
   theHelper.SetOwner();
   theBestMuonFinder.initHistos(theHelper);
@@ -145,7 +148,9 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   l1ObjColl = new L1ObjColl;
   hitSpec = new HitSpecObj(); 
   hitSpecSt1 = new HitSpecObj(); 
+  hitSpecProp = new HitSpecObj(); 
   digSpec = std::vector< std::pair<uint32_t, uint32_t> >();
+  digSpecFiltered = std::vector< std::pair<uint32_t, uint32_t> >();
 
   //
   // fill Simulated Mu Info 
@@ -241,7 +246,10 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   //
   *hitSpec = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,2);
   *hitSpecSt1 = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,1);
+  *hitSpecProp = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,99);
+  
   digSpec  = theDetHitDigiGrabber.digiCollector(ev,es);
+  digSpecFiltered  = theDetHitDigiGrabber.digiCollector(ev,es,true);
   
 
   //
@@ -257,5 +265,6 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   delete l1ObjColl; l1ObjColl = 0;
   delete hitSpec; hitSpec = 0;
   delete hitSpecSt1; hitSpecSt1 = 0;
+  delete hitSpecProp; hitSpecProp = 0;
 }
 				

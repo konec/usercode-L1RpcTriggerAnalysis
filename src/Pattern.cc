@@ -25,11 +25,11 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
   switch (detId.subdetId()) {
   case MuonSubdetId::RPC: {
   RPCDetId aId(rawId);    
-    if(aId.region()<0 || 
-       (aId.region()==0 && aId.ring()<2) ||
-       (aId.region()==0 && aId.station()==4) ||
-       (aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
-       (aId.region()==1 && aId.ring()<3)
+    if(aId.region()<0 
+       //|| (aId.region()==0 && aId.ring()<2) ||
+       //(aId.region()==0 && aId.station()==4) ||
+       //(aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
+       //(aId.region()==1 && aId.ring()<3)
        ) return false;
   }
     break;

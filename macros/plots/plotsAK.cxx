@@ -84,7 +84,7 @@ void makeFriendTree(TTree *tree){
   TBranch *weightBranch = weightsTree->Branch("weight", &weight, "weight/D");  
 
   TH1F *hPtOrig = new TH1F("hPtOrig","",400,0,200);
-  tree->Draw("pt>>hPtOrig","1","goff");
+  tree->Draw("pt>>hPtOrig","eta<0.5","goff");
 
   int iBin, nEvInBin;
   float ptLow, ptHigh;
@@ -165,7 +165,7 @@ void plotEffPanel(TTree *tree,
   if(sysType=="Gmt") ptCuts = ptCutsGmt;
 
   for (int icut=0; icut <=3;++icut){
-    string selection(TString::Format("eta<1.19",sysType.c_str()).Data());
+    string selection(TString::Format("eta<0.5",sysType.c_str()).Data());
     TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"pt",sysType,selection);    
     hEff->SetStats(kFALSE);
     hEff->SetMinimum(0.0001); 
@@ -206,7 +206,7 @@ void plotEffVsPhi(TTree *tree,
 
   TH2F *h2D = new TH2F("h2D","",5*32,-TMath::Pi(),TMath::Pi(),2,-0.5,1.5);
   for (int icut=0; icut <=1;++icut){
-    string selection(TString::Format("(pt>%d + 20)",ptCuts[icut]).Data());
+    string selection(TString::Format("(pt>%d + 20)*(eta<1.5)",ptCuts[icut]).Data());
     TH1D* hEff = getTurnOncurve(tree,ptCuts[icut],h2D,"phi",sysType,selection);
     hEff->SetStats(kFALSE);
     hEff->SetMinimum(0.8); 
@@ -292,7 +292,8 @@ void plotEffVsEta(TTree *tree, string sysType="Otf"){
   l.SetFillColor(10);
   c->SetGrid(0,1);
 
-  TH2F *h2D = new TH2F("h2D","",8*26,0.5,1.8,2,-0.5,1.5);
+  //TH2F *h2D = new TH2F("h2D","",8*26,0.5,1.8,2,-0.5,1.5);
+  TH2F *h2D = new TH2F("h2D","",8*23,-0.1,2.2,2,-0.5,1.5);
 
   int *ptCuts = ptCutsOtf;
   if(sysType=="Gmt" || sysType=="Rpc") ptCuts = ptCutsGmt;
@@ -422,7 +423,7 @@ TH1F* getRateHisto(TTree *tree,
   std::string var = "pt>>hRateVx";
   if(type!="Vx") var = std::string(TString::Format("l1Objects%s[0].pt>>hRate%s",type.c_str(),type.c_str()));
 
-  TH1F *hRate = new TH1F(TString::Format("hRate%s",type.c_str()),"",400,0,200);
+  TH1F *hRate = new TH1F(TString::Format("hRate%s",type.c_str()),"",400,1,201);
   hRate->SetXTitle("p_{T}^{cut} [GeV/c]");
   hRate->SetYTitle("Arbitrary units");
 
@@ -438,10 +439,10 @@ TH1F* getRateHisto(TTree *tree,
 ///////////////////////////////////////////////////////
 void plotRate(TTree *tree){
 
-
-  TH1F *hRateVx = getRateHisto(tree,"Vx");
-  TH1F *hRateGmt = getRateHisto(tree,"Gmt");
-  TH1F *hRateOtf = getRateHisto(tree,"Otf");
+  std::string selection = "eta<0.5";
+  TH1F *hRateVx = getRateHisto(tree,"Vx",selection);
+  TH1F *hRateGmt = getRateHisto(tree,"Gmt",selection);
+  TH1F *hRateOtf = getRateHisto(tree,"Otf",selection);
 
   TF1 *fIntVxMuRate = new TF1("fIntVxMuRate","TMath::Power(x,[0]*TMath::Log(x))*TMath::Power(x,[1])*TMath::Exp([2])",1,1000);
   fIntVxMuRate->SetParameters(-0.235801, -2.82346, 17.162);
@@ -468,9 +469,10 @@ void plotRate(TTree *tree){
 
 
   int iBinMin = hRateVx->FindBin(1); 
-  int iBinMax = hRateVx->FindBin(90); 
+  int iBinMax = hRateVx->FindBin(100); 
   hRateVx->GetXaxis()->SetRange(iBinMin,iBinMax);
-  hRateVx->SetMinimum(8E6);
+  hRateVx->SetMinimum(1E3);
+  hRateVx->SetMaximum(1E6);
 
   hRateVx->Draw();
   hRateGmt->Draw("same");
@@ -622,12 +624,18 @@ void plotsAK(){
   delete tree;
   tree = (TTree*)file->Get("efficiencyTree");
 
-  //plotEffVsEta(tree,"Otf");
-  //plotEffVsEta(tree,"Gmt");
-  //plotEffVsRate(tree,20);
+  plotRate(tree);
+  return;
+
+  plotEffVsEta(tree,"Otf");
+  plotEffVsEta(tree,"Gmt");
+  plotEffVsPhi(tree,"Gmt");
+  plotEffVsPhi(tree,"Otf");
+  plotEffVsRate(tree,20);
   plotOtfVsGmt(tree,20);
   //plotRate(tree);
-  //plotEffPanel(tree,"Otf");
+  plotEffPanel(tree,"Otf");
+  plotEffPanel(tree,"Gmt");
   //plotEffVsHitPhi(tree,"Otf");
   return;
 

@@ -168,7 +168,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     ///Maximum measure over hits in the same detId
     float fMax = -30.0;
     float fPosMax = -30.0;
-    float fBenMax = -30.0;
+    //float fBenMax = -30.0;
     float fPos=-30.0, fBen=-30.0;
     ///Loop over hits in given detId
 
@@ -226,10 +226,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  fBen = whereInDistribution(mType, myPhiConverter->getLayerNumber(rawId), digi.phiB());
 	  //std::cout<<digi<<" DT bend f: "<<fBen<<std::endl;
 	}
-	if(fPos+fBen>fMax){
+	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos;
-	  fBenMax = fBen;
+	  //fBenMax = fBen;
 	}
       }
       else if (detId.subdetId() == MuonSubdetId::CSC) {
@@ -263,27 +263,27 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  //std::cout<<digi<<" CSC bend: "<<digi.pattern()
 	  // <<" f: "<<fBen<<std::endl;
 	}
-	if(fPos+fBen>fMax){
+	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos;
-	  fBenMax = fBen;
+	  //fBenMax = fBen;
 	}
       }
     }
     if(mType==GoldenPattern::BENCSC){
       result.myResults[GoldenPattern::POSCSC].push_back(std::make_pair(rawId, fPosMax));
-      result.myResults[GoldenPattern::BENCSC].push_back(std::make_pair(rawId, fBenMax));
+      //result.myResults[GoldenPattern::BENCSC].push_back(std::make_pair(rawId, fBenMax));
     }
     if(mType==GoldenPattern::BENDT){
       result.myResults[GoldenPattern::POSDT].push_back(std::make_pair(rawId, fPosMax));
-      result.myResults[GoldenPattern::BENDT].push_back(std::make_pair(rawId, fBenMax));
+      //result.myResults[GoldenPattern::BENDT].push_back(std::make_pair(rawId, fBenMax));
     }
     if(mType==GoldenPattern::POSRPC)
       result.myResults[GoldenPattern::POSRPC].push_back(std::make_pair(rawId, fPosMax));
 
     fMax = -30.0;
     fPosMax = -30.0;
-    fBenMax = -30.0;
+    //fBenMax = -30.0;
   }
 
   result.run();
@@ -367,7 +367,7 @@ void GoldenPattern::makeIntegratedCache(){
       for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
       refSum = sum;
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
-	if((rmf->second)/refSum>1.0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
+	//if((rmf->second)/refSum>1.0 || (rmf->second)/refSum<0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
 	float val=0;
 	///Distance from mean        
         //sum-= rmf->second/2.0; 
@@ -376,11 +376,13 @@ void GoldenPattern::makeIntegratedCache(){
 	////////////////////
 	///Plain pdf
         val = log(rmf->second/refSum);
+	//val = rmf->second/refSum;
 	///Digitisation
 	int digitisedVal = val*std::pow(2,nBits);
 	//if(digitisedVal == 0 && val !=0) digitisedVal = 1.0;
 	rmf->second= digitisedVal/std::pow(2,nBits);	
-	//rmf->second = val;	
+	//rmf->second = val;        	
+	//std::cout<<"val: "<<rmf->second<<" refSum:"<<refSum<<" "<<val<<std::endl;
 	///	
       }
     }
@@ -405,7 +407,7 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
      out <<" Value: ";     
      out.precision(3);
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf) 
-       {out << imf->first<<":"<<imf->second<<", "; aSum+=imf->second;}
+       {out << imf->first<<":"<<exp(imf->second)<<", "; aSum+=exp(imf->second);}
      out <<" Sum: "<<aSum;
      out << std::endl;
    }

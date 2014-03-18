@@ -75,7 +75,7 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   if (!hitSpec) return;
 
   int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());
-  theEtaCode = 0;
+  //theEtaCode = 0;
   float phiref = hitSpec->position().phi();
   float ptref  = simu->pt(); 
   int chargeref = simu->charge();
@@ -190,7 +190,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
 
-  if (bestMatching && bestKey.ptValue()<25 && false) {
+  if (bestMatching && bestKey.ptValue()<16 && false) {
     ////////////DEBUG
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
@@ -201,10 +201,11 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	if(igps->first.theDet!=it.first) continue;  
 	myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);	  
 	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
-	if(result.nMatchedTot()>bestMatching.nMatchedTot()-2){
+	//if(result.nMatchedTot()>bestMatching.nMatchedTot()-2){
+	  if(igps->first.thePtCode==18){
 	  std::cout<<igps->first<<" "<<result<<" better? "<<(bestMatching<result)<<std::endl;
-	  //std::cout<<"GP: "<<igps->second<<std::endl; 
-	  //pattern.print(myPhiConverter);
+	  std::cout<<"GP: "<<igps->second<<std::endl; 
+	  pattern.print(myPhiConverter);
 	}
       }
     }
@@ -247,9 +248,15 @@ void PatternManager::beginJob()
     key.theCharge =  entry.key_ch;
     key.theRefStrip =  entry.key_strip;
     
-    if(key.theRefStrip<50000) continue;
-    //if(key.theEtaCode<9) continue;
+    if(key.theRefStrip<10000) continue;
+
     //if(key.thePtCode!=11 || key.theCharge!=-1 || key.theDet!=301) continue;
+
+    //if(key.theEtaCode<10 || key.theEtaCode>12) continue;
+
+    //GoldenPattern Key_eta:6(101)_pt:7_charge-1_phi:0(735984)_rotation:0
+
+
     /*
     if(key.theEtaCode==9 && 
        (key.theDet==201 || key.theDet==204) continue;
