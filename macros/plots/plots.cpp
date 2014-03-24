@@ -8,13 +8,12 @@ double ptBins[33]={0., 0.1,
 		 160. };
 
 
-//string path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/05RPC/";
 string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
 
-path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC/";
-//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC_noRPC_ref/";
-//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleEta_01RPC_noDT_CSC_ref/";
- 
+
+path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/Dynamic/SingleMu_16_p/";
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/05RPC/SingleMu_16_p/";
+
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 void plotRecoPt(string sysType="Otf",
@@ -167,6 +166,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
   gSystem->mkdir(dirName);
 
   TString locName = TString::Format("tower%d_ref%d_pt%d_sign%d",iTower,iRef,iPt,iCharge);
+  std::cout<<locName.Data()<<std::endl;
   ////
   TString cName = "RPC"+locName;
   TCanvas *cRPC = (TCanvas*)file->Get(cName.Data());
@@ -185,7 +185,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
       string aName(obj->GetName());
       if(aName.find("layer")!=std::string::npos){
 	TGraph *aGr = (TGraph*)obj; 
-	Double_t x,y, sum=0;
+	Double_t x,y, sum=0;	
 	for(int i=0;i<aGr->GetN();++i){aGr->GetPoint(i,x,y);sum+=y;}
 	std::cout<<aGr->GetName()<<" sum: "<<sum<<std::endl;
 	if(sum>1E-2) grRPC.Add(aGr);			
@@ -263,6 +263,8 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
     c->Print(TString::Format("%s/pdf_%s.png",dirName.Data(),gr->GetName()));
   }
   //////
+  return;
+  //////
   for(int i=0;i<grCSC.GetEntries();++i){
     TGraph *gr = (TGraph*)grCSC.At(i);
     gr->GetXaxis()->SetLabelSize(0.06);
@@ -278,11 +280,10 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
-  plotRecoPhi(20);
-  plotRecoPt("Otf",20);
-  //plotGoldenPattern(30,7,102,-1); 
-  //plotGoldenPattern(11,8,202,-1); 
-  //plotGoldenPattern(11,8,202,1); 
+
+  plotGoldenPattern(16,0,102,1); 
+  plotGoldenPattern(16,0,303,1); 
+  //plotGoldenPattern(16,0,304,1); 
   return;
 
 

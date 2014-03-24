@@ -176,12 +176,13 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   //nentries = 1E7;
   nentries = 1E5;
 
+  //nentries = 0;
+
   //
   // main loop
   //
   unsigned int lastRun = 0;
   for (int ev=0; ev<nentries; ev+=1) {
-
     chain.GetEntry(ev);
     //AK if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 

@@ -248,7 +248,35 @@ std::vector< std::pair<uint32_t,uint32_t> > DetHitDigiGrabber::digiCollector(con
     ////////////////////////////////
     if(hasMuonHit || !filter) result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
   }
+  /*
+  std::vector<DTthDigiSpec> dtTheta = dtEtaDetDigis(ev,es);
+  for (std::vector<DTthDigiSpec>::const_iterator it = dtTheta.begin(); it!= dtTheta.end(); ++it) {
+    //////////Filter noise digis
+    bool hasMuonHit = false;
+    for (edm::PSimHitContainer::const_iterator hitItr = simDTHits->begin(); 
+	 filter && hitItr != simDTHits->end(); ++hitItr) {
+      if (abs(hitItr->particleType())!=13) continue;
+      uint32_t dtRawId = hitItr->detUnitId();
 
+      DTChamberId aDt(it->rawId());
+      DTChamberId aDt1(dtRawId);
+      ///Digi detId has sector numbering shifted by 1
+      DTChamberId aDtStripped(aDt.wheel(),
+			      aDt.station(),
+			      aDt.sector()+1);
+      
+      ///detID holds more info than wheel, station and sector
+      ///strip everything except the three above
+      DTChamberId aDtStripped1(aDt1.wheel(),
+			      aDt1.station(),
+			      aDt1.sector());
+
+      if(aDtStripped1==aDtStripped.rawId()) hasMuonHit = true;
+    }
+    ////////////////////////////////
+    if(hasMuonHit || !filter) result.push_back( std::make_pair( it->rawId(), it->codedDigi()) );
+  }
+  */
   std::vector<DTphDigiSpec> dt = dtPhiDetDigis(ev,es);
   for (std::vector<DTphDigiSpec>::const_iterator it = dt.begin(); it!= dt.end(); ++it) {
     //////////Filter noise digis
@@ -367,7 +395,7 @@ std::vector<DTphDigiSpec> DetHitDigiGrabber::dtPhiDetDigis(const edm::Event &ev,
 
   for (IP ip = phi_Container->begin(); ip < phi_Container->end(); ip++){
     const L1MuDTChambPhDigi& phDigi = (*ip);
-    result.push_back( DTphDigiSpec(phDigi));
+    result.push_back(DTphDigiSpec(phDigi));
 /*
     DTphDigiSpec d(phDigi); 
     if (    (d.phi() != phDigi.phi())
@@ -390,28 +418,39 @@ std::vector<DTphDigiSpec> DetHitDigiGrabber::dtPhiDetDigis(const edm::Event &ev,
   }
   return result;
 }
-/*
-void DetHitDigiGrabber::dtEtaDetDigis(const edm::Event &ev, const edm::EventSetup &es) co
-{
+
+std::vector< std::pair<uint32_t, uint32_t> > DetHitDigiGrabber::dtEtaDetDigis(const edm::Event &ev, const edm::EventSetup &es) const{
+
+  //std::vector<DTthDigiSpec> result; 
+  std::vector< std::pair<uint32_t, uint32_t> > result;
   edm::Handle<L1MuDTChambThContainer> dtThetaDigiColls;
   static std::string dtDigisCollName = theConfig.getParameter<std::string>("dtDigiCollName");
   static bool warnNoColl = theConfig.getUntrackedParameter<bool>("warnNoColl" , true);
   ev.getByLabel(dtDigisCollName,dtThetaDigiColls);
   if (!dtThetaDigiColls.isValid()) {
     if (warnNoColl) std::cout <<"** WARNING: not collection: "<< dtDigisCollName<< std::endl;
-    return;
+    return result;
   }
   L1MuDTChambThContainer::The_Container * theta_Container = dtThetaDigiColls->getContainer();
   typedef L1MuDTChambThContainer::The_iterator IT;
   for (IT it = theta_Container->begin(); it < theta_Container->end(); it++){
     const L1MuDTChambThDigi& thDigi = (*it);
+    DTthDigiSpec aDTSpec(thDigi);
+    //result.push_back(aDTSpec);
+    result.push_back(std::make_pair(aDTSpec.rawId(),aDTSpec.codedDigi()) );
+    /*
     std::cout <<"DT_TH:  wheel: "<<thDigi.whNum()
                  <<", station: "<<thDigi.stNum()
-                 <<", sector: "<<thDigi.scNum()
-                 <<std::endl;
+	      <<", sector: "<<thDigi.scNum()
+	      <<", pos(q) ";
+    for(int i=0;i<7;++i) 
+      std::cout<<"(i="<<i<<") "<<thDigi.position(i)<<"("<<thDigi.quality(i)<<") ";	        
+    std::cout<<std::endl;
+    */
   }
+  return result;
 }
-*/
+
 
 void DetHitDigiGrabber::initHistos(TObjArray & histos)
 {

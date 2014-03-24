@@ -106,8 +106,8 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecOb
 
   static double matchingdR = theConfig.getParameter<double>("maxDR");
   std::vector<L1Obj> l1Rpcs = l1Coll->l1RpcColl().selectByBx().selectByDeltaR(matchingdR);
-  std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByBx().selectByDeltaR(matchingdR).selectByEta();
-  std::vector<L1Obj> l1Gmts = l1Coll->selectByType(L1Obj::GMT).selectByBx().selectByQuality(4,7).selectByDeltaR( matchingdR).selectByEta();
+  std::vector<L1Obj> l1Oths = l1Coll->l1OthColl().selectByBx().selectByDeltaR(matchingdR).selectByEta(-2.5,2.5);
+  std::vector<L1Obj> l1Gmts = l1Coll->selectByType(L1Obj::GMT).selectByBx().selectByQuality(4,7).selectByDeltaR( matchingdR).selectByEta(-2.5,2.5);
   std::vector<L1Obj> l1Otfs = l1Coll->selectByType(L1Obj::OTF);
 
   myEvent->l1ObjectsOtf = l1Otfs;

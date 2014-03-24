@@ -37,7 +37,7 @@ public:
 
     float getReferencePhi() const {return phiref; };
 
-    int convert(std::pair<uint32_t,  unsigned int > aData);
+    int convert(std::pair<uint32_t,  unsigned int > aData, int nDivisions);
     float convertRpc(uint32_t detUnitId, int16_t strip);
     float convertCsc(uint32_t detUnitId, uint16_t halfstrip, uint16_t pattern, uint16_t keyWG);
     float convertDt(uint32_t detUnitId, int16_t phi);

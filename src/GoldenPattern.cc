@@ -109,6 +109,8 @@ void GoldenPattern::add( GoldenPattern::PosBenCase aCase, uint32_t rawId, int po
 //////////////////////////////////////////////////
 void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConverter) {
 
+  int nPhi = this->theKey.nPhi(this->theKey.theDet);
+
   const Pattern::DataType & detdigi = p ;
   for (auto is = detdigi.cbegin(); is != detdigi.cend(); ++is) {
     uint32_t rawId = is->second.first;
@@ -118,18 +120,18 @@ void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConvert
     switch (detId.subdetId()) {
       case MuonSubdetId::RPC: {
         RPCDigiSpec digi(rawId, is->second.second);
-	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second)]++;
+	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
         break;
       }	
       case MuonSubdetId::DT: {
         DTphDigiSpec digi(rawId, is->second.second);
-        PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second)]++;
+        PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
 	PattCore[GoldenPattern::BENDT][myPhiConverter->getLayerNumber(rawId)][digi.phiB()]++;
         break;
       }
       case MuonSubdetId::CSC: {
         CSCDigiSpec digi(rawId, is->second.second);
-        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second)]++;
+        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
         PattCore[GoldenPattern::BENCSC][myPhiConverter->getLayerNumber(rawId)][digi.pattern()]++;
         break;
       }
@@ -148,6 +150,8 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
   SystFreq::const_iterator cit;
   DetFreq::const_iterator idm;
   PosBenCase mType;
+
+  int nPhi = this->theKey.nPhi(this->theKey.theDet);
     
   ///Loop over unique detIds
   for (auto aEntry : detsHit){
@@ -185,7 +189,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if (idm != cit->second.cend() ) {
 	  fPos = whereInDistribution(mType,
 				     myPhiConverter->getLayerNumber(rawId),
-				     myPhiConverter->convert(is->second));
+				     myPhiConverter->convert(is->second,nPhi));
 	  /*	  	  
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
 		   <<" pos rel: "<<myPhiConverter->convert(is->second)
@@ -207,7 +211,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if (idm != cit->second.cend() ) {
 	  fPos = whereInDistribution(mType, 
 				     myPhiConverter->getLayerNumber(rawId),
-				     myPhiConverter->convert(is->second));
+				     myPhiConverter->convert(is->second,nPhi));
 	  /*
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
 		   <<" pos rel: "<<myPhiConverter->convert(is->second)
@@ -241,7 +245,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if (idm != cit->second.cend() ) {
 	  fPos = whereInDistribution(mType, 
 				     myPhiConverter->getLayerNumber(rawId),
-				     myPhiConverter->convert(is->second));
+				     myPhiConverter->convert(is->second,nPhi));
 	  /*
 	  std::cout<<digi<<"layer: "<<myPhiConverter->getLayerNumber(rawId)
 		   <<" pos rel: "<<myPhiConverter->convert(is->second)
@@ -376,7 +380,6 @@ void GoldenPattern::makeIntegratedCache(){
 	////////////////////
 	///Plain pdf
         val = log(rmf->second/refSum);
-	//val = rmf->second/refSum;
 	///Digitisation
 	int digitisedVal = val*std::pow(2,nBits);
 	//if(digitisedVal == 0 && val !=0) digitisedVal = 1.0;
@@ -458,7 +461,7 @@ void GoldenPattern::plot(){
      (*aMap)[idf->first] = gr;
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){  
        Double_t x = imf->first;
-       Double_t y = imf->second;
+       Double_t y = exp(imf->second);
        gr->SetPoint(gr->GetN(),x,y);
      }
  }

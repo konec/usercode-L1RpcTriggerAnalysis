@@ -48,7 +48,7 @@ void MtfCoordinateConverter::setReferencePhi(float aPhiRef){
 }
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
-int  MtfCoordinateConverter::convert(std::pair<uint32_t,  unsigned int > aData){
+int  MtfCoordinateConverter::convert(std::pair<uint32_t,  unsigned int > aData,  int nDivisions){
   
   float phi = 999.0;
   
@@ -80,9 +80,8 @@ int  MtfCoordinateConverter::convert(std::pair<uint32_t,  unsigned int > aData){
   while  (phi < 0) { phi+=2*M_PI; }
   while  (phi > 2*M_PI) { phi-=2*M_PI; }
   
-  int nDivisions = GoldenPattern::Key::nPhi;
+  //int nDivisions = GoldenPattern::Key::nPhi;
   int iPhi =  floor(phi * nDivisions/(2*M_PI));
-
   if(iPhi>nDivisions/2.0) iPhi-=nDivisions;
 
   return iPhi;

@@ -6,6 +6,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/DTphDigiSpec.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/DTthDigiSpec.h"
 
 namespace edm { class Event; class EventSetup; }
 class TObjArray;
@@ -24,11 +25,10 @@ public:
   HitSpecObj rpcDetHits(const edm::Event &ev, const edm::EventSetup &es, const TrackObj * simu, int station = 2) const;
   std::vector< std::pair<uint32_t, uint32_t> > digiCollector(const edm::Event &ev, const edm::EventSetup &es, bool filter = false) const;
 
-  //std::vector<RpcDigiSpec> 
   std::vector<RPCDigiSpec> rpcDetDigis(const edm::Event &ev, const edm::EventSetup &es) const;
   std::vector<CSCDigiSpec> cscDetDigis(const edm::Event &ev, const edm::EventSetup &es) const ; 
   std::vector<DTphDigiSpec>  dtPhiDetDigis(const edm::Event &ev, const edm::EventSetup &es)const; 
-//  void  dtEtaDetDigis(const edm::Event &ev, const edm::EventSetup &es)const; 
+  std::vector< std::pair<uint32_t, uint32_t> >  dtEtaDetDigis(const edm::Event &ev, const edm::EventSetup &es)const; 
 
   void initHistos(TObjArray & histos);
 private:

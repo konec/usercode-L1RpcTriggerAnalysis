@@ -83,6 +83,7 @@ void L1RpcTreeMaker::beginJob()
   theTree->Branch("hitSpecSt1","HitSpecObj",&hitSpecSt1,32000,99);
   theTree->Branch("hitSpecProp","HitSpecObj",&hitSpecProp,32000,99);
   theTree->Branch("digSpec",&digSpec);
+  theTree->Branch("digSpecDTth",&digSpecDTth);
   theTree->Branch("digSpecFiltered",&digSpecFiltered);
 
   theHelper.SetOwner();
@@ -150,6 +151,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   hitSpecSt1 = new HitSpecObj(); 
   hitSpecProp = new HitSpecObj(); 
   digSpec = std::vector< std::pair<uint32_t, uint32_t> >();
+  digSpecDTth = std::vector< std::pair<uint32_t, uint32_t> >();
   digSpecFiltered = std::vector< std::pair<uint32_t, uint32_t> >();
 
   //
@@ -249,6 +251,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   *hitSpecProp = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,99);
   
   digSpec  = theDetHitDigiGrabber.digiCollector(ev,es);
+  digSpecDTth  = theDetHitDigiGrabber.dtEtaDetDigis(ev,es);
   digSpecFiltered  = theDetHitDigiGrabber.digiCollector(ev,es,true);
   
 

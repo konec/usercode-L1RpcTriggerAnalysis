@@ -34,7 +34,7 @@ public:
 
   bool operator==(const Pattern& o) const;
 
-  void print(MtfCoordinateConverter *myPhiConverter);
+  void print(MtfCoordinateConverter *myPhiConverter, int nPhi);
   
 private:
 

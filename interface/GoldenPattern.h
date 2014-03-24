@@ -49,7 +49,7 @@ enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
      return !(theEtaCode!=o.theEtaCode || thePtCode!=o.thePtCode || thePhiCode!=o.thePhiCode || theCharge!=o.theCharge || theDet!=o.theDet);
    }
    float ptValue() const { return  L1RpcTriggerAnalysisEfficiencyUtilities::PtScale::ptValue(thePtCode); }
-   float phiValue() const { return (float)(thePhiCode)/(nPhi/(2*M_PI)); }
+   float phiValue() const { return (float)(thePhiCode)/(nPhi(theDet) /(2*M_PI)); }
    float etaValue() const {return L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaValue(theEtaCode);}
    int chargeValue() const { return theCharge;}
    uint32_t     theDet; 
@@ -59,7 +59,14 @@ enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
    unsigned int theRefStrip;
    int          theCharge;
    int          theRotation;
-   static const int nPhi = 2*1152;
+   //static const int nPhi = 2*1152;
+   static const int nPhi(uint32_t aDet){
+     return 2*1152;
+     if(aDet/(uint32_t)100==1) return 5*1152;
+     if(aDet/(uint32_t)100==2) return 5*1152;
+     if(aDet/(uint32_t)100==3) return 2*1152;
+     return 2*1152;
+   }
 
    friend std::ostream & operator << (std::ostream &out, const Key & o) {
      out << "Key_eta:"<<o.theEtaCode<<"("<<o.theDet<<")_pt:"<<o.thePtCode<<"_charge"<<o.theCharge

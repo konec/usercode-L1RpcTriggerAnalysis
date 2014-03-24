@@ -75,7 +75,7 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   if (!hitSpec) return;
 
   int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());
-  //theEtaCode = 0;
+  theEtaCode = 0;
   float phiref = hitSpec->position().phi();
   float ptref  = simu->pt(); 
   int chargeref = simu->charge();
@@ -94,10 +94,9 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
     if (!isOK) return;
 
     int aLayer = myPhiConverter->getLayerNumber(is->first)+100*detId.subdetId();
-    int iPhi = myPhiConverter->convert(*is);
-
-    //int nDivisions = GoldenPattern::Key::nPhi;
-    //if(iPhi<0) iPhi+=nDivisions;
+    int nPhi = GoldenPattern::Key::nPhi(aLayer);
+    int iPhi = myPhiConverter->convert(*is,nPhi);
+    //if(iPhi<0) iPhi+=nPhi;
     //Accept only events with single hit in each layer
     if(refPhi.find(aLayer)!=refPhi.end()) return; 
     refPhi[aLayer] = iPhi;
@@ -111,7 +110,8 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
 
   GoldenPattern::Key key(theEtaCode, ptref, chargeref, phiref,stripRef);
   key.theDet = it.first;
-  myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);
+  int nPhi = GoldenPattern::Key::nPhi(it.first);
+  myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);
 
   if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key);
   theGPs[key].add(pattern, myPhiConverter);
@@ -153,9 +153,10 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;    
     if(!pattern.add(*is)) continue; //For refernce use only layers with single hit (most likely too restrictive)
     int aLayer = myPhiConverter->getLayerNumber(is->first)+100*detId.subdetId();
-    int iPhi = myPhiConverter->convert(*is);
-    int nDivisions = GoldenPattern::Key::nPhi;
-    if(iPhi<0) iPhi+=nDivisions;
+    int nPhi = GoldenPattern::Key::nPhi(aLayer);
+    //std::cout<<"aLayer: "<<aLayer<<" nPhi: "<<nPhi<<std::endl;
+    int iPhi = myPhiConverter->convert(*is,nPhi);
+    if(iPhi<0) iPhi+=nPhi;
 
     bool skipLayer = true;
     for(auto aRef : myActiveRefs){
@@ -178,7 +179,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     igps->second.makeIntegratedCache();
     for (auto const & it : refPhi){  
       if(igps->first.theDet!=it.first) continue;     
-      myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);	  
+      int nPhi = GoldenPattern::Key::nPhi(it.first);
+      myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
       GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
       ////////////////////
       if (bestMatching < result) {
@@ -190,7 +192,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
 
-  if (bestMatching && bestKey.ptValue()<16 && false) {
+  if (!bestMatching && false) {
     ////////////DEBUG
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
@@ -199,13 +201,14 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
       for (auto const & it : refPhi){
 	if(igps->first.theDet!=it.first) continue;  
-	myPhiConverter->setReferencePhi((float)it.second/GoldenPattern::Key::nPhi*2*M_PI);	  
+	int nPhi = GoldenPattern::Key::nPhi(it.first);
+	myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
 	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
 	//if(result.nMatchedTot()>bestMatching.nMatchedTot()-2){
 	  if(igps->first.thePtCode==18){
 	  std::cout<<igps->first<<" "<<result<<" better? "<<(bestMatching<result)<<std::endl;
 	  std::cout<<"GP: "<<igps->second<<std::endl; 
-	  pattern.print(myPhiConverter);
+	  pattern.print(myPhiConverter,nPhi);
 	}
       }
     }
@@ -213,15 +216,15 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   ////////////DEBUG            
   if (bestMatching) {
     candidate.pt = bestKey.ptValue();
-    //candidate.eta = bestKey.etaValue();
+    candidate.eta = bestKey.etaValue();
     candidate.phi = bestKey.phiValue();
     candidate.charge = bestKey.chargeValue();
     candidate.q   = bestMatching.nMatchedTot()
  	+ 100*bestMatching.withStation1()
         + 200*bestMatching.withStation2()    
         + 500*bestMatching.withStation3();    
-    //candidate.disc = bestMatching.value();
-    candidate.eta = bestMatching.value();
+    candidate.disc = bestMatching.value();
+    //candidate.eta = bestMatching.value();
     candidate.type = L1Obj::OTF;
   }
 
@@ -250,7 +253,7 @@ void PatternManager::beginJob()
     
     if(key.theRefStrip<10000) continue;
 
-    //if(key.thePtCode!=11 || key.theCharge!=-1 || key.theDet!=301) continue;
+    //if(key.thePtCode!=30) continue;
 
     //if(key.theEtaCode<10 || key.theEtaCode>12) continue;
 
@@ -282,12 +285,12 @@ void PatternManager::endJob(){
   std::string patternOutFileName = theConfig.getParameter<std::string>("patternOutFile");
   TFile patternOutFile( patternOutFileName.c_str(),"RECREATE");   
   
-  /*
+  
   for (auto igps = theGPs.begin(); igps != theGPs.end();) {
     GoldenPattern & gp = igps->second;      
     if(!gp.purge()) {theGPs.erase(igps++);} else { ++igps; } 
   }
-  */
+  
   
   static ENTRY entry;
   TTree *tree = new TTree("FlatPatterns","FlatPatterns");

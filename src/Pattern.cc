@@ -104,7 +104,7 @@ std::ostream & operator << (std::ostream &out, const Pattern &o)
 }
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
-void Pattern::print(MtfCoordinateConverter *myPhiConverter){
+void Pattern::print(MtfCoordinateConverter *myPhiConverter, int nPhi){
 
 
   std::cout <<" Pattern:  size: "<<size();
@@ -116,7 +116,7 @@ void Pattern::print(MtfCoordinateConverter *myPhiConverter){
     case MuonSubdetId::CSC: { std::cout << std::endl <<CSCDetId(it->second.first)<<" "<<CSCDigiSpec(it->second.first, it->second.second);  break; }
     };
     std::cout<<" layer: "<<myPhiConverter->getLayerNumber(it->second.first)
-	     <<" pos rel: "<<myPhiConverter->convert(it->second);
+	     <<" pos rel: "<<myPhiConverter->convert(it->second,nPhi);
   }
   std::cout<<"\nUnique layers: ";
   for (auto aEntry : detsHit) std::cout<<aEntry.first<<" ";  
