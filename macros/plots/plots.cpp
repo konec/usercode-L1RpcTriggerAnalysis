@@ -11,8 +11,10 @@ double ptBins[33]={0., 0.1,
 string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
 
 
-path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/Dynamic/SingleMu_16_p/";
+path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/Dynamic/SingleMu_10_p/";
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/05RPC/SingleMu_16_p/";
+
+path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/FullEta05RPC/SingleMu_10_p/";
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -250,6 +252,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
     gr->GetYaxis()->SetLabelSize(0.06);
     gr->SetFillColor(kBlue-10);
     gr->Draw("A b");
+    gr->Print("all");
     c->Print(TString::Format("%s/pdf_%s.png",dirName.Data(),gr->GetName()));
   }
   /////
@@ -262,8 +265,6 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
     gr->Draw("A b");
     c->Print(TString::Format("%s/pdf_%s.png",dirName.Data(),gr->GetName()));
   }
-  //////
-  return;
   //////
   for(int i=0;i<grCSC.GetEntries();++i){
     TGraph *gr = (TGraph*)grCSC.At(i);
@@ -281,8 +282,8 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 void plots(){
 
 
-  plotGoldenPattern(16,0,102,1); 
-  plotGoldenPattern(16,0,303,1); 
+  plotGoldenPattern(10,9,202,1); 
+  //plotGoldenPattern(7,0,203,1); 
   //plotGoldenPattern(16,0,304,1); 
   return;
 

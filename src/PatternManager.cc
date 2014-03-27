@@ -140,7 +140,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   theEvForPatCounter++;
 
   std::vector<int> myActiveRefs = {301, 302, 303, 304, 101, 102, 312, 313, 202};
-  //std::vector<int> myActiveRefs = {101, 102, 202}; //noRPC
+  //std::vector<int> myActiveRefs = {301, 302, 303, 304, 305, 101, 102, 103, 201, 202, 203, 311, 312, 313};
+  //std::vector<int> myActiveRefs = {101, 102, 103, 201, 202, 203}; //noRPC
   //std::vector<int> myActiveRefs = {301, 302, 303, 304, 312, 313}; //no DT, CSC
 
   Pattern pattern;
@@ -175,7 +176,9 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
 
+  ///High precision chambers first
   for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
+    if(igps->first.theDet/100==3) continue;
     igps->second.makeIntegratedCache();
     for (auto const & it : refPhi){  
       if(igps->first.theDet!=it.first) continue;     
@@ -189,6 +192,26 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	bestKey.thePhiCode = it.second;       
 	bestKey.theCharge = it.first;       
 	} 	
+    }
+  }
+  ///Then RPC
+  if(!bestMatching){
+    for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
+      igps->second.makeIntegratedCache();
+      for (auto const & it : refPhi){  
+	if(igps->first.theDet/100!=3) continue;     
+	if(igps->first.theDet!=it.first) continue;     
+	int nPhi = GoldenPattern::Key::nPhi(it.first);
+	myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
+	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
+	////////////////////
+	if (bestMatching < result) {
+	  bestMatching = result;
+	  bestKey =  igps->first;
+	  bestKey.thePhiCode = it.second;       
+	  bestKey.theCharge = it.first;       
+	} 	
+      }
     }
   }
 

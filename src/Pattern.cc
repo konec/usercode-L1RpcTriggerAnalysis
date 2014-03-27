@@ -106,7 +106,7 @@ std::ostream & operator << (std::ostream &out, const Pattern &o)
 /////////////////////////////////////////////////
 void Pattern::print(MtfCoordinateConverter *myPhiConverter, int nPhi){
 
-
+  int devSum = 0;
   std::cout <<" Pattern:  size: "<<size();
   for (auto it = theData.cbegin(); it != theData.cend(); ++it){
     DetId detId(it->second.first);
@@ -117,7 +117,9 @@ void Pattern::print(MtfCoordinateConverter *myPhiConverter, int nPhi){
     };
     std::cout<<" layer: "<<myPhiConverter->getLayerNumber(it->second.first)
 	     <<" pos rel: "<<myPhiConverter->convert(it->second,nPhi);
+    devSum+=myPhiConverter->convert(it->second,nPhi);
   }
+  std::cout<<" sum dev: "<<devSum;
   std::cout<<"\nUnique layers: ";
   for (auto aEntry : detsHit) std::cout<<aEntry.first<<" ";  
   std::cout<<std::endl;

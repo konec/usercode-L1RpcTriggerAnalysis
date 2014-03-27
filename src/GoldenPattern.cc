@@ -68,7 +68,7 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
-  return(value()>-99999);
+  return(value()>-99999 && nMatchedTot()>2);
 }
 
 float GoldenPattern::Result::value() const { 
