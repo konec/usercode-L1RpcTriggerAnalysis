@@ -104,6 +104,16 @@ std::ostream & operator << (std::ostream &out, const Pattern &o)
 }
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
+int Pattern::deviationSum(MtfCoordinateConverter *myPhiConverter, int nPhi) const{
+
+  int devSum = 0;
+  for (auto it = theData.cbegin(); it != theData.cend(); ++it)
+    devSum+=abs(myPhiConverter->convert(it->second,nPhi));
+
+  return devSum;
+}
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
 void Pattern::print(MtfCoordinateConverter *myPhiConverter, int nPhi){
 
   int devSum = 0;
@@ -117,7 +127,7 @@ void Pattern::print(MtfCoordinateConverter *myPhiConverter, int nPhi){
     };
     std::cout<<" layer: "<<myPhiConverter->getLayerNumber(it->second.first)
 	     <<" pos rel: "<<myPhiConverter->convert(it->second,nPhi);
-    devSum+=myPhiConverter->convert(it->second,nPhi);
+    devSum+=abs(myPhiConverter->convert(it->second,nPhi));
   }
   std::cout<<" sum dev: "<<devSum;
   std::cout<<"\nUnique layers: ";

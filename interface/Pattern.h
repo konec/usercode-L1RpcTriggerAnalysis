@@ -35,6 +35,8 @@ public:
   bool operator==(const Pattern& o) const;
 
   void print(MtfCoordinateConverter *myPhiConverter, int nPhi);
+
+  int deviationSum(MtfCoordinateConverter *myPhiConverter, int nPhi) const;
   
 private:
 

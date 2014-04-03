@@ -18,7 +18,7 @@ public:
 //
 // where
 //
-enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
+  enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4, TOTDEV=5};
 
 //
 // Key
@@ -61,10 +61,11 @@ enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4 };
    int          theRotation;
    //static const int nPhi = 2*1152;
    static const int nPhi(uint32_t aDet){
-     return 2*1152;
-     if(aDet/(uint32_t)100==1) return 5*1152;
-     if(aDet/(uint32_t)100==2) return 5*1152;
-     if(aDet/(uint32_t)100==3) return 2*1152;
+     //return 2*1152;
+     if(aDet/(uint32_t)1000==1) return 1*1152;
+     if(aDet/(uint32_t)1000==2) return 2*1152;
+     if(aDet/(uint32_t)1000==3) return 5*1152;
+     if(aDet/(uint32_t)1000==4) return 10*1152;
      return 2*1152;
    }
 

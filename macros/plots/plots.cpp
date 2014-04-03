@@ -8,13 +8,12 @@ double ptBins[33]={0., 0.1,
 		 160. };
 
 
-string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/";
+string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat//SingleMu_10_p/";
 
 
-path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/Dynamic/SingleMu_10_p/";
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/Dynamic/SingleMu_10_p/";
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/05RPC/SingleMu_16_p/";
-
-path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/FullEta05RPC/SingleMu_10_p/";
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/FullEta05RPC/SingleMu_10_p/";
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -170,6 +169,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
   TString locName = TString::Format("tower%d_ref%d_pt%d_sign%d",iTower,iRef,iPt,iCharge);
   std::cout<<locName.Data()<<std::endl;
   ////
+  //TString cName = "Dev"+locName;
   TString cName = "RPC"+locName;
   TCanvas *cRPC = (TCanvas*)file->Get(cName.Data());
   cName = "DT"+locName;
@@ -252,7 +252,6 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
     gr->GetYaxis()->SetLabelSize(0.06);
     gr->SetFillColor(kBlue-10);
     gr->Draw("A b");
-    gr->Print("all");
     c->Print(TString::Format("%s/pdf_%s.png",dirName.Data(),gr->GetName()));
   }
   /////
@@ -281,8 +280,13 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
+  plotGoldenPattern(10,0,1312,1); 
+  return;
 
-  plotGoldenPattern(10,9,202,1); 
+  plotGoldenPattern(17,0,1202,1); 
+  plotGoldenPattern(17,0,2202,1); 
+  plotGoldenPattern(17,0,3202,1); 
+  plotGoldenPattern(17,0,4202,1); 
   //plotGoldenPattern(7,0,203,1); 
   //plotGoldenPattern(16,0,304,1); 
   return;

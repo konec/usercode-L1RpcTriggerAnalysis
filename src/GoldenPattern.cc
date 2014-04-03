@@ -167,17 +167,40 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     auto beginIt = aRange.first;
     auto endIt =   aRange.second;
 
-    //std::cout<<"diff: "<<detdigi.count(layer)<<std::endl;
-    //if((layer==101 || layer==201 || layer==301 || layer==311) && detdigi.count(layer)>1) continue;
     ///Maximum measure over hits in the same detId
     float fMax = -30.0;
     float fPosMax = -30.0;
-    //float fBenMax = -30.0;
     float fPos=-30.0, fBen=-30.0;
     ///Loop over hits in given detId
 
     std::cout.precision(15);
 
+    ////////////////
+    ////////////////
+    /*
+    float fDev=-30, fDevMax = -30.0;
+    mType = GoldenPattern::TOTDEV;
+    cit = PattCoreIntegrated.find(mType);
+    if(cit==PattCoreIntegrated.cend()) continue; //AK: Ugly, FIX.
+    idm = cit->second.find(501);
+    if (idm != cit->second.cend() ) {
+      fDev = whereInDistribution(mType,
+				 501,
+				 p.deviationSum(myPhiConverter,nPhi));
+      
+      std::cout<<" layer: "<<501
+	       <<" pos rel: "<<p.deviationSum(myPhiConverter,nPhi)
+	       <<" TOTDEV  f: "<<fPos<<std::endl;      
+      
+    }
+    if(fDev>fDevMax) fDevMax = fDev;
+    if(mType==GoldenPattern::TOTDEV)
+      result.myResults[GoldenPattern::TOTDEV].push_back(std::make_pair(1, fDevMax));
+    ////////////////
+    if(fDevMax<-29) return result;
+    ////////////////
+    fDevMax = -30.0;
+    */
     for (auto is = beginIt; is != endIt; ++is) {
       if (detId.subdetId() == MuonSubdetId::RPC) {
 	RPCDigiSpec digi(rawId, is->second.second);
@@ -287,7 +310,6 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 
     fMax = -30.0;
     fPosMax = -30.0;
-    //fBenMax = -30.0;
   }
 
   result.run();
@@ -340,7 +362,7 @@ bool GoldenPattern::purge(){
 	remove = false;
 	pos = imf->first;  
 	sum += idf->second[pos];
- 	if (idf->second[pos]/refSum<5E-3) remove = true;
+ 	if (idf->second[pos]/refSum<1E-3) remove = true;
 	if(remove) {idf->second.erase(imf++); } else { ++imf; } 	
       }
       if (idf->second.size()==0 || (float)sum/refSum<-0.05) 
@@ -362,6 +384,7 @@ void GoldenPattern::makeIntegratedCache(){
 
   int refSum = theKey.theRefStrip;
   int nBits = 6;
+  float minPlog = log(1E-3);
   ///////////////////
   ///Prepare tables of integrated frequencies
   PattCoreIntegrated = PattCore;
@@ -369,7 +392,7 @@ void GoldenPattern::makeIntegratedCache(){
     for (auto idf = isf->second.begin(); idf !=isf->second.end();++idf) {
       float sum = 0;
       for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
-      refSum = sum;
+      //refSum = sum;
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
 	//if((rmf->second)/refSum>1.0 || (rmf->second)/refSum<0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
 	float val=0;
@@ -379,14 +402,22 @@ void GoldenPattern::makeIntegratedCache(){
 	//val = 2.*(0.5-fabs(val-0.5)); 
 	////////////////////
 	///Plain pdf
-        val = log(rmf->second/refSum);
+        val = log(rmf->second/refSum);	
+	
+	int scale = 1;
+	if(theKey.theDet/(uint32_t)1000==1) scale = 1;
+	if(theKey.theDet/(uint32_t)1000==2) scale = 2;
+	if(theKey.theDet/(uint32_t)1000==3) scale = 5;
+	if(theKey.theDet/(uint32_t)1000==4) scale = 10;
+        if(isf->first==GoldenPattern::BENDT ||
+	   isf->first==GoldenPattern::BENCSC) scale = 1;
+	val+=log(scale);
+	
+
 	///Digitisation
-	int digitisedVal = val*std::pow(2,nBits);
-	//if(digitisedVal == 0 && val !=0) digitisedVal = 1.0;
-	rmf->second= digitisedVal/std::pow(2,nBits);	
-	//rmf->second = val;        	
-	//std::cout<<"val: "<<rmf->second<<" refSum:"<<refSum<<" "<<val<<std::endl;
-	///	
+	int digitisedVal = (val/minPlog)*std::pow(2,nBits);
+	rmf->second= -digitisedVal/std::pow(2,nBits);	
+	//rmf->second = val;
       }
     }
   }
@@ -401,16 +432,17 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
 
  out <<"GoldenPattern "<< o.theKey <<std::endl;
 
- std::vector<std::string> typeInfos = {"POSRPC","POSCSC","BENCSC","POSDT","BENDT"};
+ std::vector<std::string> typeInfos = {"POSRPC","POSCSC","BENCSC","POSDT","BENDT","TOTDEV"};
 
  for (auto isf=o.PattCoreIntegrated.cbegin();isf!=o.PattCoreIntegrated.cend();++isf){
    for (auto idf = isf->second.cbegin(); idf!=isf->second.cend();++idf) {      
      out <<typeInfos[isf->first]<<" Det: "<< idf->first;    
      float aSum = 0.0;
      out <<" Value: ";     
-     out.precision(3);
+     out.precision(5);
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf) 
-       {out << imf->first<<":"<<exp(imf->second)<<", "; aSum+=exp(imf->second);}
+     {out << imf->first<<":"<<exp(-imf->second*log(1E-3))<<", "; aSum+=exp(-imf->second*log(1E-3));}
+     //{out << imf->first<<":"<<exp(imf->second)<<", "; aSum+=exp(imf->second);}
      out <<" Sum: "<<aSum;
      out << std::endl;
    }
@@ -439,20 +471,22 @@ int GoldenPattern::size(){
 void GoldenPattern::plot(){
 
  makeIntegratedCache();
- std::vector<std::string> typeInfos = {"POSRPC","POSCSC","BENCSC","POSDT","BENDT"};
+ std::vector<std::string> typeInfos = {"POSRPC","POSCSC","BENCSC","POSDT","BENDT","TOTDEV"};
 
  std::map<unsigned int, TGraph *> graphsRPCMap;
  std::map<unsigned int, TGraph *> graphsDTMap, graphsBENDTMap; 
  std::map<unsigned int, TGraph *> graphsCSCMap, graphsBENCSCMap;
+ std::map<unsigned int, TGraph *> graphsDevMap;
 
  std::map<unsigned int, TGraph *>  *aMap;
 
- for (auto isf=PattCoreIntegrated.cbegin();isf!=PattCoreIntegrated.cend();++isf){
+ for (auto isf=PattCoreIntegrated.cbegin();isf!=PattCoreIntegrated.cend();++isf){   
    if(typeInfos[isf->first].find("RPC")!=std::string::npos) aMap = &graphsRPCMap;
    else if(typeInfos[isf->first].find("POSCSC")!=std::string::npos) aMap = &graphsCSCMap;
    else if(typeInfos[isf->first].find("POSDT")!=std::string::npos) aMap = &graphsDTMap;
    else if(typeInfos[isf->first].find("BENCSC")!=std::string::npos) aMap = &graphsBENCSCMap;
    else if(typeInfos[isf->first].find("BENDT")!=std::string::npos) aMap = &graphsBENDTMap;
+   else if(typeInfos[isf->first].find("TOTDEV")!=std::string::npos) aMap = &graphsDevMap;
    else continue;
 
    for (auto idf = isf->second.cbegin(); idf!=isf->second.cend();++idf) {      
@@ -461,11 +495,11 @@ void GoldenPattern::plot(){
      (*aMap)[idf->first] = gr;
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){  
        Double_t x = imf->first;
-       Double_t y = exp(imf->second);
+       Double_t y = exp(-imf->second*log(1E-3));
        gr->SetPoint(gr->GetN(),x,y);
      }
+   }
  }
-}
 
  TFile file("GoldenPatterns.root","UPDATE");
  //////////////
@@ -480,11 +514,38 @@ void GoldenPattern::plot(){
  TCanvas* cCSC = new TCanvas(TString::Format("CSCtower%d_ref%d_pt%d_sign%d",theKey.theEtaCode, theKey.theDet, theKey.thePtCode, theKey.theCharge+1).Data(),
 			     TString::Format("GoldenPattern").Data(),
 			     600,150,1100,600);
+
+ TCanvas* cDev = new TCanvas(TString::Format("Devtower%d_ref%d_pt%d_sign%d",theKey.theEtaCode, theKey.theDet, theKey.thePtCode, theKey.theCharge+1).Data(),
+			     TString::Format("GoldenPattern").Data(),
+			     600,150,1100,600);
+
  int iCnt = 0;
+ cDev->Divide(graphsDevMap.size());
  cRPC->Divide(graphsRPCMap.size());
  cCSC->Divide(graphsCSCMap.size() + graphsBENCSCMap.size());
  cDT->Divide(graphsDTMap.size() + graphsBENDTMap.size());
 
+ //////////////Dev
+ for(auto it=graphsDevMap.begin();
+     it!=graphsDevMap.end();++it){   
+   iCnt++;
+   cDev->cd(iCnt);   
+   it->second->Sort();
+   it->second->GetXaxis()->SetLabelSize(0.06);
+   it->second->GetXaxis()->SetLabelOffset(-0.03);
+   it->second->GetYaxis()->SetLabelSize(0.08);
+   if(it->second->GetN()==1) it->second->Draw("A*");
+   else it->second->Draw("AL");
+   TPaveText *pt = new TPaveText(0.25,0.9,0.75,0.95,"blNDC");
+   pt->SetBorderSize(0);
+   pt->SetFillColor(0);
+   pt->SetFillStyle(0);
+   pt->SetTextSize(0.1);
+   pt->AddText(TString::Format("Dev layer: %d",it->first));
+   pt->Draw();
+   it->second->SetName(TString::Format("Dev_layer_%d",it->first));
+ }
+ cDev->Write();
  //////////////RPC
  for(auto it=graphsRPCMap.begin();
      it!=graphsRPCMap.end();++it){   
