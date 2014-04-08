@@ -142,7 +142,6 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
 
   L1ObjColl* l1ObjColl = 0;
   HitSpecObj* hitSpec = 0;
-  HitSpecObj* hitSpecSt1 = 0;
   HitSpecObj* hitSpecProp = 0;
 
   chain.SetBranchAddress("event",&event);
@@ -162,7 +161,6 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   chain.SetBranchAddress("l1ObjColl",&l1ObjColl);
   chain.SetBranchAddress("hitSpec",&hitSpec);
   chain.SetBranchAddress("hitSpecSt1",&hitSpecProp);
-  //chain.SetBranchAddress("hitSpecSt1",&hitSpecSt1);
   //chain.SetBranchAddress("hitSpecProp",&hitSpecProp);
   
   //
@@ -171,8 +169,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   Int_t nentries= (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
-  nentries = 5E6;
-  //nentries = 1E5;
+  //nentries = 5E6;
+  nentries = 1E4;
 
   //nentries = 0;
 
@@ -220,11 +218,20 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
    if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
    if (thePatternProducer) thePatternProducer->run(event, es, simu, hitSpecProp, *digSpec);/////propageted state used, filtered digis used!!!
-   L1Obj l1otf;
-   if (thePatternProvider) l1otf=thePatternProvider->check(event, es, simu, hitSpecProp, hitSpecSt1, *digSpec);      
-   if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf);  
+   L1Obj l1otf1x,l1otf2x,l1otf5x, l1otf10x;
+   if (thePatternProvider){
+     l1otf1x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,1);      
+     l1otf2x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,2);      
+     l1otf5x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,3);      
+     l1otf10x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,4);           
+   }
+
+   if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf2x);  
    L1ObjColl myL1ObjColl = *l1ObjColl;
-   myL1ObjColl.push_back(l1otf, false, 0.); 
+   myL1ObjColl.push_back(l1otf1x, false, 0.); 
+   myL1ObjColl.push_back(l1otf2x, false, 0.); 
+   myL1ObjColl.push_back(l1otf5x, false, 0.); 
+   myL1ObjColl.push_back(l1otf10x, false, 0.); 
    if (theAnaEff) theAnaEff->run(refTrack, &myL1ObjColl, hitSpecProp);
   }
 }

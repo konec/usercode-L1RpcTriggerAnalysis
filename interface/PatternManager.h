@@ -36,10 +36,11 @@ public:
 	   const TrackObj * simu, const HitSpecObj * hitSpec,  
 	   const VDigiSpec & higSpec);
   
-L1Obj check(const EventObj* ev, const edm::EventSetup& es,
+  L1Obj check(const EventObj* ev, const edm::EventSetup& es,
 	      const TrackObj * simu, 
-	      const HitSpecObj * hitSpec,  const HitSpecObj * hitSpecSt1,  
-	      const VDigiSpec & higSpec);
+	      const HitSpecObj * hitSpec, 
+	      const VDigiSpec & higSpec,
+	      int iGranularity);
   
   void endJob();
   void beginJob();

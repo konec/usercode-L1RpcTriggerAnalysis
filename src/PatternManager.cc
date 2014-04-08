@@ -128,8 +128,9 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
 /////////////////////////////////////////////////////////////////////////
 L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 			    const TrackObj * simu, 
-			    const HitSpecObj * hitSpec,  const HitSpecObj * hitSpecSt1,  
-			    const VDigiSpec & vDigi){
+			    const HitSpecObj * hitSpec,  
+			    const VDigiSpec & vDigi,
+			    int iGranularity){
 
   L1Obj candidate;
  
@@ -156,24 +157,22 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;    
     if(!pattern.add(*is)) continue; //For refernce use only layers with single hit (most likely too restrictive)
 
-
-    for(int iGranularity=1;iGranularity<5;++iGranularity){
-      int aLayer = myPhiConverter->getLayerNumber(is->first)+100*detId.subdetId() + 1000*iGranularity;
-      int nPhi = GoldenPattern::Key::nPhi(aLayer);
-      int iPhi = myPhiConverter->convert(*is,nPhi);
-      if(iPhi<0) iPhi+=nPhi;
-
-      bool skipLayer = true;
-      for(auto aRef : myActiveRefs){
-	if(aRef==aLayer%1000){
-	  skipLayer = false;
-	  break;
-	}
+    int aLayer = myPhiConverter->getLayerNumber(is->first)+100*detId.subdetId() + 1000*iGranularity;
+    int nPhi = GoldenPattern::Key::nPhi(aLayer);
+    int iPhi = myPhiConverter->convert(*is,nPhi);
+    if(iPhi<0) iPhi+=nPhi;
+    
+    bool skipLayer = true;
+    for(auto aRef : myActiveRefs){
+      if(aRef==aLayer%1000){
+	skipLayer = false;
+	break;
       }
-      if(skipLayer) continue;    
-    refPhi[aLayer] = iPhi; //FIXME! Use multimap
     }
+    if(skipLayer) continue;    
+    refPhi[aLayer] = iPhi; //FIXME! Use multimap
   }
+  
   pattern.makeHitDetsList();
   if (pattern.size() == 0) return candidate; 
 
@@ -219,7 +218,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
 
-  if (false && bestMatching && bestKey.thePtCode<10 && bestKey.theCharge<2000) {
+  if (bestMatching && bestMatching.nMatchedTot()==1) {
     ////////////DEBUG
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
@@ -232,7 +231,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	int nPhi = GoldenPattern::Key::nPhi(it.first);
 	myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
 	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
-	if(igps->first.theDet%1000/100<3 && igps->first.thePtCode==17 && igps->first.theCharge==-1){
+	if(igps->first.ptValue()>=16 && igps->first.ptValue()<35 && result){
 	//if(result.nMatchedTot()>=bestMatching.nMatchedTot() && igps->first.theDet%1000/100<3 && igps->first.thePtCode>10){
 	//if(igps->first.thePtCode==17){
 	  std::cout<<igps->first<<" "<<result<<" better? "<<(bestMatching<result)<<std::endl;

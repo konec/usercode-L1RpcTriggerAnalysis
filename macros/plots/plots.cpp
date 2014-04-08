@@ -8,7 +8,7 @@ double ptBins[33]={0., 0.1,
 		 160. };
 
 
-string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat//SingleMu_10_p/";
+string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat/SingleMu_18_p/";
 
 
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/Dynamic/SingleMu_10_p/";
@@ -280,7 +280,9 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
-  plotGoldenPattern(10,0,1312,1); 
+  //plotGoldenPattern(14,0,4202,1); 
+  plotGoldenPattern(18,0,4202,1); 
+  plotGoldenPattern(18,0,3202,1); 
   return;
 
   plotGoldenPattern(17,0,1202,1); 

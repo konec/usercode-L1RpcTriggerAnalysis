@@ -37,7 +37,7 @@ void GoldenPattern::Result::runNoCheck() const {
   for(auto it=nMatchedPoints.cbegin();it!=nMatchedPoints.cend();++it) nTot+=it->second;    
   
   //theValue = ( nTot > 3) ? fract : -99999.;  
-  theValue = ( nTot > 2) ? fract : -99999.;  
+  theValue = ( nTot > 0) ? fract : -99999.;  
 
 }
 ////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
-  return(value()>-99999 && nMatchedTot()>2);
+  return(value()>-99999 && nMatchedTot()>0);
 }
 
 float GoldenPattern::Result::value() const { 
@@ -256,7 +256,6 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos;
-	  //fBenMax = fBen;
 	}
       }
       else if (detId.subdetId() == MuonSubdetId::CSC) {
@@ -293,7 +292,6 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos;
-	  //fBenMax = fBen;
 	}
       }
     }
