@@ -46,7 +46,8 @@ float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereIn
   static const float epsilon = 1.e-6;
   float normValue = whereInDist;  
   if(normValue > log(epsilon)) ++nMatchedPoints[where];
-  else normValue = log(epsilon);
+  //else normValue = log(epsilon);
+  else normValue = 0.0;
   /////////////////
   return normValue; 
 }
@@ -68,7 +69,7 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
-  return(value()>-99999 && nMatchedTot()>1);
+  return(value()>-99999 && nMatchedTot()>2);
 }
 
 float GoldenPattern::Result::value() const { 

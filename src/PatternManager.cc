@@ -157,10 +157,10 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   //////////////////////
   theEvForPatCounter++;
 
-  std::vector<int> myActiveRefs = {101, 102, 103, 201, 202, 203, 313, 314};
+  //std::vector<int> myActiveRefs = {101, 102, 103, 202, 203, 301, 302, 303};
   //std::vector<int> myActiveRefs = {101, 102, 103, 104, 201, 202, 203, 204}; //noRPC
   //std::vector<int> myActiveRefs = {301, 302, 303, 304, 311, 312, 313, 314}; //no DT, CSC
-  //std::vector<int> myActiveRefs = {101, 102, 103, 201, 202, 203, 204, 301, 302, 303, 304, 311, 312, 313, 314};//All
+  std::vector<int> myActiveRefs = {101, 102, 103, 104, 201, 202, 203, 204, 301, 302, 303, 304, 311, 312, 313, 314};//All 
 
   Pattern pattern;
   std::map<uint32_t,int> refPhi;
@@ -206,6 +206,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
       myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
       GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
       ////////////////////
+      if((theEtaCode==2 || theEtaCode==3) && result.value()<-8) result = GoldenPattern::Result();
+      ////////////////////
       if (bestMatching < result) {
 	bestMatching = result;
 	bestKey =  igps->first;
@@ -227,6 +229,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	int nPhi = GoldenPattern::Key::nPhi(it.first);
 	myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
 	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
+	////////////////////
+	if((theEtaCode==2 || theEtaCode==3) && result.value()<-8) result = GoldenPattern::Result();
 	////////////////////
 	if (bestMatching < result) {
 	  bestMatching = result;

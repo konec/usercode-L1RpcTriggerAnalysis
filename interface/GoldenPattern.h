@@ -61,7 +61,6 @@ public:
    int          theRotation;
    //static const int nPhi = 2*1152;
    static const int nPhi(uint32_t aDet){
-     return 5*1152;
      if(aDet/(uint32_t)1000==1) return 1*1152;
      if(aDet/(uint32_t)1000==2) return 2*1152;
      if(aDet/(uint32_t)1000==3) return 5*1152;
