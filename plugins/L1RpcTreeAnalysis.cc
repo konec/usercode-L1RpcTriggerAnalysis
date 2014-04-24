@@ -172,7 +172,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   //nentries = 5E6;
   nentries = 1E4;
 
-  //nentries = 0;
+  //nentries = 1353;
 
   //
   // main loop
@@ -218,12 +218,13 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
    if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
    if (thePatternProducer) thePatternProducer->run(event, es, simu, hitSpecProp, *digSpec);/////propageted state used, filtered digis used!!!
-   L1Obj l1otf1x,l1otf2x,l1otf5x, l1otf10x;
+   L1Obj l1otf1x, l1otf2x, l1otf5x, l1otf7x, l1otf10x;
    if (thePatternProvider){
-     l1otf1x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,1);      
-     l1otf2x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,2);      
+     //l1otf1x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,1);      
+     //l1otf2x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,2);      
      l1otf5x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,3);      
-     l1otf10x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,4);           
+     //l1otf7x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,4);      
+     //l1otf10x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,5);           
    }
 
    if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf2x);  
@@ -231,6 +232,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
    myL1ObjColl.push_back(l1otf1x, false, 0.); 
    myL1ObjColl.push_back(l1otf2x, false, 0.); 
    myL1ObjColl.push_back(l1otf5x, false, 0.); 
+   myL1ObjColl.push_back(l1otf7x, false, 0.); 
    myL1ObjColl.push_back(l1otf10x, false, 0.); 
    if (theAnaEff) theAnaEff->run(refTrack, &myL1ObjColl, hitSpecProp);
   }

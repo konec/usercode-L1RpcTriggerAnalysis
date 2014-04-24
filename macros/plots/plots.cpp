@@ -8,7 +8,15 @@ double ptBins[33]={0., 0.1,
 		 160. };
 
 
-string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat/SingleMu_18_p/";
+string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_7_m/";
+
+
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/5bins/SingleMu_7_p/";
+path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/5bins/SingleMu_16_p/";
+
+
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/SingleMu_7_p/";
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/FullEta/SingleMu_16_p/";
 
 
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev4/job_3_pat/Dynamic/SingleMu_10_p/";
@@ -63,7 +71,7 @@ void plotRecoPt(string sysType="Otf",
 void plotRecoPhi(int ipt=0){
 
   string filePath = path;
-  if(ipt>0) filePath = path+ string(TString::Format("SingleMu_%d_m/",ipt));
+  if(ipt>0) filePath = path+ string(TString::Format("SingleMu_%d_p/",ipt));
   
   TFile *file = new TFile((filePath+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
@@ -86,13 +94,18 @@ void plotRecoPhi(int ipt=0){
   hOtf->SetLineColor(4);
  
   std::string sysType = "Otf";
-  std::string selection = "";
+  std::string selection = "eta>1.1";
   tree->Draw(TString::Format("l1Objects%s[0].phi - phiHit>>h%s",sysType.c_str(),sysType.c_str())
 	     ,selection.c_str(),"goff");
+  tree->Draw(TString::Format("l1Objects%s[0].phi - phiHit - 2*TMath::Pi()>>h%s",sysType.c_str(),sysType.c_str())
+  	     ,selection.c_str(),"goff");
 
   std::string sysType = "Gmt";
+  selection = "eta>1.1";
   tree->Draw(TString::Format("l1Objects%s[0].phi - phiHit>>h%s",sysType.c_str(),sysType.c_str())
-	     ,"","goff");
+	     ,selection.c_str(),"goff");
+  tree->Draw(TString::Format("l1Objects%s[0].phi - phiHit- 2*TMath::Pi()>>h%s",sysType.c_str(),sysType.c_str())
+	     ,selection.c_str(),"goff");
 
   TCanvas* c = new TCanvas("RecoPhiRes","RecoPhiRes",460,500);
   TLegend *leg = new TLegend(0.6074561,0.6800847,0.8464912,0.8728814,NULL,"brNDC");
@@ -209,6 +222,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 	TGraph *aGr = (TGraph*)obj;
 	Double_t x,y, sum=0;
 	for(int i=0;i<aGr->GetN();++i){aGr->GetPoint(i,x,y);sum+=y;}
+	aGr->Print("all");
 	std::cout<<aGr->GetName()<<" sum: "<<sum<<std::endl;
 	if(sum>1E-2) grCSC.Add(aGr);
       }
@@ -280,9 +294,11 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
-  //plotGoldenPattern(14,0,4202,1); 
-  plotGoldenPattern(18,0,4202,1); 
-  plotGoldenPattern(18,0,3202,1); 
+  //plotRecoPhi(10);
+  //return;
+
+  //plotGoldenPattern(7,2,3202,1); 
+  plotGoldenPattern(18,2,3202,1); 
   return;
 
   plotGoldenPattern(17,0,1202,1); 

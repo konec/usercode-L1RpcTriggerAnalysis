@@ -29,7 +29,7 @@ void GoldenPattern::Result::runNoCheck() const {
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
       float val = norm(mType->first,it->second);
       fract += 2.0*val; 
-      //std::cout<<mType->first<<" "<<val<<std::endl;
+      //std::cout<<mType->first<<" "<<2*val<<std::endl;
     }
   }
 
@@ -68,7 +68,7 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
-  return(value()>-99999 && nMatchedTot()>0);
+  return(value()>-99999 && nMatchedTot()>1);
 }
 
 float GoldenPattern::Result::value() const { 
@@ -255,7 +255,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	}
 	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
 	  fMax = fPos+fBen;
-	  fPosMax = fPos;
+	  fPosMax = fPos+fBen;
 	}
       }
       else if (detId.subdetId() == MuonSubdetId::CSC) {
@@ -291,17 +291,15 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	}
 	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
 	  fMax = fPos+fBen;
-	  fPosMax = fPos;
+	  fPosMax = fPos+fBen;
 	}
       }
     }
     if(mType==GoldenPattern::BENCSC){
       result.myResults[GoldenPattern::POSCSC].push_back(std::make_pair(rawId, fPosMax));
-      //result.myResults[GoldenPattern::BENCSC].push_back(std::make_pair(rawId, fBenMax));
     }
     if(mType==GoldenPattern::BENDT){
       result.myResults[GoldenPattern::POSDT].push_back(std::make_pair(rawId, fPosMax));
-      //result.myResults[GoldenPattern::BENDT].push_back(std::make_pair(rawId, fBenMax));
     }
     if(mType==GoldenPattern::POSRPC)
       result.myResults[GoldenPattern::POSRPC].push_back(std::make_pair(rawId, fPosMax));
@@ -369,9 +367,7 @@ bool GoldenPattern::purge(){
       if (isf->second.size()==0) PattCore.erase(isf++);  else  ++isf;
   }
   ///////////////////  
-  ///Usefull pattern has at least 2 types of measurements:
-  ///RPC and something else
-  return PattCore.find(POSRPC)!=PattCore.end() && PattCore.size()>1;
+  return PattCore.size();
 }
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -379,6 +375,11 @@ void GoldenPattern::makeIntegratedCache(){
 
   if(hasIntegratedCache) return;
   else hasIntegratedCache = true;
+
+  aPhiOffset = -999;
+  int max = 0;
+  int commonRef = GoldenPattern::PosBenCase::POSDT;
+  if( (theKey.theDet>200 && theKey.theDet<300) || theKey.theDet%100>10) commonRef = GoldenPattern::PosBenCase::POSCSC;
 
   int refSum = theKey.theRefStrip;
   int nBits = 6;
@@ -392,26 +393,23 @@ void GoldenPattern::makeIntegratedCache(){
       for (auto imf = idf->second.begin(); imf != idf->second.end();++imf) sum+= imf->second;  
       //refSum = sum;
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
+	///Find offset wrt. DT/CSC reference 
+	//if(theKey.theDet==301){
+	// std::cout<<commonRef<<" "<<isf->first<<" "<<idf->first<<" "<<rmf->second<<" "<<max<<std::endl;
+	//}
+	if(isf->first==commonRef && idf->first==2 && rmf->second>max){
+	  max = rmf->second;
+	  aPhiOffset =  rmf->first;
+	}
 	//if((rmf->second)/refSum>1.0 || (rmf->second)/refSum<0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
-	float val=0;
+	float val=0;	
 	///Distance from mean        
         //sum-= rmf->second/2.0; 
 	//val = sum/refSum;
 	//val = 2.*(0.5-fabs(val-0.5)); 
 	////////////////////
 	///Plain pdf
-        val = log(rmf->second/refSum);	
-	
-	int scale = 1;
-	if(theKey.theDet/(uint32_t)1000==1) scale = 1;
-	if(theKey.theDet/(uint32_t)1000==2) scale = 2;
-	if(theKey.theDet/(uint32_t)1000==3) scale = 5;
-	if(theKey.theDet/(uint32_t)1000==4) scale = 10;
-        if(isf->first==GoldenPattern::BENDT ||
-	   isf->first==GoldenPattern::BENCSC) scale = 1;
-	val+=log(scale);
-	
-
+        val = log(rmf->second/refSum);	      
 	///Digitisation
 	int digitisedVal = (val/minPlog)*std::pow(2,nBits);
 	rmf->second= -digitisedVal/std::pow(2,nBits);	
@@ -419,8 +417,12 @@ void GoldenPattern::makeIntegratedCache(){
       }
     }
   }
-
-  //PattCoreIntegrated.clear();
+  /*
+  std::cout<<"det: "<<theKey.theDet
+	   <<" pt: "<<theKey.thePtCode
+	   <<" eta: "<<theKey.theEtaCode
+	   <<" offset: "<<aPhiOffset<<std::endl;
+  */
   PattCore.clear();
   //////////////
 }
@@ -439,8 +441,8 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
      out <<" Value: ";     
      out.precision(5);
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf) 
-     {out << imf->first<<":"<<exp(-imf->second*log(1E-3))<<", "; aSum+=exp(-imf->second*log(1E-3));}
-     //{out << imf->first<<":"<<exp(imf->second)<<", "; aSum+=exp(imf->second);}
+       {out << imf->first<<":"<<exp(-imf->second*log(1E-3))<<", "; aSum+=exp(-imf->second*log(1E-3));}
+       //{out << imf->first<<":"<<exp(imf->second)<<", "; aSum+=exp(imf->second);}
      out <<" Sum: "<<aSum;
      out << std::endl;
    }

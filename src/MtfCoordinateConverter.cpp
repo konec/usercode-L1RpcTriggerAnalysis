@@ -134,7 +134,7 @@ float MtfCoordinateConverter::convertCsc(uint32_t detUnitId, uint16_t halfstrip,
     double offset = 0.0;
     switch(1) {
     case 1:
-        offset = CSCPatternLUT::get2007Position(pattern);
+      offset = CSCPatternLUT::get2007Position(pattern);
     }
     const unsigned halfstrip_offs = unsigned(0.5 + halfstrip + offset);
     const unsigned strip = halfstrip_offs/2 + 1; // geom starts from 1
@@ -170,7 +170,14 @@ float MtfCoordinateConverter::convertCsc(uint32_t detUnitId, uint16_t halfstrip,
     chamb.release();
     layer_geom.release();
     layer.release();
-
+    /*
+    std::cout<<" coarse: "<<coarse_gp.phi().value()
+	     <<" final: "<<final_gp.phi().value()
+	     <<" offset: "<<offset
+	     <<" halfstrip_offs: "<<halfstrip_offs
+	     <<" phi_offset: "<<phi_offset
+	     <<std::endl;
+    */
     float globalPhi = final_gp.phi().value();
     return globalPhi;
 }
