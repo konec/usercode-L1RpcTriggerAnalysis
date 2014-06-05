@@ -59,11 +59,11 @@ public:
    unsigned int theRefStrip;
    int          theCharge;
    int          theRotation;
-   //static const int nPhi = 2*1152;
+
    static const int nPhi(uint32_t aDet){
-     if(aDet/(uint32_t)1000==1) return 1*1152;
+     if(aDet/(uint32_t)1000==1) return 1152;
      if(aDet/(uint32_t)1000==2) return 2*1152;
-     if(aDet/(uint32_t)1000==3) return 5*1152;
+     if(aDet/(uint32_t)1000==3) return 4096;
      if(aDet/(uint32_t)1000==4) return 7*1152;
      if(aDet/(uint32_t)1000==5) return 10*1152;
      return 2*1152;
@@ -144,6 +144,8 @@ public:
   int phiOffset() const { return aPhiOffset;};
 
   void plot();
+
+  std::vector<std::vector<int> > dump(int type);
 
   int size();
   

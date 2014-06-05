@@ -208,6 +208,7 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
     RPCDetId aId(rawId);
     RPCDetIdUtil aIdUtil(rawId);
     aLayer = aIdUtil.layer() + 10*(!aIdUtil.isBarrel());
+    if(aId.ring()==1 && aIdUtil.layer()==1) aLayer = aIdUtil.layer() + 20*(!aIdUtil.isBarrel());
   }
     break;
   case MuonSubdetId::DT: {
@@ -218,6 +219,18 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
   case MuonSubdetId::CSC: {
     CSCDetId csc(rawId);
     aLayer = csc.station();
+    /*
+    std::cout<<"csc.ring(): "<<csc.ring()
+	     <<" chamber(): "<<csc.chamber()
+	     <<std::endl;
+    */
+    if(csc.ring()==1 && csc.station()==1) aLayer+=10;
+    if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==0) aLayer+=20;
+    if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==1) aLayer+=30;
+    
+    //if(csc.ring()==1 && csc.station()==1) std::cout<<"AA aLayer: "<<aLayer<<std::endl;
+    if(csc.ring()==4) std::cout<<"BB aLayer: "<<aLayer<<std::endl;
+
     break;
   }
   }  

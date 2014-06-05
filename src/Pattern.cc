@@ -43,7 +43,7 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
   }
   case MuonSubdetId::CSC: {
     CSCDetId csc(rawId);
-    if(csc.station()==1 && csc.ring()==1) return false; //Skip ME1/A due to use of ganged strips, causing problems in phi calculation
+    //if(csc.station()==1 && csc.ring()==1) return false; //Skip ME1/A due to use of ganged strips, causing problems in phi calculation
     ///////////////////
     break;
   }

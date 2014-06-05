@@ -47,6 +47,8 @@ public:
 
 private:
 
+  void dumpPatterns(std::ostream &out);
+
   edm::ParameterSet theConfig;
   edm::ESHandle<RPCGeometry> rpcGeometry;
 
