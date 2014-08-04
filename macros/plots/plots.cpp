@@ -8,8 +8,7 @@ double ptBins[33]={0., 0.1,
 		 160. };
 
 
-string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat/SingleMu_18_p/";
-
+string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat/";
 
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/5bins/SingleMu_7_p/";
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_4_ana/";
@@ -203,6 +202,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
   ////
   //TString cName = "Dev"+locName;
   TString cName = "RPC"+locName;
+  std::cout<<cName<<std::endl;
   TCanvas *cRPC = (TCanvas*)file->Get(cName.Data());
   cName = "DT"+locName;
   TCanvas *cDT = (TCanvas*)file->Get(cName.Data());
@@ -320,11 +320,22 @@ void plots(){
   //plotRecoPhi(10);
   //return;
 
-  plotGoldenPattern(18,1,3211,1);  
-  plotGoldenPattern(18,1,3221,1); 
-  plotGoldenPattern(18,1,3231,1); 
-  plotGoldenPattern(18,1,3222,1); 
-  plotGoldenPattern(18,1,3232,1); 
+  plotGoldenPattern(19,7,3102,1);  
+  plotGoldenPattern(7,7,3102,1);  
+  return;
+
+  plotGoldenPattern(19,9,3222,1);  
+  plotGoldenPattern(7,9,3222,1);  
+
+  plotGoldenPattern(19,8,3222,1);  
+  plotGoldenPattern(7,8,3222,1);  
+
+  plotGoldenPattern(19,9,3232,1);  
+  plotGoldenPattern(7,9,3232,1);  
+  
+  plotGoldenPattern(19,8,3232,1);  
+  plotGoldenPattern(7,8,3232,1);  
+
   return;
 
   plotGoldenPattern(17,0,1202,1); 

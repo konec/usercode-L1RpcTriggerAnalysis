@@ -82,14 +82,14 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
       theConfig.exists("patternOutFile")) return;
 
   int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());
-  //theEtaCode = 0;
-
+  theEtaCode = 0;
+  /*
   if(theEtaCode<6) theEtaCode = 0;
   if(theEtaCode>5 && theEtaCode<10) theEtaCode = 1;
   if(theEtaCode>9 && theEtaCode<13) theEtaCode = 2;
   if(theEtaCode>12 && simu->eta()<2.1) theEtaCode = 3;
   if(simu->eta()>2.1) theEtaCode = 4;
-
+  */
   //std::cout<<"eta: "<<simu->eta()<<" phi: "<<simu->phi()<<std::endl;
 
   float phiref  = 0;
@@ -148,7 +148,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 			    int iGranularity){
 
   L1Obj candidate;
-  int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());
+  int theEtaCode = L1RpcTriggerAnalysisEfficiencyUtilities::EtaScale::etaCode(simu->eta());  
   if(theEtaCode<6) theEtaCode = 0;
   if(theEtaCode>5 && theEtaCode<10) theEtaCode = 1;
   //if(theEtaCode>9 &&  theEtaCode<13) theEtaCode = 2;

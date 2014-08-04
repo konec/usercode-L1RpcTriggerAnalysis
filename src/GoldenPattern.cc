@@ -114,8 +114,21 @@ void GoldenPattern::add( GoldenPattern::PosBenCase aCase, uint32_t rawId, int po
 void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConverter) {
 
   int nPhi = this->theKey.nPhi(this->theKey.theDet);
+  int refBend = 0;
 
   const Pattern::DataType & detdigi = p ;
+  /*
+  if(this->theKey.theDet%1000<200){
+    for (auto is = detdigi.cbegin(); is != detdigi.cend(); ++is) {
+      uint32_t rawId = is->second.first;
+      DetId detId(rawId);
+      uint32_t aLayer = myPhiConverter->getLayerNumber(rawId)+100*detId.subdetId();
+      if(aLayer!=this->theKey.theDet%1000) continue;
+      DTphDigiSpec digi(rawId, is->second.second);
+      refBend = digi.phiB();
+    }
+  }
+  */
   for (auto is = detdigi.cbegin(); is != detdigi.cend(); ++is) {
     uint32_t rawId = is->second.first;
     DetId detId(rawId);
@@ -124,18 +137,22 @@ void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConvert
     switch (detId.subdetId()) {
       case MuonSubdetId::RPC: {
         RPCDigiSpec digi(rawId, is->second.second);
-	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
+	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
         break;
       }	
       case MuonSubdetId::DT: {
         DTphDigiSpec digi(rawId, is->second.second);
-        PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
+	//uint32_t aLayer = myPhiConverter->getLayerNumber(rawId)+100*detId.subdetId();
+	if(this->theKey.theDet%1000<200) std::cout<<" ref: "<<this->theKey.theDet<<" refBend: "<<refBend<<std::endl;
+	PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
+	//if(aLayer!=this->theKey.theDet%1000) PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
+	//else PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
 	PattCore[GoldenPattern::BENDT][myPhiConverter->getLayerNumber(rawId)][digi.phiB()]++;
         break;
       }
       case MuonSubdetId::CSC: {
         CSCDigiSpec digi(rawId, is->second.second);
-        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
+        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
         PattCore[GoldenPattern::BENCSC][myPhiConverter->getLayerNumber(rawId)][digi.pattern()]++;
         break;
       }
