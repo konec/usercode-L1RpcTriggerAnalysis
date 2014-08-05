@@ -114,21 +114,9 @@ void GoldenPattern::add( GoldenPattern::PosBenCase aCase, uint32_t rawId, int po
 void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConverter) {
 
   int nPhi = this->theKey.nPhi(this->theKey.theDet);
-  int refBend = 0;
 
   const Pattern::DataType & detdigi = p ;
-  /*
-  if(this->theKey.theDet%1000<200){
-    for (auto is = detdigi.cbegin(); is != detdigi.cend(); ++is) {
-      uint32_t rawId = is->second.first;
-      DetId detId(rawId);
-      uint32_t aLayer = myPhiConverter->getLayerNumber(rawId)+100*detId.subdetId();
-      if(aLayer!=this->theKey.theDet%1000) continue;
-      DTphDigiSpec digi(rawId, is->second.second);
-      refBend = digi.phiB();
-    }
-  }
-  */
+ 
   for (auto is = detdigi.cbegin(); is != detdigi.cend(); ++is) {
     uint32_t rawId = is->second.first;
     DetId detId(rawId);
@@ -137,22 +125,18 @@ void GoldenPattern::add(const Pattern & p,  MtfCoordinateConverter *myPhiConvert
     switch (detId.subdetId()) {
       case MuonSubdetId::RPC: {
         RPCDigiSpec digi(rawId, is->second.second);
-	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
+	PattCore[GoldenPattern::POSRPC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
         break;
       }	
       case MuonSubdetId::DT: {
         DTphDigiSpec digi(rawId, is->second.second);
-	//uint32_t aLayer = myPhiConverter->getLayerNumber(rawId)+100*detId.subdetId();
-	if(this->theKey.theDet%1000<200) std::cout<<" ref: "<<this->theKey.theDet<<" refBend: "<<refBend<<std::endl;
-	PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
-	//if(aLayer!=this->theKey.theDet%1000) PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
-	//else PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
+	PattCore[GoldenPattern::POSDT][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
 	PattCore[GoldenPattern::BENDT][myPhiConverter->getLayerNumber(rawId)][digi.phiB()]++;
         break;
       }
       case MuonSubdetId::CSC: {
         CSCDigiSpec digi(rawId, is->second.second);
-        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)+refBend]++;
+        PattCore[GoldenPattern::POSCSC][myPhiConverter->getLayerNumber(rawId)][myPhiConverter->convert(is->second,nPhi)]++;
         PattCore[GoldenPattern::BENCSC][myPhiConverter->getLayerNumber(rawId)][digi.pattern()]++;
         break;
       }
@@ -739,6 +723,7 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
   int val = 0;
   //11 bitów adresowych, 9 bitów wartości
   //int nAddrBits = 11;
+  //10 bitów adresowych, 18 bitów wartości
   int nValBits = 18;
   ///
   std::vector<std::vector<int> > layers;
@@ -749,18 +734,11 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
       std::vector<int> pdf;      
       for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){  
 	val = 0;
-	//int x = imf->first;
 	int y = -imf->second*std::pow(2,nBits);
+	//std::cout<<"second: "<<imf->second<<" val: "<<y;
 	//int refPos = abs(x-meanDistPhiVec[iLayer]);	  
 	val = 0 | (y  & ((int)pow(2,nValBits)-1));
-	std::cout<<"second: "<<imf->second<<" val: "<<y<<std::endl;
-	/*
-	val = val<<nValBits;
-	if(imf!=idf->second.cend()){
-	  y = (++imf)->second*std::pow(2,nBits);
-	}
-	val = val | (y  & ((int)pow(2,nValBits)-1));
-	*/
+	std::cout<<" digitised val: "<<y<<std::endl;
 	pdf.push_back(val);
 	if(imf==idf->second.cend()) break;
       }
@@ -776,7 +754,7 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
   dummy.clear();
   dummy.push_back(99);
   for(int i=meanDistPhiVec.size();i<nMaxLayers;++i) meanDistPhiVec.push_back(dummy);
-
+  /*
   std::ostream &out = std::cout;
 
   out <<"GoldenPattern "<< this->theKey <<std::endl;
@@ -794,7 +772,7 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
     out<<std::endl;
   }     
   out<<std::endl;
-  
+  */
   if(type==0) return meanDistPhiVec;  
   if(type==1) return layers;
   return layers;

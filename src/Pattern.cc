@@ -29,7 +29,7 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
        //|| (aId.region()==0 && aId.ring()<2) ||
        //(aId.region()==0 && aId.station()==4) ||
        //(aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
-       //(aId.region()==1 && aId.ring()<3)
+       || (aId.region()==1 && aId.station()==4)
        ) return false;
   }
     break;
@@ -38,7 +38,6 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
     DTphDigiSpec digi(rawId, aData.second);
     ///Select TD digis with hits in inner and outer layers 
     if (digi.bxNum() != 0 || digi.bxCnt() != 0 || digi.ts2() != 0 ||  digi.code()<4) return false;	
-    //if(dt.wheel()<2) return false;       
     break;
   }
   case MuonSubdetId::CSC: {

@@ -235,7 +235,7 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
   }
   }  
 
- return aLayer;
+  return aLayer+100*detId.subdetId();
 }
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////

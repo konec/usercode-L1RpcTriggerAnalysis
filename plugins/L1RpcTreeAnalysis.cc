@@ -170,7 +170,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
   //nentries = 1E6;
-  nentries = 5E5;
+  nentries = 5E1;
 
   //nentries = 1353;
 

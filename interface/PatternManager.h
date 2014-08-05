@@ -23,6 +23,8 @@ class EventObj;
 #include "TRandom3.h"
 
 class RPCDigiSpec;
+class GoldenPattern;
+#include "xercesc/dom/DOM.hpp"
 
 class PatternManager {
 
@@ -48,6 +50,9 @@ public:
 private:
 
   void dumpPatterns(std::ostream &out);
+void writeXML(std::string fname);
+void dumpPatternsXML(xercesc::DOMDocument* theDoc, 
+			    xercesc::DOMElement* theTopElement);
 
   edm::ParameterSet theConfig;
   edm::ESHandle<RPCGeometry> rpcGeometry;
