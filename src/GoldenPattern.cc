@@ -33,7 +33,7 @@ void GoldenPattern::Result::runNoCheck() const {
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
       float val = norm(mType->first,it->second);
       fract += val; 
-      //std::cout<<mType->first<<" "<<2*val<<std::endl;
+      //std::cout<<mType->first<<" "<<val<<std::endl;
     }
   }
 
@@ -428,10 +428,11 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
      float aSum = 0.0;
      out <<" Value: ";     
      out.precision(5);
-     for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf) 
-       {out << imf->first<<":"<<exp(imf->second/pow(2,GoldenPattern::nBitsVal)*log(GoldenPattern::minP))
-	    <<", "; aSum+=exp(imf->second/pow(2,GoldenPattern::nBitsVal)*log(GoldenPattern::minP));}
-     //{out << imf->first<<":"<<2*imf->second<<", ";}
+     for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){
+       //out << imf->first<<":"<<exp(imf->second/pow(2,GoldenPattern::nBitsVal)*log(GoldenPattern::minP))
+       out << imf->first<<":"<<imf->second
+	   <<", "; aSum+=exp(imf->second/pow(2,GoldenPattern::nBitsVal)*log(GoldenPattern::minP));
+     }
      out <<" Sum: "<<aSum;
      out << std::endl;
    }
@@ -657,10 +658,9 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
   std::vector<std::string> typeInfos = {"POSRPC","POSCSC","BENCSC","POSDT","BENDT","TOTDEV"};
     
   int nOfPhis = 0;
-  std::vector<std::vector<int> > meanDistPhiVec;   
+  std::vector<std::vector<int> > meanDistPhiVec(5);   
   for (auto isf=PattCoreIntegrated.cbegin();isf!=PattCoreIntegrated.cend();++isf){
     if(typeInfos[isf->first].find("TOTDEV")!=std::string::npos) continue;
-    if(typeInfos[isf->first].find("BEN")!=std::string::npos) continue;
     for (auto idf = isf->second.cbegin(); idf!=isf->second.cend();++idf) {      
       ++nOfPhis;
       float meanDistPhiTmp = 0;
@@ -672,33 +672,40 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
 	sum+=exp(imf->second/pow(2,nBitsVal)*log(GoldenPattern::minP));
       }
       std::vector<int> tmpVec;      
-      if(typeInfos[isf->first].find("BEN")!=std::string::npos) tmpVec.push_back(0);
-      else tmpVec.push_back((int)meanDistPhiTmp/sum);
-      meanDistPhiVec.push_back(tmpVec);
+      tmpVec.push_back((int)meanDistPhiTmp/sum);
+      meanDistPhiVec[isf->first] = tmpVec;
     }
   }
   ///
   std::vector<std::vector<int> > layers;
   for (auto isf=PattCoreIntegrated.cbegin();isf!=PattCoreIntegrated.cend();++isf){
     if(typeInfos[isf->first].find("TOTDEV")!=std::string::npos) continue;
-    if(typeInfos[isf->first].find("BEN")!=std::string::npos) continue;
     for (auto idf = isf->second.cbegin(); idf!=isf->second.cend();++idf) {
-      std::vector<int> pdf;      
-      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){  
-	pdf.push_back(imf->second);
+      std::vector<int> pdf(128);      
+      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){ 
+	int meanDistPhi = meanDistPhiVec[isf->first][0];
+	int index = imf->first - meanDistPhi + 128/2;
+	if(typeInfos[isf->first].find("BEN")!=std::string::npos) index = 0;
+	//if(index<0 || index>127) continue;
+	if(index<0 || index>127) std::cout<<this->theKey
+					  <<" imf->first: "<<imf->first
+					  <<" isf->first: "<<isf->first
+					  <<" index: "<<index
+					  <<" mean: "<<meanDistPhiVec[isf->first][0]
+					  <<std::endl;
+	pdf[index] = imf->second;
 	if(imf==idf->second.cend()) break;
       }
-      for(int i=pdf.size();i<128;++i) pdf.push_back(0);
+      //for(int i=pdf.size();i<128;++i) pdf.push_back(999);
       layers.push_back(pdf);
     }
   }
 
-  std::vector<int> dummy;
+  std::vector<int> dummy(128);
   int nMaxLayers = 20;
-  for(int i=dummy.size();i<128;++i) dummy.push_back(0);
   for(int i=layers.size();i<nMaxLayers;++i) layers.push_back(dummy);
   dummy.clear();
-  dummy.push_back(99);
+  dummy.push_back(9999);
   for(int i=meanDistPhiVec.size();i<nMaxLayers;++i) meanDistPhiVec.push_back(dummy);
   /*
   std::ostream &out = std::cout;
