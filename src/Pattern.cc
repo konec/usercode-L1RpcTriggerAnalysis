@@ -48,7 +48,7 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
   }
   }
 
-  int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first)+100*detId.subdetId();
+  int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first);
   std::pair<uint32_t,  std::pair<uint32_t, unsigned int> > aDataWithLayer(aLayer,aData);
 
   theData.insert(aDataWithLayer);

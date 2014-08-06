@@ -49,6 +49,9 @@ public:
 
 private:
 
+void readXMLConfig(std::string fName);
+
+
   void dumpPatterns(std::ostream &out);
 void writeXML(std::string fname);
 void dumpPatternsXML(xercesc::DOMDocument* theDoc, 

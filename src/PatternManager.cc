@@ -71,6 +71,9 @@ PatternManager::PatternManager(const edm::ParameterSet &cfg)
 
   myPhiConverter = 0;
 
+  std::string configFile = "/home/akalinow/scratch/CMS/OverlapTrackFinder/hwToLogicLayer.xml";
+  readXMLConfig(configFile);
+
 }
 
 PatternManager::~PatternManager(){
@@ -589,6 +592,37 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
     }
   }
   ////
+}
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+void PatternManager::readXMLConfig(std::string configFile){
+
+
+  XercesDOMParser *parser = new XercesDOMParser();     
+  parser->setValidationScheme(XercesDOMParser::Val_Auto);
+  parser->setDoNamespaces(false);
+  parser->parse(configFile.c_str()); 
+  xercesc::DOMDocument* doc = parser->getDocument();
+  assert(doc);
+  unsigned int nElem = doc->getElementsByTagName(qtxml::_toDOMS("OMTF"))->getLength();
+  std::cout<<"OMTF size: "<<nElem<<std::endl;
+  if(nElem!=1){
+    std::cout<<"Problem parsing XML file "<<configFile<<std::endl;
+    exit(0);
+  }
+  DOMNode *aNode = doc->getElementsByTagName(qtxml::_toDOMS("OMTF"))->item(0);
+  DOMElement* aOMTFElement = static_cast<DOMElement *>(aNode);  
+  nElem = aOMTFElement->getElementsByTagName(qtxml::_toDOMS("LayerMap"))->getLength();
+  std::cout<<"LayerMap size: "<<nElem<<std::endl;
+  DOMElement* aLayerElement = 0;
+  for(uint i=0;i<nElem;++i){
+    aNode = aOMTFElement->getElementsByTagName(qtxml::_toDOMS("LayerMap"))->item(i);
+    aLayerElement = static_cast<DOMElement *>(aNode); 
+    std::cout<<"hwNumber: "<<std::atoi(qtxml::_toString(aLayerElement->getAttribute(qtxml::_toDOMS("hwNumber"))).c_str())<<std::endl;
+    std::cout<<"logicNumber: "<<std::atoi(qtxml::_toString(aLayerElement->getAttribute(qtxml::_toDOMS("logicNumber"))).c_str())<<std::endl;
+  }
+
+
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////

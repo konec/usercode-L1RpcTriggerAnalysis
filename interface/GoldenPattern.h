@@ -173,6 +173,9 @@ private:
   bool hasIntegratedCache;
   int  aPhiOffset;
 
+  static const int nBitsVal = 6;
+  static const float minP;
+
 private:
 
   bool purge();

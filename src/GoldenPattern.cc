@@ -23,13 +23,16 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 
+
+const float GoldenPattern::minP = 1E-3;
+
 void GoldenPattern::Result::runNoCheck() const {
 
   float fract = 0;
   for(auto mType=myResults.cbegin();mType!=myResults.cend();++mType){    
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
       float val = norm(mType->first,it->second);
-      fract += 2.0*val; 
+      fract += val; 
       //std::cout<<mType->first<<" "<<2*val<<std::endl;
     }
   }
@@ -37,17 +40,16 @@ void GoldenPattern::Result::runNoCheck() const {
   unsigned int nTot = 0;
   for(auto it=nMatchedPoints.cbegin();it!=nMatchedPoints.cend();++it) nTot+=it->second;    
   
-  //theValue = ( nTot > 3) ? fract : -99999.;  
-  theValue = ( nTot > 0) ? fract : -99999.;  
+  //theValue = ( nTot > 3) ? fract : pow(2,nBitsVal);  
+  theValue = ( nTot > 0) ? fract : pow(2,nBitsVal);  
 
 }
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 float GoldenPattern::Result::norm(GoldenPattern::PosBenCase where, float whereInDist) const {
-  static const float epsilon = 1.e-6;
+
   float normValue = whereInDist;  
-  if(normValue > log(epsilon)) ++nMatchedPoints[where];
-  //else normValue = log(epsilon);
+  if(normValue < pow(2,nBitsVal)) ++nMatchedPoints[where];
   else normValue = 0.0;
   /////////////////
   return normValue; 
@@ -58,23 +60,20 @@ bool GoldenPattern::Result::operator < (const GoldenPattern::Result &o) const {
   if ( *this && o) {
 
     if (nMatchedTot() < o.nMatchedTot()) return true;
-    else if (nMatchedTot() == o.nMatchedTot() && value() < o.value()) return true;
+    else if (nMatchedTot() == o.nMatchedTot() && value() > o.value()) return true;
     else return false; 
   } 
   else if (o) {return true; }
   else if (*this) { return false; } 
   else return false;
-
-//  return (value() < o.value() ); 
-//  return false;
 }
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 GoldenPattern::Result::operator bool() const {
-  return(value()>-99999 && nMatchedTot()>2);
-  //return(value()>-99999 && nMatchedTot()>4);
+  return(value()<pow(2,nBitsVal) && nMatchedTot()>2);
 }
-
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 float GoldenPattern::Result::value() const { 
   run(); 
   return theValue; 
@@ -175,9 +174,9 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     auto endIt =   aRange.second;
 
     ///Maximum measure over hits in the same detId
-    float fMax = -30.0;
-    float fPosMax = -30.0;
-    float fPos=-30.0, fBen=-30.0;
+    float fMax = pow(2,nBitsVal);
+    float fPosMax = pow(2,nBitsVal);
+    float fPos=pow(2,nBitsVal), fBen=pow(2,nBitsVal);
     ///Loop over hits in given detId
 
     std::cout.precision(15);
@@ -200,7 +199,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 		   <<" pos rel: "<<myPhiConverter->convert(is->second,nPhi)
 		   <<" RPC  f: "<<fPos<<std::endl;
 	  */
-	  if(fPos>fPosMax) fPosMax = fPos;
+	  if(fPos<fPosMax) fPosMax = fPos;
 	  RPCDetId rpc(rawId);
 	  if(rpc.station()==1) result.hasStation1 = true;
 	  if(rpc.station()==2) result.hasStation2 = true;
@@ -235,7 +234,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  fBen = whereInDistribution(mType, myPhiConverter->getLayerNumber(rawId), digi.phiB());
 	  //std::cout<<digi<<" DT bend f: "<<fBen<<std::endl;
 	}
-	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
+	if(fPos+fBen<fMax && fBen<pow(2,nBitsVal) && fPos<pow(2,nBitsVal)){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos+fBen;
 	}
@@ -272,12 +271,12 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	  // <<" f: "<<fBen<<std::endl;
 	}        	
 	//fBen = 0;
-	if(fPos+fBen>fMax && fBen>-30 && fPos>-30){
+	if(fPos+fBen<fMax && fBen<pow(2,nBitsVal) && fPos<pow(2,nBitsVal)){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos+fBen;
 	}
       }
-      if(fPos>-30) deviationSum+=abs(myPhiConverter->convert(is->second,nPhi));
+      if(fPos<pow(2,nBitsVal)) deviationSum+=abs(myPhiConverter->convert(is->second,nPhi));
     }
     if(mType==GoldenPattern::BENCSC){
       result.myResults[GoldenPattern::POSCSC].push_back(std::make_pair(rawId, fPosMax));
@@ -288,44 +287,10 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     if(mType==GoldenPattern::POSRPC)
       result.myResults[GoldenPattern::POSRPC].push_back(std::make_pair(rawId, fPosMax));
 
-    fMax = -30.0;
-    fPosMax = -30.0;
+    fMax = pow(2,nBitsVal);
+    fPosMax = pow(2,nBitsVal);
   }
-  ////////////////////////////
-  ////////////////////////////
-  /*
-  float fDev=-30, fDevMax = -10.0;
-  mType = GoldenPattern::TOTDEV;
-  cit = PattCoreIntegrated.find(mType);
-  //if(cit==PattCoreIntegrated.cend()) continue; //AK: Ugly, FIX.
-  idm = cit->second.find(501);
-  if (idm != cit->second.cend() ) {
-    fDev = whereInDistribution(mType,
-			       501,
-			       deviationSum);
-        
-    //std::cout<<" layer: "<<501
-	//     <<" pos rel: "<<deviationSum
-	  //   <<" TOTDEV  f: "<<fDev
-	    // <<" fDevMax: "<<fDevMax<<std::endl;      
-    
-  }
-  //if(fDev<-9 && deviationSum>1) std::cout<<" TOTDEV  "<<deviationSum<<" f: "<<fDev<<" "<<deviationSum<<std::endl; 
-  
-  //if(fDev>fDevMax) fDevMax = fDev;
-  
-  if(mType==GoldenPattern::TOTDEV){
-    result.myResults[GoldenPattern::TOTDEV].push_back(std::make_pair(1, fDevMax));
-  }
-  
-  ////////////////
-  //if(fDevMax<-9) return Result();
-  ////////////////
-  //fDevMax = -10.0;
-  */
-  ////////////////////////////
-  ////////////////////////////
-
+ 
   result.run();
   return result;
 }
@@ -349,7 +314,7 @@ float GoldenPattern::whereInDistribution( int obj, const GoldenPattern::MFreq & 
 ////////////////////////////////////////////////////
 float GoldenPattern::whereInDistribution(PosBenCase mType, uint32_t rawId, int pos) const{
 
-  float freqInt = -30;
+  float freqInt = pow(2,nBitsVal);
   auto detsMap = PattCoreIntegrated.find(mType);
   if(detsMap!=PattCoreIntegrated.cend()){
     auto freqMap = detsMap->second.find(rawId);
@@ -373,12 +338,12 @@ bool GoldenPattern::purge(){
     for (auto idf = isf->second.begin(); idf !=isf->second.end();) {
       int sum=0;
       int width = 0;
-      for (auto rmf = idf->second.begin(); rmf != idf->second.end();++rmf) width+=(idf->second[pos]/refSum<1E-3);
+      for (auto rmf = idf->second.begin(); rmf != idf->second.end();++rmf) width+=(idf->second[pos]/refSum<GoldenPattern::minP);
       for (auto imf = idf->second.begin(); imf != idf->second.end();) {
 	remove = false;
 	pos = imf->first;  
 	sum += idf->second[pos];
- 	if (idf->second[pos]/refSum<1E-3) remove = true;
+ 	if (idf->second[pos]/refSum<GoldenPattern::minP) remove = true;
  	//if (idf->second[pos]/refSum<0.5/width) remove = true;
 	if(remove) {idf->second.erase(imf++); } else { ++imf; } 	
       }
@@ -403,8 +368,7 @@ void GoldenPattern::makeIntegratedCache(){
   if( (theKey.theDet>200 && theKey.theDet<300) || theKey.theDet%100>10) commonRef = GoldenPattern::PosBenCase::POSCSC;
 
   int refSum = theKey.theRefStrip;
-  int nBits = 6;
-  float minPlog = log(1E-3);
+  float minPlog = log(GoldenPattern::minP);
   int width = 0;
   ///////////////////
   ///Prepare tables of integrated frequencies
@@ -424,11 +388,6 @@ void GoldenPattern::makeIntegratedCache(){
       }
       //refSum = sum;
       for (auto rmf = idf->second.rbegin(); rmf != idf->second.rend();++rmf){
-	///Find offset wrt. DT/CSC reference 
-	//if(theKey.theDet==301){
-	// std::cout<<commonRef<<" "<<isf->first<<" "<<idf->first<<" "<<rmf->second<<" "<<max<<std::endl;
-	//}
-	//if((rmf->second)/refSum>1.0 || (rmf->second)/refSum<0) std::cout<<"Normalisation problem: "<<rmf->second<<" "<<refSum<<std::endl<<*this<<std::endl;
 	float val=0;	
 	///Distance from mean        
         //sum-= rmf->second/2.0; 
@@ -440,10 +399,9 @@ void GoldenPattern::makeIntegratedCache(){
 	//refSum = max1;
         val = log(rmf->second/refSum);	      
 	///Digitisation
-	int digitisedVal = (val/minPlog)*std::pow(2,nBits);
-	rmf->second= -digitisedVal/std::pow(2,nBits);	
-	//if(rmf->second/refSum<0.1/width) rmf->second = -50;
-	//rmf->second = val;
+	int digitisedVal = (val/minPlog)*std::pow(2,nBitsVal);
+	int tmp  = 0 | (digitisedVal  & ((int)pow(2,nBitsVal)-1));
+	rmf->second = tmp;
       }
     }
   }
@@ -471,7 +429,8 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern & o) {
      out <<" Value: ";     
      out.precision(5);
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf) 
-       {out << imf->first<<":"<<exp(-imf->second*log(1E-3))<<", "; aSum+=exp(-imf->second*log(1E-3));}
+       {out << imf->first<<":"<<exp(imf->second/pow(2,GoldenPattern::nBitsVal)*log(GoldenPattern::minP))
+	    <<", "; aSum+=exp(imf->second/pow(2,GoldenPattern::nBitsVal)*log(GoldenPattern::minP));}
      //{out << imf->first<<":"<<2*imf->second<<", ";}
      out <<" Sum: "<<aSum;
      out << std::endl;
@@ -525,7 +484,7 @@ void GoldenPattern::plot(){
      (*aMap)[idf->first] = gr;
      for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){  
        Double_t x = imf->first;
-       Double_t y = exp(-imf->second*log(1E-3));
+       Double_t y = exp(imf->second/pow(2,nBitsVal)*log(GoldenPattern::minP));
        gr->SetPoint(gr->GetN(),x,y);
      }
    }
@@ -709,8 +668,8 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
       for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){  
 	int x = imf->first;
 	//float y = imf->second;
-	meanDistPhiTmp+=x*exp(-imf->second*log(1E-3));
-	sum+=exp(-imf->second*log(1E-3));
+	meanDistPhiTmp+=x*exp(imf->second/pow(2,nBitsVal)*log(GoldenPattern::minP));
+	sum+=exp(imf->second/pow(2,nBitsVal)*log(GoldenPattern::minP));
       }
       std::vector<int> tmpVec;      
       if(typeInfos[isf->first].find("BEN")!=std::string::npos) tmpVec.push_back(0);
@@ -718,13 +677,6 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
       meanDistPhiVec.push_back(tmpVec);
     }
   }
-
-  int nBits = 6;
-  int val = 0;
-  //11 bitów adresowych, 9 bitów wartości
-  //int nAddrBits = 11;
-  //10 bitów adresowych, 18 bitów wartości
-  int nValBits = 18;
   ///
   std::vector<std::vector<int> > layers;
   for (auto isf=PattCoreIntegrated.cbegin();isf!=PattCoreIntegrated.cend();++isf){
@@ -733,13 +685,7 @@ std::vector<std::vector<int> > GoldenPattern::dump(int type){
     for (auto idf = isf->second.cbegin(); idf!=isf->second.cend();++idf) {
       std::vector<int> pdf;      
       for (auto imf = idf->second.cbegin(); imf != idf->second.cend();++imf){  
-	val = 0;
-	int y = -imf->second*std::pow(2,nBits);
-	//std::cout<<"second: "<<imf->second<<" val: "<<y;
-	//int refPos = abs(x-meanDistPhiVec[iLayer]);	  
-	val = 0 | (y  & ((int)pow(2,nValBits)-1));
-	std::cout<<" digitised val: "<<y<<std::endl;
-	pdf.push_back(val);
+	pdf.push_back(imf->second);
 	if(imf==idf->second.cend()) break;
       }
       for(int i=pdf.size();i<128;++i) pdf.push_back(0);
