@@ -18,7 +18,7 @@ public:
 //
 // where
 //
-  enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4, TOTDEV=5};
+  enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4, TOTDEV=5, LAYER=6};
 
 //
 // Key
@@ -66,7 +66,7 @@ public:
      if(aDet/(uint32_t)1000==3) return 4096;
      if(aDet/(uint32_t)1000==4) return 7*1152;
      if(aDet/(uint32_t)1000==5) return 10*1152;
-     return 2*1152;
+     return 4096;
    }
 
    friend std::ostream & operator << (std::ostream &out, const Key & o) {
@@ -89,12 +89,14 @@ public:
       nMatchedPoints[GoldenPattern::POSCSC] = 0;
       nMatchedPoints[GoldenPattern::BENDT] = 0;
       nMatchedPoints[GoldenPattern::BENCSC] = 0;  
+      nMatchedPoints[GoldenPattern::LAYER] = 0;  
 
       myResults[GoldenPattern::POSRPC] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::POSDT] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::POSCSC] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::BENDT] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::BENCSC] =  std::vector< std::pair<uint32_t, float > >();   
+      myResults[GoldenPattern::LAYER] =  std::vector< std::pair<uint32_t, float > >();   
     }
     bool operator<( const Result & o) const;
     operator bool() const;
@@ -174,6 +176,7 @@ private:
   int  aPhiOffset;
 
   static const int nBitsVal = 6;
+  static const int nBitsPdfAddr = 7;
   static const float minP;
 
 private:

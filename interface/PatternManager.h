@@ -47,15 +47,20 @@ public:
   void endJob();
   void beginJob();
 
+  static std::map<int,int> hwToLogicLayer;
+  static std::map<int,int> logicToHwLayer;
+  static std::vector<int> refToLogicNumber;
+  static int nLogicLayers;
+
 private:
 
 void readXMLConfig(std::string fName);
 
 
   void dumpPatterns(std::ostream &out);
-void writeXML(std::string fname);
-void dumpPatternsXML(xercesc::DOMDocument* theDoc, 
-			    xercesc::DOMElement* theTopElement);
+  void writeXML(std::string fname);
+  void dumpPatternsXML(xercesc::DOMDocument* theDoc, 
+		       xercesc::DOMElement* theTopElement);
 
   edm::ParameterSet theConfig;
   edm::ESHandle<RPCGeometry> rpcGeometry;

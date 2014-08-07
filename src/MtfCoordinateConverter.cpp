@@ -21,6 +21,8 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/GoldenPattern.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDetIdUtil.h"
 
+#include "UserCode/L1RpcTriggerAnalysis/interface/PatternManager.h"
+
 MtfCoordinateConverter::MtfCoordinateConverter(const edm::EventSetup& es): es(es) {
 
     const MuonGeometryRecord& geom = es.get<MuonGeometryRecord>();
@@ -224,18 +226,23 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
 	     <<" chamber(): "<<csc.chamber()
 	     <<std::endl;
     */
-    if(csc.ring()==1 && csc.station()==1) aLayer+=10;
-    if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==0) aLayer+=20;
-    if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==1) aLayer+=30;
+    //if(csc.ring()==1 && csc.station()==1) aLayer+=10;
+    //if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==0) aLayer+=20;
+    //if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==1) aLayer+=30;
     
-    //if(csc.ring()==1 && csc.station()==1) std::cout<<"AA aLayer: "<<aLayer<<std::endl;
     if(csc.ring()==4) std::cout<<"BB aLayer: "<<aLayer<<std::endl;
 
     break;
   }
   }  
 
-  return aLayer+100*detId.subdetId();
+  int hwNumber = aLayer+100*detId.subdetId();
+  if(PatternManager::hwToLogicLayer.find(hwNumber)==PatternManager::hwToLogicLayer.end()){
+    std::cout<<"Problem with hwNumber: "<<hwNumber<<std::endl;
+    exit(0);
+  }
+
+  return PatternManager::hwToLogicLayer[hwNumber];
 }
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////

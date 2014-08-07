@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include <bitset>
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/PatternManager.h"
 
@@ -45,12 +46,6 @@ XERCES_CPP_NAMESPACE_USE
 ////
 
 
-
-
-
-
-
-
 namespace {
   typedef struct {
     UInt_t key_det;
@@ -65,6 +60,13 @@ namespace {
     unsigned int freq; 
   } ENTRY;
 }
+
+
+// OMTF configuration. To be moved to separate, configuration holder class.
+std::map<int,int> PatternManager::hwToLogicLayer;
+std::map<int,int> PatternManager::logicToHwLayer;
+int PatternManager::nLogicLayers = 0;
+std::vector<int> PatternManager::refToLogicNumber(8);
 
 PatternManager::PatternManager(const edm::ParameterSet &cfg) 
   : theConfig(cfg), theEvForPatCounter(0), theEvUsePatCounter(0), phiMapDone(false){
@@ -89,11 +91,8 @@ PatternManager::~PatternManager(){
       std::cout <<" GP: "<< *gp << std::endl;
       gp->plot();
     }
+    writeXML("test.xml");
   }
-
-  std::ofstream out("GP.dat",std::ios_base::app);
-  //dumpPatterns(out);
-  writeXML("test.xml");
 
   if(myPhiConverter) delete myPhiConverter;
 
@@ -114,6 +113,8 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   if(theEtaCode>12 && simu->eta()<2.1) theEtaCode = 3;
   if(simu->eta()>2.1) theEtaCode = 4;
 
+  if(theEtaCode!=1) return;
+
   //std::cout<<"eta: "<<simu->eta()<<" phi: "<<simu->phi()<<std::endl;
 
   float phiref  = 0;
@@ -130,16 +131,21 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   for (VDigiSpec::const_iterator is= vDigi.begin(); is!=vDigi.end(); ++is) {
     DetId detId( is->first);    
     if(detId.subdetId()==MuonSubdetId::DT && DTphDigiSpec(is->first, is->second).bxNum()!=0) continue; 
-    bool isOK = pattern.add(myPhiConverter, 3000, *is); 
+    bool isOK = pattern.add(*is); 
     if (!isOK) return;
 
     for(int iGranularity=3;iGranularity<4;++iGranularity){      
-      int aLayer = myPhiConverter->getLayerNumber(is->first) + 1000*iGranularity;
+      //int aLayer = myPhiConverter->getLayerNumber(is->first) + 1000*iGranularity; 
+      int aLayer = myPhiConverter->getLayerNumber(is->first); 
       int nPhi = GoldenPattern::Key::nPhi(aLayer);
       int iPhi = myPhiConverter->convert(*is,nPhi);
       //Accept only events with single hit in each layer
       if(refPhi.find(aLayer)!=refPhi.end()) return; 
-      refPhi[aLayer] = iPhi;
+      ///Use only selected layers as reference layers
+      for(unsigned int i=0;i<refToLogicNumber.size();++i){
+	//std::cout<<refToLogicNumber[i]<<" "<<aLayer<<std::endl;
+	if(refToLogicNumber[i] ==  aLayer) refPhi[aLayer] = iPhi;	
+      }
     }
   }
   if (pattern.size() == 0) return; 
@@ -155,7 +161,7 @@ void PatternManager::run(const EventObj* ev,  const edm::EventSetup& es,
   myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);
   if (theGPs.find(key)==theGPs.end()) theGPs[key]=GoldenPattern(key);
   theGPs[key].add(pattern, myPhiConverter);
-  theGPs[key].add(GoldenPattern::PosBenCase::TOTDEV,501,pattern.deviationSum(myPhiConverter,nPhi),1);
+  //theGPs[key].add(GoldenPattern::PosBenCase::TOTDEV,501,pattern.deviationSum(myPhiConverter,nPhi),1);
 
   ///Count number of events for each key
   if (aCounterMap.find(key)==aCounterMap.end()) aCounterMap[key]=1;
@@ -211,7 +217,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     int nPhi = GoldenPattern::Key::nPhi(aLayer);
     int iPhi = myPhiConverter->convert(*is,nPhi);
 
-    pattern.add(myPhiConverter, nPhi, *is);
+    pattern.add(*is);
 
     if(iPhi<0) iPhi+=nPhi;
     
@@ -425,7 +431,7 @@ void PatternManager::dumpPatterns(std::ostream &out){
       int nRefLayers=0;
       for(unsigned int iRefLayer=0;iRefLayer<myActiveRefs.size();++iRefLayer){
 	GoldenPattern::Key key(iEtaCode,0,0,0,0);
-	key.theDet = 3000+myActiveRefs[iRefLayer];
+	key.theDet = myActiveRefs[iRefLayer];
 	key.thePtCode = iPtCode;
 	key.theEtaCode = iEtaCode;
 	key.thePhiCode = 0;
@@ -507,23 +513,23 @@ void PatternManager::writeXML(std::string fname){
 void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc, 
 					  xercesc::DOMElement* theTopElement){
 
-  std::vector<int> myActiveRefs = {101, 102, 301, 302, 303, 304, 222, 223};
-
   std::ostringstream stringStr;
   xercesc::DOMElement* aGP=0, *aLayer=0, *aPdf=0, *aMeanDistPhi=0, *aSelDistPhi=0;
   xercesc::DOMElement *aSelDistPhiShift=0, *aDistMsbPhiShift=0;
   int iEtaCode = 1;
   int iPhiCode = 0;
+  int nRefLayers = 8;
 
   for(int iPtCode=31;iPtCode>0;--iPtCode){
-    for(int iCharge=-1;iCharge<2;++++iCharge){
+    if(iPtCode!=19) continue;
+    for(int iCharge=-1;iCharge<2;++++iCharge){     
+      if(iCharge!=-1) continue;
       std::vector<std::vector<int> > meanDistPhiVec;
+      std::vector<std::vector<int> > selDistPhiVec;
       std::vector<std::vector<int> > pdf;
-      int nLayers=0;
-      int nRefLayers=0;
-      for(unsigned int iRefLayer=0;iRefLayer<myActiveRefs.size();++iRefLayer){
+      for(unsigned int iRefLayer=0;iRefLayer<refToLogicNumber.size();++iRefLayer){
 	GoldenPattern::Key key(iEtaCode,0,0,0,0);
-	key.theDet = 3000+myActiveRefs[iRefLayer];
+	key.theDet = refToLogicNumber[iRefLayer];
 	key.thePtCode = iPtCode;
 	key.theEtaCode = iEtaCode;
 	key.thePhiCode = 0;
@@ -531,16 +537,28 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 	if(theGPs.find(key)!=theGPs.end()){
 	  GoldenPattern &myGP = theGPs[key];
 	  std::vector<std::vector<int> > tmp = myGP.dump(0); 
-	  nLayers = tmp.size();
-	  ++nRefLayers;
 	  if(!meanDistPhiVec.size()) meanDistPhiVec = tmp;
 	  else meanDistPhiVec.insert(meanDistPhiVec.end(),tmp.begin(),tmp.end());
 	  tmp = myGP.dump(1); 
 	  if(!pdf.size()) pdf = tmp;
 	  else pdf.insert(pdf.end(),tmp.begin(),tmp.end());
-	}
-      }
-     
+	  tmp = myGP.dump(2); 
+	  if(!selDistPhiVec.size()) selDistPhiVec = tmp;
+	  else selDistPhiVec.insert(selDistPhiVec.end(),tmp.begin(),tmp.end());
+	}	
+	else{
+	  std::vector<int> dummyMeanDist(1);
+	  std::vector<std::vector<int> > dummyVec(nLogicLayers,dummyMeanDist);
+	  if(!meanDistPhiVec.size()) meanDistPhiVec = dummyVec;
+	  else meanDistPhiVec.insert(meanDistPhiVec.end(),dummyVec.begin(),dummyVec.end());
+	  std::vector<int> dummyLayer(128);
+	  std::vector<std::vector<int> > dummyGP(nLogicLayers,dummyLayer);
+	  if(!pdf.size()) pdf = dummyGP;
+	  else pdf.insert(pdf.end(),dummyGP.begin(),dummyGP.end());
+	  if(!selDistPhiVec.size()) selDistPhiVec = dummyGP;
+	  else selDistPhiVec.insert(selDistPhiVec.end(),dummyGP.begin(),dummyGP.end());
+	}	
+      }     
       aGP = theDoc->createElement(qtxml::_toDOMS("GP"));
       stringStr.str("");
       stringStr<<iPtCode;
@@ -555,8 +573,7 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
       stringStr<<iCharge;
       aGP->setAttribute(qtxml::_toDOMS("iCharge"), qtxml::_toDOMS(stringStr.str()));
       ////
-      if(nLayers){   
-	for(int iLayer = 0;iLayer<nLayers;++iLayer){
+      for(int iLayer = 0;iLayer<nLogicLayers;++iLayer){
 	  int nOfPhis = 0;
 	  aLayer = theDoc->createElement(qtxml::_toDOMS("Layer"));
 	  stringStr.str("");
@@ -566,7 +583,7 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 	  stringStr<<nOfPhis;
 	  aLayer->setAttribute(qtxml::_toDOMS("nOfPhis"), qtxml::_toDOMS(stringStr.str()));
 	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
-	    int meanDistPhi = meanDistPhiVec[iLayer+iRefLayer*nLayers][0];	       
+	    int meanDistPhi = meanDistPhiVec[iLayer+iRefLayer*nLogicLayers][0];	       
 	    stringStr.str("");
 	    stringStr<<meanDistPhi;
 	    aMeanDistPhi = theDoc->createElement(qtxml::_toDOMS("meanDistPhi"));
@@ -574,13 +591,18 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 	    aLayer->appendChild(aMeanDistPhi);
 	  }
 	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
-	    int selDistPhi = 0;
+	    std::bitset<(int)pow(2,GoldenPattern::nBitsPdfAddr)> aBitset;
+	    for(unsigned int i=0;i<selDistPhiVec[iLayer+iRefLayer*nLogicLayers].size();++i){
+	      aBitset.set(i,selDistPhiVec[iLayer+iRefLayer*nLogicLayers][i]);
+	    }
 	    stringStr.str("");
-	    stringStr<<selDistPhi;
+	    stringStr<<aBitset.to_string();
 	    aSelDistPhi = theDoc->createElement(qtxml::_toDOMS("selDistPhi"));
 	    aSelDistPhi->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
 	    aLayer->appendChild(aSelDistPhi);
 	  }
+	  std::cout<<"Here 1"<<std::endl;
+
 	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
 	    int selDistPhiShift = 0;
 	    stringStr.str("");
@@ -598,16 +620,15 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 	    aLayer->appendChild(aDistMsbPhiShift);
 	  }
 	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
-	    for(unsigned int iPdf=0;iPdf<pdf[iLayer+iRefLayer*nLayers].size();++iPdf){
+	    for(unsigned int iPdf=0;iPdf<pdf[iLayer+iRefLayer*nLogicLayers].size();++iPdf){
 	      aPdf = theDoc->createElement(qtxml::_toDOMS("PDF"));
 	      stringStr.str("0");
-	      stringStr<<pdf[iLayer+iRefLayer*nLayers][iPdf];
+	      stringStr<<pdf[iLayer+iRefLayer*nLogicLayers][iPdf];
 	      aPdf->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
 	      aLayer->appendChild(aPdf);
 	    }
 	  }
 	  aGP->appendChild(aLayer);
-	}
       }
       theTopElement->appendChild(aGP);
     }
@@ -617,7 +638,6 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 void PatternManager::readXMLConfig(std::string configFile){
-
 
   XercesDOMParser *parser = new XercesDOMParser();     
   parser->setValidationScheme(XercesDOMParser::Val_Auto);
@@ -633,17 +653,32 @@ void PatternManager::readXMLConfig(std::string configFile){
   }
   DOMNode *aNode = doc->getElementsByTagName(qtxml::_toDOMS("OMTF"))->item(0);
   DOMElement* aOMTFElement = static_cast<DOMElement *>(aNode);  
+  ///hw <-> logic numbering map
   nElem = aOMTFElement->getElementsByTagName(qtxml::_toDOMS("LayerMap"))->getLength();
   std::cout<<"LayerMap size: "<<nElem<<std::endl;
   DOMElement* aLayerElement = 0;
   for(uint i=0;i<nElem;++i){
     aNode = aOMTFElement->getElementsByTagName(qtxml::_toDOMS("LayerMap"))->item(i);
     aLayerElement = static_cast<DOMElement *>(aNode); 
-    std::cout<<"hwNumber: "<<std::atoi(qtxml::_toString(aLayerElement->getAttribute(qtxml::_toDOMS("hwNumber"))).c_str())<<std::endl;
-    std::cout<<"logicNumber: "<<std::atoi(qtxml::_toString(aLayerElement->getAttribute(qtxml::_toDOMS("logicNumber"))).c_str())<<std::endl;
+    int hwNumer = std::atoi(qtxml::_toString(aLayerElement->getAttribute(qtxml::_toDOMS("hwNumber"))).c_str());
+    int logicNumber = std::atoi(qtxml::_toString(aLayerElement->getAttribute(qtxml::_toDOMS("logicNumber"))).c_str());
+    hwToLogicLayer[hwNumer] = logicNumber;
+    logicToHwLayer[logicNumber] = hwNumer;
+    if(nLogicLayers<logicNumber) nLogicLayers = logicNumber;
   }
+  ++nLogicLayers;//logic number in XML starts from 0.
 
-
+  ///ref<->logic numberig map
+  nElem = aOMTFElement->getElementsByTagName(qtxml::_toDOMS("RefLayerMap"))->getLength();
+  std::cout<<"RefLayerMap size: "<<nElem<<std::endl;
+  DOMElement* aRefLayerElement = 0;
+  for(uint i=0;i<nElem;++i){
+    aNode = aOMTFElement->getElementsByTagName(qtxml::_toDOMS("RefLayerMap"))->item(i);
+    aRefLayerElement = static_cast<DOMElement *>(aNode); 
+    int refLayer = std::atoi(qtxml::_toString(aRefLayerElement->getAttribute(qtxml::_toDOMS("refLayer"))).c_str());
+    int logicNumber = std::atoi(qtxml::_toString(aRefLayerElement->getAttribute(qtxml::_toDOMS("logicNumber"))).c_str());
+    refToLogicNumber[refLayer] = logicNumber;
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////

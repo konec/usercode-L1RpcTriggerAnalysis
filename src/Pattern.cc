@@ -15,10 +15,8 @@
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
-bool Pattern::add(MtfCoordinateConverter *myPhiConverter,  int nPhi,
-		  std::pair<uint32_t,  unsigned int > aData) {
+bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
 
-  int myPOS = -999, myBEN = -999;
   ///Clean up digis. Remove unconnected detectors
   uint32_t rawId = aData.first;   
   DetId detId(rawId);
@@ -27,45 +25,28 @@ bool Pattern::add(MtfCoordinateConverter *myPhiConverter,  int nPhi,
   switch (detId.subdetId()) {
   case MuonSubdetId::RPC: {
   RPCDetId aId(rawId);    
-    if(aId.region()<0 
-       //|| (aId.region()==0 && aId.ring()<2) ||
-       //(aId.region()==0 && aId.station()==4) ||
-       //(aId.region()==1 && aId.station()==2 && aId.roll()==1) || 
-       || (aId.region()==1 && aId.station()==4)
-       ) return false;
-    myPOS = myPhiConverter->convert(aData,nPhi);
-    myBEN = -9999;
-    break;
+  if(aId.region()<0 ||
+     (aId.region()==0 && aId.ring()<2) ||
+     (aId.region()==0 && aId.station()==4)
+     ) return false;
   }
+    break;
   case MuonSubdetId::DT: {
-    DTChamberId dt(rawId);
     DTphDigiSpec digi(rawId, aData.second);
-    ///Select DT digis with hits in inner and outer layers 
+    ///Select TD digis with hits in inner and outer layers 
     if (digi.bxNum() != 0 || digi.bxCnt() != 0 || digi.ts2() != 0 ||  digi.code()<4) return false;	
-    myPOS = myPhiConverter->convert(aData,nPhi);
-    myBEN = digi.phiB();
     break;
   }
   case MuonSubdetId::CSC: {
     CSCDetId csc(rawId);
-    CSCDigiSpec digi(rawId, aData.second);
-    //if(csc.station()==1 && csc.ring()==1) return false; //Skip ME1/A due to use of ganged strips, causing problems in phi calculation
+    //if(csc.station()==1 && csc.ring()==4) return false; //Skip ME1/a due to use of ganged strips, causing problems in phi calculation
     ///////////////////
-    myPOS = myPhiConverter->convert(aData,nPhi);
-    myBEN = digi.pattern();
     break;
   }
   }
 
-  int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first);
+  int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first)+100*detId.subdetId();
   std::pair<uint32_t,  std::pair<uint32_t, unsigned int> > aDataWithLayer(aLayer,aData);
-
-  std::pair<uint32_t, int> aDataWithLayerNew(aLayer,myPOS);
-  theDataNew.insert(aDataWithLayerNew);
-  if(myBEN>-9999){
-    std::pair<uint32_t, int> aDataWithLayerNew(aLayer,myBEN);
-    theDataNew.insert(aDataWithLayerNew);
-  }
 
   theData.insert(aDataWithLayer);
   int aCounts = theData.count(aLayer);
