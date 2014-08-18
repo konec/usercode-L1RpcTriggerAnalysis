@@ -181,7 +181,7 @@ void Pattern::dumpToXML(xercesc::DOMDocument* theDoc,
 	++iHit;
       }
     }
-  theTopElement->appendChild(aLayer);
+  theTopElement->appendChild(aLayerr);
   }
 }
 /////////////////////////////////////////////////
