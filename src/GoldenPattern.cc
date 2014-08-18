@@ -185,7 +185,7 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
     float fPos=pow(2,nBitsVal), fBen=pow(2,nBitsVal);
     ///Loop over hits in given detId
 
-    std::cout.precision(15);
+    //std::cout.precision(15);
 
     ////////////////
     ////////////////      

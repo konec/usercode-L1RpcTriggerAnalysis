@@ -160,12 +160,18 @@ void Pattern::dumpToXML(xercesc::DOMDocument* theDoc,
   std::ostringstream stringStr;
   myPhiConverter->setReferencePhi(0.0);
 
-  xercesc::DOMElement *aLayer, *aHit; 
+  xercesc::DOMElement *aLayer, *aBendLayer, *aHit; 
   for (auto aEntry : detsHit){
     aLayer = theDoc->createElement(qtxml::_toDOMS("Layer"));
     stringStr.str("");
     stringStr<<aEntry.first;
     aLayer->setAttribute(qtxml::_toDOMS("iLayer"), qtxml::_toDOMS(stringStr.str()));
+
+    aBendLayer = theDoc->createElement(qtxml::_toDOMS("Layer"));
+    stringStr.str("");
+    stringStr<<aEntry.first+1;
+    aBendLayer->setAttribute(qtxml::_toDOMS("iLayer"), qtxml::_toDOMS(stringStr.str()));
+
     int iHit = 0;
     for (auto it = theData.cbegin(); it != theData.cend(); ++it){
       unsigned int iLayer = myPhiConverter->getLayerNumber(it->second.first);
@@ -178,10 +184,33 @@ void Pattern::dumpToXML(xercesc::DOMDocument* theDoc,
 	stringStr<<myPhiConverter->convert(it->second,nPhi);
 	aHit->setAttribute(qtxml::_toDOMS("iPhi"), qtxml::_toDOMS(stringStr.str()));
 	aLayer->appendChild(aHit);
+	if(iLayer<8){///Ugly HACK!!!!     
+	  DTphDigiSpec digi(it->second.first, it->second.second);
+	  aHit = theDoc->createElement(qtxml::_toDOMS("Hit"));
+	  stringStr.str("");
+	  stringStr<<iHit;
+	  aHit->setAttribute(qtxml::_toDOMS("iHit"), qtxml::_toDOMS(stringStr.str()));
+	  stringStr.str("");
+	  stringStr<<digi.phiB();
+	  aHit->setAttribute(qtxml::_toDOMS("iPhi"), qtxml::_toDOMS(stringStr.str()));
+	  aBendLayer->appendChild(aHit);
+	}
+	if(iLayer>7 && iLayer<16){///Ugly HACK!!!!    
+	  CSCDigiSpec digi(it->second.first, it->second.second);
+	  aHit = theDoc->createElement(qtxml::_toDOMS("Hit"));
+	  stringStr.str("");
+	  stringStr<<iHit;
+	  aHit->setAttribute(qtxml::_toDOMS("iHit"), qtxml::_toDOMS(stringStr.str()));
+	  stringStr.str("");
+	  stringStr<<digi.pattern();
+	  aHit->setAttribute(qtxml::_toDOMS("iPhi"), qtxml::_toDOMS(stringStr.str()));
+	  aBendLayer->appendChild(aHit);
+	}
 	++iHit;
-      }
+      }     
     }
-  theTopElement->appendChild(aLayer);
+    theTopElement->appendChild(aLayer);   
+    if(aEntry.first<16) theTopElement->appendChild(aBendLayer);   
   }
 }
 /////////////////////////////////////////////////

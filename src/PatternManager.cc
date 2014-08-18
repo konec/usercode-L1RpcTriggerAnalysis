@@ -98,8 +98,8 @@ PatternManager::~PatternManager(){
       gp->makeIntegratedCache();      
       std::cout <<" GP: "<< *gp << std::endl;
       gp->plot();
-      writeXML("test.xml");      
-      std::string fname = "testEvent.xml";
+      writeXML("Patterns.xml");      
+      std::string fname = "TestEvent.xml";
       XMLFormatTarget* formTarget = new LocalFileFormatTarget(fname.c_str());
       xercesc::DOMWriter* domWriter = (dynamic_cast<DOMImplementation*>(domImpl))->createDOMWriter();
       domWriter->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true);
@@ -260,8 +260,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
       if (bestMatching < result) {
 	bestMatching = result;
 	bestKey =  igps->first;
-	bestKey.thePhiCode = it.second + igps->second.phiOffset();       
-	bestKey.theCharge = it.first;       
+	//bestKey.thePhiCode = it.second + igps->second.phiOffset();       
+	//bestKey.theCharge = it.first;       
 	} 	
     }
   }
@@ -285,14 +285,14 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	if (bestMatching < result) {
 	  bestMatching = result;
 	  bestKey =  igps->first;
-	  bestKey.thePhiCode = it.second + igps->second.phiOffset();       
-	  bestKey.theCharge = it.first;       
+	  //bestKey.thePhiCode = it.second + igps->second.phiOffset();       
+	  //bestKey.theCharge = it.first;       
 	} 	
       }
     }
   }
 
-  if (false && bestMatching &&  bestMatching.nMatchedTot()>4 &&  bestKey.thePtCode<10) {
+  if (bestMatching) {
     ////////////DEBUG
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
@@ -337,7 +337,9 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   if (theConfig.getUntrackedParameter<bool>("dump",false)){
     std::ostringstream stringStr;
     int nPhi = 4096;
-    pattern.print(myPhiConverter,nPhi);    
+    myPhiConverter->setReferencePhi(0);
+    pattern.print(myPhiConverter,nPhi);
+    std::cout<<bestMatching<<std::endl;
 
     xercesc::DOMElement *aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
     stringStr.str("");
