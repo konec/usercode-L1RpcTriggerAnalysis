@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include <bitset>
+#include <typeinfo>
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/PatternManager.h"
 
@@ -73,9 +74,16 @@ PatternManager::PatternManager(const edm::ParameterSet &cfg)
 
   myPhiConverter = 0;
 
-  std::string configFile = "/home/akalinow/scratch/CMS/OverlapTrackFinder/hwToLogicLayer.xml";
+  std::string configFile = getenv("CMSSW_BASE");
+  configFile+="/src/UserCode/L1RpcTriggerAnalysis/data/OMTF/hwToLogicLayer.xml";
   readXMLConfig(configFile);
 
+  if(theConfig.getUntrackedParameter<bool>("dump",false)) {
+    
+    domImpl = DOMImplementationRegistry::getDOMImplementation(qtxml::_toDOMS("Range"));   
+    theDoc = domImpl->createDocument(0,qtxml::_toDOMS("OMTF_Events"), 0);
+    theTopElement = theDoc->getDocumentElement();    
+  }
 }
 
 PatternManager::~PatternManager(){
@@ -90,12 +98,19 @@ PatternManager::~PatternManager(){
       gp->makeIntegratedCache();      
       std::cout <<" GP: "<< *gp << std::endl;
       gp->plot();
+      writeXML("test.xml");      
+      std::string fname = "testEvent.xml";
+      XMLFormatTarget* formTarget = new LocalFileFormatTarget(fname.c_str());
+      xercesc::DOMWriter* domWriter = (dynamic_cast<DOMImplementation*>(domImpl))->createDOMWriter();
+      domWriter->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true);
+      domWriter->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true);
+      domWriter->writeNode(formTarget,*theTopElement);
+      delete formTarget;
+      //theDoc->release();
     }
-    writeXML("test.xml");
   }
 
   if(myPhiConverter) delete myPhiConverter;
-
 }
 ////////////////////////////////////////////
 ////////////////////////////////////////////
@@ -192,18 +207,6 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   myPhiConverter->setReferencePhi(0);
   //////////////////////
   theEvForPatCounter++;
-
-  //std::vector<int> myActiveRefs = {101, 102, 103, 202, 203, 301, 302, 303};
-  //std::vector<int> myActiveRefs = {101, 102, 103, 104, 201, 202, 203, 204}; //noRPC
-  //std::vector<int> myActiveRefs = {301, 302, 303, 304, 311, 312, 313, 314}; //no DT, CSC
-  
-  std::vector<int> myActiveRefs = {101, 102, 103, 104, 201, 202, 203, 204, 301, 302, 303, 304, 311, 312, 313, 314};//All 
-  
-  for(int i=1;i<5;++i){
-    myActiveRefs.push_back(210+i);
-    myActiveRefs.push_back(220+i);
-    myActiveRefs.push_back(230+i);
-  }
   
   Pattern pattern;
   std::map<uint32_t,int> refPhi;
@@ -213,7 +216,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     DetId detId( is->first);
     if (skipRpcData   && detId.subdetId()==MuonSubdetId::RPC) continue;
     if (skipDtCscData && (detId.subdetId()==MuonSubdetId::DT || detId.subdetId()==MuonSubdetId::CSC) ) continue;    
-    int aLayer = myPhiConverter->getLayerNumber(is->first) + 1000*iGranularity;
+    int aLayer = myPhiConverter->getLayerNumber(is->first);
     int nPhi = GoldenPattern::Key::nPhi(aLayer);
     int iPhi = myPhiConverter->convert(*is,nPhi);
 
@@ -222,8 +225,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     if(iPhi<0) iPhi+=nPhi;
     
     bool skipLayer = true;
-    for(auto aRef : myActiveRefs){
-      if(aRef==aLayer%1000){
+    for(auto aRef : refToLogicNumber){
+      if(aRef==aLayer){
 	skipLayer = false;
 	break;
       }
@@ -231,7 +234,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     if(skipLayer) continue;    
     refPhi[aLayer] = iPhi; //FIXME! Use multimap
   }
-  
+
   pattern.makeHitDetsList();
   if (pattern.size() == 0) return candidate; 
 
@@ -240,12 +243,11 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 
   ///High precision chambers first
   for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {    
-    if(igps->first.theDet%1000/100==3) continue;
+    if(igps->first.theDet>15) continue;
     ////
     if(igps->first.theEtaCode!=theEtaCode) continue;
     ////
     igps->second.makeIntegratedCache();
-
 
     for (auto const & it : refPhi){
       if(igps->first.theDet!=it.first) continue;     
@@ -271,7 +273,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
       if(igps->first.theEtaCode!=theEtaCode) continue;
       ////
       for (auto const & it : refPhi){  
-	if(igps->first.theDet%1000/100!=3) continue;     
+	if(igps->first.theDet<16) continue;     
 	if(igps->first.theDet!=it.first) continue;     
 	int nPhi = GoldenPattern::Key::nPhi(it.first);
 	myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
@@ -283,8 +285,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	if (bestMatching < result) {
 	  bestMatching = result;
 	  bestKey =  igps->first;
-	  //bestKey.thePhiCode = it.second + igps->second.phiOffset();       
-	  //bestKey.theCharge = it.first;       
+	  bestKey.thePhiCode = it.second + igps->second.phiOffset();       
+	  bestKey.theCharge = it.first;       
 	} 	
       }
     }
@@ -329,6 +331,42 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     candidate.disc = bestMatching.value();
     candidate.type = L1Obj::OTF;
   }
+
+
+  ///////Dump to XML
+  if (theConfig.getUntrackedParameter<bool>("dump",false)){
+    std::ostringstream stringStr;
+    int nPhi = 4096;
+    pattern.print(myPhiConverter,nPhi);    
+
+    xercesc::DOMElement *aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
+    stringStr.str("");
+    stringStr<<ev->id;
+    aEvent->setAttribute(qtxml::_toDOMS("iEvent"), qtxml::_toDOMS(stringStr.str()));
+    stringStr.str("");
+    stringStr<<candidate.pt;
+    aEvent->setAttribute(qtxml::_toDOMS("OMTFpt"), qtxml::_toDOMS(stringStr.str()));
+    stringStr.str("");
+    stringStr<<candidate.q%100;
+    aEvent->setAttribute(qtxml::_toDOMS("OMTFnHits"), qtxml::_toDOMS(stringStr.str()));
+    stringStr.str("");
+    stringStr<<candidate.disc;
+    aEvent->setAttribute(qtxml::_toDOMS("OMTFvalue"), qtxml::_toDOMS(stringStr.str()));
+
+    xercesc::DOMElement *aBx = theDoc->createElement(qtxml::_toDOMS("bx"));
+    stringStr.str("");
+    stringStr<<ev->bx;
+    aBx->setAttribute(qtxml::_toDOMS("iBx"), qtxml::_toDOMS(stringStr.str()));
+    aEvent->appendChild(aBx);
+    
+    pattern.dumpToXML(theDoc,aBx,
+    		      myPhiConverter,nPhi);        
+    
+    theTopElement->appendChild(aEvent);
+  }
+  //////////////////
+
+  std::cout<<"Here 0"<<std::endl;
 
   return candidate;
 }
@@ -418,71 +456,6 @@ void PatternManager::endJob(){
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
-void PatternManager::dumpPatterns(std::ostream &out){
-
-  std::vector<int> myActiveRefs = {101, 102, 301, 302, 303, 304, 222, 223};
-
-  int iEtaCode = 0;
-  for(int iPtCode=31;iPtCode>0;--iPtCode){
-    for(int iCharge=-1;iCharge<2;++++iCharge){
-      std::vector<std::vector<int> > meanDistPhiVec;
-      std::vector<std::vector<int> > pdf;
-      int nLayers=0;
-      int nRefLayers=0;
-      for(unsigned int iRefLayer=0;iRefLayer<myActiveRefs.size();++iRefLayer){
-	GoldenPattern::Key key(iEtaCode,0,0,0,0);
-	key.theDet = myActiveRefs[iRefLayer];
-	key.thePtCode = iPtCode;
-	key.theEtaCode = iEtaCode;
-	key.thePhiCode = 0;
-	key.theCharge = iCharge;
-	if(theGPs.find(key)!=theGPs.end()){
-	  std::cout<<"GoldenPattern iEtaCode: "<<iEtaCode<<" iPtCode: "<<iPtCode<<" iCharge: "<<iCharge<<std::endl;
-	  GoldenPattern &aGP = theGPs[key];
-	  std::vector<std::vector<int> > tmp = aGP.dump(0); 
-	  nLayers = tmp.size();
-	  ++nRefLayers;
-	  if(!meanDistPhiVec.size()) meanDistPhiVec = tmp;
-	  else meanDistPhiVec.insert(meanDistPhiVec.end(),tmp.begin(),tmp.end());
-	  tmp = aGP.dump(1); 
-	  if(!pdf.size()) pdf = tmp;
-	  else pdf.insert(pdf.end(),tmp.begin(),tmp.end());
-	}
-      }
-      ////
-      if(nLayers){
-	for(unsigned int i=0;i<meanDistPhiVec.size();++i) std::cout<<" "<<meanDistPhiVec[i][0];       	
-	std::cout<<std::endl;
-	int nOfPhis = 0;
-	std::cout<<" meanDistPhiVec.size(): "<<meanDistPhiVec.size()<<" nLayers: "<<nLayers<<" nRefLayers: "<<nRefLayers<<" "<<std::endl;
-	out<<"GoldenPattern iEtaCode: "<<iEtaCode<<" iPtCode: "<<iPtCode<<" iCharge: "<<iCharge<<std::endl;
-	for(int iLayer = 0;iLayer<nLayers;++iLayer){	
-	  //if(iLayer>11) return;
-	  out<<"Layer: "<<iLayer<<std::endl;
-	  out<<"nOfPhis: "<<nOfPhis<<std::endl;
-	  out<<"meanDistPhi: ";
-	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
-	    std::cout<<" index: "<<iLayer+iRefLayer*nLayers<<" "<<meanDistPhiVec[iLayer+iRefLayer*nLayers][0]<<std::endl;
-	    out<<" "<<meanDistPhiVec[iLayer+iRefLayer*nLayers][0];       	
-	  }
-	  out<<std::endl;
-	  out<<"pdf: ";
-	  std::cout<<"pdf size: "<<pdf[0].size()<<std::endl;
-	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
-	     for(unsigned int iPdf=0;iPdf<pdf[iLayer+iRefLayer*nLayers].size();++iPdf) out<<" "<<pdf[iLayer+iRefLayer*nLayers][iPdf];
-	  }
-	  out<<std::endl;
-	  out<<"selDistPhiShift: 0"<<std::endl;
-	  out<<std::endl;
-	  //return;
-	}
-      }
-      ////
-    }
-  }
-}
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
 void PatternManager::writeXML(std::string fname){
 
   xercesc::DOMElement* theTopElement;
@@ -511,7 +484,7 @@ void PatternManager::writeXML(std::string fname){
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc, 
-					  xercesc::DOMElement* theTopElement){
+				     xercesc::DOMElement* theTopElement){
 
   std::ostringstream stringStr;
   xercesc::DOMElement* aGP=0, *aLayer=0, *aPdf=0, *aMeanDistPhi=0, *aSelDistPhi=0;
@@ -601,7 +574,6 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 	    aSelDistPhi->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
 	    aLayer->appendChild(aSelDistPhi);
 	  }
-	  std::cout<<"Here 1"<<std::endl;
 
 	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
 	    int selDistPhiShift = 0;
@@ -682,3 +654,4 @@ void PatternManager::readXMLConfig(std::string configFile){
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
+

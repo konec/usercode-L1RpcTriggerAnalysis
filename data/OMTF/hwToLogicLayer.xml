@@ -1,0 +1,38 @@
+<OMTF>
+<LayerMap hwNumber = "101" logicNumber = "0"/>
+<LayerMap hwNumber = "1101" logicNumber = "1"/>
+<LayerMap hwNumber = "102" logicNumber = "2"/>
+<LayerMap hwNumber = "1102" logicNumber = "3"/>
+<LayerMap hwNumber = "103" logicNumber = "4"/>
+<LayerMap hwNumber = "1103" logicNumber = "5"/>
+<LayerMap hwNumber = "104" logicNumber = "6"/>
+<LayerMap hwNumber = "1104" logicNumber = "7"/>
+<LayerMap hwNumber = "201" logicNumber = "8"/>
+<LayerMap hwNumber = "1201" logicNumber = "9"/>
+<LayerMap hwNumber = "202" logicNumber = "10"/>
+<LayerMap hwNumber = "1202" logicNumber = "11"/>
+<LayerMap hwNumber = "203" logicNumber = "12"/>
+<LayerMap hwNumber = "1203" logicNumber = "13"/>
+<LayerMap hwNumber = "204" logicNumber = "14"/>
+<LayerMap hwNumber = "1204" logicNumber = "15"/>
+<LayerMap hwNumber = "301" logicNumber = "16"/>
+<LayerMap hwNumber = "302" logicNumber = "17"/>
+<LayerMap hwNumber = "303" logicNumber = "18"/>
+<LayerMap hwNumber = "304" logicNumber = "19"/>
+<LayerMap hwNumber = "305" logicNumber = "20"/>
+<LayerMap hwNumber = "311" logicNumber = "21"/>
+<LayerMap hwNumber = "312" logicNumber = "22"/>
+<LayerMap hwNumber = "313" logicNumber = "23"/>
+<LayerMap hwNumber = "314" logicNumber = "24"/>
+
+<RefLayerMap refLayer="0" logicNumber ="0"/>
+<RefLayerMap refLayer="1" logicNumber ="2"/>
+<RefLayerMap refLayer="2" logicNumber ="4"/>
+<RefLayerMap refLayer="3" logicNumber ="8"/>
+<RefLayerMap refLayer="4" logicNumber ="10"/>
+<RefLayerMap refLayer="5" logicNumber ="16"/>
+<RefLayerMap refLayer="6" logicNumber ="17"/>
+<RefLayerMap refLayer="7" logicNumber ="20"/>
+</OMTF>
+
+

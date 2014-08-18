@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/Pattern.h"
 
@@ -12,6 +14,22 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MtfCoordinateConverter.h"
 
+// Xerces include files
+#include <xercesc/framework/StdOutFormatTarget.hpp>
+#include <xercesc/framework/LocalFileFormatTarget.hpp>
+
+#include "xercesc/parsers/XercesDOMParser.hpp"
+#include "xercesc/dom/DOM.hpp"
+#include <xercesc/dom/DOMException.hpp>
+#include <xercesc/dom/DOMImplementation.hpp>
+#include "xercesc/sax/HandlerBase.hpp"
+#include "xercesc/util/XMLString.hpp"
+#include "xercesc/util/PlatformUtils.hpp"
+#include "xercesc/util/XercesDefs.hpp"
+XERCES_CPP_NAMESPACE_USE
+
+#include "DQMServices/ClientConfig/interface/ParserFunctions.h"
+/////////////////////////
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -45,7 +63,7 @@ bool Pattern::add(std::pair<uint32_t,  unsigned int > aData) {
   }
   }
 
-  int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first)+100*detId.subdetId();
+  int aLayer = MtfCoordinateConverter::getLayerNumber(aData.first);
   std::pair<uint32_t,  std::pair<uint32_t, unsigned int> > aDataWithLayer(aLayer,aData);
 
   theData.insert(aDataWithLayer);
@@ -131,6 +149,40 @@ void Pattern::print(MtfCoordinateConverter *myPhiConverter, int nPhi){
   for (auto aEntry : detsHit) std::cout<<aEntry.first<<" ";  
   std::cout<<std::endl;
 
+}
+/////////////////////////////////////////////////
+/////////////////////////////////////////////////
+void Pattern::dumpToXML(xercesc::DOMDocument* theDoc, 
+			xercesc::DOMElement* theTopElement,			
+			MtfCoordinateConverter *myPhiConverter, 
+			int nPhi){
+
+  std::ostringstream stringStr;
+  myPhiConverter->setReferencePhi(0.0);
+
+  xercesc::DOMElement *aLayer, *aHit; 
+  for (auto aEntry : detsHit){
+    aLayer = theDoc->createElement(qtxml::_toDOMS("Layer"));
+    stringStr.str("");
+    stringStr<<aEntry.first;
+    aLayer->setAttribute(qtxml::_toDOMS("iLayer"), qtxml::_toDOMS(stringStr.str()));
+    int iHit = 0;
+    for (auto it = theData.cbegin(); it != theData.cend(); ++it){
+      unsigned int iLayer = myPhiConverter->getLayerNumber(it->second.first);
+      if(iLayer == aEntry.first){
+	aHit = theDoc->createElement(qtxml::_toDOMS("Hit"));
+	stringStr.str("");
+	stringStr<<iHit;
+	aHit->setAttribute(qtxml::_toDOMS("iHit"), qtxml::_toDOMS(stringStr.str()));
+	stringStr.str("");
+	stringStr<<myPhiConverter->convert(it->second,nPhi);
+	aHit->setAttribute(qtxml::_toDOMS("iPhi"), qtxml::_toDOMS(stringStr.str()));
+	aLayer->appendChild(aHit);
+	++iHit;
+      }
+    }
+  theTopElement->appendChild(aLayer);
+  }
 }
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////

@@ -54,10 +54,8 @@ public:
 
 private:
 
-void readXMLConfig(std::string fName);
+  void readXMLConfig(std::string fName);
 
-
-  void dumpPatterns(std::ostream &out);
   void writeXML(std::string fname);
   void dumpPatternsXML(xercesc::DOMDocument* theDoc, 
 		       xercesc::DOMElement* theTopElement);
@@ -74,6 +72,11 @@ void readXMLConfig(std::string fName);
   std::map< GoldenPattern::Key, int> aCounterMap; 
   std::map< GoldenPattern::Key, GoldenPattern> theGPs; 
   std::multimap<GoldenPattern::Key, GoldenPattern::Key> theGPsPhiMap;
+
+  ///XML objects for Event dump
+  xercesc::DOMElement* theTopElement;
+  xercesc::DOMDocument* theDoc ;
+  xercesc::DOMImplementation* domImpl;
 
 };
 #endif

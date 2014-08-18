@@ -1,0 +1,437 @@
+
+<OMTF_Events>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="1">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="1125"/>
+      </Layer>
+      <Layer iLayer="4">
+        <Hit iHit="0" iPhi="1133"/>
+      </Layer>
+      <Layer iLayer="6">
+        <Hit iHit="0" iPhi="1134"/>
+      </Layer>
+      <Layer iLayer="19">
+        <Hit iHit="0" iPhi="1129"/>
+      </Layer>
+      <Layer iLayer="20">
+        <Hit iHit="0" iPhi="1133"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="2">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="1198"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="3" OMTFpt="25" OMTFvalue="68" iEvent="3">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="3545"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="3548"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3549"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="3542"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="3546"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="3546"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="3550"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="3" OMTFpt="25" OMTFvalue="66" iEvent="4">
+    <bx iBx="4294967295">
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3936"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="3939"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="3930"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="3937"/>
+      </Layer>
+      <Layer iLayer="23">
+        <Hit iHit="0" iPhi="3939"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="4" OMTFpt="25" OMTFvalue="65" iEvent="5">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="825"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="827"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="828"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="824"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="824"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="828"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="830"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="3" OMTFpt="25" OMTFvalue="60" iEvent="6">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="525"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="530"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="533"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="527"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="528"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="531"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="531"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="7">
+    <bx iBx="4294967295">
+      <Layer iLayer="2">
+        <Hit iHit="0" iPhi="2258"/>
+      </Layer>
+      <Layer iLayer="4">
+        <Hit iHit="0" iPhi="2266"/>
+      </Layer>
+      <Layer iLayer="6">
+        <Hit iHit="0" iPhi="2269"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="8">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="3517"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3519"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="3520"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="3519"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="3516"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="3519"/>
+      </Layer>
+      <Layer iLayer="23">
+        <Hit iHit="0" iPhi="3519"/>
+      </Layer>
+      <Layer iLayer="24">
+        <Hit iHit="0" iPhi="3518"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="9">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="1874"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="1876"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="1876"/>
+        <Hit iHit="1" iPhi="1876"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="1877"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="1875"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="1872"/>
+      </Layer>
+      <Layer iLayer="23">
+        <Hit iHit="0" iPhi="1875"/>
+      </Layer>
+      <Layer iLayer="24">
+        <Hit iHit="0" iPhi="1873"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="10">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="97"/>
+      </Layer>
+      <Layer iLayer="4">
+        <Hit iHit="0" iPhi="106"/>
+      </Layer>
+      <Layer iLayer="6">
+        <Hit iHit="0" iPhi="108"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="11">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="75"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="4058"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="4058"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="4058"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="12">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="2720"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="2728"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="2729"/>
+      </Layer>
+      <Layer iLayer="23">
+        <Hit iHit="0" iPhi="2728"/>
+      </Layer>
+      <Layer iLayer="24">
+        <Hit iHit="0" iPhi="2728"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="13">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="3761"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3767"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="3767"/>
+      </Layer>
+      <Layer iLayer="24">
+        <Hit iHit="0" iPhi="3767"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="14">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="123"/>
+      </Layer>
+      <Layer iLayer="4">
+        <Hit iHit="0" iPhi="132"/>
+      </Layer>
+      <Layer iLayer="6">
+        <Hit iHit="0" iPhi="134"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="15">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="1342"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="1230"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="1232"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="1232"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="16">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="1794"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="1726"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="1727"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="1728"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="17">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="2736"/>
+      </Layer>
+      <Layer iLayer="2">
+        <Hit iHit="0" iPhi="2741"/>
+      </Layer>
+      <Layer iLayer="4">
+        <Hit iHit="0" iPhi="2745"/>
+      </Layer>
+      <Layer iLayer="6">
+        <Hit iHit="0" iPhi="2746"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="4" OMTFpt="25" OMTFvalue="107" iEvent="18">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="3833"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="3836"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3837"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="3831"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="3834"/>
+      </Layer>
+      <Layer iLayer="18">
+        <Hit iHit="0" iPhi="3833"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="3839"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="3836"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="19">
+    <bx iBx="4294967295">
+      <Layer iLayer="2">
+        <Hit iHit="0" iPhi="1439"/>
+      </Layer>
+      <Layer iLayer="4">
+        <Hit iHit="0" iPhi="1443"/>
+      </Layer>
+      <Layer iLayer="18">
+        <Hit iHit="0" iPhi="1439"/>
+      </Layer>
+      <Layer iLayer="20">
+        <Hit iHit="0" iPhi="1441"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="20">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="2324"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="2327"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="2328"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="2328"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="2323"/>
+      </Layer>
+      <Layer iLayer="23">
+        <Hit iHit="0" iPhi="2327"/>
+      </Layer>
+      <Layer iLayer="24">
+        <Hit iHit="0" iPhi="2327"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="-1" OMTFpt="-1" OMTFvalue="-999" iEvent="21">
+    <bx iBx="4294967295">
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="273"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="274"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="275"/>
+      </Layer>
+      <Layer iLayer="14">
+        <Hit iHit="0" iPhi="275"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="272"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="275"/>
+      </Layer>
+      <Layer iLayer="23">
+        <Hit iHit="0" iPhi="275"/>
+      </Layer>
+      <Layer iLayer="24">
+        <Hit iHit="0" iPhi="275"/>
+      </Layer>
+    </bx>
+  </Event>
+
+</OMTF_Events>

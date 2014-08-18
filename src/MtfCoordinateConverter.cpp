@@ -81,10 +81,9 @@ int  MtfCoordinateConverter::convert(std::pair<uint32_t,  unsigned int > aData, 
   
   while  (phi < 0) { phi+=2*M_PI; }
   while  (phi > 2*M_PI) { phi-=2*M_PI; }
-  
-  //int nDivisions = GoldenPattern::Key::nPhi;
+ 
   int iPhi =  floor(phi * nDivisions/(2*M_PI));
-  if(iPhi>nDivisions/2.0) iPhi-=nDivisions;
+  //if(iPhi>nDivisions/2.0) iPhi-=nDivisions;
 
   return iPhi;
 }
@@ -202,7 +201,10 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
   uint32_t aLayer = 0;
   
   DetId detId(rawId);
-  if (detId.det() != DetId::Muon) std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
+  if (detId.det() != DetId::Muon){
+    std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
+    return rawId;
+  }
 
 
   switch (detId.subdetId()) {
@@ -239,7 +241,10 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
   int hwNumber = aLayer+100*detId.subdetId();
   if(PatternManager::hwToLogicLayer.find(hwNumber)==PatternManager::hwToLogicLayer.end()){
     std::cout<<"Problem with hwNumber: "<<hwNumber<<std::endl;
-    exit(0);
+    //RPCDetId aId(rawId);
+    //std::cout<<aId<<std::endl;
+    return 99;
+    //exit(0);
   }
 
   return PatternManager::hwToLogicLayer[hwNumber];
