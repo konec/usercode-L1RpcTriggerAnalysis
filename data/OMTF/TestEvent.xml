@@ -1,0 +1,173 @@
+
+<OMTF_Events>
+
+  <Event OMTFnHits="3" OMTFpt="25" OMTFvalue="68" iEvent="3">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="3545"/>
+      </Layer>
+      <Layer iLayer="1">
+        <Hit iHit="0" iPhi="17"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="3548"/>
+      </Layer>
+      <Layer iLayer="9">
+        <Hit iHit="0" iPhi="10"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3549"/>
+      </Layer>
+      <Layer iLayer="11">
+        <Hit iHit="0" iPhi="10"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="3542"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="3546"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="3546"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="3550"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="3" OMTFpt="25" OMTFvalue="66" iEvent="4">
+    <bx iBx="4294967295">
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3936"/>
+      </Layer>
+      <Layer iLayer="11">
+        <Hit iHit="0" iPhi="10"/>
+      </Layer>
+      <Layer iLayer="12">
+        <Hit iHit="0" iPhi="3939"/>
+      </Layer>
+      <Layer iLayer="13">
+        <Hit iHit="0" iPhi="8"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="3930"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="3937"/>
+      </Layer>
+      <Layer iLayer="23">
+        <Hit iHit="0" iPhi="3939"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="4" OMTFpt="25" OMTFvalue="65" iEvent="5">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="825"/>
+      </Layer>
+      <Layer iLayer="1">
+        <Hit iHit="0" iPhi="14"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="827"/>
+      </Layer>
+      <Layer iLayer="9">
+        <Hit iHit="0" iPhi="10"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="828"/>
+      </Layer>
+      <Layer iLayer="11">
+        <Hit iHit="0" iPhi="9"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="824"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="824"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="828"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="830"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="3" OMTFpt="25" OMTFvalue="60" iEvent="6">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="525"/>
+      </Layer>
+      <Layer iLayer="1">
+        <Hit iHit="0" iPhi="-73"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="530"/>
+      </Layer>
+      <Layer iLayer="9">
+        <Hit iHit="0" iPhi="10"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="533"/>
+      </Layer>
+      <Layer iLayer="11">
+        <Hit iHit="0" iPhi="10"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="527"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="528"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="531"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="531"/>
+      </Layer>
+    </bx>
+  </Event>
+
+  <Event OMTFnHits="4" OMTFpt="25" OMTFvalue="107" iEvent="18">
+    <bx iBx="4294967295">
+      <Layer iLayer="0">
+        <Hit iHit="0" iPhi="3833"/>
+      </Layer>
+      <Layer iLayer="1">
+        <Hit iHit="0" iPhi="15"/>
+      </Layer>
+      <Layer iLayer="8">
+        <Hit iHit="0" iPhi="3836"/>
+      </Layer>
+      <Layer iLayer="9">
+        <Hit iHit="0" iPhi="9"/>
+      </Layer>
+      <Layer iLayer="10">
+        <Hit iHit="0" iPhi="3837"/>
+      </Layer>
+      <Layer iLayer="11">
+        <Hit iHit="0" iPhi="10"/>
+      </Layer>
+      <Layer iLayer="16">
+        <Hit iHit="0" iPhi="3831"/>
+      </Layer>
+      <Layer iLayer="17">
+        <Hit iHit="0" iPhi="3834"/>
+      </Layer>
+      <Layer iLayer="18">
+        <Hit iHit="0" iPhi="3833"/>
+      </Layer>
+      <Layer iLayer="21">
+        <Hit iHit="0" iPhi="3839"/>
+      </Layer>
+      <Layer iLayer="22">
+        <Hit iHit="0" iPhi="3836"/>
+      </Layer>
+    </bx>
+  </Event>
+
+</OMTF_Events>
