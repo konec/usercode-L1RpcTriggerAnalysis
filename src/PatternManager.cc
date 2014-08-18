@@ -99,7 +99,7 @@ PatternManager::~PatternManager(){
       std::cout <<" GP: "<< *gp << std::endl;
       gp->plot();
       writeXML("Patterns.xml");      
-      std::string fname = "TestEvent.xml";
+      std::string fname = "TestEvents.xml";
       XMLFormatTarget* formTarget = new LocalFileFormatTarget(fname.c_str());
       xercesc::DOMWriter* domWriter = (dynamic_cast<DOMImplementation*>(domImpl))->createDOMWriter();
       domWriter->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true);
