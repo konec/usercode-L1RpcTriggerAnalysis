@@ -74,7 +74,7 @@ void AnaSynch::beginRun(const edm::Run&, const edm::EventSetup& es)
 {
   edm::ESTransientHandle<RPCEMap> readoutMapping;
   es.get<RPCEMapRcd>().get(readoutMapping);
-  RPCReadOutMapping * cabling = readoutMapping->convert();
+  const RPCReadOutMapping * cabling = readoutMapping->convert();
   std::cout <<" INITIALISING READOUT MAP, version: "<< cabling->version() << std::endl;
   theSynchroStat.init(cabling, true); // second for use of DetNames
   delete cabling;

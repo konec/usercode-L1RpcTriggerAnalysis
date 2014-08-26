@@ -22,7 +22,7 @@ public:
 private:
   edm::ParameterSet theAnaConfig;
   edm::ESWatcher<RPCEMapRcd> theMapWatcher;
-  RPCReadOutMapping * theCabling;
+  const RPCReadOutMapping * theCabling;
   TObjArray theHistos; 
   unsigned int theEventCounter;
   unsigned int theRPCCounter;
