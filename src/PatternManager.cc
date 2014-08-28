@@ -297,9 +297,9 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
     std::cout<<theGPs[bestKey]<<std::endl;   
-    //int nPhi = GoldenPattern::Key::nPhi(bestKey.theDet);
+    int nPhi = GoldenPattern::Key::nPhi(bestKey.theDet);
     //myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);
-    //pattern.print(myPhiConverter,nPhi);	
+    pattern.print(myPhiConverter,nPhi);	
     std::cout<<"-----------------"<<std::endl;
 
     for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
@@ -308,7 +308,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	int nPhi = GoldenPattern::Key::nPhi(it.first);
 	myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
 	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
-	if(result.nMatchedTot()>4 && igps->first.thePtCode==19){
+	if(result.nMatchedTot()>2 && igps->first.thePtCode==19){
 	  //if(result.nMatchedTot()>=bestMatching.nMatchedTot() && igps->first.theDet%1000/100<3 && igps->first.thePtCode>10){
 	  //if(igps->first.thePtCode==19){
 	    std::cout<<igps->first<<" "<<result<<" better? "<<(bestMatching<result)<<std::endl;
@@ -384,9 +384,9 @@ void PatternManager::beginJob()
     tree->GetEntry(i);
 
     if(entry.key_strip<5E3) continue;
-    //if(entry.key_det!=3101) continue;
+    //if(entry.key_det!=0) continue;
     //if(entry.key_ch!=1) continue;
-    //if(entry.key_pt!=5) continue;
+    //if(entry.key_pt!=12) continue;
     //if(entry.key_eta!=1) continue;
 
     GoldenPattern::Key key;

@@ -41,8 +41,8 @@ void GoldenPattern::Result::runNoCheck() const {
   unsigned int nTot = 0;
   for(auto it=nMatchedPoints.cbegin();it!=nMatchedPoints.cend();++it) nTot+=it->second;    
   
-  //theValue = ( nTot > 3) ? fract : pow(2,nBitsVal);  
-  theValue = ( nTot > 0) ? fract : pow(2,nBitsVal);  
+  //theValue = ( nTot > 3) ? fract : 0;  
+  theValue = ( nTot > 0) ? fract : 0;  
 
 }
 ////////////////////////////////////////////////////
@@ -330,7 +330,7 @@ float GoldenPattern::whereInDistribution(PosBenCase mType, uint32_t rawId, int p
 
   int meanDistPhi = 0;   
 
-  float freqInt = pow(2,nBitsVal);
+  float freqInt = 0.0;
   auto detsMap = PattCoreIntegrated.find(mType);
   if(detsMap!=PattCoreIntegrated.cend()){
     auto freqMap = detsMap->second.find(rawId);

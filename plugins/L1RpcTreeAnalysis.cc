@@ -169,8 +169,9 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   Int_t nentries= (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
-  nentries = 21;
-  //nentries = 5E5;
+  //nentries = 21;
+  nentries = 5E4;
+  //nentries = 1E6;
 
   //
   // main loop
