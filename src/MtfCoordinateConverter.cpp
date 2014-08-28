@@ -83,7 +83,7 @@ int  MtfCoordinateConverter::convert(std::pair<uint32_t,  unsigned int > aData, 
   while  (phi > 2*M_PI) { phi-=2*M_PI; }
  
   int iPhi =  floor(phi * nDivisions/(2*M_PI));
-  //if(iPhi>nDivisions/2.0) iPhi-=nDivisions;
+  if(iPhi>nDivisions/2.0) iPhi-=nDivisions;
 
   return iPhi;
 }

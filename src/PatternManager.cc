@@ -96,8 +96,8 @@ PatternManager::~PatternManager(){
 	   im = theGPs.begin(); im!= theGPs.end(); ++im) {
       GoldenPattern *gp =  const_cast<GoldenPattern*>(&(*im).second);      
       gp->makeIntegratedCache();      
-      std::cout <<" GP: "<< *gp << std::endl;
-      gp->plot();
+      //std::cout <<" GP: "<< *gp << std::endl;
+      //gp->plot();
       writeXML("Patterns.xml");      
       std::string fname = "TestEvents.xml";
       XMLFormatTarget* formTarget = new LocalFileFormatTarget(fname.c_str());
@@ -292,7 +292,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
 
-  if (bestMatching) {
+  if (false && bestMatching) {
     ////////////DEBUG
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
@@ -338,8 +338,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     std::ostringstream stringStr;
     int nPhi = 4096;
     myPhiConverter->setReferencePhi(0);
-    pattern.print(myPhiConverter,nPhi);
-    std::cout<<bestMatching<<std::endl;
+    //pattern.print(myPhiConverter,nPhi);
+    //std::cout<<bestMatching<<std::endl;
 
     xercesc::DOMElement *aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
     stringStr.str("");
@@ -367,9 +367,6 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     theTopElement->appendChild(aEvent);
   }
   //////////////////
-
-  std::cout<<"Here 0"<<std::endl;
-
   return candidate;
 }
 /////////////////////////////////////////////////////////////////////////
@@ -496,9 +493,9 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
   int nRefLayers = 8;
 
   for(int iPtCode=31;iPtCode>0;--iPtCode){
-    if(iPtCode!=19) continue;
+    //if(iPtCode!=10) continue;
     for(int iCharge=-1;iCharge<2;++++iCharge){     
-      if(iCharge!=-1) continue;
+      if(iCharge!=1) continue;
       std::vector<std::vector<int> > meanDistPhiVec;
       std::vector<std::vector<int> > selDistPhiVec;
       std::vector<std::vector<int> > pdf;
