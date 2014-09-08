@@ -242,7 +242,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   GoldenPattern::Key    bestKey;
 
  ///////Dump to XML
-  xercesc::DOMElement *aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
+  xercesc::DOMElement *aEvent = 0;
   xercesc::DOMElement* aGP = 0;
 
   if (theConfig.getUntrackedParameter<bool>("dump",false)){
@@ -252,6 +252,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     //pattern.print(myPhiConverter,nPhi);
     //std::cout<<bestMatching<<std::endl;
     
+    aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
+
     stringStr.str("");
     stringStr<<ev->id;
     aEvent->setAttribute(qtxml::_toDOMS("iEvent"), qtxml::_toDOMS(stringStr.str()));
@@ -395,7 +397,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
 
-  if (bestMatching) {
+  if (false && bestMatching) {
     ////////////DEBUG
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
@@ -472,14 +474,8 @@ void PatternManager::beginJob()
     tree->GetEntry(i);
 
     if(entry.key_strip<5E3) continue;
-    //if(entry.key_det!=3101) continue;
-    //if(entry.key_ch!=1) continue;
-    if(entry.key_pt>20 || entry.key_pt<16) continue;
-
-    //if(entry.key_pt!=20) continue;
-
-    //if(entry.key_eta!=1) continue;
-
+    //if(entry.key_pt>20 || entry.key_pt<16) continue;
+    
     bool skipLayer = true;
     for(auto aRef : refToLogicNumber){
       if(aRef==(int)entry.key_det){
@@ -488,7 +484,7 @@ void PatternManager::beginJob()
       }
     }
     if(skipLayer) continue;    
-
+    
     GoldenPattern::Key key;
     key.theDet =     entry.key_det;
     key.thePtCode =  entry.key_pt;
