@@ -114,17 +114,20 @@ public:
       }
       return false;
     }
+
+    ///Those were private
+    float norm(PosBenCase where, float whereInDist) const;
+    mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, float > > > myResults;
   private:
     void run() const { if (checkMe) {checkMe=false; runNoCheck(); } }
     void runNoCheck() const;
-    float norm(PosBenCase where, float whereInDist) const;
   private:
     mutable bool checkMe; 
     mutable float theValue;
     mutable std::map<GoldenPattern::PosBenCase, unsigned int> nMatchedPoints;
    
     bool hasStation1, hasStation2, hasStation3, hasRefStation;
-    mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, float > > > myResults;
+
     friend std::ostream & operator << (std::ostream &out, const Result& o); 
     friend class GoldenPattern; 
   };

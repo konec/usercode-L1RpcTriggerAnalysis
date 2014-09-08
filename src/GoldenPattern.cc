@@ -101,7 +101,15 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern::Result& o)
     out<<o.nMatchedPoints[cit->first]<<"/"<<cit->second.size()<<", ";
   }
   out <<"tot:"<<o.nMatchedTot()<<")";
-  
+  out<<std::endl;
+
+  out<<"Pdfs in layers: ";
+  for(auto mType=o.myResults.cbegin();mType!=o.myResults.cend();++mType){    
+    for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
+      out<<"iLayer: "<<it->first<<" val: "<<it->second;
+    }
+  }
+
   return out;
 }
 //////////////////////////////////////////////////
@@ -238,12 +246,15 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	mType = GoldenPattern::LAYER;
 	cit = PattCoreIntegrated.find(mType);
 	if(cit==PattCoreIntegrated.cend()) continue;
-	idm = cit->second.find(1000+myPhiConverter->getLayerNumber(rawId));
+	idm = cit->second.find(myPhiConverter->getLayerNumber(rawId)+1);
 	if (idm != cit->second.cend() ) {
-	  fBen = whereInDistribution(mType, 1000+myPhiConverter->getLayerNumber(rawId), digi.phiB());
+	  fBen = whereInDistribution(mType, 
+				     myPhiConverter->getLayerNumber(rawId)+1, 
+				     digi.phiB());
 	  //std::cout<<digi<<" DT bend f: "<<fBen<<std::endl;
 	}
-	if(fPos+fBen>fMax && fBen>0 && fPos>0){
+	fBen = 0; //////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+	if(fPos+fBen>fMax && fBen>-10 && fPos>0){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos+fBen;
 	}
@@ -273,16 +284,15 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 	mType = GoldenPattern::LAYER;	
 	cit = PattCoreIntegrated.find(mType);
 	if(cit==PattCoreIntegrated.cend()) continue;
-	idm = cit->second.find(1000+myPhiConverter->getLayerNumber(rawId));
+	idm = cit->second.find(myPhiConverter->getLayerNumber(rawId)+1);
 	if (idm != cit->second.cend() ) {
 	  fBen = whereInDistribution(mType,
-				     1000+myPhiConverter->getLayerNumber(rawId), 
+				     myPhiConverter->getLayerNumber(rawId)+1, 
 				     digi.pattern());
-	  //std::cout<<digi<<" CSC bend: "<<digi.pattern()
-	  // <<" f: "<<fBen<<std::endl;
+	  //std::cout<<digi<<" CSC bend: "<<digi.pattern()<<" f: "<<fBen<<std::endl;
 	}        	
-	//fBen = 0;
-	if(fPos+fBen>fMax && fBen>0 && fPos>0){
+	fBen = 0; //////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+	if(fPos+fBen>fMax && fBen>-10 && fPos>0){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos+fBen;
 	}

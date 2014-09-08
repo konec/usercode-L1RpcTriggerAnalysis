@@ -10,7 +10,7 @@
 <LayerMap hwNumber = "201" logicNumber = "8"/>
 <LayerMap hwNumber = "1201" logicNumber = "9"/>
 <LayerMap hwNumber = "202" logicNumber = "10"/>
-<LayerMap hwNumber = "1202" logicNumber = "11"/>
+<LayerMap hwNumber = "1202" logicNumber = "11"/> 
 <LayerMap hwNumber = "203" logicNumber = "12"/>
 <LayerMap hwNumber = "1203" logicNumber = "13"/>
 <LayerMap hwNumber = "204" logicNumber = "14"/>
@@ -31,8 +31,10 @@
 <RefLayerMap refLayer="3" logicNumber ="8"/>
 <RefLayerMap refLayer="4" logicNumber ="10"/>
 <RefLayerMap refLayer="5" logicNumber ="16"/>
+<!--
 <RefLayerMap refLayer="6" logicNumber ="17"/>
 <RefLayerMap refLayer="7" logicNumber ="20"/>
+-->
 </OMTF>
 
 

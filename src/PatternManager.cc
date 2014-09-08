@@ -241,6 +241,32 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   GoldenPattern::Result bestMatching;
   GoldenPattern::Key    bestKey;
 
+ ///////Dump to XML
+  xercesc::DOMElement *aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
+  xercesc::DOMElement* aGP = 0;
+
+  if (theConfig.getUntrackedParameter<bool>("dump",false)){
+    std::ostringstream stringStr;
+    int nPhi = 4096;
+    myPhiConverter->setReferencePhi(0);
+    //pattern.print(myPhiConverter,nPhi);
+    //std::cout<<bestMatching<<std::endl;
+    
+    stringStr.str("");
+    stringStr<<ev->id;
+    aEvent->setAttribute(qtxml::_toDOMS("iEvent"), qtxml::_toDOMS(stringStr.str()));
+    xercesc::DOMElement *aBx = theDoc->createElement(qtxml::_toDOMS("bx"));
+    stringStr.str("");
+    stringStr<<ev->bx;
+    aBx->setAttribute(qtxml::_toDOMS("iBx"), qtxml::_toDOMS(stringStr.str()));
+    aEvent->appendChild(aBx);
+    
+    pattern.dumpToXML(theDoc,aBx,
+    		      myPhiConverter,nPhi);        
+    
+    theTopElement->appendChild(aEvent);
+  }
+
   ///High precision chambers first
   for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {    
     if(igps->first.theDet>15) continue;
@@ -248,13 +274,55 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     if(igps->first.theEtaCode!=theEtaCode) continue;
     ////
     igps->second.makeIntegratedCache();
+    /// Dump intermediate resutls to XML
+    if (theConfig.getUntrackedParameter<bool>("dump",false)){
+      aGP = theDoc->createElement(qtxml::_toDOMS("GP"));
+      std::ostringstream stringStr;
+      stringStr.str("");
+      stringStr<<igps->first.thePtCode;
+      aGP->setAttribute(qtxml::_toDOMS("iPt"), qtxml::_toDOMS(stringStr.str()));
+      stringStr.str("");
+      stringStr<<igps->first.theEtaCode;
+      aGP->setAttribute(qtxml::_toDOMS("iEta"), qtxml::_toDOMS(stringStr.str()));
+      stringStr.str("");
+      stringStr<<"0";
+      aGP->setAttribute(qtxml::_toDOMS("iPhi"), qtxml::_toDOMS(stringStr.str()));
+      stringStr.str("");
+      stringStr<<igps->first.theCharge;
+      aGP->setAttribute(qtxml::_toDOMS("iCharge"), qtxml::_toDOMS(stringStr.str()));
+    }
 
     for (auto const & it : refPhi){
       if(igps->first.theDet!=it.first) continue;     
+      if (theConfig.getUntrackedParameter<bool>("dump",false)) aEvent->appendChild(aGP);
       int nPhi = GoldenPattern::Key::nPhi(it.first);
       myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
       GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
-      ////////////////////
+      /// Dump intermediate resutls to XML
+      if (theConfig.getUntrackedParameter<bool>("dump",false)){
+	xercesc::DOMElement* aResult = theDoc->createElement(qtxml::_toDOMS("Result"));
+	std::ostringstream stringStr;
+	stringStr.str("");
+	stringStr<<igps->first.theDet;
+	aResult->setAttribute(qtxml::_toDOMS("iRefLayer"), qtxml::_toDOMS(stringStr.str()));
+	for(auto mType=result.myResults.cbegin();mType!=result.myResults.cend();++mType){    
+	  for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
+	    float val = it->second;
+	    xercesc::DOMElement* aLayer = theDoc->createElement(qtxml::_toDOMS("Layer"));
+	    stringStr.str("");
+	    stringStr<<myPhiConverter->getLayerNumber(it->first);
+	    aLayer->setAttribute(qtxml::_toDOMS("iLayer"), qtxml::_toDOMS(stringStr.str()));
+	    stringStr.str("");
+	    stringStr<<val;
+	    aLayer->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
+	    aResult->appendChild(aLayer);
+	  }
+	}
+	aGP->appendChild(aResult);
+	std::cout<<result<<std::endl;
+      }
+      ////////////////////////////////////
+      ////////////////////////////////////
       //if((theEtaCode==2 || theEtaCode==3) && result.value()<-8) result = GoldenPattern::Result();
       ////////////////////
       if (bestMatching < result) {
@@ -272,16 +340,51 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
       ////
       if(igps->first.theEtaCode!=theEtaCode) continue;
       ////
+      /// Dump intermediate resutls to XML
+      if (theConfig.getUntrackedParameter<bool>("dump",false)){
+	aGP = theDoc->createElement(qtxml::_toDOMS("GP"));
+	std::ostringstream stringStr;
+	stringStr.str("");
+	stringStr<<igps->first.thePtCode;
+	aGP->setAttribute(qtxml::_toDOMS("iPt"), qtxml::_toDOMS(stringStr.str()));
+	stringStr.str("");
+	stringStr<<igps->first.theEtaCode;
+	aGP->setAttribute(qtxml::_toDOMS("iEta"), qtxml::_toDOMS(stringStr.str()));
+	stringStr.str("");
+	stringStr<<"0";
+	aGP->setAttribute(qtxml::_toDOMS("iPhi"), qtxml::_toDOMS(stringStr.str()));
+	stringStr.str("");
+	stringStr<<igps->first.theCharge;
+	aGP->setAttribute(qtxml::_toDOMS("iCharge"), qtxml::_toDOMS(stringStr.str()));
+      }
       for (auto const & it : refPhi){  
 	if(igps->first.theDet<16) continue;     
-	if(igps->first.theDet!=it.first) continue;     
+	if(igps->first.theDet!=it.first) continue;  
+	if (theConfig.getUntrackedParameter<bool>("dump",false)) aEvent->appendChild(aGP);   
 	int nPhi = GoldenPattern::Key::nPhi(it.first);
 	myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);	  
 	GoldenPattern::Result result =  igps->second.compare(pattern,myPhiConverter);
 	////////////////////
 	//if((theEtaCode==2 || theEtaCode==3) && result.value()<-8) result = GoldenPattern::Result();
 	////////////////////
-	
+	////
+	/// Dump intermediate resutls to XML
+	if (theConfig.getUntrackedParameter<bool>("dump",false)){
+	aGP = theDoc->createElement(qtxml::_toDOMS("GP"));
+	std::ostringstream stringStr;
+	stringStr.str("");
+	stringStr<<igps->first.thePtCode;
+	aGP->setAttribute(qtxml::_toDOMS("iPt"), qtxml::_toDOMS(stringStr.str()));
+	stringStr.str("");
+	stringStr<<igps->first.theEtaCode;
+	aGP->setAttribute(qtxml::_toDOMS("iEta"), qtxml::_toDOMS(stringStr.str()));
+	stringStr.str("");
+	stringStr<<"0";
+	aGP->setAttribute(qtxml::_toDOMS("iPhi"), qtxml::_toDOMS(stringStr.str()));
+	stringStr.str("");
+	stringStr<<igps->first.theCharge;
+	aGP->setAttribute(qtxml::_toDOMS("iCharge"), qtxml::_toDOMS(stringStr.str()));
+      }
 	if (bestMatching < result) {
 	  bestMatching = result;
 	  bestKey =  igps->first;
@@ -292,14 +395,14 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
 
-  if (false && bestMatching) {
+  if (bestMatching) {
     ////////////DEBUG
     std::cout<<"eta: "<<simu->eta()<<" phi: "<<hitSpec->position().phi()<<std::endl;
     std::cout<<"Best match: "<<bestKey<<" "<<bestMatching<<std::endl;
     std::cout<<theGPs[bestKey]<<std::endl;   
-    //int nPhi = GoldenPattern::Key::nPhi(bestKey.theDet);
+    int nPhi = GoldenPattern::Key::nPhi(bestKey.theDet);
     //myPhiConverter->setReferencePhi((float)it.second/nPhi*2*M_PI);
-    //pattern.print(myPhiConverter,nPhi);	
+    pattern.print(myPhiConverter,nPhi);	
     std::cout<<"-----------------"<<std::endl;
 
     for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
@@ -332,40 +435,25 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     candidate.type = L1Obj::OTF;
   }
 
-
-  ///////Dump to XML
+  /// Dump intermediate resutls to XML
   if (theConfig.getUntrackedParameter<bool>("dump",false)){
+    xercesc::DOMElement* aResult = theDoc->createElement(qtxml::_toDOMS("FinalResult"));
     std::ostringstream stringStr;
-    int nPhi = 4096;
-    myPhiConverter->setReferencePhi(0);
-    //pattern.print(myPhiConverter,nPhi);
-    //std::cout<<bestMatching<<std::endl;
-
-    xercesc::DOMElement *aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
     stringStr.str("");
-    stringStr<<ev->id;
-    aEvent->setAttribute(qtxml::_toDOMS("iEvent"), qtxml::_toDOMS(stringStr.str()));
+    stringStr<<bestKey.thePtCode;
+    aResult->setAttribute(qtxml::_toDOMS("OMTFpt"), qtxml::_toDOMS(stringStr.str()));
     stringStr.str("");
-    stringStr<<candidate.pt;
-    aEvent->setAttribute(qtxml::_toDOMS("OMTFpt"), qtxml::_toDOMS(stringStr.str()));
+    stringStr<<candidate.charge;
+    aResult->setAttribute(qtxml::_toDOMS("OMTFcharge"), qtxml::_toDOMS(stringStr.str()));
     stringStr.str("");
     stringStr<<candidate.q%100;
-    aEvent->setAttribute(qtxml::_toDOMS("OMTFnHits"), qtxml::_toDOMS(stringStr.str()));
+    aResult->setAttribute(qtxml::_toDOMS("OMTFnHits"), qtxml::_toDOMS(stringStr.str()));
     stringStr.str("");
     stringStr<<candidate.disc;
-    aEvent->setAttribute(qtxml::_toDOMS("OMTFvalue"), qtxml::_toDOMS(stringStr.str()));
-
-    xercesc::DOMElement *aBx = theDoc->createElement(qtxml::_toDOMS("bx"));
-    stringStr.str("");
-    stringStr<<ev->bx;
-    aBx->setAttribute(qtxml::_toDOMS("iBx"), qtxml::_toDOMS(stringStr.str()));
-    aEvent->appendChild(aBx);
-    
-    pattern.dumpToXML(theDoc,aBx,
-    		      myPhiConverter,nPhi);        
-    
-    theTopElement->appendChild(aEvent);
+    aResult->setAttribute(qtxml::_toDOMS("OMTFvalue"), qtxml::_toDOMS(stringStr.str()));
+    aEvent->appendChild(aResult);
   }
+
   //////////////////
   return candidate;
 }
@@ -386,8 +474,20 @@ void PatternManager::beginJob()
     if(entry.key_strip<5E3) continue;
     //if(entry.key_det!=3101) continue;
     //if(entry.key_ch!=1) continue;
-    //if(entry.key_pt!=5) continue;
+    if(entry.key_pt>20 || entry.key_pt<11) continue;
+
+    //if(entry.key_pt!=20) continue;
+
     //if(entry.key_eta!=1) continue;
+
+    bool skipLayer = true;
+    for(auto aRef : refToLogicNumber){
+      if(aRef==(int)entry.key_det){
+	skipLayer = false;
+	break;
+      }
+    }
+    if(skipLayer) continue;    
 
     GoldenPattern::Key key;
     key.theDet =     entry.key_det;
@@ -492,10 +592,11 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
   int iPhiCode = 0;
   int nRefLayers = 8;
 
-  for(int iPtCode=31;iPtCode>0;--iPtCode){
+  //for(int iPtCode=31;iPtCode>0;--iPtCode){
+  for(int iPtCode=20;iPtCode>10;--iPtCode){
     //if(iPtCode!=10) continue;
     for(int iCharge=-1;iCharge<2;++++iCharge){     
-      if(iCharge!=1) continue;
+      if(iCharge!=-1) continue;
       std::vector<std::vector<int> > meanDistPhiVec;
       std::vector<std::vector<int> > selDistPhiVec;
       std::vector<std::vector<int> > pdf;
