@@ -474,7 +474,7 @@ void PatternManager::beginJob()
     if(entry.key_strip<5E3) continue;
     //if(entry.key_det!=3101) continue;
     //if(entry.key_ch!=1) continue;
-    if(entry.key_pt>20 || entry.key_pt<11) continue;
+    if(entry.key_pt>20 || entry.key_pt<16) continue;
 
     //if(entry.key_pt!=20) continue;
 
@@ -593,10 +593,10 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
   int nRefLayers = 8;
 
   //for(int iPtCode=31;iPtCode>0;--iPtCode){
-  for(int iPtCode=20;iPtCode>10;--iPtCode){
+  for(int iPtCode=20;iPtCode>15;--iPtCode){
     //if(iPtCode!=10) continue;
     for(int iCharge=-1;iCharge<2;++++iCharge){     
-      if(iCharge!=-1) continue;
+      if(iCharge!=1) continue;
       std::vector<std::vector<int> > meanDistPhiVec;
       std::vector<std::vector<int> > selDistPhiVec;
       std::vector<std::vector<int> > pdf;
