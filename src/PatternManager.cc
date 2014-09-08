@@ -248,10 +248,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
   if (theConfig.getUntrackedParameter<bool>("dump",false)){
     std::ostringstream stringStr;
     int nPhi = 4096;
-    myPhiConverter->setReferencePhi(0);
-    //pattern.print(myPhiConverter,nPhi);
-    //std::cout<<bestMatching<<std::endl;
-    
+    myPhiConverter->setReferencePhi(0);    
     aEvent = theDoc->createElement(qtxml::_toDOMS("Event"));
 
     stringStr.str("");
@@ -259,7 +256,8 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     aEvent->setAttribute(qtxml::_toDOMS("iEvent"), qtxml::_toDOMS(stringStr.str()));
     xercesc::DOMElement *aBx = theDoc->createElement(qtxml::_toDOMS("bx"));
     stringStr.str("");
-    stringStr<<ev->bx;
+    //stringStr<<ev->bx;
+    stringStr<<4;
     aBx->setAttribute(qtxml::_toDOMS("iBx"), qtxml::_toDOMS(stringStr.str()));
     aEvent->appendChild(aBx);
     
@@ -306,6 +304,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 	std::ostringstream stringStr;
 	stringStr.str("");
 	stringStr<<igps->first.theDet;
+	std::cout<<" iRefLayer: "<<stringStr.str()<<std::endl;
 	aResult->setAttribute(qtxml::_toDOMS("iRefLayer"), qtxml::_toDOMS(stringStr.str()));
 	for(auto mType=result.myResults.cbegin();mType!=result.myResults.cend();++mType){    
 	  for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
