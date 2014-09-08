@@ -57,6 +57,10 @@ private:
   void readXMLConfig(std::string fName);
 
   void writeXML(std::string fname);
+
+  void writeGlobalData(xercesc::DOMDocument* theDoc, 
+		       xercesc::DOMElement* theTopElement);
+  
   void dumpPatternsXML(xercesc::DOMDocument* theDoc, 
 		       xercesc::DOMElement* theTopElement);
 

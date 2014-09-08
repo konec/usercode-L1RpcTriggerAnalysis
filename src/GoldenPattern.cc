@@ -106,7 +106,7 @@ std::ostream & operator << (std::ostream &out, const GoldenPattern::Result& o)
   out<<"Pdfs in layers: ";
   for(auto mType=o.myResults.cbegin();mType!=o.myResults.cend();++mType){    
     for (auto it=mType->second.cbegin(); it!=mType->second.cend();++it){
-      out<<"iLayer: "<<it->first<<" val: "<<it->second;
+      out<<" val: "<<it->second;
     }
   }
 
@@ -253,8 +253,8 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 				     digi.phiB());
 	  //std::cout<<digi<<" DT bend f: "<<fBen<<std::endl;
 	}
-	//fBen = 0; //////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-	if(fPos+fBen>fMax && fBen>0 && fPos>0){
+	fBen = 0; //////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if(fPos+fBen>fMax && fBen>-10 && fPos>0){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos+fBen;
 	}
@@ -291,8 +291,8 @@ GoldenPattern::Result GoldenPattern::compare(const Pattern &p,  MtfCoordinateCon
 				     digi.pattern());
 	  //std::cout<<digi<<" CSC bend: "<<digi.pattern()<<" f: "<<fBen<<std::endl;
 	}        	
-	//fBen = 0; //////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-	if(fPos+fBen>fMax && fBen>0 && fPos>0){
+	fBen = 0; //////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+	if(fPos+fBen>fMax && fBen>-10 && fPos>0){
 	  fMax = fPos+fBen;
 	  fPosMax = fPos+fBen;
 	}

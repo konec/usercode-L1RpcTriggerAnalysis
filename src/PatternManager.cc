@@ -474,7 +474,7 @@ void PatternManager::beginJob()
     tree->GetEntry(i);
 
     if(entry.key_strip<5E3) continue;
-    //if(entry.key_pt>20 || entry.key_pt<16) continue;
+    if(entry.key_pt>20 || entry.key_pt<16) continue;
     
     bool skipLayer = true;
     for(auto aRef : refToLogicNumber){
@@ -566,6 +566,8 @@ void PatternManager::writeXML(std::string fname){
   theTopElement = theDoc->getDocumentElement();
   /////////////
 
+  writeGlobalData(theDoc, theTopElement);
+
   dumpPatternsXML(theDoc, theTopElement);
 
   /////////////
@@ -575,6 +577,24 @@ void PatternManager::writeXML(std::string fname){
   domWriter->writeNode(formTarget, *theTopElement);
   delete formTarget;
   theDoc->release(); 
+}
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+void PatternManager::writeGlobalData(xercesc::DOMDocument* theDoc, 
+				     xercesc::DOMElement* theTopElement){
+
+  std::ostringstream stringStr;
+  xercesc::DOMElement* aData=theDoc->createElement(qtxml::_toDOMS("GlobalData"));
+  stringStr.str("");
+  stringStr<<GoldenPattern::nBitsPdfAddr;
+  aData->setAttribute(qtxml::_toDOMS("nPdfAddrBits"), qtxml::_toDOMS(stringStr.str()));
+  stringStr.str("");
+  stringStr<<GoldenPattern::nBitsVal;
+  aData->setAttribute(qtxml::_toDOMS("nPdfValBits"), qtxml::_toDOMS(stringStr.str()));
+  stringStr.str("");
+  stringStr<<GoldenPattern::minP;
+  aData->setAttribute(qtxml::_toDOMS("minPdfVal"), qtxml::_toDOMS(stringStr.str()));
+  theTopElement->appendChild(aData);
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
@@ -665,7 +685,8 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 	      aBitset.set(i,selDistPhiVec[iLayer+iRefLayer*nLogicLayers][i]);
 	    }
 	    stringStr.str("");
-	    stringStr<<aBitset.to_string();
+	    //stringStr<<aBitset.to_string();
+	    stringStr<<"0";
 	    aSelDistPhi = theDoc->createElement(qtxml::_toDOMS("selDistPhi"));
 	    aSelDistPhi->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
 	    aLayer->appendChild(aSelDistPhi);
