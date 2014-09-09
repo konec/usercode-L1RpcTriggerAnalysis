@@ -30,9 +30,9 @@
 <RefLayerMap refLayer="2" logicNumber ="4"/>
 <RefLayerMap refLayer="3" logicNumber ="8"/>
 <RefLayerMap refLayer="4" logicNumber ="10"/>
-<RefLayerMap refLayer="5" logicNumber ="16"/>
-<RefLayerMap refLayer="6" logicNumber ="17"/>
-<RefLayerMap refLayer="7" logicNumber ="20"/>
+<RefLayerMap refLayer="5" logicNumber ="21"/>
+<RefLayerMap refLayer="6" logicNumber ="22"/>
+<RefLayerMap refLayer="7" logicNumber ="23"/>
 
 </OMTF>
 
