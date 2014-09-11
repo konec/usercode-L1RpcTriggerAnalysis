@@ -210,7 +210,7 @@ void Pattern::dumpToXML(xercesc::DOMDocument* theDoc,
       } 
     }
     theTopElement->appendChild(aLayer);   
-    //if(aEntry.first<16) theTopElement->appendChild(aBendLayer);   
+    if(aEntry.first<16) theTopElement->appendChild(aBendLayer);   
   }
 }
 /////////////////////////////////////////////////

@@ -257,7 +257,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     xercesc::DOMElement *aBx = theDoc->createElement(qtxml::_toDOMS("bx"));
     stringStr.str("");
     //stringStr<<ev->bx;
-    stringStr<<4;
+    stringStr<<ev->id*2;
     aBx->setAttribute(qtxml::_toDOMS("iBx"), qtxml::_toDOMS(stringStr.str()));
     aEvent->appendChild(aBx);
     
@@ -269,7 +269,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
 
   ///High precision chambers first
   for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {    
-    if(igps->first.theDet>15) continue;
+    //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA if(igps->first.theDet>15) continue;
     ////
     if(igps->first.theEtaCode!=theEtaCode) continue;
     ////
@@ -335,7 +335,7 @@ L1Obj PatternManager::check(const EventObj* ev, const edm::EventSetup& es,
     }
   }
   ///Then RPC
-  if(!bestMatching){
+  if(false && !bestMatching){
     for (auto igps = theGPs.begin(); igps!=theGPs.end();++igps) {
       igps->second.makeIntegratedCache();
       ////
@@ -472,9 +472,9 @@ void PatternManager::beginJob()
   for (Int_t i=0; i<nentries; ++i) {
     tree->GetEntry(i);
 
-    if(entry.key_strip<5E3) continue;
+    //if(entry.key_strip<5E3) continue;
     if(entry.key_pt>20 || entry.key_pt<16) continue;
-    
+        
     bool skipLayer = true;
     for(auto aRef : refToLogicNumber){
       if(aRef==(int)entry.key_det){
@@ -565,7 +565,7 @@ void PatternManager::writeXML(std::string fname){
   theTopElement = theDoc->getDocumentElement();
   /////////////
 
-  writeGlobalData(theDoc, theTopElement);
+  //writeGlobalData(theDoc, theTopElement);
 
   dumpPatternsXML(theDoc, theTopElement);
 
@@ -594,6 +594,12 @@ void PatternManager::writeGlobalData(xercesc::DOMDocument* theDoc,
   stringStr<<GoldenPattern::minP;
   aData->setAttribute(qtxml::_toDOMS("minPdfVal"), qtxml::_toDOMS(stringStr.str()));
   theTopElement->appendChild(aData);
+  stringStr.str("");
+  int nRefLayers = 8;
+  stringStr<<theGPs.size()/nRefLayers;
+  aData->setAttribute(qtxml::_toDOMS("nGPs"), qtxml::_toDOMS(stringStr.str()));
+  theTopElement->appendChild(aData);
+
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
@@ -601,17 +607,15 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 				     xercesc::DOMElement* theTopElement){
 
   std::ostringstream stringStr;
-  xercesc::DOMElement* aGP=0, *aLayer=0, *aPdf=0, *aMeanDistPhi=0, *aSelDistPhi=0;
-  xercesc::DOMElement *aSelDistPhiShift=0, *aDistMsbPhiShift=0;
+  xercesc::DOMElement* aGP=0, *aLayer=0, *aRefLayer=0, *aPdf=0;
   int iEtaCode = 1;
   int iPhiCode = 0;
   int nRefLayers = 8;
 
-  //for(int iPtCode=31;iPtCode>0;--iPtCode){
+  //for(int iPtCode=31;iPtCode>5;--iPtCode){
   for(int iPtCode=20;iPtCode>15;--iPtCode){
-    //if(iPtCode!=10) continue;
     for(int iCharge=-1;iCharge<2;++++iCharge){     
-      if(iCharge!=1) continue;
+      if(iCharge!=-1) continue;
       std::vector<std::vector<int> > meanDistPhiVec;
       std::vector<std::vector<int> > selDistPhiVec;
       std::vector<std::vector<int> > pdf;
@@ -671,41 +675,24 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
 	  stringStr<<nOfPhis;
 	  aLayer->setAttribute(qtxml::_toDOMS("nOfPhis"), qtxml::_toDOMS(stringStr.str()));
 	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
+	    aRefLayer = theDoc->createElement(qtxml::_toDOMS("RefLayer"));
 	    int meanDistPhi = meanDistPhiVec[iLayer+iRefLayer*nLogicLayers][0];	       
 	    stringStr.str("");
 	    stringStr<<meanDistPhi;
-	    aMeanDistPhi = theDoc->createElement(qtxml::_toDOMS("meanDistPhi"));
-	    aMeanDistPhi->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
-	    aLayer->appendChild(aMeanDistPhi);
-	  }
-	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
-	    std::bitset<(int)pow(2,GoldenPattern::nBitsPdfAddr)> aBitset;
-	    for(unsigned int i=0;i<selDistPhiVec[iLayer+iRefLayer*nLogicLayers].size();++i){
-	      aBitset.set(i,selDistPhiVec[iLayer+iRefLayer*nLogicLayers][i]);
-	    }
+	    aRefLayer->setAttribute(qtxml::_toDOMS("meanDistPhi"), qtxml::_toDOMS(stringStr.str()));
+	    int selDistPhi = 0;
 	    stringStr.str("");
-	    //stringStr<<aBitset.to_string();
-	    stringStr<<"0";
-	    aSelDistPhi = theDoc->createElement(qtxml::_toDOMS("selDistPhi"));
-	    aSelDistPhi->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
-	    aLayer->appendChild(aSelDistPhi);
-	  }
-
-	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
+	    stringStr<<selDistPhi;
+	    aRefLayer->setAttribute(qtxml::_toDOMS("selDistPhi"), qtxml::_toDOMS(stringStr.str()));
 	    int selDistPhiShift = 0;
 	    stringStr.str("");
 	    stringStr<<selDistPhiShift;
-	    aSelDistPhiShift = theDoc->createElement(qtxml::_toDOMS("selDistPhiShift"));
-	    aSelDistPhiShift->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
-	    aLayer->appendChild(aSelDistPhiShift);
-	  }
-	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
+	    aRefLayer->setAttribute(qtxml::_toDOMS("selDistPhiShift"), qtxml::_toDOMS(stringStr.str()));
 	    int distMsbPhiShift = 0;
 	    stringStr.str("");
 	    stringStr<<distMsbPhiShift;
-	    aDistMsbPhiShift = theDoc->createElement(qtxml::_toDOMS("distMsbPhiShift"));
-	    aDistMsbPhiShift->setAttribute(qtxml::_toDOMS("value"), qtxml::_toDOMS(stringStr.str()));
-	    aLayer->appendChild(aDistMsbPhiShift);
+	    aRefLayer->setAttribute(qtxml::_toDOMS("distMsbPhiShift"), qtxml::_toDOMS(stringStr.str()));
+	    aLayer->appendChild(aRefLayer);
 	  }
 	  for(int iRefLayer=0;iRefLayer<nRefLayers;++iRefLayer){
 	    for(unsigned int iPdf=0;iPdf<pdf[iLayer+iRefLayer*nLogicLayers].size();++iPdf){
@@ -770,4 +757,5 @@ void PatternManager::readXMLConfig(std::string configFile){
 }
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
+
 
