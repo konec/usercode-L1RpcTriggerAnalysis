@@ -615,7 +615,7 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
   //for(int iPtCode=31;iPtCode>5;--iPtCode){
   for(int iPtCode=20;iPtCode>15;--iPtCode){
     for(int iCharge=-1;iCharge<2;++++iCharge){     
-      if(iCharge!=-1) continue;
+      if(iCharge!=1) continue;
       std::vector<std::vector<int> > meanDistPhiVec;
       std::vector<std::vector<int> > selDistPhiVec;
       std::vector<std::vector<int> > pdf;
