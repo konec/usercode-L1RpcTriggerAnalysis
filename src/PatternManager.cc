@@ -472,8 +472,9 @@ void PatternManager::beginJob()
   for (Int_t i=0; i<nentries; ++i) {
     tree->GetEntry(i);
 
-    //if(entry.key_strip<5E3) continue;
-    if(entry.key_pt>20 || entry.key_pt<16) continue;
+    if(entry.key_strip<5E3) continue;
+    //if(entry.key_pt>20 || entry.key_pt<16) continue;
+    if(entry.key_pt<6) continue;
         
     bool skipLayer = true;
     for(auto aRef : refToLogicNumber){
@@ -612,8 +613,8 @@ void PatternManager::dumpPatternsXML(xercesc::DOMDocument* theDoc,
   int iPhiCode = 0;
   int nRefLayers = 8;
 
-  //for(int iPtCode=31;iPtCode>5;--iPtCode){
-  for(int iPtCode=20;iPtCode>15;--iPtCode){
+  for(int iPtCode=31;iPtCode>5;--iPtCode){
+  //for(int iPtCode=20;iPtCode>15;--iPtCode){
     for(int iCharge=-1;iCharge<2;++++iCharge){     
       if(iCharge!=1) continue;
       std::vector<std::vector<int> > meanDistPhiVec;

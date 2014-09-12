@@ -176,8 +176,8 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   // main loop
   //
   unsigned int lastRun = 0;
-  for (int ev=0; ev<nentries; ev+=1) {
-  //for (int ev=3; ev<4; ev+=1) {
+  //for (int ev=0; ev<nentries; ev+=1) {
+    for (int ev=3; ev<4; ev+=1) {
 
     chain.GetEntry(ev);
 

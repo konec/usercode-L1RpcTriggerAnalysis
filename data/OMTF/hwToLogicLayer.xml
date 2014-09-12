@@ -1,6 +1,6 @@
 <OMTF>
 
-<GlobalData minPdfVal="0.001" nPdfAddrBits="7" nPdfValBits="6"/>
+<GlobalData minPdfVal="0.001" nPdfAddrBits="7" nPdfValBits="6" nHitsPerLayer="6" nPhiBits="10"/>
 
 <LayerMap hwNumber = "101" logicNumber = "0"  bendingLayer = "0"/>
 <LayerMap hwNumber = "1101" logicNumber = "1" bendingLayer = "1"/>

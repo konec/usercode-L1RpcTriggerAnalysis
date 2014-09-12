@@ -154,9 +154,13 @@ ostream & operator<< (ostream &out, const L1Obj &o)
     case L1Obj::RPCb_emu: { out <<"RPCb_emu"; break; }
     case L1Obj::RPCf_emu: { out <<"RPCf_emu"; break; }
     case L1Obj::GMT_emu:  { out <<"GMT_emu "; break; }
+    case L1Obj::OTF:      { out <<"OMTF    "; break; }
     case L1Obj::NONE   :  { out <<"NONE    "; break; }
     default: out <<"Unknown";
   };
-  out <<" pt: "<<o.pt<<", eta: "<<o.eta<<", phi: "<<o.phi<<", q: "<<o.q<<", bx: "<<o.bx;
+  out <<" pt: "<<o.pt<<", eta: "<<o.eta
+      <<", phi: "<<o.phi<<", charge: "<<o.charge
+      <<", q: "<<o.q<<", disc: "<<o.disc
+      <<", bx: "<<o.bx;
   return out;
 }

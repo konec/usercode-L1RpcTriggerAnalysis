@@ -29,5 +29,5 @@
 <use   name="FWCore/PluginManager"/>
 <use   name="xerces-c"/>
 <export>
-  <lib   name="1"/>
+  <lib   name="UserCodeL1RpcTriggerAnalysis"/>
 </export>
