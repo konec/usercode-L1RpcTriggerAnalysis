@@ -13,13 +13,15 @@
 #include "L1Trigger/DTUtilities/interface/DTTrigGeom.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 
-#include "L1TriggerDPGUpgrade/DataFormats/interface/L1TMuonTriggerPrimitive.h"
+//#include "L1TriggerDPGUpgrade/DataFormats/interface/L1TMuonTriggerPrimitive.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/DTphDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/GoldenPattern.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDetIdUtil.h"
+
+#include "UserCode/L1RpcTriggerAnalysis/interface/PatternManager.h"
 
 MtfCoordinateConverter::MtfCoordinateConverter(const edm::EventSetup& es): es(es) {
 
@@ -79,8 +81,7 @@ int  MtfCoordinateConverter::convert(std::pair<uint32_t,  unsigned int > aData, 
   
   while  (phi < 0) { phi+=2*M_PI; }
   while  (phi > 2*M_PI) { phi-=2*M_PI; }
-  
-  //int nDivisions = GoldenPattern::Key::nPhi;
+ 
   int iPhi =  floor(phi * nDivisions/(2*M_PI));
   if(iPhi>nDivisions/2.0) iPhi-=nDivisions;
 
@@ -200,7 +201,10 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
   uint32_t aLayer = 0;
   
   DetId detId(rawId);
-  if (detId.det() != DetId::Muon) std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
+  if (detId.det() != DetId::Muon){
+    std::cout << "PROBLEM: hit in unknown Det, detID: "<<detId.det()<<std::endl;
+    return rawId;
+  }
 
 
   switch (detId.subdetId()) {
@@ -208,6 +212,7 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
     RPCDetId aId(rawId);
     RPCDetIdUtil aIdUtil(rawId);
     aLayer = aIdUtil.layer() + 10*(!aIdUtil.isBarrel());
+    if(aId.ring()==1 && aIdUtil.layer()==1) aLayer = aIdUtil.layer() + 20*(!aIdUtil.isBarrel());
   }
     break;
   case MuonSubdetId::DT: {
@@ -218,11 +223,31 @@ uint32_t  MtfCoordinateConverter::getLayerNumber(uint32_t rawId){
   case MuonSubdetId::CSC: {
     CSCDetId csc(rawId);
     aLayer = csc.station();
+    /*
+    std::cout<<"csc.ring(): "<<csc.ring()
+	     <<" chamber(): "<<csc.chamber()
+	     <<std::endl;
+    */
+    //if(csc.ring()==1 && csc.station()==1) aLayer+=10;
+    //if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==0) aLayer+=20;
+    //if((csc.ring()>1 || csc.station()!=1) && csc.chamber()%2==1) aLayer+=30;
+    
+    if(csc.ring()==4) std::cout<<"BB aLayer: "<<aLayer<<std::endl;
+
     break;
   }
   }  
 
- return aLayer;
+  int hwNumber = aLayer+100*detId.subdetId();
+  if(PatternManager::hwToLogicLayer.find(hwNumber)==PatternManager::hwToLogicLayer.end()){
+    std::cout<<"Problem with hwNumber: "<<hwNumber<<std::endl;
+    //RPCDetId aId(rawId);
+    //std::cout<<aId<<std::endl;
+    return 99;
+    //exit(0);
+  }
+
+  return PatternManager::hwToLogicLayer[hwNumber];
 }
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
