@@ -169,17 +169,18 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   Int_t nentries= (Int_t) chain.GetEntries();
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
-  //nentries = 5E6;
-  nentries = 1E4;
-
-  //nentries = 1353;
+  nentries = 21;
+  //nentries = 5E4;
 
   //
   // main loop
   //
   unsigned int lastRun = 0;
   for (int ev=0; ev<nentries; ev+=1) {
+  //for (int ev=3; ev<4; ev+=1) {
+
     chain.GetEntry(ev);
+
     //AK if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
     if ( (lastRun != (*event).run) || (ev%(nentries/20)==0)) { 
@@ -229,11 +230,11 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
 
    if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf2x);  
    L1ObjColl myL1ObjColl = *l1ObjColl;
-   myL1ObjColl.push_back(l1otf1x, false, 0.); 
-   myL1ObjColl.push_back(l1otf2x, false, 0.); 
+   //myL1ObjColl.push_back(l1otf1x, false, 0.); 
+   //myL1ObjColl.push_back(l1otf2x, false, 0.); 
    myL1ObjColl.push_back(l1otf5x, false, 0.); 
-   myL1ObjColl.push_back(l1otf7x, false, 0.); 
-   myL1ObjColl.push_back(l1otf10x, false, 0.); 
+   //myL1ObjColl.push_back(l1otf7x, false, 0.); 
+   //myL1ObjColl.push_back(l1otf10x, false, 0.); 
    if (theAnaEff) theAnaEff->run(refTrack, &myL1ObjColl, hitSpecProp);
   }
 }
