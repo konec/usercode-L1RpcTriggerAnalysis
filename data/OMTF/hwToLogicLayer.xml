@@ -1,0 +1,42 @@
+<OMTF>
+
+<GlobalData minPdfVal="0.001" nPdfAddrBits="7" nPdfValBits="6"/>
+
+<LayerMap hwNumber = "101" logicNumber = "0"  bendingLayer = "0"/>
+<LayerMap hwNumber = "1101" logicNumber = "1" bendingLayer = "1"/>
+<LayerMap hwNumber = "102" logicNumber = "2" bendingLayer = "0"/>
+<LayerMap hwNumber = "1102" logicNumber = "3" bendingLayer = "1"/>
+<LayerMap hwNumber = "103" logicNumber = "4" bendingLayer = "0"/>
+<LayerMap hwNumber = "1103" logicNumber = "5" bendingLayer = "1"/>
+<LayerMap hwNumber = "104" logicNumber = "6" bendingLayer = "0"/>
+<LayerMap hwNumber = "1104" logicNumber = "7" bendingLayer = "1"/>
+<LayerMap hwNumber = "201" logicNumber = "8" bendingLayer = "0"/>
+<LayerMap hwNumber = "1201" logicNumber = "9" bendingLayer = "1"/>
+<LayerMap hwNumber = "202" logicNumber = "10" bendingLayer = "0"/>
+<LayerMap hwNumber = "1202" logicNumber = "11" bendingLayer = "1"/>
+<LayerMap hwNumber = "203" logicNumber = "12" bendingLayer = "0"/>
+<LayerMap hwNumber = "1203" logicNumber = "13" bendingLayer = "1"/>
+<LayerMap hwNumber = "204" logicNumber = "14" bendingLayer = "0"/>
+<LayerMap hwNumber = "1204" logicNumber = "15" bendingLayer = "1"/>
+<LayerMap hwNumber = "301" logicNumber = "16" bendingLayer = "0"/>
+<LayerMap hwNumber = "302" logicNumber = "17" bendingLayer = "0"/>
+<LayerMap hwNumber = "303" logicNumber = "18" bendingLayer = "0"/>
+<LayerMap hwNumber = "304" logicNumber = "19" bendingLayer = "0"/>
+<LayerMap hwNumber = "305" logicNumber = "20" bendingLayer = "0"/>
+<LayerMap hwNumber = "311" logicNumber = "21" bendingLayer = "0"/>
+<LayerMap hwNumber = "312" logicNumber = "22" bendingLayer = "0"/>
+<LayerMap hwNumber = "313" logicNumber = "23" bendingLayer = "0"/>
+<LayerMap hwNumber = "314" logicNumber = "24" bendingLayer = "0"/>
+
+<RefLayerMap refLayer="0" logicNumber ="0"/>
+<RefLayerMap refLayer="1" logicNumber ="2"/>
+<RefLayerMap refLayer="2" logicNumber ="4"/>
+<RefLayerMap refLayer="3" logicNumber ="8"/>
+<RefLayerMap refLayer="4" logicNumber ="10"/>
+<RefLayerMap refLayer="5" logicNumber ="16"/>
+<RefLayerMap refLayer="6" logicNumber ="17"/>
+<RefLayerMap refLayer="7" logicNumber ="20"/>
+
+</OMTF>
+
+

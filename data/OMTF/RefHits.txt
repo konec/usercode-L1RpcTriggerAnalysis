@@ -1,0 +1,98 @@
+#dane dla jednego sektora 10 deg
+#skala phi: 0-1023
+#nr stozka nr_warstwy nr_linku min_phi max_phi
+0 0 0 0 1023     #MB1 in, chamber 1, hit 1
+0 0 1 0 1023     #MB1 in, chamber 1, hit 2
+0 0 2 0 1023     #MB1 in, chamber 2, hit 1
+0 0 3 0 1023     #MB1 in, chamber 2, hit 2
+0 0 4 0 1023     #MB1 in, chamber 3, hit 1
+0 0 5 0 1023     #MB1 in, chamber 3, hit 2
+
+0 2 0 0 1023     #MB1 out, chamber 1, hit 1
+0 2 1 0 1023     #MB1 out, chamber 1, hit 2
+0 2 2 0 1023     #MB1 out, chamber 2, hit 1
+0 2 3 0 1023     #MB1 out, chamber 2, hit 2
+0 2 4 0 1023    #MB1 out, chamber 3, hit 1
+0 2 5 0 1023    #MB1 out, chamber 3, hit 2
+
+0 4 0 0 1023    #MB2 in, chamber 1, hit 1
+0 4 1 0 1023    #MB2 in, chamber 1, hit 2
+0 4 2 0 1023    #MB2 in, chamber 2, hit 1
+0 4 3 0 1023    #MB2 in, chamber 2, hit 2
+0 4 4 0 1023    #MB2 in, chamber 3, hit 1
+0 4 5 0 1023    #MB2 in, chamber 3, hit 2
+
+0 8 0 0 1023    #MB2 out, chamber 1, hit 1
+0 8 1 0 1023    #MB2 out, chamber 1, hit 2
+0 8 2 0 1023    #MB2 out, chamber 2, hit 1
+0 8 3 0 1023    #MB2 out, chamber 2, hit 2
+0 8 4 0 1023    #MB2 out, chamber 3, hit 1
+0 8 5 0 1023    #MB2 out, chamber 3, hit 2
+
+0 10 0 0 1023    #ME 1/3, chamber 1, hit 1
+0 10 1 0 1023    #ME 1/3, chamber 1, hit 2
+0 10 2 0 1023    #ME 1/3, chamber 2, hit 1
+0 10 3 0 1023    #ME 1/3, chamber 2, hit 2
+0 10 4 0 1023    #ME 1/3, chamber 3, hit 1
+0 10 5 0 1023    #ME 1/3, chamber 3, hit 2
+0 10 6 0 1023    #ME 1/3, chamber 4, hit 1
+0 10 7 0 1023    #ME 1/3, chamber 4, hit 2
+0 10 8 0 1023    #ME 1/3, chamber 5, hit 1
+0 10 9 0 1023    #ME 1/3, chamber 5, hit 2
+0 10 10 0 1023    #ME 1/3, chamber 6, hit 1
+0 10 11 0 1023    #ME 1/3, chamber 6, hit 2
+0 10 12 0 1023    #ME 1/3, chamber 7, hit 1
+0 10 13 0 1023    #ME 1/3, chamber 7, hit 2
+
+0 16 0 0 1023    #ME 2/3, chamber 1, hit 1
+0 16 1 0 1023    #ME 2/3, chamber 1, hit 2
+0 16 2 0 1023    #ME 2/3, chamber 2, hit 1
+0 16 3 0 1023    #ME 2/3, chamber 2, hit 2
+0 16 4 0 1023    #ME 2/3, chamber 3, hit 1
+0 16 5 0 1023    #ME 2/3, chamber 3, hit 2
+0 16 6 0 1023    #ME 2/3, chamber 4, hit 1
+0 16 7 0 1023    #ME 2/3, chamber 4, hit 2
+0 16 8 0 1023    #ME 2/3, chamber 5, hit 1
+0 16 9 0 1023    #ME 2/3, chamber 5, hit 2
+0 16 10 0 1023    #ME 2/3, chamber 6, hit 1
+0 16 11 0 1023    #ME 2/3, chamber 6, hit 2
+0 16 12 0 1023    #ME 2/3, chamber 7, hit 1
+0 16 13 0 1023    #ME 2/3, chamber 7, hit 2
+
+0 17 0 0 1023    #RPC MB2 in, chamber 1, hit 1
+0 17 1 0 1023    #RPC MB2 in, chamber 1, hit 2
+0 17 2 0 1023    #RPC MB2 in, chamber 1, hit 3
+0 17 3 0 1023    #RPC MB2 in, chamber 1, hit 4
+0 17 4 0 1023    #RPC MB2 in, chamber 1, hit 5
+0 17 5 0 1023    #RPC MB2 in, chamber 1, hit 6
+0 17 6 0 1023    #RPC MB2 in, chamber 1, hit 7
+0 17 7 0 1023    #RPC MB2 in, chamber 2, hit 1
+0 17 8 0 1023    #RPC MB2 in, chamber 2, hit 2
+0 17 9 0 1023    #RPC MB2 in, chamber 2, hit 3
+0 17 10 0 1023    #RPC MB2 in, chamber 2, hit 4
+0 17 11 0 1023    #RPC MB2 in, chamber 2, hit 5
+0 17 12 0 1023    #RPC MB2 in, chamber 2, hit 6
+0 17 13 0 1023    #RPC MB2 in, chamber 2, hit 7
+
+0 20 0 0 1023    #RPC MB2 out, chamber 1, hit 1
+0 20 1 0 1023    #RPC MB2 out, chamber 1, hit 2
+0 20 2 0 1023    #RPC MB2 out, chamber 1, hit 3
+0 20 3 0 1023    #RPC MB2 out, chamber 1, hit 4
+0 20 4 0 1023    #RPC MB2 out, chamber 1, hit 5
+0 20 5 0 1023    #RPC MB2 out, chamber 1, hit 6
+0 20 6 0 1023    #RPC MB2 out, chamber 1, hit 7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
