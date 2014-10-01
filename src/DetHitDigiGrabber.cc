@@ -390,7 +390,7 @@ std::vector<DTphDigiSpec> DetHitDigiGrabber::dtPhiDetDigis(const edm::Event &ev,
     if (warnNoColl) std::cout <<"** WARNING: not collection: "<< dtDigisCollName<< std::endl;
     return result;
   }
-  L1MuDTChambPhContainer::Phi_Container * phi_Container = dtPhiDigiColls->getContainer();
+  const L1MuDTChambPhContainer::Phi_Container * phi_Container = dtPhiDigiColls->getContainer();
   typedef L1MuDTChambPhContainer::Phi_iterator IP;
 
   for (IP ip = phi_Container->begin(); ip < phi_Container->end(); ip++){
@@ -431,7 +431,7 @@ std::vector< std::pair<uint32_t, uint32_t> > DetHitDigiGrabber::dtEtaDetDigis(co
     if (warnNoColl) std::cout <<"** WARNING: not collection: "<< dtDigisCollName<< std::endl;
     return result;
   }
-  L1MuDTChambThContainer::The_Container * theta_Container = dtThetaDigiColls->getContainer();
+  const L1MuDTChambThContainer::The_Container * theta_Container = dtThetaDigiColls->getContainer();
   typedef L1MuDTChambThContainer::The_iterator IT;
   for (IT it = theta_Container->begin(); it < theta_Container->end(); it++){
     const L1MuDTChambThDigi& thDigi = (*it);
