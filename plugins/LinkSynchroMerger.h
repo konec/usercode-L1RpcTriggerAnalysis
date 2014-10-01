@@ -9,7 +9,10 @@ public:
   LinkSynchroMerger(const edm::ParameterSet& cfg);
   virtual ~LinkSynchroMerger(){}
   virtual void beginJob();
+  /* MB can not be defined as it overrids a 'final' method
+  * Where this intialisation should be moved??   
   virtual void beginRun(const edm::Run&, const edm::EventSetup& es);
+  */
   virtual void analyze(const edm::Event&, const edm::EventSetup&){}
 private:
   void preFillFromFile(const std::string & file);

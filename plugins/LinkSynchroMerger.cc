@@ -16,16 +16,19 @@ LinkSynchroMerger::LinkSynchroMerger(const edm::ParameterSet& cfg)
 {}
 
 void LinkSynchroMerger::beginJob()
-{ RPCMonitorLinkSynchro::beginJob(); }
+{ /*MB RPCMonitorLinkSynchro::beginJob(); //not present, replacement not known */ }
 
+/* MB can not be defined as it overrids a 'final' method
+ * Where this intialisation should be moved??
 void LinkSynchroMerger::beginRun(const edm::Run& ev, const edm::EventSetup& es)
 {
-  RPCMonitorLinkSynchro::beginRun(ev,es);
+  //MB RPCMonitorLinkSynchro::beginRun(ev,es); //not present, replacement not known
   if(!isInitialised) {
     isInitialised = true;
     if (!theFileNames.empty())for (std::vector<std::string>::const_iterator it=theFileNames.begin(); it != theFileNames.end(); ++it) preFillFromFile(*it);
   }
 }
+*/
 
 void LinkSynchroMerger::preFillFromFile(const std::string & fileName)
 {

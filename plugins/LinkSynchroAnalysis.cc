@@ -39,7 +39,7 @@ LinkSynchroAnalysis::~LinkSynchroAnalysis()
 
 void LinkSynchroAnalysis::beginJob()
 {
-  RPCMonitorLinkSynchro::beginJob();
+  //MB RPCMonitorLinkSynchro::beginJob(); //not present, replacement not known
   theHistos.SetOwner();
   theHistos.Add(new TH1F("hBX","hBX",3564,0.,3564));
 
@@ -52,13 +52,13 @@ void LinkSynchroAnalysis::beginJob()
 
 void LinkSynchroAnalysis::endJob()
 {
-  RPCMonitorLinkSynchro::endJob();
+  //MB RPCMonitorLinkSynchro::endJob(); //not present, replacement not known
   bool writeHistos = theAnaConfig.getUntrackedParameter<bool>("writeHistograms", false);
   if (writeHistos) {
     std::string histoFile = theAnaConfig.getUntrackedParameter<std::string>("histoFileName");
     TFile f(histoFile.c_str(),"RECREATE");
     theHistos.Write();
-    histos().Write(); 
+    //RPCMonitorLinkSynchro::histos().Write(); //MB histos().Write(); -> RPCMonitorLinkSynchro::histos().Write(); //not present, replacement not known
     edm::LogInfo(" END JOB, histos saved!");
     edm::LogInfo("") <<"LINK SYNCHRO ANALYSIS number of events SELECTED: "<<theEventCounter;
     f.Close();
