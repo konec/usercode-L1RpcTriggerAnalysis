@@ -8,11 +8,10 @@ double ptBins[33]={0., 0.1,
 		 160. };
 
 
-string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_4_ana/SingleMu_7_m/";
-
+string path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Dev3/job_3_pat/";
 
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/5bins/SingleMu_7_p/";
-path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/5bins/SingleMu_16_p/";
+//path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_4_ana/";
 
 
 //path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/SingleMu_7_p/";
@@ -28,7 +27,7 @@ path = "/home/akalinow/scratch0/CMS/OverlapTrackFinder/Dev5/job_3_pat/FullEta/5b
 void plotRecoPt(string sysType="Otf",
 		int ipt=22){
 
-  string filePath = path + string(TString::Format("SingleMu_%d_p/",ipt));
+  string filePath = path;// + string(TString::Format("SingleMu_%d_p/",ipt));
   
   TFile *file = new TFile((filePath+"EfficiencyTree.root").c_str());
   if (file->IsZombie()) return;
@@ -43,15 +42,34 @@ void plotRecoPt(string sysType="Otf",
   gStyle->SetStatY(0.9);
   gStyle->SetStatX(0.9);
   
-  TH1F *h = (TH1F*)h1D->Clone(TString::Format("h%s",sysType.c_str()));
-  std::string selection = "eta<0.9";
+  TH1F *h1 = (TH1F*)h1D->Clone(TString::Format("h1%s",sysType.c_str()));
+  std::string selection = "eta<1.6 && eta>1.25 && pt<25 && pt>20";
   
-  tree->Draw(TString::Format("l1Objects%s[0].pt>>h%s",sysType.c_str(),sysType.c_str())
+  //std::string selection = "eta<0.93 && eta<1.25 && pt<25 && pt>20";
+  //std::string selection = "eta>0.93 && eta<1.25 && pt<15 && pt>10";
+  
+  tree->Draw(TString::Format("l1Objects%s[0].pt>>h1%s",sysType.c_str(),sysType.c_str())
 	     ,selection.c_str(),"goff");
 
-  TCanvas* c = new TCanvas(TString::Format("RecoPt_%s",sysType.c_str()),"RecoPt",460,500);			  
-  h->Draw();
-  h->Fit("gaus","S","",ptBins[ipt]-30,ptBins[ipt]+30);
+  TH1F *h2 = (TH1F*)h1D->Clone(TString::Format("h2%s",sysType.c_str()));
+  selection = "eta<1.6 && eta<1.25 && pt<15 && pt>10";
+
+  tree->Draw(TString::Format("l1Objects%s[0].pt>>h2%s",sysType.c_str(),sysType.c_str())
+  	     ,selection.c_str(),"goff");
+
+  TCanvas* c = new TCanvas(TString::Format("RecoPt_%s",sysType.c_str()),"RecoPt",460,500);
+
+  h1->Scale(1.0/h1->Integral());
+  h2->Scale(1.0/h2->Integral());
+
+  h1->Fit("gaus","S","",ptBins[ipt]-30,ptBins[ipt]+30);
+  h2->Fit("gaus","S","",ptBins[ipt]-30,ptBins[ipt]+30);			  
+  
+  h2->SetLineColor(4);
+  h2->SetLineWidth(3);
+
+  h2->Draw();
+  h1->Draw("same");
 
   TLatex aLatex(100,4000,
 		TString::Format("%d<p_{T}^{gen}<%d",(int)ptBins[ipt],(int)ptBins[ipt+1]).Data());
@@ -184,6 +202,7 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
   ////
   //TString cName = "Dev"+locName;
   TString cName = "RPC"+locName;
+  std::cout<<cName<<std::endl;
   TCanvas *cRPC = (TCanvas*)file->Get(cName.Data());
   cName = "DT"+locName;
   TCanvas *cDT = (TCanvas*)file->Get(cName.Data());
@@ -294,11 +313,29 @@ void plotGoldenPattern(int iPt=9, int iTower=9, int iRef=44, int iCharge=-1){
 ///////////////////////////////////////////////////////
 void plots(){
 
+
+  //plotRecoPt("Otf",16);
+  //return;
+
   //plotRecoPhi(10);
   //return;
 
-  //plotGoldenPattern(7,2,3202,1); 
-  plotGoldenPattern(18,2,3202,1); 
+  plotGoldenPattern(19,7,3102,1);  
+  plotGoldenPattern(7,7,3102,1);  
+  return;
+
+  plotGoldenPattern(19,9,3222,1);  
+  plotGoldenPattern(7,9,3222,1);  
+
+  plotGoldenPattern(19,8,3222,1);  
+  plotGoldenPattern(7,8,3222,1);  
+
+  plotGoldenPattern(19,9,3232,1);  
+  plotGoldenPattern(7,9,3232,1);  
+  
+  plotGoldenPattern(19,8,3232,1);  
+  plotGoldenPattern(7,8,3232,1);  
+
   return;
 
   plotGoldenPattern(17,0,1202,1); 
