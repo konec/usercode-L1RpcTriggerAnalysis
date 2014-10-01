@@ -7,6 +7,8 @@
 #include <ostream>
 #include <map>
 
+#include "xercesc/dom/DOM.hpp"
+
 class MtfCoordinateConverter;
 
 class  Pattern {
@@ -35,6 +37,11 @@ public:
   bool operator==(const Pattern& o) const;
 
   void print(MtfCoordinateConverter *myPhiConverter, int nPhi);
+
+  void dumpToXML(xercesc::DOMDocument* theDoc, 
+		 xercesc::DOMElement* theTopElement,
+		 MtfCoordinateConverter *myPhiConverter, 
+		 int nPhi);
 
   int deviationSum(MtfCoordinateConverter *myPhiConverter, int nPhi) const;
   

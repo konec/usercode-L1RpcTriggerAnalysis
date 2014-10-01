@@ -18,7 +18,7 @@ public:
 //
 // where
 //
-  enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4, TOTDEV=5};
+  enum PosBenCase { POSRPC=0, POSCSC=1, BENCSC=2, POSDT=3, BENDT=4, TOTDEV=5, LAYER=6};
 
 //
 // Key
@@ -59,15 +59,14 @@ public:
    unsigned int theRefStrip;
    int          theCharge;
    int          theRotation;
-   //static const int nPhi = 2*1152;
+
    static const int nPhi(uint32_t aDet){
-     return 5*1152;
-     if(aDet/(uint32_t)1000==1) return 1*1152;
+     if(aDet/(uint32_t)1000==1) return 1152;
      if(aDet/(uint32_t)1000==2) return 2*1152;
-     if(aDet/(uint32_t)1000==3) return 5*1152;
+     if(aDet/(uint32_t)1000==3) return 4096;
      if(aDet/(uint32_t)1000==4) return 7*1152;
      if(aDet/(uint32_t)1000==5) return 10*1152;
-     return 2*1152;
+     return 4096;
    }
 
    friend std::ostream & operator << (std::ostream &out, const Key & o) {
@@ -90,12 +89,14 @@ public:
       nMatchedPoints[GoldenPattern::POSCSC] = 0;
       nMatchedPoints[GoldenPattern::BENDT] = 0;
       nMatchedPoints[GoldenPattern::BENCSC] = 0;  
+      nMatchedPoints[GoldenPattern::LAYER] = 0;  
 
       myResults[GoldenPattern::POSRPC] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::POSDT] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::POSCSC] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::BENDT] =  std::vector< std::pair<uint32_t, float > >();   
       myResults[GoldenPattern::BENCSC] =  std::vector< std::pair<uint32_t, float > >();   
+      myResults[GoldenPattern::LAYER] =  std::vector< std::pair<uint32_t, float > >();   
     }
     bool operator<( const Result & o) const;
     operator bool() const;
@@ -113,17 +114,20 @@ public:
       }
       return false;
     }
+
+    ///Those were private
+    float norm(PosBenCase where, float whereInDist) const;
+    mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, float > > > myResults;
   private:
     void run() const { if (checkMe) {checkMe=false; runNoCheck(); } }
     void runNoCheck() const;
-    float norm(PosBenCase where, float whereInDist) const;
   private:
     mutable bool checkMe; 
     mutable float theValue;
     mutable std::map<GoldenPattern::PosBenCase, unsigned int> nMatchedPoints;
    
     bool hasStation1, hasStation2, hasStation3, hasRefStation;
-    mutable std::map<GoldenPattern::PosBenCase, std::vector< std::pair<uint32_t, float > > > myResults;
+
     friend std::ostream & operator << (std::ostream &out, const Result& o); 
     friend class GoldenPattern; 
   };
@@ -145,6 +149,8 @@ public:
   int phiOffset() const { return aPhiOffset;};
 
   void plot();
+
+  std::vector<std::vector<int> > dump(int type);
 
   int size();
   
@@ -171,6 +177,10 @@ private:
 
   bool hasIntegratedCache;
   int  aPhiOffset;
+
+  static const int nBitsVal = 6;
+  static const int nBitsPdfAddr = 7;
+  static const float minP;
 
 private:
 

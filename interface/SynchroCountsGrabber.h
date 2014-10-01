@@ -24,7 +24,7 @@ public:
    void initHistos(TObjArray & histos) {theSelector.initHistos(histos); }
 private:
   edm::ESWatcher<RPCEMapRcd> theMapWatcher;
-  RPCReadOutMapping * theCabling;
+  const RPCReadOutMapping * theCabling;
   const reco::Muon * theMuon;
   SynchroSelectorMuon theSelector;
   bool deltaR_MuonToDetUnit_cutoff, checkInside;

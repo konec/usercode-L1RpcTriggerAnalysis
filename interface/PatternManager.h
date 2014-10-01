@@ -23,6 +23,8 @@ class EventObj;
 #include "TRandom3.h"
 
 class RPCDigiSpec;
+class GoldenPattern;
+#include "xercesc/dom/DOM.hpp"
 
 class PatternManager {
 
@@ -45,7 +47,22 @@ public:
   void endJob();
   void beginJob();
 
+  static std::map<int,int> hwToLogicLayer;
+  static std::map<int,int> logicToHwLayer;
+  static std::vector<int> refToLogicNumber;
+  static int nLogicLayers;
+
 private:
+
+  void readXMLConfig(std::string fName);
+
+  void writeXML(std::string fname);
+
+  void writeGlobalData(xercesc::DOMDocument* theDoc, 
+		       xercesc::DOMElement* theTopElement);
+  
+  void dumpPatternsXML(xercesc::DOMDocument* theDoc, 
+		       xercesc::DOMElement* theTopElement);
 
   edm::ParameterSet theConfig;
   edm::ESHandle<RPCGeometry> rpcGeometry;
@@ -59,6 +76,11 @@ private:
   std::map< GoldenPattern::Key, int> aCounterMap; 
   std::map< GoldenPattern::Key, GoldenPattern> theGPs; 
   std::multimap<GoldenPattern::Key, GoldenPattern::Key> theGPsPhiMap;
+
+  ///XML objects for Event dump
+  xercesc::DOMElement* theTopElement;
+  xercesc::DOMDocument* theDoc ;
+  xercesc::DOMImplementation* domImpl;
 
 };
 #endif
