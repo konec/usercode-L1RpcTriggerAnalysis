@@ -1,4 +1,6 @@
 <use   name="UserCode/L1RpcTriggerAnalysis"/>
+<use   name="UserCode/OMTFSimulation"/>
+
 <library   file="*.cc" name="UserCodeL1RpcTriggerAnalysisPlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>
