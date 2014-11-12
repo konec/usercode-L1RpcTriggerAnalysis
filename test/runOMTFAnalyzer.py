@@ -4,6 +4,7 @@ import os
 import sys
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+
 process.MessageLogger = cms.Service("MessageLogger",
        suppressInfo       = cms.untracked.vstring('AfterSource', 'PostModule'),
        destinations   = cms.untracked.vstring(
@@ -50,14 +51,10 @@ process.MessageLogger = cms.Service("MessageLogger",
                 GetByLabelWithoutRegistration  = cms.untracked.PSet (limit = cms.untracked.int32(0) ) 
        ),
 )
-#Uncomment it to switch off messages
-process.MessageLogger = cms.Service("MessageLogger")
-'''
-process.MessageLogger.cout = cms.untracked.PSet(INFO = cms.untracked.PSet(
-        reportEvery = cms.untracked.int32(1) # every 100th only
-     ))
-'''
 
+
+#process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 process.source = cms.Source(
     'PoolSource',
@@ -66,7 +63,7 @@ process.source = cms.Source(
                                       )
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10))
 
 ###PostLS1 geometry used
 process.load('Configuration.Geometry.GeometryExtendedPostLS1Reco_cff')
@@ -81,9 +78,10 @@ path = os.environ['CMSSW_BASE']+"/src/UserCode/OMTFSimulation/data/"
 
 process.load('L1Trigger.L1TMuon.L1TMuonTriggerPrimitiveProducer_cfi')
 
+###OMTF emulator configuration
 process.omtfEmulator = cms.EDProducer("OMTFProducer",
                                       TriggerPrimitiveSrc = cms.InputTag('L1TMuonTriggerPrimitives'),
-                                      dumpResultToXML = cms.bool(True),                                     
+                                      dumpResultToXML = cms.bool(False),                                     
                                       dumpGPToXML = cms.bool(False),                                     
                                       makeConnectionsMaps = cms.bool(False),                                      
                                       omtf = cms.PSet(
@@ -92,7 +90,7 @@ process.omtfEmulator = cms.EDProducer("OMTFProducer",
         )
                                       )
 
-
+###OMTF analyser configuration
 process.omtfAnalyser = cms.EDAnalyzer("OMTFAnalyzer",
                                       OMTFCandSrc = cms.InputTag('omtfEmulator','OMTF'),
                                       GMTCandSrc = cms.InputTag('simGmtDigis'),
@@ -100,18 +98,32 @@ process.omtfAnalyser = cms.EDAnalyzer("OMTFAnalyzer",
                                       anaEff      = cms.PSet( maxDR= cms.double(9999.)),
                                       )
 
-process.L1TMuonSeq = cms.Sequence( process.L1TMuonTriggerPrimitives +
-                                   process.omtfEmulator
-                                   +
-                                   process.omtfAnalyser)
+###Gen level filter configuration
+process.MuonEtaFilter = cms.EDFilter("SimTrackEtaFilter",
+                                minNumber = cms.uint32(1),
+                                src = cms.InputTag("g4SimHits"),
+                                cut = cms.string("momentum.eta<1.24 && momentum.eta>0.83")
+                                )
 
-process.L1TMuonPath = cms.Path(process.L1TMuonSeq)
+process.GenMuPath = cms.Path(process.MuonEtaFilter)
+##########################################
+
+
+
+process.L1TMuonSeq = cms.Sequence( process.L1TMuonTriggerPrimitives+ 
+                                   process.omtfEmulator+process.omtfAnalyser)
+
+process.L1TMuonPath = cms.Path(process.MuonEtaFilter*process.L1TMuonSeq)
+
 
 process.out = cms.OutputModule("PoolOutputModule", 
    fileName = cms.untracked.string("Test.root"),
-)
+                               SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring('GenMuPath')
+        )
+                               )
 
 process.output_step = cms.EndPath(process.out)
 
-process.schedule = cms.Schedule(process.L1TMuonPath)
+process.schedule = cms.Schedule(process.GenMuPath,process.L1TMuonPath)
 process.schedule.extend([process.output_step])

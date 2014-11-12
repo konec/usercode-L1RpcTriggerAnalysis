@@ -63,6 +63,9 @@ int  MtfCoordinateConverter::convert(std::pair<uint32_t,  unsigned int > aData, 
     float phi1 = convertRpc(aData.first,digi.fromStrip());
     float phi2 = convertRpc(aData.first,digi.toStrip());
     phi = (phi1+phi2)/2.0;
+    ///If phi1 is close to Pi, and phi2 close to -Pi the results phi is 0
+    ///instead -pi
+    if(phi1*phi2<0 && fabs(phi1)>M_PI/2.0) phi = (M_PI-phi)*(1 - 2*std::signbit(phi));
   }
     break;
   case MuonSubdetId::DT: {
