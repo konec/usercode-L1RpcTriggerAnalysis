@@ -126,7 +126,8 @@ bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
     obj.phi = it.phiValue();
     obj.pt  = RPCConst::ptFromIpt(it.pt_packed());
     obj.charge = it.chargeValue();
-    obj.q   = it.quality();
+    //obj.q   = it.quality();
+    obj.q   = it.bx();
     obj.bx  = it.bx();
     obj.type = L1Obj::OTF;
     result.push_back(obj);

@@ -2,9 +2,10 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("OMTFEmulation")
 import os
 import sys
+import commands
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-
+'''
 process.MessageLogger = cms.Service("MessageLogger",
        suppressInfo       = cms.untracked.vstring('AfterSource', 'PostModule'),
        destinations   = cms.untracked.vstring(
@@ -51,19 +52,27 @@ process.MessageLogger = cms.Service("MessageLogger",
                 GetByLabelWithoutRegistration  = cms.untracked.PSet (limit = cms.untracked.int32(0) ) 
        ),
 )
+'''
 
-
-#process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(10000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 process.source = cms.Source(
     'PoolSource',
-    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/Test/Ipt_16m_720_FullEta_Test_v2/crab_0_141028_111133/res/SingleMu_16_m_1_1_hvk.root',
-                                      'file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/Test/Ipt_16m_720_FullEta_Test_v2/crab_0_141028_111133/res/SingleMu_16_m_2_1_SZ6.root'
-                                      )
+    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/SingleMu_16_p_1_2_TWz.root')
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000))
+
+'''
+path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/"
+command = "ls "+path
+fileList = commands.getoutput(command).split("\n")
+
+process.source.fileNames =  cms.untracked.vstring()
+for aFile in fileList:
+    process.source.fileNames.append('file:'+path+aFile)
+'''
 
 ###PostLS1 geometry used
 process.load('Configuration.Geometry.GeometryExtendedPostLS1Reco_cff')
@@ -102,7 +111,7 @@ process.omtfAnalyser = cms.EDAnalyzer("OMTFAnalyzer",
 process.MuonEtaFilter = cms.EDFilter("SimTrackEtaFilter",
                                 minNumber = cms.uint32(1),
                                 src = cms.InputTag("g4SimHits"),
-                                cut = cms.string("momentum.eta<1.24 && momentum.eta>0.83")
+                                cut = cms.string("momentum.eta<1.24 && momentum.eta>0.83 &&  momentum.pt>1")
                                 )
 
 process.GenMuPath = cms.Path(process.MuonEtaFilter)
