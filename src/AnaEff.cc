@@ -82,8 +82,8 @@ double AnaEff::maxPt(const std::vector<L1Obj> & l1Objs) const
   return result; 
 }
 
-void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecObj * hitSpec)
-{
+void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, 
+		  const HitSpecObj * hitSpec,  const TrackObj *muon1){
   double etaMu = fabs(muon->eta());
   double ptMu  = muon->pt();  
 
@@ -93,6 +93,15 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecOb
   myEvent->pt = muon->pt();
   myEvent->eta = muon->eta();
   myEvent->phi = muon->phi(); 
+  myEvent->charge = muon->charge(); 
+
+  if(muon1){
+    myEvent->pt1 = muon1->pt();
+    myEvent->eta1 = muon1->eta();
+    myEvent->phi1 = muon1->phi(); 
+    myEvent->charge1 = muon1->charge(); 
+  }
+
   if(hitSpec && hitSpec->position().mag()>100){
     myEvent->phiHit = hitSpec->position().phi();
     myEvent->etaHit = hitSpec->position().eta();
@@ -101,7 +110,7 @@ void AnaEff::run( const TrackObj *muon, const L1ObjColl *l1Coll, const HitSpecOb
     myEvent->phiHit = -999;
     myEvent->etaHit = -999;
   }
-  myEvent->charge = muon->charge(); 
+
   /////////////////////////////
 
   static double matchingdR = theConfig.getParameter<double>("maxDR");

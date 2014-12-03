@@ -21,9 +21,16 @@ struct EventData: public TObject{
   float pt;
   float eta;
   float phi;
+  int charge;
+
+  float pt1;
+  float eta1;
+  float phi1;
+  int charge1;
+
   float phiHit;
   float etaHit;
-  int charge;
+
 
   std::vector<L1Obj> l1ObjectsOtf;
   std::vector<L1Obj> l1ObjectsGmt;

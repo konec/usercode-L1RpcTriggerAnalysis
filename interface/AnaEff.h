@@ -24,7 +24,8 @@ public:
   AnaEff(const edm::ParameterSet & cfg) :  debug(false), theConfig(cfg) {}
   ~AnaEff();
   void init(TObjArray& histos); 
-  void run(const TrackObj* muon, const L1ObjColl *l1Coll, const HitSpecObj * hitSpec);
+  void run(const TrackObj* muon, const L1ObjColl *l1Coll, const HitSpecObj * hitSpec,  
+	   const TrackObj *muon1=0);
 
   bool debug;
 

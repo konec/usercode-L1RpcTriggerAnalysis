@@ -47,10 +47,17 @@ void OMTFAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es){
 
   ///Get the simulated muon parameters
   TrackObj* simu = new TrackObj();
-  const SimTrack* aSimMuon = BestSimulatedMuonFinder().result(ev,es);
+  TrackObj* simu1 = new TrackObj();
+  const SimTrack* aSimMuon1 = BestSimulatedMuonFinder().result(ev,es);
+  const SimTrack* aSimMuon2 = BestSimulatedMuonFinder().result(ev,es,aSimMuon1);
+  const SimTrack* aSimMuon = aSimMuon1;
   if (aSimMuon) { 
     int charge = (abs(aSimMuon->type()) == 13) ? aSimMuon->type()/-13 : 0;
     simu->setKine(aSimMuon->momentum().pt(), aSimMuon->momentum().eta(),aSimMuon->momentum().phi(), charge);
+  }
+  if (aSimMuon2) { 
+    int charge = (abs(aSimMuon2->type()) == 13) ? aSimMuon2->type()/-13 : 0;
+    simu1->setKine(aSimMuon2->momentum().pt(), aSimMuon2->momentum().eta(),aSimMuon2->momentum().phi(), charge);
   }
 
   ///Get the GMT and old subststems response
@@ -66,7 +73,7 @@ void OMTFAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es){
 
   L1ObjColl myL1ObjColl;
   for(auto aObj:theL1Objs) myL1ObjColl.push_back(aObj, false, 0.); 
-  if (theAnaEff) theAnaEff->run(simu, &myL1ObjColl,0);
+  if (theAnaEff) theAnaEff->run(simu, &myL1ObjColl,0,simu1);
 }
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////

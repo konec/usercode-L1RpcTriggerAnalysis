@@ -1,4 +1,5 @@
 <use   name="root"/>
+<use   name="rootrflx"/>
 <use   name="FWCore/Framework"/>
 <use   name="DataFormats/L1Trigger"/>
 <use   name="DataFormats/RPCDigi"/>
@@ -31,3 +32,4 @@
 <export>
   <lib   name="1"/>
 </export>
+

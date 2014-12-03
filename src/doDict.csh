@@ -1,4 +1,4 @@
-#! /usr/local/bin/tcsh -f
+#! /bin/tcsh -f
 
 if ( ! ( $?ROOTSYS ) ) eval `scram runtime -csh`
 

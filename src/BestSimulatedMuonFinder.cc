@@ -11,7 +11,9 @@
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 
-const SimTrack * BestSimulatedMuonFinder::result(const edm::Event &ev, const edm::EventSetup &es)
+#include "Math/VectorUtil.h"
+
+const SimTrack * BestSimulatedMuonFinder::result(const edm::Event &ev, const edm::EventSetup &es, const SimTrack * previous)
 {
   const SimTrack * result = 0;
   edm::Handle<edm::SimTrackContainer> simTks;
@@ -24,6 +26,7 @@ const SimTrack * BestSimulatedMuonFinder::result(const edm::Event &ev, const edm
   for (std::vector<SimTrack>::const_iterator it=simTks->begin(); it< simTks->end(); it++) {
     const SimTrack & aTrack = *it;
     if ( !(aTrack.type() == 13 || aTrack.type() == -13) )continue;
+    if(previous && ROOT::Math::VectorUtil::DeltaR(aTrack.momentum(),previous->momentum())<0.07) continue;
     if ( !result || aTrack.momentum().pt() > result->momentum().pt()) result = &aTrack;
   }
   return result;

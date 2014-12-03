@@ -8,7 +8,7 @@ class BestSimulatedMuonFinder {
 
 public:
   BestSimulatedMuonFinder( ){};
-  const SimTrack *result(const edm::Event &ev, const edm::EventSetup &es);
+  const SimTrack *result(const edm::Event &ev, const edm::EventSetup &es, const SimTrack *previous=0);
 private:
 };
   
