@@ -54,15 +54,18 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 '''
 
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 process.source = cms.Source(
     'PoolSource',
-    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/JPsi_21kEvents.root')
+    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/JPsi_21kEvents.root')
+    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/SingleMu_16_p_1_2_TWz.root')
+    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_16_m_1_2_hCg.root') 
+
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000))
 
 '''
 path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/"
@@ -92,10 +95,16 @@ process.omtfEmulator = cms.EDProducer("OMTFProducer",
                                       TriggerPrimitiveSrc = cms.InputTag('L1TMuonTriggerPrimitives'),
                                       dumpResultToXML = cms.bool(False),                                     
                                       dumpGPToXML = cms.bool(False),                                     
-                                      makeConnectionsMaps = cms.bool(False),                                      
+                                      makeConnectionsMaps = cms.bool(False),
+                                      dropRPCPrimitives = cms.bool(False),                                    
+                                      dropDTPrimitives = cms.bool(True),                                    
+                                      dropCSCPrimitives = cms.bool(False),                                        
                                       omtf = cms.PSet(
-        configXMLFile = cms.string(path+"hwToLogicLayer.xml"),
-        patternsXMLFiles = cms.vstring(path+"Patterns_chPlus.xml",path+"Patterns_chMinus.xml"),
+        #configXMLFile = cms.string(path+"hwToLogicLayer.xml"),
+        #patternsXMLFiles = cms.vstring(path+"Patterns_chPlus.xml",path+"Patterns_chMinus.xml"),
+
+        configXMLFile = cms.string(path+"hwToLogicLayer_18layersFix2.xml"),
+        patternsXMLFiles = cms.vstring(path+"Patterns_ipt6_18.xml",path+"Patterns_ipt19_31.xml"),
         )
                                       )
 
