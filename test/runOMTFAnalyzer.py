@@ -85,8 +85,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
-path = os.environ['CMSSW_BASE']+"/src/UserCode/OMTFSimulation/data/"
-
+path = os.environ['CMSSW_BASE']+"/src/L1Trigger/L1TMuon/data/"
 
 process.load('L1Trigger.L1TMuon.L1TMuonTriggerPrimitiveProducer_cfi')
 
@@ -100,10 +99,7 @@ process.omtfEmulator = cms.EDProducer("OMTFProducer",
                                       dropDTPrimitives = cms.bool(True),                                    
                                       dropCSCPrimitives = cms.bool(False),                                        
                                       omtf = cms.PSet(
-        #configXMLFile = cms.string(path+"hwToLogicLayer.xml"),
-        #patternsXMLFiles = cms.vstring(path+"Patterns_chPlus.xml",path+"Patterns_chMinus.xml"),
-
-        configXMLFile = cms.string(path+"hwToLogicLayer_18layersFix2.xml"),
+        configXMLFile = cms.string(path+"hwToLogicLayer_721.xml"),
         patternsXMLFiles = cms.vstring(path+"Patterns_ipt6_18.xml",path+"Patterns_ipt19_31.xml"),
         )
                                       )
