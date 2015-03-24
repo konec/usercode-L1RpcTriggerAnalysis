@@ -4,9 +4,12 @@ import os
 import sys
 import commands
 
+verbose = False
+
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-'''
-process.MessageLogger = cms.Service("MessageLogger",
+
+if verbose: 
+    process.MessageLogger = cms.Service("MessageLogger",
        suppressInfo       = cms.untracked.vstring('AfterSource', 'PostModule'),
        destinations   = cms.untracked.vstring(
                                              'detailedInfo'
@@ -50,22 +53,23 @@ process.MessageLogger = cms.Service("MessageLogger",
                 Alignment  = cms.untracked.PSet (limit = cms.untracked.int32(0) ), 
                 GetManyWithoutRegistration  = cms.untracked.PSet (limit = cms.untracked.int32(0) ), 
                 GetByLabelWithoutRegistration  = cms.untracked.PSet (limit = cms.untracked.int32(0) ) 
-       ),
-)
-'''
+                ),
+                                        )
 
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
+if not verbose:
+    process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(50000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 process.source = cms.Source(
     'PoolSource',
-    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/JPsi_21kEvents.root')
+    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/JPsi_21kEvents.root')
     #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/SingleMu_16_p_1_2_TWz.root')
-    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_16_m_1_2_hCg.root') 
-
+    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_16_m_1_2_hCg.root') 
+    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_4_p_1_2_EFs.root', 
+    #                                  'file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_4_p_2_2_3b1.root')
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000))
 
 '''
 path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/"
@@ -90,6 +94,7 @@ path = os.environ['CMSSW_BASE']+"/src/UserCode/OMTFSimulation/data/"
 
 process.load('L1Trigger.L1TMuon.L1TMuonTriggerPrimitiveProducer_cfi')
 
+path1 = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Emulator/CMSSW_7_2_1/src/UserCode/OMTFSimulation/test/"
 ###OMTF emulator configuration
 process.omtfEmulator = cms.EDProducer("OMTFProducer",
                                       TriggerPrimitiveSrc = cms.InputTag('L1TMuonTriggerPrimitives'),
@@ -97,14 +102,12 @@ process.omtfEmulator = cms.EDProducer("OMTFProducer",
                                       dumpGPToXML = cms.bool(False),                                     
                                       makeConnectionsMaps = cms.bool(False),
                                       dropRPCPrimitives = cms.bool(False),                                    
-                                      dropDTPrimitives = cms.bool(True),                                    
+                                      dropDTPrimitives = cms.bool(False),                                    
                                       dropCSCPrimitives = cms.bool(False),                                        
                                       omtf = cms.PSet(
-        #configXMLFile = cms.string(path+"hwToLogicLayer.xml"),
-        #patternsXMLFiles = cms.vstring(path+"Patterns_chPlus.xml",path+"Patterns_chMinus.xml"),
 
-        configXMLFile = cms.string(path+"hwToLogicLayer_18layersFix2.xml"),
-        patternsXMLFiles = cms.vstring(path+"Patterns_ipt6_18.xml",path+"Patterns_ipt19_31.xml"),
+        configXMLFile = cms.string(path+"hwToLogicLayer_721_5760.xml"),
+        patternsXMLFiles = cms.vstring(path+"Patterns_ipt4_31_5760.xml"),
         )
                                       )
 
