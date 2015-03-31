@@ -28,8 +28,11 @@ public:
   unsigned int nAllMuons;
 private:  
   unsigned int theMuonBits; 
-  friend ostream & operator<< (ostream &out, const MuonObj &o);
 public:
 ClassDef(MuonObj,2)
 };
+
+
+std::ostream & operator<< (std::ostream &out, const MuonObj &o);
+
 #endif

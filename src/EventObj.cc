@@ -2,7 +2,7 @@
 
 
 ClassImp(EventObj)
-ostream & operator<< (ostream &out, const EventObj &o) {
+std::ostream & operator<< (std::ostream &out, const EventObj &o) {
   out <<"run: "<< o.run <<" event: "<<o.id<<" lumi: "<<o.lumi; 
   return out;
 }

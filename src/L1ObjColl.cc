@@ -132,7 +132,7 @@ std::vector<L1Obj> L1ObjColl::getL1ObjsSelected(
 }
 
 
-ostream & operator<< (ostream &out, const L1ObjColl &col)
+std::ostream & operator<< (std::ostream &out, const L1ObjColl &col)
  {
   for (unsigned int i=0; i< col.theL1Obj.size(); ++i) {
     out <<"("<<i<<")"<<col.theL1Obj[i];
@@ -142,7 +142,7 @@ ostream & operator<< (ostream &out, const L1ObjColl &col)
    return out;
  }
 
-ostream & operator<< (ostream &out, const L1Obj &o)
+std::ostream & operator<< (std::ostream &out, const L1Obj &o)
 {
   out<<"L1Obj: ";
   switch (o.type) {

@@ -4,7 +4,7 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "UserCode/OMTFSimulation/interface/OMTFConfiguration.h"
+#include "L1Trigger/L1TMuon/interface/OMTFConfiguration.h"
 
 #include "TObjArray.h"
 

@@ -77,8 +77,6 @@ public:
   }
 */
 
-  friend ostream & operator<< (ostream &out, const L1ObjColl&s);
-
 //tmp
   std::vector<L1Obj> getL1ObjsMatched(double ptMin = 0) const;
   std::vector<L1Obj> getL1ObjsSelected(
@@ -98,6 +96,10 @@ private:
 public:
 ClassDef(L1ObjColl,1)
 
+friend std::ostream & operator<< (std::ostream &out, const L1ObjColl&s);
+
 };
+
+
 
 #endif
