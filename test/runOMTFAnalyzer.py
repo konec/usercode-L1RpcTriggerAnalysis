@@ -85,8 +85,8 @@ for aFile in fileList:
 process.load('Configuration.Geometry.GeometryExtendedPostLS1Reco_cff')
 process.load('Configuration.Geometry.GeometryExtendedPostLS1_cff')
 ############################
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-from Configuration.AlCa.GlobalTag import GlobalTag
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 path = os.environ['CMSSW_BASE']+"/src/UserCode/OMTFSimulation/data/"
