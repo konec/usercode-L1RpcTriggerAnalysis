@@ -56,6 +56,8 @@ private:
 
   AnaEff              *theAnaEff;
 
+  unsigned int multiplyEvents;
+
 }; 
 
 #endif

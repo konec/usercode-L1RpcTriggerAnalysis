@@ -1,5 +1,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/plugins/OMTFAnalyzer.h"
 
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTCand.h"
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"
@@ -17,6 +19,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <strstream>
 
 OMTFAnalyzer::OMTFAnalyzer(const edm::ParameterSet & cfg)
   : theConfig(cfg), theAnaEff(0){
@@ -26,6 +29,8 @@ OMTFAnalyzer::OMTFAnalyzer(const edm::ParameterSet & cfg)
   trigOMTFCandSrc = cfg.getParameter<edm::InputTag>("OMTFCandSrc");
   trigGMTCandSrc = cfg.getParameter<edm::InputTag>("GMTCandSrc");
   g4SimTrackSrc = cfg.getParameter<edm::InputTag>("g4SimTrackSrc");
+  multiplyEvents = 1;
+  if (theConfig.exists("multiplyEvents"))  multiplyEvents = cfg.getParameter<unsigned int>("multiplyEvents");
 
   inputOMTFToken = consumes<std::vector<L1MuRegionalCand> >(trigOMTFCandSrc);
   inputGMTToken = consumes<L1MuGMTReadoutCollection>(trigGMTCandSrc);
@@ -45,6 +50,8 @@ void OMTFAnalyzer::beginJob(){
 ///////////////////////////////////////////////////////////////
 void OMTFAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es){
 
+  std::ostringstream myStr;
+
   ///Get the simulated muon parameters
   TrackObj* simu = new TrackObj();
   TrackObj* simu1 = new TrackObj();
@@ -62,10 +69,10 @@ void OMTFAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es){
 
   ///Get the GMT and old subststems response
   std::vector<L1Obj> theL1Objs;
-  getGMTReadout( ev, theL1Objs,L1Obj::RPCb); 
-  getGMTReadout( ev, theL1Objs,L1Obj::RPCf);
-  getGMTReadout( ev, theL1Objs,L1Obj::CSC);
-  getGMTReadout( ev, theL1Objs,L1Obj::DT);
+  //getGMTReadout( ev, theL1Objs,L1Obj::RPCb); 
+  //getGMTReadout( ev, theL1Objs,L1Obj::RPCf);
+  //getGMTReadout( ev, theL1Objs,L1Obj::CSC);
+  //getGMTReadout( ev, theL1Objs,L1Obj::DT);
   getGMTReadout( ev, theL1Objs,L1Obj::GMT);
 
   ///Get the OMTF result  
@@ -73,13 +80,17 @@ void OMTFAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es){
 
   L1ObjColl myL1ObjColl;
   for(auto aObj:theL1Objs) myL1ObjColl.push_back(aObj, false, 0.); 
-  if (theAnaEff) theAnaEff->run(simu, &myL1ObjColl,0,simu1);
+
+  for(unsigned int i=0;i<multiplyEvents;++i) if (theAnaEff) theAnaEff->run(simu, &myL1ObjColl,0,simu1);
+ 
 }
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 bool OMTFAnalyzer::getGMTReadout(const edm::Event &iEvent,
 				 std::vector<L1Obj> &result,
 				 L1Obj::TYPE type){
+
+  std::ostringstream myStr;
 
   edm::Handle<L1MuGMTReadoutCollection> gmtCandidates;
   iEvent.getByToken(inputGMTToken, gmtCandidates);
@@ -98,7 +109,12 @@ bool OMTFAnalyzer::getGMTReadout(const edm::Event &iEvent,
       case L1Obj::RPCf: { cands = RRItr->getFwdRPCCands(); break; }
       case L1Obj::DT:   { cands = RRItr->getDTBXCands(); break; }
       case L1Obj::CSC:  { cands = RRItr->getCSCCands(); break; }
-      case L1Obj::GMT:      { gmts  = RRItr->getGMTCands(); break; }
+      case L1Obj::GMT:      { gmts  = RRItr->getGMTCands(); 
+
+	myStr<<"GMT cands: "<<cands.size()<<std::endl;
+	if(cands.size()) myStr<<" GMT pt code: "<<cands[0].pt_packed()<<std::endl;
+	break; 
+      }
       case L1Obj::GMT_emu:  { gmts  = RRItr->getGMTCands(); break; }
       default: break;
     };
@@ -114,8 +130,9 @@ bool OMTFAnalyzer::getGMTReadout(const edm::Event &iEvent,
       if (it->empty()) continue;
       result.push_back( makeL1Obj( *it, type) );
     }
-
   }
+
+  edm::LogInfo("OMTFAnalyzer")<<myStr.str();
   return true;
 }
 ///////////////////////////////////////////////////////////////
@@ -128,14 +145,13 @@ bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
   for (auto it: *omtfCandidates.product()) {
     if (it.empty()) continue;
     L1Obj obj;
-    int tower = it.eta_packed();
-    obj.eta = tower;
+    obj.eta = it.etaValue()/1000*4.0;
     obj.phi = it.phiValue();
     obj.pt  = RPCConst::ptFromIpt(it.pt_packed());
     obj.charge = it.chargeValue();
-    //obj.q   = it.quality();
-    obj.q   = it.bx()%100;
-    obj.disc   = it.bx()/1000;
+    obj.q   = it.getHitsWord();
+    obj.refLayer   = it.quality();
+    obj.disc   = it.getDiscVal();
     obj.bx  = it.bx();
     obj.type = L1Obj::OTF;
     result.push_back(obj);

@@ -1,5 +1,6 @@
 <use   name="UserCode/L1RpcTriggerAnalysis"/>
-<use   name="L1Trigger/L1TMuon"/>
+<use   name="L1Trigger/L1OverlapMuonTrackFinder"/>
+
 
 <library   file="*.cc" name="UserCodeL1RpcTriggerAnalysisPlugins">
   <flags   EDM_PLUGIN="1"/>

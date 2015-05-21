@@ -4,7 +4,7 @@ import os
 import sys
 import commands
 
-verbose = False
+verbose = True
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
@@ -62,14 +62,13 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 process.source = cms.Source(
     'PoolSource',
-    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/JPsi_21kEvents.root')
+    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/JPsi_21kEvents.root')
     #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/SingleMu_16_p_1_2_TWz.root')
     #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_16_m_1_2_hCg.root') 
-    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_4_p_1_2_EFs.root', 
-    #                                  'file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_4_p_2_2_3b1.root')
+    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_6_m_1_2_VZc.root') 
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000))
 
 '''
 path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/"
@@ -89,7 +88,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
-path = os.environ['CMSSW_BASE']+"/src/UserCode/OMTFSimulation/data/"
+path = os.environ['CMSSW_BASE']+"/src/L1Trigger/L1TMuon/data/"
 
 
 process.load('L1Trigger.L1TMuon.L1TMuonTriggerPrimitiveProducer_cfi')
@@ -98,8 +97,11 @@ path1 = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Emulator/CMSSW_7_2_1/src/
 ###OMTF emulator configuration
 process.omtfEmulator = cms.EDProducer("OMTFProducer",
                                       TriggerPrimitiveSrc = cms.InputTag('L1TMuonTriggerPrimitives'),
-                                      dumpResultToXML = cms.bool(False),                                     
-                                      dumpGPToXML = cms.bool(False),                                     
+                                      dumpResultToXML = cms.bool(True),
+                                      XMLDumpFileName = cms.string("TestEvents.xml"),                                                                          
+                                      dumpGPToXML = cms.bool(False),
+                                      readEventsFromXML = cms.bool(False),
+                                      eventsXMLFiles = cms.vstring("TestEvents.xml"),                                     
                                       makeConnectionsMaps = cms.bool(False),
                                       dropRPCPrimitives = cms.bool(False),                                    
                                       dropDTPrimitives = cms.bool(False),                                    
@@ -123,7 +125,7 @@ process.omtfAnalyser = cms.EDAnalyzer("OMTFAnalyzer",
 process.MuonEtaFilter = cms.EDFilter("SimTrackEtaFilter",
                                 minNumber = cms.uint32(1),
                                 src = cms.InputTag("g4SimHits"),
-                                cut = cms.string("momentum.eta<1.24 && momentum.eta>0.83 &&  momentum.pt>1")
+                                cut = cms.string("momentum.eta<1.24 && momentum.eta>1.0 &&  momentum.pt>1")
                                 )
 
 process.GenMuPath = cms.Path(process.MuonEtaFilter)

@@ -9,7 +9,7 @@ struct L1Obj : public TObject {
 
   float pt, eta, phi;
   float disc;
-  int   bx, q, charge;
+  int   bx, q, charge, refLayer;
   TYPE  type;
 
  L1Obj() : pt(-1.),eta(99.),phi(99.),disc(-999), bx(0),q(-1), charge(99), type(NONE) {}
