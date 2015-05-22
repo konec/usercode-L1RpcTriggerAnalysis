@@ -10,6 +10,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
+#include "DataFormats/L1TMuon/interface/L1TRegionalMuonCandidate.h"
+#include "DataFormats/L1TMuon/interface/L1TRegionalMuonCandidateFwd.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaEff.h"
@@ -51,7 +53,7 @@ private:
   edm::ParameterSet theConfig;
   edm::InputTag trigOMTFCandSrc, trigGMTCandSrc, g4SimTrackSrc;
 
-  edm::EDGetTokenT<std::vector<L1MuRegionalCand> > inputOMTFToken;
+  edm::EDGetTokenT<l1t::L1TRegionalMuonCandidateCollection > inputOMTFToken;
   edm::EDGetTokenT<L1MuGMTReadoutCollection> inputGMTToken;
 
   AnaEff              *theAnaEff;

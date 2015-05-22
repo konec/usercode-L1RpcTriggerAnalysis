@@ -7,6 +7,7 @@
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 
+#include "L1Trigger/L1OverlapMuonTrackFinder/interface/OMTFConfiguration.h"
 #include "L1Trigger/RPCTrigger/interface/RPCConst.h"
 
 #include "SimDataFormats/Track/interface/SimTrack.h"
@@ -32,7 +33,7 @@ OMTFAnalyzer::OMTFAnalyzer(const edm::ParameterSet & cfg)
   multiplyEvents = 1;
   if (theConfig.exists("multiplyEvents"))  multiplyEvents = cfg.getParameter<unsigned int>("multiplyEvents");
 
-  inputOMTFToken = consumes<std::vector<L1MuRegionalCand> >(trigOMTFCandSrc);
+  inputOMTFToken = consumes<l1t::L1TRegionalMuonCandidateCollection >(trigOMTFCandSrc);
   inputGMTToken = consumes<L1MuGMTReadoutCollection>(trigGMTCandSrc);
   consumes<edm::SimTrackContainer>(g4SimTrackSrc);
 
@@ -140,19 +141,20 @@ bool OMTFAnalyzer::getGMTReadout(const edm::Event &iEvent,
 bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
 				     std::vector<L1Obj> &result){
 
-  edm::Handle<std::vector<L1MuRegionalCand> > omtfCandidates; 
+  edm::Handle<l1t::L1TRegionalMuonCandidateCollection > omtfCandidates; 
   iEvent.getByToken(inputOMTFToken, omtfCandidates);
   for (auto it: *omtfCandidates.product()) {
-    if (it.empty()) continue;
+    if (!it.hwPt()) continue;
     L1Obj obj;
-    obj.eta = it.etaValue()/1000*4.0;
-    obj.phi = it.phiValue();
-    obj.pt  = RPCConst::ptFromIpt(it.pt_packed());
-    obj.charge = it.chargeValue();
-    obj.q   = it.getHitsWord();
-    obj.refLayer   = it.quality();
-    obj.disc   = it.getDiscVal();
-    obj.bx  = it.bx();
+    obj.eta = it.hwEta()/1000.0*4.0;
+    obj.phi = (float)(it.hwPhi())/OMTFConfiguration::nPhiBins*2*M_PI;
+    if(obj.phi>M_PI) obj.phi-=2*M_PI;
+    obj.pt  = RPCConst::ptFromIpt(it.hwPt());
+    obj.charge = it.hwSign();
+    obj.q   = it.hwQual();
+    obj.refLayer   = it.hwTrackAddress();
+    obj.disc   = it.link();
+    obj.bx  = it.hwSignValid();
     obj.type = L1Obj::OTF;
     result.push_back(obj);
   }
