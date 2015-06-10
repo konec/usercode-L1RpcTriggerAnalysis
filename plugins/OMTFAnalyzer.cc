@@ -146,17 +146,21 @@ bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
   for (auto it: *omtfCandidates.product()) {
     if (!it.hwPt()) continue;
     L1Obj obj;
-    obj.eta = it.hwEta()/1000.0*4.0;
+    obj.eta = it.hwEta()/240.0*2.61;
+    //obj.phi = (float)(it.hwPhi())*10/OMTFConfiguration::nPhiBins*2*M_PI;
+    ////TEST
     obj.phi = (float)(it.hwPhi())/OMTFConfiguration::nPhiBins*2*M_PI;
+    /////
     if(obj.phi>M_PI) obj.phi-=2*M_PI;
-    obj.pt  = RPCConst::ptFromIpt(it.hwPt());
+    obj.pt  = it.hwPt()*2.0;
     obj.charge = it.hwSign();
-    obj.q   = it.hwQual();
-    obj.refLayer   = it.hwTrackAddress();
+    obj.q   = it.hwTrackAddress();
+    obj.refLayer   = it.hwQual(); 
     obj.disc   = it.link();
     obj.bx  = it.hwSignValid();
     obj.type = L1Obj::OTF;
     result.push_back(obj);
+    edm::LogInfo("OMTFAnalyzer")<<obj;
   }
   return true;
 }
