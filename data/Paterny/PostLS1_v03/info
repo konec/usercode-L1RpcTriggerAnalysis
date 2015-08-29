@@ -1,0 +1,10 @@
+mix
+
+t0-9 from D_20110921_fixedCones_new36__all_12
+t10-12 from D_LS1_V006__all_12, gdzie quality 4,5,6 z endcapu zamienia sie na 0,1,2
+0 (1|2) & 3 & 4 : 4 -> 0
+1 1 & 2 & (3|4) : 5 -> 1
+2 1 & 2 & 3 & 4 : 6 -> 2
+uzywam ~/bim/change.sh xml - te dla wiez 10, 11, 12 
+t13-16 z D_20110921_fixedCones_new36__all_12 - bo wszedzie sa takie same
+
