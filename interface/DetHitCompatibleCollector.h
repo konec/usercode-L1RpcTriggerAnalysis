@@ -9,6 +9,7 @@ namespace edm { class Event; class EventSetup; }
 namespace reco { class Muon; }
 class TObjArray;
 class TH1F;
+class TH2F;
 
 class DetHitCompatibleCollector {
 public:
@@ -24,8 +25,9 @@ public:
   void initHistos( TObjArray & histos);
   
 private:
-  TH1F *hPullX_B[6], *hPullX_E[3], *hDistX_B[6], *hDistX_E[3] , *hPullX;
-  TH1F *hPullY_B[6], *hPullY_E[3], *hDistY_B[6], *hDistY_E[3] , *hPullY;
+  TH1F *hPullX_B[6], *hPullX_E[4], *hDistX_B[6], *hDistX_E[4] , *hPullX;
+  TH1F *hPullY_B[6], *hPullY_E[4], *hDistY_B[6], *hDistY_E[4] , *hPullY;
+  TH2F *hPlaceComp, *hPlaceDiff;
   TH1F *hPropToDetDeltaR;
 
   bool theNoDigiWarning;

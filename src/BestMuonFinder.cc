@@ -40,11 +40,11 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
 
 
   //getBeamSpot
-  math::XYZPoint reference(0.,0.,0.);
   edm::InputTag beamSpot =  theConfig.getParameter<edm::InputTag>("beamSpot");
   edm::Handle<reco::BeamSpot> bsHandle;
   ev.getByLabel( beamSpot, bsHandle);
-  if (bsHandle.isValid()) reference = math::XYZPoint(bsHandle->x0(), bsHandle->y0(), bsHandle->z0());
+  math::XYZPoint reference =  (bsHandle.isValid())  ?  math::XYZPoint(bsHandle->x0(), bsHandle->y0(), bsHandle->z0())
+                                                    :  math::XYZPoint(0.,0.,0.);
 
   //get Muon
   edm::Handle<reco::MuonCollection> muons;
@@ -56,8 +56,11 @@ bool BestMuonFinder::run(const edm::Event &ev, const edm::EventSetup &es)
     return false;
   }
   theAllMuons = muons->size();
+//  std::cout <<"SIZE of muons: " <<  muons->size() << std::endl;
   
   for (reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+//    std::cout << "HERE Muon:" <<" Glb: "<< im->isGlobalMuon() <<" pt="<<im->bestTrack()->pt() 
+//              <<" eta="<<im->bestTrack()->eta() <<" phi="<<im->bestTrack()->phi() <<" chi2: "<<im->bestTrack()->normalizedChi2()<<std::endl;
 
 /*
 if (ev.id().event() == 352597514) {
@@ -79,7 +82,7 @@ if (ev.id().event() == 352597514) {
     if (im->isStandAloneMuon())  std::cout <<" StandaloneMuon"<<std::endl;
 }
 */
-    if (im->bestTrack()->eta() >  theConfig.getParameter<double>("maxEta")) continue;
+    if ( fabs(im->bestTrack()->eta()) >  theConfig.getParameter<double>("maxAbsEta")) continue;
     if (im->bestTrack()->pt() < theConfig.getParameter<double>("minPt")) continue;
     if (im->numberOfMatchedStations() <  theConfig.getParameter<int>("minNumberOfMatchedStations")) continue;
 

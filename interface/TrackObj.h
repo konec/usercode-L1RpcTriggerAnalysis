@@ -15,8 +15,14 @@ public:
 private:
    float thePt, theEta, thePhi;
    int theCharge;
-   friend ostream & operator<< (ostream &out, const TrackObj &o);
+
 public:
 ClassDef(TrackObj,1)
+
+friend std::ostream & operator<< (std::ostream &out, const TrackObj &o);
+
 };
+
+
+
 #endif

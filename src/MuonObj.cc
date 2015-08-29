@@ -1,7 +1,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 ClassImp(MuonObj)
 
-ostream & operator<< (ostream &out, const MuonObj &o)
+std::ostream & operator<< (std::ostream &out, const MuonObj &o)
 {
   out<<(TrackObj)o <<" MuonObj: ";
   out <<" stat: "<<o.nMatchedStations;

@@ -85,9 +85,11 @@ bool L1ObjMaker:: getRpcRegional(const edm::Event &ev, std::vector<L1Obj> & resu
   RegCand allRpcCand;
 
   edm::Handle<std::vector<L1MuRegionalCand> > candB;
-  ev.getByLabel(l1RpcDigis.label(), "RPCb", candB);
+  ev.getByLabel(edm::InputTag(l1RpcDigis.label(), "RPCb"), candB);
+
   edm::Handle<std::vector<L1MuRegionalCand> > candF;
-  ev.getByLabel(l1RpcDigis.label(), "RPCf", candF);
+  edm::InputTag l1RpcDigisRPCf(l1RpcDigis.label(),"RPCf");
+  ev.getByLabel(edm::InputTag(l1RpcDigis.label(),"RPCf"), candF);
 
   if (!candB.isValid() && !candF.isValid() ) return false;
 

@@ -54,7 +54,8 @@ using namespace std;
 
 FilterGM::FilterGM(const edm::ParameterSet& cfg)
   :  theCounter(0), theAllCounter(0)
-{ }
+{
+  theMuCollection = consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("muons")); }
 
 FilterGM::~FilterGM()
 { 
@@ -65,7 +66,7 @@ bool FilterGM::filter(edm::Event&ev, const edm::EventSetup&es)
 {
   theAllCounter++;
   edm::Handle<reco::TrackCollection> muonCollection;
-  ev.getByLabel(InputTag("globalMuons"),muonCollection);
+  ev.getByToken(theMuCollection,muonCollection);
 
   bool hasMuon = (muonCollection->size() !=0) ? true : false;
   if (hasMuon) theCounter++;

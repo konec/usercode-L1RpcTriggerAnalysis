@@ -16,9 +16,11 @@ LinkSynchroMerger::LinkSynchroMerger(const edm::ParameterSet& cfg)
 {}
 
 void LinkSynchroMerger::beginJob()
-{ RPCMonitorLinkSynchro::beginJob(); }
+{ 
+// RPCMonitorLinkSynchro::beginJob();    //FIXME_MK  
+}
 
-void LinkSynchroMerger::beginRun(const edm::Run& ev, const edm::EventSetup& es)
+void LinkSynchroMerger::mkBeginRun(const edm::Run& ev, const edm::EventSetup& es)
 {
   RPCMonitorLinkSynchro::beginRun(ev,es);
   if(!isInitialised) {

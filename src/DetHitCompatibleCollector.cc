@@ -37,7 +37,9 @@
 
 #include "TObjArray.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include <sstream>
+#include <cmath>
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackAtSurface.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/RPCDetIdUtil.h"
@@ -74,7 +76,8 @@ std::vector<DetCluDigiObj> DetHitCompatibleCollector::compatibleHits( const reco
   ev.getByLabel("rpcRecHits", recHits);
 
   edm::Handle<RPCDigiCollection> rpcDigis;
-  ev.getByLabel("muonRPCDigis", rpcDigis);
+//  ev.getByLabel("muonRPCDigis", rpcDigis);
+  ev.getByLabel("rpcunpacker", rpcDigis);
 
   edm::ESHandle<RPCGeometry> rpcGeometry;
   es.get<MuonGeometryRecord>().get(rpcGeometry);
@@ -131,7 +134,10 @@ std::vector<DetCluDigiObj> DetHitCompatibleCollector::compatibleHits( const reco
         for (RPCDigiCollection::const_iterator id = range.first; id != range.second; ++id) if (id->bx() == 0) strips[id->strip()] = true;
         if ( strips.size() == 0 ) std::cout <<"WARNING ***************"<<std::endl;
         aMap[rpcDet.rawId()].second = strips.size(); 
-      } else theNoDigiWarning = true;
+      } else {
+        theNoDigiWarning = true;
+        std::cout <<"Hit compatible but no valid digis found! Det: "<< ih->rpcId()<<"is valid: "<< ih->isValid()<< "BX= "<<ih->BunchX() << std::endl;
+      }
     }
 
     RPCDetIdUtil place(rpcDet);
@@ -145,9 +151,17 @@ std::vector<DetCluDigiObj> DetHitCompatibleCollector::compatibleHits( const reco
       hDistX_E[place.layer()-1]->Fill(distX);
       hPullY_E[place.layer()-1]->Fill(pullY);
       hDistY_E[place.layer()-1]->Fill(distY);
+      { 
+        double ilayer = rpcDet.station() * rpcDet.region();
+        double phi    =  (rpcGeometry->idToDet(rpcDet)->toGlobal(ih->localPosition())).phi(); 
+        if (hitCompatible) hPlaceComp->Fill(ilayer, phi); else hPlaceDiff->Fill(ilayer, phi);
+      }
     }
     hPullX->Fill(pullX);
     hPullY->Fill(pullY);
+
+    if (!place.isBarrel()) {
+    }
   }
 
 
@@ -246,7 +260,7 @@ void DetHitCompatibleCollector::initHistos( TObjArray & histos)
     hPullY_B[i-1]= new TH1F(namePullY_B.str().c_str(),namePullY_B.str().c_str(),50,-5.,5.);  histos.Add( hPullY_B[i-1]);
     hDistY_B[i-1]= new TH1F(nameDistY_B.str().c_str(),nameDistY_B.str().c_str(),100,-100.,100.);  histos.Add( hDistY_B[i-1]);
   }
-  for (unsigned int i=1; i<=3; ++i) {
+  for (unsigned int i=1; i<=4; ++i) {
     std::stringstream namePullX_E; namePullX_E <<"hPullX_E" << i;
     std::stringstream nameDistX_E; nameDistX_E <<"hDistX_E"<< i;
     hPullX_E[i-1]= new TH1F(namePullX_E.str().c_str(),namePullX_E.str().c_str(),50,-5.,5.);  histos.Add( hPullX_E[i-1]);
@@ -258,6 +272,8 @@ void DetHitCompatibleCollector::initHistos( TObjArray & histos)
   }
   hPullX = new TH1F("hPullX","hPullX",50,-5.,5.);  histos.Add( hPullX);
   hPullY = new TH1F("hPullY","hPullY",50,-5.,5.);  histos.Add( hPullY);
+  hPlaceComp = new TH2F("hPlaceComp","hPlaceComp",9, -4.5,4.5,  144, -M_PI, M_PI);  histos.Add(hPlaceComp);
+  hPlaceDiff = new TH2F("hPlaceDiff","hPlaceDiff",9, -4.5,4.5,  144, -M_PI, M_PI);  histos.Add(hPlaceDiff); 
 
   hPropToDetDeltaR = new TH1F("hPropToDetDeltaR","DR good Mu-DU before propagation",100,0.,3.);  histos.Add(hPropToDetDeltaR);
 }

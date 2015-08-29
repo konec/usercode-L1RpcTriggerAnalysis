@@ -13,7 +13,7 @@
 #include "L1Trigger/DTUtilities/interface/DTTrigGeom.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 
-#include "L1TriggerDPGUpgrade/DataFormats/interface/L1TMuonTriggerPrimitive.h"
+// FIXME_MK #include "L1TriggerDPGUpgrade/DataFormats/interface/L1TMuonTriggerPrimitive.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/DTphDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/CSCDigiSpec.h"

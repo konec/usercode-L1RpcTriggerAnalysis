@@ -53,7 +53,8 @@ TrackAtSurface::TrackAtSurface(const reco::Muon* mu,const edm::Event &ev, const 
 //refit global muons, take tracjctory colsest to Mu. 
   typedef std::vector<Trajectory> Trajectories;
   edm::Handle<Trajectories> trajectories;
-  edm::InputTag refitTag("globalMuons","Refitted");
+//  edm::InputTag refitTag("globalMuons","Refitted");
+  edm::InputTag refitTag("refittedMuons","Refitted");
   ev.getByLabel(refitTag,trajectories);
   double minDR =  0.3;
   for (Trajectories::const_iterator it=trajectories->begin(); it != trajectories->end(); ++it) {

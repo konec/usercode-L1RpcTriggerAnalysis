@@ -20,8 +20,8 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObj.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObj.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/SynchroCountsObjVect.h"
+#include "UserCode/L1RpcTriggerAnalysis/interface/DetCluDigiObjVect.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/HitSpecObj.h"
 
@@ -60,6 +60,7 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   if (theConfig.exists("anaOtfEff")) theAnaOtfEff = new AnaOtfEff( cfg.getParameter<edm::ParameterSet>("anaOtfEff"));
   if (theConfig.exists("anaEff")) theAnaEff = new   AnaEff(cfg.getParameter<edm::ParameterSet>("anaEff") );
   if (theConfig.exists("anaRpcVsOth")) theAnaRpcVsOth = new   AnaRpcVsOth(cfg.getParameter<edm::ParameterSet>("anaRpcVsOth") );
+  if (theConfig.exists("anaSynch")) theAnaSynch = new AnaSynch();
   
 }
 
@@ -114,78 +115,74 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
   //
   // prepare datastructures and branches
   //
-  /* AK
-  std::vector<SynchroCountsObj> *counts= 0;
+  //std::vector<SynchroCountsObj> *counts= 0;
   std::vector<uint32_t> *detsCrossedByMuon = 0;
   std::vector<uint32_t> *detsCrossedByMuonDeepInside = 0;
-  std::vector<DetCluDigiObj> *detsHitsCompatibleWithMuon = 0;
+  //std::vector<DetCluDigiObj> *detsHitsCompatibleWithMuon = 0;
   std::vector<uint32_t> *detsSIMU = 0;
-  */
   std::vector<std::pair<uint32_t, uint32_t> > *digSpec = 0;
   //std::vector<std::pair<uint32_t, uint32_t> > *digSpecFiltered = 0;
 
   EventObj * event = 0;
   MuonObj * muon = 0;
   TrackObj * simu = 0;
-  /* AK
   TriggerMenuResultObj *bitsL1  = 0;
   TriggerMenuResultObj *bitsHLT = 0;
 
-  TBranch *bcounts=0;
+  //TBranch *bcounts=0;
   TBranch *bdetsCrossedByMuon =0;
   TBranch *bdetsCrossedByMuonDeepInside =0;
-  TBranch *bdetsHitsCompatibleWithMuon = 0;
+  //TBranch *bdetsHitsCompatibleWithMuon = 0;
   TBranch *bdetsSIMU =0;
-  */
   TBranch *bdigSpec = 0;
   //TBranch *bdigSpecFiltered = 0;
 
+  
+  SynchroCountsObjVect* synchroCounts = 0;
+  DetCluDigiObjVect* detsHitsCompatibleWithMuon = 0;
   L1ObjColl* l1ObjColl = 0;
   HitSpecObj* hitSpec = 0;
-  HitSpecObj* hitSpecSt1 = 0;
-  HitSpecObj* hitSpecProp = 0;
+  //HitSpecObj* hitSpecSt1 = 0;
+  //HitSpecObj* hitSpecProp = 0;
 
   chain.SetBranchAddress("event",&event);
-  //AK chain.SetBranchAddress("muon",&muon);
+  chain.SetBranchAddress("muon",&muon);
   chain.SetBranchAddress("simu",&simu);
 
-  //AK chain.SetBranchAddress("bitsL1",&bitsL1);
-  //AK chain.SetBranchAddress("bitsHLT",&bitsHLT);
-  //AK chain.SetBranchAddress("counts",&counts,&bcounts);
-  //AK chain.SetBranchAddress("detsCrossedByMuon",&detsCrossedByMuon,&bdetsCrossedByMuon);
-  //AK chain.SetBranchAddress("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside,&bdetsCrossedByMuonDeepInside);
-  //AK chain.SetBranchAddress("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon,&bdetsHitsCompatibleWithMuon);
-  //AK chain.SetBranchAddress("detsSIMU",&detsSIMU,&bdetsSIMU);
+  chain.SetBranchAddress("bitsL1",&bitsL1);
+  chain.SetBranchAddress("bitsHLT",&bitsHLT);
+  //chain.SetBranchAddress("counts",&counts,&bcounts);
+  chain.SetBranchAddress("detsCrossedByMuon",&detsCrossedByMuon,&bdetsCrossedByMuon);
+  chain.SetBranchAddress("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside,&bdetsCrossedByMuonDeepInside);
+  //chain.SetBranchAddress("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon,&bdetsHitsCompatibleWithMuon);
+  chain.SetBranchAddress("detsSIMU",&detsSIMU,&bdetsSIMU);
   chain.SetBranchAddress("digSpec",&digSpec,&bdigSpec);
   //chain.SetBranchAddress("digSpecFiltered",&digSpecFiltered,&bdigSpecFiltered);
 
+  chain.SetBranchAddress("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon);
+  chain.SetBranchAddress("synchroCounts",&synchroCounts);
   chain.SetBranchAddress("l1ObjColl",&l1ObjColl);
   chain.SetBranchAddress("hitSpec",&hitSpec);
-  chain.SetBranchAddress("hitSpecSt1",&hitSpecSt1);
-  chain.SetBranchAddress("hitSpecProp",&hitSpecProp);
+  //chain.SetBranchAddress("hitSpecSt1",&hitSpecSt1);
+  //chain.SetBranchAddress("hitSpecProp",&hitSpecProp);
   
   //
   // number of events
   //
   Int_t nentries= (Int_t) chain.GetEntries();
-  if(nentries<1E6) nentries = 1E4;
-  //if(nentries>1E6) nentries = 5E6;
   std::cout <<" ENTRIES: " << nentries << std::endl;
  
-  nentries = 35;
-  nentries = 1E4;
-
   //
   // main loop
   //
   unsigned int lastRun = 0;
-  for (int ev=31; ev<nentries; ev+=1) {
+  for (int ev=0; ev<nentries; ev++) {
 
     chain.GetEntry(ev);
-    //AK if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
+    if (theAnaMenu) theAnaMenu->updateMenu(bitsL1->names, bitsHLT->names);
 
-    if ( (lastRun != (*event).run) || (ev%(nentries/20)==0)) { 
-    //if ( (lastRun != (*event).run) || true) { 
+    if ( (lastRun != (*event).run) || (ev%(std::max(nentries/10,1))==0)) { 
+//    if ( (lastRun != (*event).run) || true) { 
       lastRun = (*event).run; 
       std::cout <<"RUN:"    << std::setw(7) << (*event).run
                 <<" event:" << std::setw(8) << ev
@@ -195,42 +192,39 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
 
    // EVENT NUMBER, BX structure etc.
    EventObjBXExtra eventBx(*event);
-   //AK if ( theAnaEvent && !theAnaEvent->filter(&eventBx) && theConfig.getParameter<bool>("filterByAnaEvent") ) continue;
+   if ( theAnaEvent && !theAnaEvent->filter(&eventBx) && theConfig.getParameter<bool>("filterByAnaEvent") ) continue;
    // ANALYSE AND FILTER KINEMCTICS 
-   //AK if ( theAnaMuonDistribution && !theAnaMuonDistribution->filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
+   if ( theAnaMuonDistribution && !theAnaMuonDistribution->filter(muon) && theConfig.getParameter<bool>("filterByAnaMuonDistribution") ) continue;
    // ANALYSE AND FILTER TRIGGER MENU
-   //AK if ( theAnaMenu && !theAnaMenu->filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("filterByAnaMenu") ) continue;
-   // ANALYSE AND FILTER SIMU KONEMATICs
-   if (theAnaSiMuDistribution && !theAnaSiMuDistribution->filter(event, simu, hitSpec, hitSpecProp) && theConfig.getParameter<bool>("filterByAnaSiMuDistribution") ) continue;
+   if ( theAnaMenu && !theAnaMenu->filter(event, muon, bitsL1, bitsHLT) && theConfig.getParameter<bool>("filterByAnaMenu") ) continue;
+   // ANALYSE AND FILTER SIMU KINEMATICs
+//   if (theAnaSiMuDistribution && !theAnaSiMuDistribution->filter(event, simu, hitSpec, hitSpecProp) && theConfig.getParameter<bool>("filterByAnaSiMuDistribution") ) continue;
 
-   const TrackObj * refTrack = theConfig.getParameter<bool>("useSiMuReference") ? simu : muon;
+//   const TrackObj * refTrack = theConfig.getParameter<bool>("useSiMuReference") ? simu : muon;
 
    // ANALYSES 
-   //AK if (theAnaRpcVsOth) theAnaRpcVsOth->run(refTrack,l1ObjColl);
-   /*
-   if (theAnaRpcMisc)  theAnaRpcMisc->run(event,muon,l1ObjColl);
-   if (theAnaDet)      theAnaDet->run( muon, *detsHitsCompatibleWithMuon,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
-   if (theAnaEmu)      theAnaEmu->run ( event, muon, l1ObjColl);
-   if (theAnaSynch)    theAnaSynch->run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
-   if (theAnaClu)      theAnaClu->run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
-   if (theAnaTimingL1) theAnaTimingL1->run( &eventBx, muon, l1ObjColl);
-   */
+//   if (theAnaRpcVsOth) theAnaRpcVsOth->run(refTrack,l1ObjColl);
+//   if (theAnaRpcMisc)  theAnaRpcMisc->run(event,muon,l1ObjColl);
+//   if (theAnaDet)      theAnaDet->run( muon, detsHitsCompatibleWithMuon->data,  *detsCrossedByMuon, *detsCrossedByMuonDeepInside);
+//   if (theAnaEmu)      theAnaEmu->run ( event, muon, l1ObjColl);
+//   if (theAnaSynch)    theAnaSynch->run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( *counts));
+   if (theAnaSynch)    theAnaSynch->run( event, muon, ConverterRPCRawSynchroSynchroCountsObj::toRawSynchro( synchroCounts->data));
+//  if (theAnaClu)      theAnaClu->run( event, muon, l1ObjColl, *detsHitsCompatibleWithMuon);
+//  if (theAnaTimingL1) theAnaTimingL1->run( &eventBx, muon, l1ObjColl);
    // HITPATTERN ANALYSES & OTF EFFICIENCY
 
    if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
-   if (thePatternProducer) thePatternProducer->run(event, es, simu, hitSpecProp, *digSpec);/////propageted state used, filtered digis used!!!
+//   if (thePatternProducer) thePatternProducer->run(event, es, simu, hitSpecProp, *digSpec);/////propageted state used, filtered digis used!!!
    L1Obj l1otf;
    if (thePatternProvider){
-     //std::string a;
-     //std::cin>>a;
      thePatternProvider->makePhiMap(es);
-     l1otf=thePatternProvider->check(event, es, simu, hitSpecProp, hitSpecSt1, *digSpec);   
+//     l1otf=thePatternProvider->check(event, es, simu, hitSpecProp, hitSpecSt1, *digSpec);   
    }
    if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf);  
    L1ObjColl myL1ObjColl = *l1ObjColl;
    myL1ObjColl.push_back(l1otf, false, 0.); 
-   if (theAnaEff) theAnaEff->run(refTrack, &myL1ObjColl, hitSpecProp);
+//   if (theAnaEff) theAnaEff->run(refTrack, &myL1ObjColl, hitSpecProp);
   }
 }
 

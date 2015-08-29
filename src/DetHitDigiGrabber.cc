@@ -199,7 +199,7 @@ std::vector<DTphDigiSpec> DetHitDigiGrabber::dtPhiDetDigis(const edm::Event &ev,
     if (warnNoColl) std::cout <<"** WARNING: not collection: "<< dtDigisCollName<< std::endl;
     return result;
   }
-  L1MuDTChambPhContainer::Phi_Container * phi_Container = dtPhiDigiColls->getContainer();
+  const L1MuDTChambPhContainer::Phi_Container * phi_Container = dtPhiDigiColls->getContainer();
   typedef L1MuDTChambPhContainer::Phi_iterator IP;
 
   for (IP ip = phi_Container->begin(); ip < phi_Container->end(); ip++){

@@ -24,15 +24,16 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/TriggerMenuResultObj.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestSimulatedMuonFinder.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include "TFile.h"
 #include "TTree.h"
 
 //tmp
-//#include "Geometry/CommonDetUnit/interface/GeomDet.h"
-//#include "DataFormats/MuonDetId/interface/RPCDetId.h"
-//#include "DataFormats/RPCRecHit/interface/RPCRecHitCollection.h"
-//#include "DataFormats/DetId/interface/DetIdCollection.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "DataFormats/MuonDetId/interface/RPCDetId.h"
+#include "DataFormats/RPCRecHit/interface/RPCRecHitCollection.h"
+#include "DataFormats/DetId/interface/DetIdCollection.h"
 
 
 template <class T> T sqr( T t) {return t*t;}
@@ -40,7 +41,8 @@ template <class T> T sqr( T t) {return t*t;}
 L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
   : theConfig(cfg), theTree(0), event(0), muon(0), simu(0), 
     bitsL1(0), bitsHLT(0),
-    counts(0), 
+    detsHitsCompatibleWithMuon(0),
+    synchroCounts(0),
     l1ObjColl(0),hitSpec(0), hitSpecSt1(0), 
     theCounter(0),
     theBestMuonFinder(cfg.getParameter<edm::ParameterSet>("bestMuonFinder")),
@@ -51,7 +53,24 @@ L1RpcTreeMaker::L1RpcTreeMaker(const edm::ParameterSet& cfg)
                       ?  cfg.getParameter<edm::ParameterSet>("menuInspector")
                       : edm::ParameterSet() ),
     theDetHitDigiGrabber( cfg.getParameter<edm::ParameterSet>("detHitDigiGrabber") )
-{ }
+{  
+  theBestMuon_Tag = consumes<reco::MuonCollection> (theConfig
+                             .getParameter<edm::ParameterSet>("bestMuonFinder")
+                             .getParameter<std::string>("muonColl") );
+  theSynchroCounts_Tag = consumes<RPCRawSynchro::ProdItem> (theConfig
+                             .getParameter<edm::ParameterSet>("linkSynchroGrabber")
+                             .getParameter<edm::InputTag>("rawSynchroTag") );
+  theL1TriggerResult_Tag = consumes<L1GlobalTriggerReadoutRecord> (edm::InputTag("gtDigis"));
+  theL1GMTReadout_Tag = consumes<L1MuGMTReadoutCollection> (edm::InputTag("gtDigis"));
+  theL1GMTEmulReadout_Tag = consumes<L1MuGMTReadoutCollection> (edm::InputTag("l1GmtEmulDigis"));
+  theHLTTriggerResult_Tag = consumes<edm::TriggerResults> (edm::InputTag("TriggerResults","","HLT"));
+  theL1TriggerMenuLite_Tag = consumes<L1GtTriggerMenuLite>   (edm::InputTag("l1GtTriggerMenuLite","","RECO"));
+  //theL1TriggerMenuLite_Tag = consumes<L1GtTriggerMenuLite>   (edm::InputTag("l1GtTriggerMenuLite")); //,"","RECO"));
+  theL1RpcbEmu_Tag = consumes<std::vector<L1MuRegionalCand> > (edm::InputTag("l1RpcEmulDigis","RPCb",""));
+  theL1RpcfEmu_Tag = consumes<std::vector<L1MuRegionalCand> > (edm::InputTag("l1RpcEmulDigis","RPCf"));
+
+}
+  
 
 void L1RpcTreeMaker::beginRun(const edm::Run &ru, const edm::EventSetup &es)
 {
@@ -65,21 +84,22 @@ void L1RpcTreeMaker::beginJob()
   theTree = new TTree("tL1Rpc","L1RpcEfficciency");
 
   theTree->Branch("event","EventObj",&event,32000,99);
-  //theTree->Branch("muon","MuonObj",&muon,32000,99);
+  theTree->Branch("muon","MuonObj",&muon,32000,99);
   theTree->Branch("simu", "TrackObj",&simu,32000,99);
-  /*
   theTree->Branch("bitsL1" ,"TriggerMenuResultObj",&bitsL1 ,32000,99);
   theTree->Branch("bitsHLT","TriggerMenuResultObj",&bitsHLT,32000,99);
 
-  theTree->Branch("counts",&counts);
+//  theTree->Branch("counts",&counts);
   theTree->Branch("detsCrossedByMuon",&detsCrossedByMuon);
   theTree->Branch("detsCrossedByMuonDeepInside",&detsCrossedByMuonDeepInside);
-  theTree->Branch("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon);
+//  theTree->Branch("detsHitsCompatibleWithMuon",&detsHitsCompatibleWithMuon);
+  theTree->Branch("detsHitsCompatibleWithMuon","DetCluDigiObjVect", &detsHitsCompatibleWithMuon, 32000,99);
   theTree->Branch("detsSIMU",&detsSIMU);
-  */
+
+  theTree->Branch("synchroCounts","SynchroCountsObjVect",&synchroCounts,32000,99);
   theTree->Branch("l1ObjColl","L1ObjColl",&l1ObjColl,32000,99);
   theTree->Branch("hitSpec","HitSpecObj",&hitSpec,32000,99);
-  theTree->Branch("hitSpecSt1","HitSpecObj",&hitSpecSt1,32000,99);
+//  theTree->Branch("hitSpecSt1","HitSpecObj",&hitSpecSt1,32000,99);
   theTree->Branch("digSpec",&digSpec);
 
   theHelper.SetOwner();
@@ -87,6 +107,7 @@ void L1RpcTreeMaker::beginJob()
   theDetHitCollector.initHistos(theHelper);
   theSynchroGrabber.initHistos(theHelper);
   theDetHitDigiGrabber.initHistos(theHelper);
+
 }
 
 void L1RpcTreeMaker::endJob()
@@ -125,7 +146,7 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   event->id = ev.id().event();
   event->run = ev.run();
   event->lumi = ev.luminosityBlock();
-  //std::cout <<"-----------------------"<< *event << std::endl;
+  std::cout <<"-----------------------"<< *event << std::endl;
 
   //
   // create other objects structure
@@ -136,21 +157,23 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   bitsL1 = new TriggerMenuResultObj();
   bitsHLT = new TriggerMenuResultObj();
 
-  counts = std::vector<SynchroCountsObj>();
   detsCrossedByMuon = std::vector<uint32_t>();
   detsCrossedByMuonDeepInside = std::vector<uint32_t>();
-  detsHitsCompatibleWithMuon = std::vector<DetCluDigiObj>();
+//  detsHitsCompatibleWithMuon = std::vector<DetCluDigiObj>();
+  detsHitsCompatibleWithMuon = new DetCluDigiObjVect;
   detsSIMU = std::vector<uint32_t>();
 
+  synchroCounts = new SynchroCountsObjVect;
   l1ObjColl = new L1ObjColl;
   hitSpec = new HitSpecObj(); 
-  hitSpecSt1 = new HitSpecObj(); 
+//  hitSpecSt1 = new HitSpecObj(); 
   digSpec = std::vector< std::pair<uint32_t, uint32_t> >();
 
   //
   // fill Simulated Mu Info 
   //
-  const SimTrack* aSimMuon = BestSimulatedMuonFinder().result(ev,es);
+//  const SimTrack* aSimMuon = BestSimulatedMuonFinder().result(ev,es);
+  const SimTrack* aSimMuon =  0;
   if (aSimMuon) { 
     int charge = (abs(aSimMuon->type()) == 13) ? aSimMuon->type()/-13 : 0;
     simu->setKine(aSimMuon->momentum().pt(), aSimMuon->momentum().eta(),aSimMuon->momentum().phi(), charge);
@@ -170,7 +193,9 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
     muon->setKine(theMuon->bestTrack()->pt(), theMuon->bestTrack()->eta(), theMuon->bestTrack()->phi(), theMuon->bestTrack()->charge());
     muon->setBits(theMuon->isGlobalMuon(), theMuon->isTrackerMuon(), theMuon->isStandAloneMuon(), theMuon->isCaloMuon(), theMuon->isMatchesValid());
     muon->nMatchedStations = theMuon->numberOfMatchedStations();
+    std::cout <<"MUON "<<*muon << std::endl;
   }
+
 
   //
   // fill algoBits info
@@ -184,37 +209,27 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   bitsL1->firedAlgos = theMenuInspector.firedAlgosL1(ev,es);
   bitsHLT->firedAlgos = theMenuInspector.firedAlgosHLT(ev,es);
   
-
-/* tmp
+// tmp
   edm::Handle<RPCRecHitCollection> recHits;
   ev.getByLabel("rpcRecHits", recHits);
   typedef RPCRecHitCollection::const_iterator IH;
   std::cout <<"Event: " << *event << std::endl;
   for (IH ih=recHits->begin(); ih != recHits->end(); ++ih) {
     std::cout <<"Det: "<< ih->rpcId()<<"is valid: "<< ih->isValid()<< "BX= "<<ih->BunchX() << std::endl;
-}
-*/
+ }
 
   //
   // hits and detectors compatible with muon track
   //
-  if (theMuon &&  muon->pt() > 10. && theMuon->isGlobalMuon()) {
-    detsHitsCompatibleWithMuon = theDetHitCollector.compatibleHits( theMuon, ev, es);
+  //if (theMuon &&  muon->pt() > 10. && theMuon->isGlobalMuon()) {
+  if (theMuon &&  muon->pt() > 10.) {
+    detsHitsCompatibleWithMuon->data = theDetHitCollector.compatibleHits( theMuon, ev, es);
+/*
     detsCrossedByMuon = theDetHitCollector.compatibleDets( theMuon, ev, es, false); 
     detsCrossedByMuonDeepInside = theDetHitCollector.compatibleDets( theMuon, ev, es, true); 
     if (theConfig.getParameter<bool>("checkDestSIMU")) detsSIMU = theDetHitCollector.compatibleSIMU( theMuon, ev, es);
+*/
   }
-
-  
-  //
-  // fill LinkSynchroAnalysis data
-  //
-  if (theMuon && theMuon->isGlobalMuon()) {
-    theSynchroGrabber.setMuon(theMuon);
-    RPCRawSynchro::ProdItem rawCounts  = theSynchroGrabber.counts(ev,es);
-    counts = ConverterRPCRawSynchroSynchroCountsObj::toSynchroObj(rawCounts);
-  }
-  
 
   //
   // fill L1 info
@@ -234,19 +249,49 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   l1ObjColl->set( matching );
   l1ObjColl->set( deltaR );
 
-//  std::cout <<*l1ObjColl << std::endl;
+  std::cout <<*l1ObjColl << std::endl;
+
+  
+
+  
+  //
+  // fill LinkSynchroAnalysis data
+  //
+  if (theMuon && theMuon->isGlobalMuon()) {  
+    theSynchroGrabber.setMuon(theMuon);
+    RPCRawSynchro::ProdItem rawCounts  = theSynchroGrabber.counts(ev,es);
+    synchroCounts->data = ConverterRPCRawSynchroSynchroCountsObj::toSynchroObj(rawCounts);
+    std::cout <<" has the synchro counts: " <<synchroCounts->data.size() << std::endl;
+  }
+/*
+  L1Obj refL1;
+  if ( l1ObjColl->l1RpcColl().getL1Objs().size() > 0) refL1 =  l1ObjColl->l1RpcColl().getL1Objs()[0];
+  double refEtaMu = theMuon ? theMuon->bestTrack()->eta() : -9999.;
+  double refPhiMu = theMuon ? theMuon->bestTrack()->phi() : -9999.;
+  double refEtaL1 = refL1.eta;
+  double refPhiL1 = refL1.phi;
+  if (refL1.isValid() && refL1.bx==0 && theMuon && reco::deltaR(refEtaMu,refPhiMu, refEtaL1,refPhiL1)<0.5) {
+    RPCRawSynchro::ProdItem rawCounts  = theSynchroGrabber.counts(ev,es,refEtaL1,refPhiL1);
+    synchroCounts->data = ConverterRPCRawSynchroSynchroCountsObj::toSynchroObj(rawCounts);
+    std::cout <<" has the synchro counts: " <<synchroCounts->data.size() << std::endl;
+  }
+*/
+  
+/*
 
   //
   // det HIT+DIGI grabber
   //
   *hitSpec = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,2);
-  *hitSpecSt1 = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,1);
+//  *hitSpecSt1 = theDetHitDigiGrabber.rpcDetHits(ev,es,simu,1);
   digSpec  = theDetHitDigiGrabber.digiCollector(ev,es);
   
 
   //
   // fill ntuple + cleanup
   //
+*/
+
 //  std::cout <<"THIS event written!" << std::endl;
   theTree->Fill();
   delete event; event = 0;
@@ -255,7 +300,9 @@ void L1RpcTreeMaker::analyze(const edm::Event &ev, const edm::EventSetup &es)
   delete bitsL1;  bitsL1= 0;
   delete bitsHLT;  bitsHLT= 0;
   delete l1ObjColl; l1ObjColl = 0;
+  delete synchroCounts; synchroCounts = 0;
+  delete detsHitsCompatibleWithMuon; detsHitsCompatibleWithMuon = 0;
   delete hitSpec; hitSpec = 0;
-  delete hitSpecSt1; hitSpecSt1 = 0;
+//  delete hitSpecSt1; hitSpecSt1 = 0;
 }
 				

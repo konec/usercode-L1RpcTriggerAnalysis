@@ -2,6 +2,9 @@
 #define FilterGM_H
 
 #include "FWCore/Framework/interface/EDFilter.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+
 
 namespace edm {class ParameterSet; class Event; class EventSetup; }
 class TH1D;
@@ -17,5 +20,6 @@ public:
 private:
   virtual void endJob() {} 
   unsigned int theCounter, theAllCounter;
+   edm::EDGetTokenT<reco::TrackCollection> theMuCollection;
 };
 #endif

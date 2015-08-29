@@ -157,7 +157,7 @@ std::vector<unsigned int> FilterMenu::firedAlgosHLT(const edm::Event&ev, const e
     std::string triggerName = theHltConfig.triggerName(triggerIndex);
     unsigned int triggerIndexTmp = theHltConfig.triggerIndex(triggerName);
     assert(triggerIndex==triggerIndexTmp);
-    //AK assert(triggerIndex==ev.triggerNames(*triggerResultsHandle).triggerIndex(triggerName));
+    assert(triggerIndex==ev.triggerNames(*triggerResultsHandle).triggerIndex(triggerName));
     bool isAccept = triggerResultsHandle->accept(triggerIndex);
     if (isAccept) result.push_back(triggerIndex);
 //    if (isAccept) std::cout <<  triggerIndex <<" ";
@@ -186,7 +186,7 @@ bool FilterMenu::filterL1(edm::Event&ev, const edm::EventSetup&es)
 
   if (ev.run() != lastRun) {
     lastRun = ev.run();
-    edm::InputTag tag("l1GtTriggerMenuLite");
+//    edm::InputTag tag("l1GtTriggerMenuLite");
 //    theL1GtUtils.retrieveL1GtTriggerMenuLite(ev.getRun(), tag);
     bool status = theL1GtUtils.availableL1Configuration(errorCode,l1ConfCode);
     std::cout <<" GOT status: " <<status<<  " errorCode: " << errorCode<<" l1ConfCode: " << l1ConfCode<<std::endl;

@@ -28,8 +28,11 @@ using namespace edm;
 using namespace std;
 
 FilterL1::FilterL1(const edm::ParameterSet& cfg)
-  : theCounter(0), theAllCounter(0), l1MuReadout(cfg.getParameter<edm::InputTag>("l1MuReadout")), thePtCut(cfg.getParameter<double>("ptCut"))
-{ }
+  : theCounter(0), theAllCounter(0), 
+    thePtCut(cfg.getParameter<double>("ptCut"))
+{ 
+ theL1MuReadout_Tag= consumes<L1MuGMTReadoutCollection>(cfg.getParameter<edm::InputTag>("l1MuReadout"));
+}
 
 FilterL1::~FilterL1()
 {
@@ -43,7 +46,7 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
   theAllCounter++;
       
   edm::Handle<L1MuGMTReadoutCollection> pCollection;
-  ev.getByLabel(l1MuReadout,pCollection);
+  ev.getByToken(theL1MuReadout_Tag,pCollection);
 
   L1MuGMTReadoutCollection const* gmtrc = pCollection.product();
 
@@ -110,13 +113,9 @@ bool FilterL1::filter(edm::Event&ev, const edm::EventSetup&es)
           <<std::endl;
     }
   }
-//  if ( brlRPC || fwdRPC)  std::cout << str.str() << std::endl;
   if (brlRPC || fwdRPC || CSC || DT) goodEvent = true;
-//  if (brlRPC || fwdRPC) goodEvent = true;
   if (goodEvent) theCounter++;
-//  if (goodEvent && ev.id().event() == 622609556) std::cout << str.str() << std::endl;
-//  if (goodEvent) std::cout << str.str() << std::endl;
+  if (goodEvent) std::cout << str.str() << std::endl;
   return goodEvent;
-//  return true;
 }
 

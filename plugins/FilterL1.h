@@ -3,6 +3,7 @@
 
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
 
 namespace edm {class ParameterSet; class Event; class EventSetup; }
 
@@ -18,7 +19,8 @@ public:
 private:
   virtual void endJob() {} 
   unsigned int theCounter, theAllCounter;
-  edm::InputTag l1MuReadout; 
   double  thePtCut;
+private:
+  edm::EDGetTokenT<L1MuGMTReadoutCollection> theL1MuReadout_Tag;
 };
 #endif
