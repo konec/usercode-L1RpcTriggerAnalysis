@@ -28,3 +28,6 @@ DEFINE_FWK_MODULE(L1RpcTreeAnalysis);
 #include "L1RpcMCEfficiency.h"
 DEFINE_FWK_MODULE(L1RpcMCEfficiency);
 
+#include "Rpc2OmtfAngleAnalyser.h"
+DEFINE_FWK_MODULE(Rpc2OmtfAngleAnalyser);
+
