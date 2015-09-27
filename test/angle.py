@@ -1,3 +1,4 @@
+# tmp utility for RPC->OMTF angle conversion
 import FWCore.ParameterSet.Config as cms
 import os
 import sys
