@@ -4,7 +4,7 @@ import os
 import sys
 import commands
 
-verbose = True
+verbose = False
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
@@ -62,56 +62,42 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 process.source = cms.Source(
     'PoolSource',
-    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data//SingleMu_16_m_1_2_hCg.root') 
+    #fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/DYToMuMu_M-50_Tune4C_13TeV-pythia8//Fall13dr-tsg_PU20bx25_POSTLS162_V2-v1/GEN-SIM-RAW/data/DYToMuMu_M-50_Tune4C_13TeV-pythia8_10_1_Khx.root')
+    fileNames = cms.untracked.vstring('file:/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/750_FullEta_v2/data//SingleMu_4_p_1_1_gOq.root') 
     )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000))
 
-'''
-path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/SingleMuFullEtaTestSample/720_FullEta_v1/data/"
+
+path = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Crab/WToMuNu_Tune4C_13TeV-pythia8/Fall13dr-tsg_PU40bx50_POSTLS162_V2-v1/GEN-SIM-RAW/data/"
 command = "ls "+path
 fileList = commands.getoutput(command).split("\n")
 
+'''
 process.source.fileNames =  cms.untracked.vstring()
 for aFile in fileList:
     process.source.fileNames.append('file:'+path+aFile)
+print  process.source.fileNames   
 '''
 
 ###PostLS1 geometry used
-process.load('Configuration.Geometry.GeometryExtendedPostLS1Reco_cff')
-process.load('Configuration.Geometry.GeometryExtendedPostLS1_cff')
+process.load('Configuration.Geometry.GeometryExtended2015_cff')
+process.load('Configuration.Geometry.GeometryExtended2015Reco_cff')
 ############################
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
-path = os.environ['CMSSW_BASE']+"/src/L1Trigger/L1OverlapMuonTrackFinder/data/"
-
-
 process.load('L1Trigger.L1EndcapMuonTrackFinder.L1TMuonTriggerPrimitiveProducer_cfi')
 
-path1 = "/home/akalinow/scratch/CMS/OverlapTrackFinder/Emulator/CMSSW_7_2_1/src/UserCode/OMTFSimulation/test/"
 ###OMTF emulator configuration
-process.omtfEmulator = cms.EDProducer("OMTFProducer",
-                                      TriggerPrimitiveSrc = cms.InputTag('L1TMuonTriggerPrimitives'),
-                                      dumpResultToXML = cms.bool(False),
-                                      XMLDumpFileName = cms.string("TestEvents.xml"),                                                                          
-                                      dumpGPToXML = cms.bool(False),
-                                      readEventsFromXML = cms.bool(False),
-                                      eventsXMLFiles = cms.vstring("TestEvents.xml"),                                     
-                                      dropRPCPrimitives = cms.bool(False),                                    
-                                      dropDTPrimitives = cms.bool(False),                                    
-                                      dropCSCPrimitives = cms.bool(False),                                        
-                                      omtf = cms.PSet(
-        configXMLFile = cms.string(path+"hwToLogicLayer_721_5760.xml"),
-        patternsXMLFiles = cms.vstring(path+"Patterns_ipt4_31_5760.xml"),
-        )
-                                      )
+process.load('L1Trigger.L1OverlapMuonTrackFinder.OMTFProducer_cfi')
 
 ###OMTF analyser configuration
 process.omtfAnalyser = cms.EDAnalyzer("OMTFAnalyzer",
                                       OMTFCandSrc = cms.InputTag('omtfEmulator','OMTF'),
                                       GMTCandSrc = cms.InputTag('simGmtDigis'),
+                                      genPartSrc = cms.InputTag('genParticles'),
                                       g4SimTrackSrc = cms.InputTag('g4SimHits'),
                                       anaEff      = cms.PSet( maxDR= cms.double(9999.)),
                                       multiplyEvents = cms.uint32(1)
@@ -121,7 +107,7 @@ process.omtfAnalyser = cms.EDAnalyzer("OMTFAnalyzer",
 process.MuonEtaFilter = cms.EDFilter("SimTrackEtaFilter",
                                 minNumber = cms.uint32(1),
                                 src = cms.InputTag("g4SimHits"),
-                                cut = cms.string("momentum.eta<1.24 && momentum.eta>0.83 &&  momentum.pt>1")
+                                cut = cms.string("momentum.eta<1.24 && momentum.eta>0.83 && momentum.pt>1 && abs(type)==13")
                                 )
 
 process.GenMuPath = cms.Path(process.MuonEtaFilter)
@@ -129,6 +115,7 @@ process.GenMuPath = cms.Path(process.MuonEtaFilter)
 
 process.L1TMuonSeq = cms.Sequence( process.L1TMuonTriggerPrimitives+ 
                                    process.omtfEmulator+process.omtfAnalyser)
+
 process.L1TMuonPath = cms.Path(process.MuonEtaFilter*process.L1TMuonSeq)
 
 process.schedule = cms.Schedule(process.GenMuPath,process.L1TMuonPath)

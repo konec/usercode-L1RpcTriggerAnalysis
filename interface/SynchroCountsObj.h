@@ -6,7 +6,7 @@
 struct SynchroCountsObj : public TObject {
   int dccId, dccInputChannelNum, tbLinkInputNum, lbNumInLink;
   int  bx; 
-  ClassDef(SynchroCountsObj,1)
+  //ClassDef(SynchroCountsObj,1)
 };
 
 #endif

@@ -5,10 +5,11 @@
 
 
 
-struct EventObj : public TObject {
+class EventObj : public TObject {
+ public:
   unsigned int bx,id,lumi,run;
   ULong64_t time, orbit;
-  ClassDef(EventObj,1)
+  //ClassDef(EventObj,1)
 
 };
 

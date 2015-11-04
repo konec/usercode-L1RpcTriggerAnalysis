@@ -1,6 +1,6 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventData.h"
 
-ClassImp(EventData)
+//ClassImp(EventData)
 
 void EventData::clear(){
   l1ObjectsOtf.clear();

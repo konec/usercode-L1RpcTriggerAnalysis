@@ -29,7 +29,7 @@ public:
 private:  
   unsigned int theMuonBits; 
 public:
-ClassDef(MuonObj,2)
+  //ClassDef(MuonObj,2)
 };
 
 

@@ -30,6 +30,6 @@ private:
   }
 
 
-  ClassDef(HitSpecObj,1)
+  //ClassDef(HitSpecObj,1)
 };
 #endif 

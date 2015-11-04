@@ -94,7 +94,7 @@ private:
   std::vector<double> theDeltaR;
 
 public:
-ClassDef(L1ObjColl,1)
+  //ClassDef(L1ObjColl,1)
 
 friend std::ostream & operator<< (std::ostream &out, const L1ObjColl&s);
 

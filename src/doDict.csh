@@ -2,7 +2,7 @@
 
 if ( ! ( $?ROOTSYS ) ) eval `scram runtime -csh`
 
-$ROOTSYS/bin/rootcint -f rootMAnaDict.cc  -c -p \
+$ROOTSYS/bin/rootcint -f rootMAnaDict.cc -rmf rootMAnaDict.rootmap -c -p \
     -I../../../  \
     -I${CMSSW_RELEASE_BASE}/src/  \
     -I`scram tool info clhep | grep ^INCLUDE | sed 's/INCLUDE=//'` \

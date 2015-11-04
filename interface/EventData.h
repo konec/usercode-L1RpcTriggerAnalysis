@@ -8,7 +8,7 @@
 ///Small class to create a TTree
 ///holding trigger response.
 
-struct EventData: public TObject{
+struct EventData {
 
   EventData(){};
   ~EventData(){}
@@ -37,7 +37,7 @@ struct EventData: public TObject{
   std::vector<L1Obj> l1ObjectsRpc;
   std::vector<L1Obj> l1ObjectsOther;
 
-  ClassDef(EventData,1)
+  //ClassDef(EventData,1)
 };
 ///////////////////////////////////////
 #endif

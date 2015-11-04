@@ -6,7 +6,7 @@
 struct DetCluDigiObj : public TObject {
   UInt_t det;
   UInt_t clusterSize, nDigis;
-ClassDef(DetCluDigiObj,1)
+  //ClassDef(DetCluDigiObj,1)
 };
 #endif
 

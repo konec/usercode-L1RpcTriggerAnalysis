@@ -10,8 +10,12 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTReadoutCollection.h"
-#include "DataFormats/L1TMuon/interface/L1TRegionalMuonCandidate.h"
-#include "DataFormats/L1TMuon/interface/L1TRegionalMuonCandidateFwd.h"
+
+#include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
+#include "DataFormats/L1TMuon/interface/RegionalMuonCandFwd.h"
+
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaEff.h"
@@ -43,6 +47,8 @@ private:
     return obj;
   }
 
+  void getGenMuon(const edm::Event &iEvent);
+
   bool getGMTReadout(const edm::Event &iEvent,
 		     std::vector<L1Obj> &result,  L1Obj::TYPE type);
 
@@ -51,10 +57,12 @@ private:
 
   TObjArray theHistos;
   edm::ParameterSet theConfig;
-  edm::InputTag trigOMTFCandSrc, trigGMTCandSrc, g4SimTrackSrc;
+  edm::InputTag trigOMTFCandSrc, trigGMTCandSrc, g4SimTrackSrc, genPartSrc;
 
-  edm::EDGetTokenT<l1t::L1TRegionalMuonCandidateCollection > inputOMTFToken;
+  edm::EDGetTokenT<l1t::RegionalMuonCandBxCollection> inputOMTFToken;
   edm::EDGetTokenT<L1MuGMTReadoutCollection> inputGMTToken;
+  edm::EDGetTokenT<reco::GenParticleCollection> inputGenPartToken;
+  
 
   AnaEff              *theAnaEff;
 

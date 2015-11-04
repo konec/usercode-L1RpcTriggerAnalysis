@@ -1,5 +1,5 @@
 <use   name="UserCode/L1RpcTriggerAnalysis"/>
-<use   name="L1Trigger/L1OverlapMuonTrackFinder"/>
+<use   name="L1Trigger/L1TMuonTrackFinderOverlap"/>
 
 
 <library   file="*.cc" name="UserCodeL1RpcTriggerAnalysisPlugins">
