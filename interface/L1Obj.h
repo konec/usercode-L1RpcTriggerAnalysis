@@ -9,10 +9,10 @@ struct L1Obj : public TObject {
 
   float pt, eta, phi;
   float disc;
-  int   bx, q, charge, refLayer;
+  int   bx, q, hits, charge, refLayer;
   TYPE  type;
 
- L1Obj() : pt(-1.),eta(99.),phi(99.),disc(-999), bx(0),q(-1), charge(99), type(NONE) {}
+ L1Obj() : pt(-1.),eta(99.),phi(99.),disc(-999), bx(0),q(-1), hits(0), charge(99), type(NONE) {}
   bool isValid() const { return q >= 0;}
 
   //ClassDef(L1Obj,1)

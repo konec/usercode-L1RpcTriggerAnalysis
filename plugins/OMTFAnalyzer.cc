@@ -183,7 +183,8 @@ bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
     obj.charge = it->hwSign();
 
     std::map<int, int> hwAddrMap = it->trackAddress();
-    obj.q   = hwAddrMap[0];
+    obj.q   = it->hwQual();
+    obj.hits   = hwAddrMap[0];
     obj.refLayer   = hwAddrMap[1];
     obj.disc   = hwAddrMap[2];
     obj.bx  = it->hwSignValid();
