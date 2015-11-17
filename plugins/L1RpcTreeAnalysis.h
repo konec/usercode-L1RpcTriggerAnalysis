@@ -17,7 +17,6 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaEvent.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaDigiSpec.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaHitSpec.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/PatternManager.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaSiMuDistribution.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaOtfEff.h"
 
@@ -53,9 +52,6 @@ private:
 
   AnaDigiSpec         *theAnaDigiSpec;
   AnaHitSpec          *theAnaHitSpec;
-
-  PatternManager      *thePatternProducer;
-  PatternManager      *thePatternProvider;
 
   AnaSiMuDistribution *theAnaSiMuDistribution;
   AnaOtfEff           *theAnaOtfEff;

@@ -43,10 +43,7 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
     theAnaEvent(0),
     theAnaDigiSpec(0),
     theAnaHitSpec(0), 
-    thePatternProducer(0),
-    thePatternProvider(0),
-    theAnaSiMuDistribution(0),
-    theAnaOtfEff(0)
+    theAnaSiMuDistribution(0)
 { 
   if (theConfig.exists("anaMuonDistribution")) theAnaMuonDistribution = new AnaMuonDistribution( cfg.getParameter<edm::ParameterSet>("anaMuonDistribution"));
   if (theConfig.exists("anaMenu")) theAnaMenu = new AnaMenu(theConfig.getParameter<edm::ParameterSet>("anaMenu"));
@@ -54,10 +51,7 @@ L1RpcTreeAnalysis::L1RpcTreeAnalysis(const edm::ParameterSet & cfg)
   if (theConfig.exists("anaEvent")) theAnaEvent = new   AnaEvent(cfg.getParameter<edm::ParameterSet>("anaEvent") );
   if (theConfig.exists("anaDigiSpec")) theAnaDigiSpec = new AnaDigiSpec(cfg.getParameter<edm::ParameterSet>("anaDigiSpec")); 
   if (theConfig.exists("anaHitSpec")) theAnaHitSpec = new AnaHitSpec(cfg.getParameter<edm::ParameterSet>("anaHitSpec")); 
-  if (theConfig.exists("patternProducer")) thePatternProducer = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProducer"));
-  if (theConfig.exists("patternProvider")) thePatternProvider = new PatternManager(cfg.getParameter<edm::ParameterSet>("patternProvider"));
   if (theConfig.exists("anaSiMuDistribution")) theAnaSiMuDistribution = new AnaSiMuDistribution( cfg.getParameter<edm::ParameterSet>("anaSiMuDistribution"));
-  if (theConfig.exists("anaOtfEff")) theAnaOtfEff = new AnaOtfEff( cfg.getParameter<edm::ParameterSet>("anaOtfEff"));
   if (theConfig.exists("anaEff")) theAnaEff = new   AnaEff(cfg.getParameter<edm::ParameterSet>("anaEff") );
   if (theConfig.exists("anaRpcVsOth")) theAnaRpcVsOth = new   AnaRpcVsOth(cfg.getParameter<edm::ParameterSet>("anaRpcVsOth") );
   
@@ -81,9 +75,6 @@ void L1RpcTreeAnalysis::beginJob()
   if (theAnaDigiSpec)         theAnaDigiSpec->init(theHistos);
   if (theAnaHitSpec)          theAnaHitSpec->init(theHistos);
   if (theAnaSiMuDistribution) theAnaSiMuDistribution->init(theHistos);
-  if (theAnaOtfEff)           theAnaOtfEff->init(theHistos);
-
-  if (thePatternProvider)     thePatternProvider->beginJob();
 }
 
 void L1RpcTreeAnalysis::beginRun(const edm::Run& ru, const edm::EventSetup& es)
@@ -218,24 +209,7 @@ void L1RpcTreeAnalysis::analyze(const edm::Event&, const edm::EventSetup& es)
 
    if (theAnaHitSpec) theAnaHitSpec->run(event, simu, hitSpec);
    if (theAnaDigiSpec) theAnaDigiSpec->run(event, simu, hitSpec, *digSpec);
-   if (thePatternProducer) thePatternProducer->run(event, es, simu, hitSpecProp, *digSpec);/////propageted state used, filtered digis used!!!
-   L1Obj l1otf1x, l1otf2x, l1otf5x, l1otf7x, l1otf10x;
-   if (thePatternProvider){
-     //l1otf1x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,1);      
-     //l1otf2x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,2);      
-     l1otf5x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,3);      
-     //l1otf7x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,4);      
-     //l1otf10x=thePatternProvider->check(event, es, simu, hitSpecProp, *digSpec,5);           
-   }
-
-   if (theAnaOtfEff) theAnaOtfEff->run(event,simu,l1otf2x);  
-   L1ObjColl myL1ObjColl = *l1ObjColl;
-   //myL1ObjColl.push_back(l1otf1x, false, 0.); 
-   //myL1ObjColl.push_back(l1otf2x, false, 0.); 
-   myL1ObjColl.push_back(l1otf5x, false, 0.); 
-   //myL1ObjColl.push_back(l1otf7x, false, 0.); 
-   //myL1ObjColl.push_back(l1otf10x, false, 0.); 
-   if (theAnaEff) theAnaEff->run(refTrack, &myL1ObjColl, hitSpecProp);
+   if (theAnaEff) theAnaEff->run(refTrack, l1ObjColl, hitSpecProp);
   }
 }
 
@@ -250,10 +224,7 @@ void L1RpcTreeAnalysis::endJob()
   if (theAnaMenu) theAnaEvent->resume(theHistos);
   if (theAnaHitSpec) theAnaHitSpec->resume(theHistos);
   if (theAnaDigiSpec) theAnaDigiSpec->resume(theHistos);
-
   if (theAnaSynch) theAnaSynch->endJob();
-  if (thePatternProducer) thePatternProducer->endJob();
-  if (thePatternProvider) thePatternProvider->endJob();
 
   std::string histoFile = theConfig.getParameter<std::string>("histoFileName");
   TFile f(histoFile.c_str(),"RECREATE");
@@ -276,8 +247,5 @@ void L1RpcTreeAnalysis::endJob()
   delete theAnaEvent;
   delete theAnaDigiSpec;
   delete theAnaHitSpec;
-  delete thePatternProducer;
-  delete thePatternProvider;
   delete theAnaSiMuDistribution;
-  delete theAnaOtfEff;
 }
