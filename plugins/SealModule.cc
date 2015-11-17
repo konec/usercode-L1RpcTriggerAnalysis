@@ -28,9 +28,6 @@ DEFINE_FWK_MODULE(L1RpcTreeAnalysis);
 #include "L1RpcMCEfficiency.h"
 DEFINE_FWK_MODULE(L1RpcMCEfficiency);
 
-#include "OMTFROOTReader.h"
-DEFINE_FWK_MODULE(OMTFROOTReader);
-
 #include "OMTFAnalyzer.h"
 DEFINE_FWK_MODULE(OMTFAnalyzer);
 

@@ -9,7 +9,7 @@
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "SimDataFormats/Track/interface/SimTrack.h"
 
-#include "L1Trigger/L1TMuonTrackFinderOverlap/interface/OMTFConfiguration.h"
+#include "L1Trigger/L1TMuonOverlap/interface/OMTFConfiguration.h"
 #include "L1Trigger/RPCTrigger/interface/RPCConst.h"
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestSimulatedMuonFinder.h"
