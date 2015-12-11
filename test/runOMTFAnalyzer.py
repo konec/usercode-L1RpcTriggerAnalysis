@@ -88,8 +88,6 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
-process.load('L1Trigger.L1EndcapMuonTrackFinder.L1TMuonTriggerPrimitiveProducer_cfi')
-
 ###OMTF emulator configuration
 process.load('L1Trigger.L1OverlapMuonTrackFinder.OMTFProducer_cfi')
 

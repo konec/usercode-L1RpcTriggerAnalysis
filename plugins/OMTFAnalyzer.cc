@@ -171,16 +171,14 @@ bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
     if (it->hwPt()<0.01) continue;
     L1Obj obj;
     obj.eta = it->hwEta()/240.0*2.61;
-    obj.phi = (float)(it->hwPhi())*10;
-
-    int iProcessor = it->processor();
-    int procOffset = (15+iProcessor*60)/360.0*OMTFConfiguration::nPhiBins;
-    obj.phi+=procOffset;
-    obj.phi = obj.phi/OMTFConfiguration::nPhiBins*2*M_PI;
+    ///Add processor offset to phi value
+    float procOffset = (15+it->processor()*60)/180.0*M_PI;
+    ///Convert to radians. uGMt has 576 bins for 2Pi  
+    obj.phi = (float)(it->hwPhi())/576.0*2*M_PI+procOffset;    
     if(obj.phi>M_PI) obj.phi-=2*M_PI;
     
-    obj.pt  = (float)it->hwPt()/2.0;
-    obj.charge = it->hwSign();
+    obj.pt  = ((float)it->hwPt()-1)/2.0;
+    obj.charge = pow(-1,it->hwSign());
 
     std::map<int, int> hwAddrMap = it->trackAddress();
     obj.q   = it->hwQual();
