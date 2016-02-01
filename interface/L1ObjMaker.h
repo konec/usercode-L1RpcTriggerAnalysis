@@ -2,7 +2,7 @@
 #define L1ObjMaker_H
 
 #include <vector>
-#include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
+#include "DataFormats/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Provenance/interface/RunID.h"
 #include "DataFormats/Provenance/interface/EventID.h"

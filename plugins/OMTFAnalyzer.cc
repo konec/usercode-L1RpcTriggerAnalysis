@@ -14,7 +14,7 @@
 
 #include "UserCode/L1RpcTriggerAnalysis/interface/BestSimulatedMuonFinder.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
+#include "DataFormats/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 
 #include <vector>
 #include <iostream>

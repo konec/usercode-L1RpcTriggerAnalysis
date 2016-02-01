@@ -8,8 +8,8 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObjBXExtra.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/MuonObj.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
+#include "DataFormats/L1RpcTriggerAnalysis/interface/L1Obj.h"
+#include "DataFormats/L1RpcTriggerAnalysis/interface/L1ObjColl.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/Utilities.h"
 #include <vector>
 #include <cmath>

@@ -9,6 +9,7 @@
 <use   name="DataFormats/L1GlobalMuonTrigger"/>
 <use   name="DataFormats/L1GlobalTrigger"/>
 <use   name="DataFormats/MuonReco"/>
+<use   name="DataFormats/L1RpcTriggerAnalysis"/>
 <use   name="CondFormats/L1TObjects"/>
 <use   name="CondFormats/RPCObjects"/>
 <use   name="L1Trigger/CSCTrackFinder"/>

@@ -8,7 +8,7 @@
 #include "UserCode/L1RpcTriggerAnalysis/interface/Utilities.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/EventObj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/TrackObj.h"
-#include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
+#include "DataFormats/L1RpcTriggerAnalysis/interface/L1Obj.h"
 
 namespace {
   TH1D* hOtfEffPt_D, *hOtfEffPt_N, *hOtfEffPt0_N;

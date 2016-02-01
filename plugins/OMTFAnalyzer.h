@@ -17,7 +17,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
-#include "UserCode/L1RpcTriggerAnalysis/interface/L1Obj.h"
+#include "DataFormats/L1RpcTriggerAnalysis/interface/L1Obj.h"
 #include "UserCode/L1RpcTriggerAnalysis/interface/AnaEff.h"
 
 #include "TObjArray.h"
