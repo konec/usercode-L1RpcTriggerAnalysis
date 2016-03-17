@@ -168,7 +168,6 @@ bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
   for (l1t::RegionalMuonCandBxCollection::const_iterator it = omtfCandidates.product()->begin(bxNumber);
        it != omtfCandidates.product()->end(bxNumber);
        ++it) {
-    if (it->hwPt()<0.01) continue;
     L1Obj obj;
     obj.eta = it->hwEta()/240.0*2.61;
     ///Add processor offset to phi value
@@ -186,7 +185,8 @@ bool OMTFAnalyzer::getOMTFCandidates(const edm::Event &iEvent,
     obj.refLayer   = hwAddrMap[1];
     obj.disc   = hwAddrMap[2];
     obj.bx  = it->hwSignValid();
-    obj.type = L1Obj::OTF;
+    obj.type =  L1Obj::OTF;//(int)it->trackFinderType();
+    obj.iProcessor = it->processor();
     result.push_back(obj);
     edm::LogInfo("OMTFAnalyzer")<<obj;
   }
